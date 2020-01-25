@@ -122,9 +122,11 @@ def guiMain(args=None):
 
     disableMusicVar = IntVar()
     disableMusicCheckbutton = Checkbutton(romOptionsWindow, text="Disable music", variable=disableMusicVar)
+    disableMusicCheckbutton.pack()
 #    disableMusicCheckbutton.grid(row=0, column=0, sticky=E)
 
     spriteDialogFrame = Frame(romOptionsWindow)
+    spriteDialogFrame.pack()
 #    spriteDialogFrame.grid(row=0, column=1)
     baseSpriteLabel = Label(spriteDialogFrame, text='Sprite:')
 
@@ -154,9 +156,11 @@ def guiMain(args=None):
 
     quickSwapVar = IntVar()
     quickSwapCheckbutton = Checkbutton(romOptionsWindow, text="L/R Quickswapping", variable=quickSwapVar)
+    quickSwapCheckbutton.pack()
 #    quickSwapCheckbutton.grid(row=1, column=0, sticky=E)
 
     fastMenuFrame = Frame(romOptionsWindow)
+    fastMenuFrame.pack()
 #    fastMenuFrame.grid(row=1, column=1, sticky=E)
     fastMenuLabel = Label(fastMenuFrame, text='Menu speed')
     fastMenuLabel.pack(side=LEFT)
@@ -166,6 +170,7 @@ def guiMain(args=None):
     fastMenuOptionMenu.pack(side=LEFT)
 
     heartcolorFrame = Frame(romOptionsWindow)
+    heartcolorFrame.pack()
 #    heartcolorFrame.grid(row=2, column=0, sticky=E)
     heartcolorLabel = Label(heartcolorFrame, text='Heart color')
     heartcolorLabel.pack(side=LEFT)
@@ -175,6 +180,7 @@ def guiMain(args=None):
     heartcolorOptionMenu.pack(side=LEFT)
 
     heartbeepFrame = Frame(romOptionsWindow)
+    heartbeepFrame.pack()
 #    heartbeepFrame.grid(row=2, column=1, sticky=E)
     heartbeepLabel = Label(heartbeepFrame, text='Heartbeep')
     heartbeepLabel.pack(side=LEFT)
@@ -184,6 +190,7 @@ def guiMain(args=None):
     heartbeepOptionMenu.pack(side=LEFT)
 
     owPalettesFrame = Frame(romOptionsWindow)
+    owPalettesFrame.pack()
 #    owPalettesFrame.grid(row=3, column=0, sticky=E)
     owPalettesLabel = Label(owPalettesFrame, text='Overworld palettes')
     owPalettesLabel.pack(side=LEFT)
@@ -193,6 +200,7 @@ def guiMain(args=None):
     owPalettesOptionMenu.pack(side=LEFT)
 
     uwPalettesFrame = Frame(romOptionsWindow)
+    uwPalettesFrame.pack()
 #    uwPalettesFrame.grid(row=3, column=1, sticky=E)
     uwPalettesLabel = Label(uwPalettesFrame, text='Dungeon palettes')
     uwPalettesLabel.pack(side=LEFT)
@@ -202,6 +210,7 @@ def guiMain(args=None):
     uwPalettesOptionMenu.pack(side=LEFT)
 
     romDialogFrame = Frame(romOptionsWindow)
+    romDialogFrame.pack()
 #    romDialogFrame.grid(row=4, column=0, columnspan=2, sticky=W+E)
 
     baseRomLabel = Label(generationSetupWindow, text='Base Rom: ')
