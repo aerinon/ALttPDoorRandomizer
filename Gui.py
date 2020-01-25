@@ -6,7 +6,7 @@ import logging
 import random
 import os
 import shutil
-from tkinter import Checkbutton, OptionMenu, Toplevel, LabelFrame, PhotoImage, Tk, LEFT, RIGHT, BOTTOM, TOP, StringVar, IntVar, Frame, Label, W, E, X, BOTH, Entry, Spinbox, Button, filedialog, messagebox, ttk
+from tkinter import Checkbutton, OptionMenu, Toplevel, LabelFrame, PhotoImage, Tk, LEFT, RIGHT, BOTTOM, TOP, INSERT, StringVar, IntVar, Frame, Label, Text, W, E, X, BOTH, Entry, Spinbox, Button, filedialog, messagebox, ttk
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
@@ -31,13 +31,16 @@ def guiMain(args=None):
     #  Randomize: Main randomizer settings
     #  Adjust:    Alter existing game file
     #  Custom:    Custom item pool
+    #  About:     About Page
     notebook = ttk.Notebook(mainWindow)
     randomizerWindow = ttk.Frame(notebook)
     adjustWindow = ttk.Frame(notebook)
     customWindow = ttk.Frame(notebook)
+    aboutWindow = ttk.Frame(notebook)
     notebook.add(randomizerWindow, text='Randomize')
     notebook.add(adjustWindow, text='Adjust')
     notebook.add(customWindow, text='Custom')
+    notebook.add(aboutWindow, text='About')
     notebook.pack()
 
     # Shared Controls
@@ -1303,6 +1306,30 @@ def guiMain(args=None):
     itemList4.pack(side=LEFT, padx=(0,0))
     itemList5.pack(side=LEFT, padx=(0,0))
     topFrame3.pack(side=TOP, pady=(17,0))
+
+    def txtEvent(event):
+      return "break"
+
+    aboutFrame = Frame(aboutWindow)
+    aboutText = Text(aboutFrame, bg='#f0f0f0', font='TkDefaultFont')
+    aboutText.insert(INSERT, "Entrance Randomizer:" + "\n")
+    aboutText.insert(INSERT, "  LLCoolDave" + "\n")
+    aboutText.insert(INSERT, "  KevinCathcart" + "\n")
+    aboutText.insert(INSERT, "  AmazingAmpharos" + "\n")
+    aboutText.insert(INSERT, "  qwertymodo" + "\n")
+    aboutText.insert(INSERT, "Enemizer:" + "\n")
+    aboutText.insert(INSERT, "  Zarby89" + "\n")
+    aboutText.insert(INSERT, "  Sosuke3" + "\n")
+    aboutText.insert(INSERT, "Dungeon Door Randomizer:" + "\n")
+    aboutText.insert(INSERT, "  Aerinon" + "\n")
+    aboutText.insert(INSERT, "  compiling" + "\n")
+    aboutText.insert(INSERT, "GUI Adjustments:" + "\n")
+    aboutText.insert(INSERT, "  Mike Trethewey" + "\n")
+
+    aboutText.pack()
+    aboutText.configure(cursor="arrow")
+    aboutText.bind("<Button-1>", lambda e: txtEvent(e))
+    aboutFrame.pack()
 
     if args is not None:
         for k,v in vars(args).items():
