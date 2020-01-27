@@ -864,7 +864,8 @@ def validate_key_layout_sub_loop(key_layout, state, checked_states, flat_proposa
 
 def cnt_avail_small_locations(free_locations, key_only, state, world, player):
     if not world.keyshuffle[player] and not world.retro[player]:
-        avail_chest_keys = min(free_locations - state.used_locations + state.used_smalls, state.key_locations - key_only)
+        bk_adj = 1 if state.big_key_opened and not state.big_key_special else 0
+        avail_chest_keys = min(free_locations - bk_adj, state.key_locations - key_only)
         return max(0, avail_chest_keys + key_only - state.used_smalls)
     return state.key_locations - state.used_smalls
 

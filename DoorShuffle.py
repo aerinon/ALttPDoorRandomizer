@@ -149,7 +149,8 @@ def vanilla_key_logic(world, player):
             analyze_dungeon(key_layout, world, player)
             world.key_logic[player][builder.name] = key_layout.key_logic
             last_key = None
-    validate_vanilla_key_logic(world, player)
+    if world.shuffle[player] == 'vanilla':
+        validate_vanilla_key_logic(world, player)
 
 
 # some useful functions
