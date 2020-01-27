@@ -176,6 +176,9 @@ def main(args, seed=None):
                 patch_rom(world, rom, player, team, use_enemizer)
 
                 if use_enemizer and (args.enemizercli or not args.jsonout):
+                    if args.enemizercli and not os.path.isfile(args.enemizercli) and not os.path.isdir(args.enemizercli):
+                      logger.error("Enemizer CLI requested but not found at " + args.enemizercli + '!')
+                      return
                     patch_enemizer(world, player, rom, args.rom, args.enemizercli, args.shufflepots[player], sprite_random_on_hit)
                     if not args.jsonout:
                         rom = LocalRom.fromJsonRom(rom, args.rom, 0x400000)
@@ -369,7 +372,7 @@ def copy_dynamic_regions_and_locations(world, ret):
         new_loc.always_allow = location.always_allow
         new_loc.item_rule = location.item_rule
         new_reg.locations.append(new_loc)
-    
+
         ret.clear_location_cache()
 
 

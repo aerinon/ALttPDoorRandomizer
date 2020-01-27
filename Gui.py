@@ -6,7 +6,7 @@ import logging
 import random
 import os
 import shutil
-from tkinter import Checkbutton, OptionMenu, Toplevel, LabelFrame, PhotoImage, Tk, LEFT, RIGHT, BOTTOM, TOP, StringVar, IntVar, Frame, Label, W, E, X, BOTH, Entry, Spinbox, Button, filedialog, messagebox, ttk
+from tkinter import Checkbutton, OptionMenu, Toplevel, LabelFrame, PhotoImage, Tk, LEFT, RIGHT, BOTTOM, TOP, INSERT, StringVar, IntVar, Frame, Label, Text, W, E, X, BOTH, Entry, Spinbox, Button, filedialog, messagebox, ttk
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
@@ -19,22 +19,33 @@ from Utils import is_bundled, local_path, output_path, open_file
 
 
 def guiMain(args=None):
+    # make main window
+    # add program title & version number
     mainWindow = Tk()
     mainWindow.wm_title("Door Shuffle %s" % ESVersion)
 
+    # set program icon
     set_icon(mainWindow)
 
+    # make notebook pages: Randomize, Adjust, Custom
+    #  Randomize: Main randomizer settings
+    #  Adjust:    Alter existing game file
+    #  Custom:    Custom item pool
+    #  About:     About Page
     notebook = ttk.Notebook(mainWindow)
     randomizerWindow = ttk.Frame(notebook)
     adjustWindow = ttk.Frame(notebook)
     customWindow = ttk.Frame(notebook)
+    aboutWindow = ttk.Frame(notebook)
     notebook.add(randomizerWindow, text='Randomize')
     notebook.add(adjustWindow, text='Adjust')
     notebook.add(customWindow, text='Custom')
+    notebook.add(aboutWindow, text='About')
     notebook.pack()
 
     # Shared Controls
 
+    # bottom of window: Open Output Directory, Open Documentation (if exists)
     farBottomFrame = Frame(mainWindow)
 
     def open_output():
@@ -48,67 +59,364 @@ def guiMain(args=None):
         openReadmeButton = Button(farBottomFrame, text='Open Documentation', command=open_readme)
         openReadmeButton.pack(side=LEFT)
 
+    # set bottom frame to main window
     farBottomFrame.pack(side=BOTTOM, fill=X, padx=5, pady=5)
 
     # randomizer controls
 
-    topFrame = Frame(randomizerWindow)
-    rightHalfFrame = Frame(topFrame)
-    checkBoxFrame = Frame(rightHalfFrame)
+    # Randomize notebook page:
+    #  make notebook pages: Item, Entrances, Enemizer, Dungeon Shuffle, Multiworld, Game Options, Generation Setup
+    #   Item:             Item Randomizer settings
+    #   Entrances:        Entrance Randomizer settings
+    #   Enemizer:         Enemy Randomizer settings
+    #   Dungeon Shuffle:  Dungeon Door Randomizer settings
+    #   Multiworld:       Multiworld settings
+    #   Game Options:     Cosmetic settings that don't affect logic/placement
+    #   Generation Setup: Primarily one&done settings
+    randomizerNotebook = ttk.Notebook(randomizerWindow)
 
-    createSpoilerVar = IntVar()
-    createSpoilerCheckbutton = Checkbutton(checkBoxFrame, text="Create Spoiler Log", variable=createSpoilerVar)
-    suppressRomVar = IntVar()
-    suppressRomCheckbutton = Checkbutton(checkBoxFrame, text="Do not create patched Rom", variable=suppressRomVar)
-    openpyramidVar = IntVar()
-    openpyramidCheckbutton = Checkbutton(checkBoxFrame, text="Pre-open Pyramid Hole", variable=openpyramidVar)
-    mcsbshuffleFrame = Frame(checkBoxFrame)
-    mcsbLabel = Label(mcsbshuffleFrame, text="Shuffle: ")
-    mapshuffleVar = IntVar()
-    mapshuffleCheckbutton = Checkbutton(mcsbshuffleFrame, text="Maps", variable=mapshuffleVar)
-    compassshuffleVar = IntVar()
-    compassshuffleCheckbutton = Checkbutton(mcsbshuffleFrame, text="Compasses", variable=compassshuffleVar)
-    keyshuffleVar = IntVar()
-    keyshuffleCheckbutton = Checkbutton(mcsbshuffleFrame, text="Keys", variable=keyshuffleVar)
-    bigkeyshuffleVar = IntVar()
-    bigkeyshuffleCheckbutton = Checkbutton(mcsbshuffleFrame, text="BigKeys", variable=bigkeyshuffleVar)
+    # Item Randomizer
+    itemWindow = ttk.Frame(randomizerNotebook)
+    randomizerNotebook.add(itemWindow, text="Item")
+
+    # Entrance Randomizer
+    entrandoWindow = ttk.Frame(randomizerNotebook)
+    randomizerNotebook.add(entrandoWindow, text="Entrances")
+
+    # Enemizer
+    enemizerWindow = ttk.Frame(randomizerNotebook)
+    randomizerNotebook.add(enemizerWindow, text="Enemizer")
+
+    # Dungeon Shuffle
+    dungeonRandoWindow = ttk.Frame(randomizerNotebook)
+    randomizerNotebook.add(dungeonRandoWindow, text="Dungeon Shuffle")
+
+    # Multiworld
+    multiWindow = ttk.Frame(randomizerNotebook)
+    randomizerNotebook.add(multiWindow, text="Multiworld")
+
+    # Game Options
+    romOptionsWindow = ttk.Frame(randomizerNotebook)
+    randomizerNotebook.add(romOptionsWindow, text="Game Options")
+
+    # Generation Setup
+    generationSetupWindow = ttk.Frame(randomizerNotebook)
+    randomizerNotebook.add(generationSetupWindow, text="Generation Setup")
+
+    # add randomizer notebook to main window
+    randomizerNotebook.pack()
+
+    # Item Randomizer options
+    ## Retro (eventually needs to become a World State)
     retroVar = IntVar()
-    retroCheckbutton = Checkbutton(checkBoxFrame, text="Retro mode (universal keys)", variable=retroVar)
+    retroCheckbutton = Checkbutton(itemWindow, text="Retro mode (universal keys)", variable=retroVar)
+    retroCheckbutton.pack(anchor=W)
+
+    leftItemFrame = Frame(itemWindow)
+    rightItemFrame = Frame(itemWindow)
+    leftItemFrame.pack(side=LEFT)
+    rightItemFrame.pack(side=RIGHT)
+
+    ## World State
+    modeFrame = Frame(leftItemFrame)
+    modeVar = StringVar()
+    modeVar.set('open')
+    modeOptionMenu = OptionMenu(modeFrame, modeVar, 'standard', 'open', 'inverted')
+    modeOptionMenu.pack(side=RIGHT)
+    modeLabel = Label(modeFrame, text='World State')
+    modeLabel.pack(side=LEFT)
+    modeFrame.pack(anchor=E)
+
+    ## Logic Level
+    logicFrame = Frame(leftItemFrame)
+    logicVar = StringVar()
+    logicVar.set('noglitches')
+    logicOptionMenu = OptionMenu(logicFrame, logicVar, 'noglitches', 'minorglitches', 'nologic')
+    logicOptionMenu.pack(side=RIGHT)
+    logicLabel = Label(logicFrame, text='Game Logic')
+    logicLabel.pack(side=LEFT)
+    logicFrame.pack(anchor=E)
+
+    ## Goal
+    goalFrame = Frame(leftItemFrame)
+    goalVar = StringVar()
+    goalVar.set('ganon')
+    goalOptionMenu = OptionMenu(goalFrame, goalVar, 'ganon', 'pedestal', 'dungeons', 'triforcehunt', 'crystals')
+    goalOptionMenu.pack(side=RIGHT)
+    goalLabel = Label(goalFrame, text='Goal')
+    goalLabel.pack(side=LEFT)
+    goalFrame.pack(anchor=E)
+
+    ## Number of crystals to open GT
+    crystalsGTFrame = Frame(leftItemFrame)
+    crystalsGTVar = StringVar()
+    crystalsGTVar.set('7')
+    crystalsGTOptionMenu = OptionMenu(crystalsGTFrame, crystalsGTVar, '0', '1', '2', '3', '4', '5', '6', '7', 'random')
+    crystalsGTOptionMenu.pack(side=RIGHT)
+    crystalsGTLabel = Label(crystalsGTFrame, text='Crystals to open Ganon\'s Tower')
+    crystalsGTLabel.pack(side=LEFT)
+    crystalsGTFrame.pack(anchor=E)
+
+    ## Number of crystals to damage Ganon
+    crystalsGanonFrame = Frame(leftItemFrame)
+    crystalsGanonVar = StringVar()
+    crystalsGanonVar.set('7')
+    crystalsGanonOptionMenu = OptionMenu(crystalsGanonFrame, crystalsGanonVar, '0', '1', '2', '3', '4', '5', '6', '7', 'random')
+    crystalsGanonOptionMenu.pack(side=RIGHT)
+    crystalsGanonLabel = Label(crystalsGanonFrame, text='Crystals to fight Ganon')
+    crystalsGanonLabel.pack(side=LEFT)
+    crystalsGanonFrame.pack(anchor=E)
+
+    ## Weapons
+    swordFrame = Frame(leftItemFrame)
+    swordVar = StringVar()
+    swordVar.set('random')
+    swordOptionMenu = OptionMenu(swordFrame, swordVar, 'random', 'assured', 'swordless', 'vanilla')
+    swordOptionMenu.pack(side=RIGHT)
+    swordLabel = Label(swordFrame, text='Sword availability')
+    swordLabel.pack(side=LEFT)
+    swordFrame.pack(anchor=E)
+
+    ## Item Pool
+    difficultyFrame = Frame(rightItemFrame)
+    difficultyVar = StringVar()
+    difficultyVar.set('normal')
+    difficultyOptionMenu = OptionMenu(difficultyFrame, difficultyVar, 'normal', 'hard', 'expert')
+    difficultyOptionMenu.pack(side=RIGHT)
+    difficultyLabel = Label(difficultyFrame, text='Difficulty: item pool')
+    difficultyLabel.pack(side=LEFT)
+    difficultyFrame.pack(anchor=E)
+
+    ## Item Functionality
+    itemfunctionFrame = Frame(rightItemFrame)
+    itemfunctionVar = StringVar()
+    itemfunctionVar.set('normal')
+    itemfunctionOptionMenu = OptionMenu(itemfunctionFrame, itemfunctionVar, 'normal', 'hard', 'expert')
+    itemfunctionOptionMenu.pack(side=RIGHT)
+    itemfunctionLabel = Label(itemfunctionFrame, text='Difficulty: item functionality')
+    itemfunctionLabel.pack(side=LEFT)
+    itemfunctionFrame.pack(anchor=E)
+
+    ## Timer setting
+    timerFrame = Frame(rightItemFrame)
+    timerVar = StringVar()
+    timerVar.set('none')
+    timerOptionMenu = OptionMenu(timerFrame, timerVar, 'none', 'display', 'timed', 'timed-ohko', 'ohko', 'timed-countdown')
+    timerOptionMenu.pack(side=RIGHT)
+    timerLabel = Label(timerFrame, text='Timer setting')
+    timerLabel.pack(side=LEFT)
+    timerFrame.pack(anchor=E)
+
+    ## Progressives: On/Off
+    progressiveFrame = Frame(rightItemFrame)
+    progressiveVar = StringVar()
+    progressiveVar.set('on')
+    progressiveOptionMenu = OptionMenu(progressiveFrame, progressiveVar, 'on', 'off', 'random')
+    progressiveOptionMenu.pack(side=RIGHT)
+    progressiveLabel = Label(progressiveFrame, text='Progressive equipment')
+    progressiveLabel.pack(side=LEFT)
+    progressiveFrame.pack(anchor=E)
+
+    ## Accessibilty
+    accessibilityFrame = Frame(rightItemFrame)
+    accessibilityVar = StringVar()
+    accessibilityVar.set('items')
+    accessibilityOptionMenu = OptionMenu(accessibilityFrame, accessibilityVar, 'items', 'locations', 'none')
+    accessibilityOptionMenu.pack(side=RIGHT)
+    accessibilityLabel = Label(accessibilityFrame, text='Item accessibility')
+    accessibilityLabel.pack(side=LEFT)
+    accessibilityFrame.pack(anchor=E)
+    accessibilityFrame.pack(anchor=E)
+
+    ## Item Sorting Algorithm
+    algorithmFrame = Frame(rightItemFrame)
+    algorithmVar = StringVar()
+    algorithmVar.set('balanced')
+    algorithmOptionMenu = OptionMenu(algorithmFrame, algorithmVar, 'freshness', 'flood', 'vt21', 'vt22', 'vt25', 'vt26', 'balanced')
+    algorithmOptionMenu.pack(side=RIGHT)
+    algorithmLabel = Label(algorithmFrame, text='Item distribution algorithm')
+    algorithmLabel.pack(side=LEFT)
+    algorithmFrame.pack(anchor=E)
+
+    # Entrance Randomizer options
+    ## Pyramid pre-opened
+    openpyramidVar = IntVar()
+    openpyramidCheckbutton = Checkbutton(entrandoWindow, text="Pre-open Pyramid Hole", variable=openpyramidVar)
+    openpyramidCheckbutton.pack(anchor=W)
+    ## Shuffle Ganon
     shuffleGanonVar = IntVar()
     shuffleGanonVar.set(1) #set default
-    shuffleGanonCheckbutton = Checkbutton(checkBoxFrame, text="Include Ganon's Tower and Pyramid Hole in shuffle pool", variable=shuffleGanonVar)
+    shuffleGanonCheckbutton = Checkbutton(entrandoWindow, text="Include Ganon's Tower and Pyramid Hole in shuffle pool", variable=shuffleGanonVar)
+    shuffleGanonCheckbutton.pack(anchor=W)
+    ## Entrance Shuffle
+    shuffleFrame = Frame(entrandoWindow)
+    shuffleVar = StringVar()
+    shuffleVar.set('vanilla')
+    shuffleOptionMenu = OptionMenu(shuffleFrame, shuffleVar, 'vanilla', 'simple', 'restricted', 'full', 'crossed', 'insanity', 'restricted_legacy', 'full_legacy', 'madness_legacy', 'insanity_legacy', 'dungeonsfull', 'dungeonssimple')
+    shuffleOptionMenu.pack(side=RIGHT)
+    shuffleLabel = Label(shuffleFrame, text='Entrance shuffle algorithm')
+    shuffleLabel.pack(side=LEFT)
+    shuffleFrame.pack(anchor=W)
+
+    # Enemizer
+    enemizerFrame = LabelFrame(enemizerWindow, text="Enemizer")
+    enemizerFrame.columnconfigure(0, weight=1)
+    enemizerFrame.columnconfigure(1, weight=1)
+    enemizerFrame.columnconfigure(2, weight=1)
+    enemizerFrame.columnconfigure(3, weight=1)
+
+    ## Enemizer CLI Path
+    enemizerPathFrame = Frame(enemizerWindow)
+    enemizerPathFrame.grid(row=0, column=0, columnspan=3, sticky=W+E)
+    enemizerCLIlabel = Label(enemizerPathFrame, text="EnemizerCLI path: ")
+    enemizerCLIlabel.pack(side=LEFT)
+    enemizerCLIpathVar = StringVar(value="EnemizerCLI/EnemizerCLI.Core")
+    enemizerCLIpathEntry = Entry(enemizerPathFrame, textvariable=enemizerCLIpathVar)
+    enemizerCLIpathEntry.pack(side=LEFT, fill=X, expand=True)
+    def EnemizerSelectPath():
+        path = filedialog.askopenfilename(filetypes=[("EnemizerCLI executable", "*EnemizerCLI*")])
+        if path:
+            enemizerCLIpathVar.set(path)
+    enemizerCLIbrowseButton = Button(enemizerPathFrame, text='...', command=EnemizerSelectPath)
+    enemizerCLIbrowseButton.pack(side=LEFT)
+
+    ## Pot Shuffle
+    potShuffleVar = IntVar()
+    potShuffleButton = Checkbutton(enemizerWindow, text="Pot shuffle", variable=potShuffleVar)
+    potShuffleButton.grid(row=0, column=3)
+
+    ## Randomize Enemies
+    enemizerEnemyFrame = Frame(enemizerWindow)
+    enemizerEnemyFrame.grid(row=1, column=0)
+    enemizerEnemyLabel = Label(enemizerEnemyFrame, text='Enemy shuffle')
+    enemizerEnemyLabel.pack(side=LEFT)
+    enemyShuffleVar = StringVar()
+    enemyShuffleVar.set('none')
+    enemizerEnemyOption = OptionMenu(enemizerEnemyFrame, enemyShuffleVar, 'none', 'shuffled', 'chaos')
+    enemizerEnemyOption.pack(side=LEFT)
+
+    ## Randomize Bosses
+    enemizerBossFrame = Frame(enemizerWindow)
+    enemizerBossFrame.grid(row=1, column=1)
+    enemizerBossLabel = Label(enemizerBossFrame, text='Boss shuffle')
+    enemizerBossLabel.pack(side=LEFT)
+    enemizerBossVar = StringVar()
+    enemizerBossVar.set('none')
+    enemizerBossOption = OptionMenu(enemizerBossFrame, enemizerBossVar, 'none', 'basic', 'normal', 'chaos')
+    enemizerBossOption.pack(side=LEFT)
+
+    ## Enemy Damage
+    enemizerDamageFrame = Frame(enemizerWindow)
+    enemizerDamageFrame.grid(row=1, column=2)
+    enemizerDamageLabel = Label(enemizerDamageFrame, text='Enemy damage')
+    enemizerDamageLabel.pack(side=LEFT)
+    enemizerDamageVar = StringVar()
+    enemizerDamageVar.set('default')
+    enemizerDamageOption = OptionMenu(enemizerDamageFrame, enemizerDamageVar, 'default', 'shuffled', 'chaos')
+    enemizerDamageOption.pack(side=LEFT)
+
+    ## Enemy Health
+    enemizerHealthFrame = Frame(enemizerWindow)
+    enemizerHealthFrame.grid(row=1, column=3)
+    enemizerHealthLabel = Label(enemizerHealthFrame, text='Enemy health')
+    enemizerHealthLabel.pack(side=LEFT)
+    enemizerHealthVar = StringVar()
+    enemizerHealthVar.set('default')
+    enemizerHealthOption = OptionMenu(enemizerHealthFrame, enemizerHealthVar, 'default', 'easy', 'normal', 'hard', 'expert')
+    enemizerHealthOption.pack(side=LEFT)
+
+    # Dungeon Shuffle options
+    ## Dungeon Item Shuffle
+    mcsbshuffleFrame = Frame(dungeonRandoWindow)
+    mcsbshuffleFrame.pack(anchor=W)
+    mcsbLabel = Label(mcsbshuffleFrame, text="Shuffle: ")
+    mcsbLabel.grid(row=0, column=0)
+    ## Map Shuffle
+    mapshuffleVar = IntVar()
+    mapshuffleCheckbutton = Checkbutton(mcsbshuffleFrame, text="Maps", variable=mapshuffleVar)
+    mapshuffleCheckbutton.grid(row=0, column=1)
+    ## Compass Shuffle
+    compassshuffleVar = IntVar()
+    compassshuffleCheckbutton = Checkbutton(mcsbshuffleFrame, text="Compasses", variable=compassshuffleVar)
+    compassshuffleCheckbutton.grid(row=0, column=2)
+    ## Small Key Shuffle
+    keyshuffleVar = IntVar()
+    keyshuffleCheckbutton = Checkbutton(mcsbshuffleFrame, text="Keys", variable=keyshuffleVar)
+    keyshuffleCheckbutton.grid(row=0, column=3)
+    ## Big Key Shuffle
+    bigkeyshuffleVar = IntVar()
+    bigkeyshuffleCheckbutton = Checkbutton(mcsbshuffleFrame, text="BigKeys", variable=bigkeyshuffleVar)
+    bigkeyshuffleCheckbutton.grid(row=0, column=4)
+    ## Dungeon Door Shuffle
+    doorShuffleFrame = Frame(dungeonRandoWindow)
+    doorShuffleVar = StringVar()
+    doorShuffleVar.set('basic')
+    doorShuffleOptionMenu = OptionMenu(doorShuffleFrame, doorShuffleVar, 'vanilla', 'basic', 'crossed', 'experimental')
+    doorShuffleOptionMenu.pack(side=RIGHT)
+    doorShuffleLabel = Label(doorShuffleFrame, text='Door shuffle algorithm')
+    doorShuffleLabel.pack(side=LEFT)
+    doorShuffleFrame.pack(anchor=W)
+
+    # Multiworld
+    multiFrame = Frame(multiWindow)
+    ## Number of Worlds
+    worldLabel = Label(multiFrame, text='Worlds')
+    worldVar = StringVar()
+    worldSpinbox = Spinbox(multiFrame, from_=1, to=100, width=5, textvariable=worldVar)
+    worldLabel.pack(side=LEFT)
+    worldSpinbox.pack(side=LEFT)
+    ## List of Player Names
+    namesLabel = Label(multiFrame, text='Player names')
+    namesVar = StringVar()
+    namesEntry = Entry(multiFrame, textvariable=namesVar)
+    namesLabel.pack(side=LEFT)
+    namesEntry.pack(side=LEFT)
+    multiFrame.pack(anchor=W)
+
+    # Game Options options
+    ## Hints: Useful/Not useful
     hintsVar = IntVar()
     hintsVar.set(1) #set default
-    hintsCheckbutton = Checkbutton(checkBoxFrame, text="Include Helpful Hints", variable=hintsVar)
-    customVar = IntVar()
-    customCheckbutton = Checkbutton(checkBoxFrame, text="Use custom item pool", variable=customVar)
+    hintsCheckbutton = Checkbutton(romOptionsWindow, text="Include Helpful Hints", variable=hintsVar)
+    hintsCheckbutton.pack(anchor=W)
 
-    createSpoilerCheckbutton.pack(expand=True, anchor=W)
-    suppressRomCheckbutton.pack(expand=True, anchor=W)
-    openpyramidCheckbutton.pack(expand=True, anchor=W)
-    mcsbshuffleFrame.pack(expand=True, anchor=W)
-    mcsbLabel.grid(row=0, column=0)
-    mapshuffleCheckbutton.grid(row=0, column=1)
-    compassshuffleCheckbutton.grid(row=0, column=2)
-    keyshuffleCheckbutton.grid(row=0, column=3)
-    bigkeyshuffleCheckbutton.grid(row=0, column=4)
-    retroCheckbutton.pack(expand=True, anchor=W)
-    shuffleGanonCheckbutton.pack(expand=True, anchor=W)
-    hintsCheckbutton.pack(expand=True, anchor=W)
-    customCheckbutton.pack(expand=True, anchor=W)
-
-    romOptionsFrame = LabelFrame(rightHalfFrame, text="Rom options")
-    romOptionsFrame.columnconfigure(0, weight=1)
-    romOptionsFrame.columnconfigure(1, weight=1)
-    for i in range(5):
-        romOptionsFrame.rowconfigure(i, weight=1)
-
+    ## Disable BGM
     disableMusicVar = IntVar()
-    disableMusicCheckbutton = Checkbutton(romOptionsFrame, text="Disable music", variable=disableMusicVar)
-    disableMusicCheckbutton.grid(row=0, column=0, sticky=E)
+    disableMusicCheckbutton = Checkbutton(romOptionsWindow, text="Disable music", variable=disableMusicVar)
+    disableMusicCheckbutton.pack(anchor=W)
 
-    spriteDialogFrame = Frame(romOptionsFrame)
-    spriteDialogFrame.grid(row=0, column=1)
+    ## L/R Quickswap
+    quickSwapVar = IntVar()
+    quickSwapCheckbutton = Checkbutton(romOptionsWindow, text="L/R Quickswapping", variable=quickSwapVar)
+    quickSwapCheckbutton.pack(anchor=W)
+
+    leftRomOptionsFrame = Frame(romOptionsWindow)
+    rightRomOptionsFrame = Frame(romOptionsWindow)
+    leftRomOptionsFrame.pack(side=LEFT)
+    rightRomOptionsFrame.pack(side=RIGHT)
+
+    ## Heart Color
+    heartcolorFrame = Frame(leftRomOptionsFrame)
+    heartcolorLabel = Label(heartcolorFrame, text='Heart color')
+    heartcolorLabel.pack(side=LEFT)
+    heartcolorVar = StringVar()
+    heartcolorVar.set('red')
+    heartcolorOptionMenu = OptionMenu(heartcolorFrame, heartcolorVar, 'red', 'blue', 'green', 'yellow', 'random')
+    heartcolorOptionMenu.pack(side=RIGHT)
+    heartcolorFrame.pack(anchor=E)
+
+    ## Heart Beep Speed
+    heartbeepFrame = Frame(leftRomOptionsFrame)
+    heartbeepLabel = Label(heartbeepFrame, text='Heart Beep sound rate')
+    heartbeepLabel.pack(side=LEFT)
+    heartbeepVar = StringVar()
+    heartbeepVar.set('normal')
+    heartbeepOptionMenu = OptionMenu(heartbeepFrame, heartbeepVar, 'double', 'normal', 'half', 'quarter', 'off')
+    heartbeepOptionMenu.pack(side=LEFT)
+    heartbeepFrame.pack(anchor=E)
+
+    ## Sprite selection
+    spriteDialogFrame = Frame(leftRomOptionsFrame)
     baseSpriteLabel = Label(spriteDialogFrame, text='Sprite:')
 
     spriteNameVar = StringVar()
@@ -134,305 +442,81 @@ def guiMain(args=None):
     baseSpriteLabel.pack(side=LEFT)
     spriteEntry.pack(side=LEFT)
     spriteSelectButton.pack(side=LEFT)
+    spriteDialogFrame.pack(anchor=E)
 
-    quickSwapVar = IntVar()
-    quickSwapCheckbutton = Checkbutton(romOptionsFrame, text="L/R Quickswapping", variable=quickSwapVar)
-    quickSwapCheckbutton.grid(row=1, column=0, sticky=E)
-
-    fastMenuFrame = Frame(romOptionsFrame)
-    fastMenuFrame.grid(row=1, column=1, sticky=E)
+    ## Menu Speed
+    fastMenuFrame = Frame(rightRomOptionsFrame)
     fastMenuLabel = Label(fastMenuFrame, text='Menu speed')
     fastMenuLabel.pack(side=LEFT)
     fastMenuVar = StringVar()
     fastMenuVar.set('normal')
     fastMenuOptionMenu = OptionMenu(fastMenuFrame, fastMenuVar, 'normal', 'instant', 'double', 'triple', 'quadruple', 'half')
     fastMenuOptionMenu.pack(side=LEFT)
+    fastMenuFrame.pack(anchor=E)
 
-    heartcolorFrame = Frame(romOptionsFrame)
-    heartcolorFrame.grid(row=2, column=0, sticky=E)
-    heartcolorLabel = Label(heartcolorFrame, text='Heart color')
-    heartcolorLabel.pack(side=LEFT)
-    heartcolorVar = StringVar()
-    heartcolorVar.set('red')
-    heartcolorOptionMenu = OptionMenu(heartcolorFrame, heartcolorVar, 'red', 'blue', 'green', 'yellow', 'random')
-    heartcolorOptionMenu.pack(side=LEFT)
-
-    heartbeepFrame = Frame(romOptionsFrame)
-    heartbeepFrame.grid(row=2, column=1, sticky=E)
-    heartbeepLabel = Label(heartbeepFrame, text='Heartbeep')
-    heartbeepLabel.pack(side=LEFT)
-    heartbeepVar = StringVar()
-    heartbeepVar.set('normal')
-    heartbeepOptionMenu = OptionMenu(heartbeepFrame, heartbeepVar, 'double', 'normal', 'half', 'quarter', 'off')
-    heartbeepOptionMenu.pack(side=LEFT)
-
-    owPalettesFrame = Frame(romOptionsFrame)
-    owPalettesFrame.grid(row=3, column=0, sticky=E)
+    ## Overworld Palettes (not Enemizer)
+    owPalettesFrame = Frame(rightRomOptionsFrame)
     owPalettesLabel = Label(owPalettesFrame, text='Overworld palettes')
     owPalettesLabel.pack(side=LEFT)
     owPalettesVar = StringVar()
     owPalettesVar.set('default')
     owPalettesOptionMenu = OptionMenu(owPalettesFrame, owPalettesVar, 'default', 'random', 'blackout')
     owPalettesOptionMenu.pack(side=LEFT)
+    owPalettesFrame.pack(anchor=E)
 
-    uwPalettesFrame = Frame(romOptionsFrame)
-    uwPalettesFrame.grid(row=3, column=1, sticky=E)
+    ## Underworld Palettes (not Enemizer)
+    uwPalettesFrame = Frame(rightRomOptionsFrame)
     uwPalettesLabel = Label(uwPalettesFrame, text='Dungeon palettes')
     uwPalettesLabel.pack(side=LEFT)
     uwPalettesVar = StringVar()
     uwPalettesVar.set('default')
     uwPalettesOptionMenu = OptionMenu(uwPalettesFrame, uwPalettesVar, 'default', 'random', 'blackout')
     uwPalettesOptionMenu.pack(side=LEFT)
+    uwPalettesFrame.pack(anchor=E)
 
-    romDialogFrame = Frame(romOptionsFrame)
-    romDialogFrame.grid(row=4, column=0, columnspan=2, sticky=W+E)
-
-    baseRomLabel = Label(romDialogFrame, text='Base Rom: ')
+    # Generation Setup options
+    ## Generate Spoiler
+    createSpoilerVar = IntVar()
+    createSpoilerCheckbutton = Checkbutton(generationSetupWindow, text="Create Spoiler Log", variable=createSpoilerVar)
+    createSpoilerCheckbutton.pack(anchor=W)
+    ## Don't make ROM
+    suppressRomVar = IntVar()
+    suppressRomCheckbutton = Checkbutton(generationSetupWindow, text="Do not create patched Rom", variable=suppressRomVar)
+    suppressRomCheckbutton.pack(anchor=W)
+    ## Use Custom Item Pool as defined in Custom tab
+    customVar = IntVar()
+    customCheckbutton = Checkbutton(generationSetupWindow, text="Use custom item pool", variable=customVar)
+    customCheckbutton.pack(anchor=W)
+    ## Locate base ROM
+    baseRomFrame = Frame(generationSetupWindow)
+    baseRomLabel = Label(baseRomFrame, text='Base Rom: ')
     romVar = StringVar(value="Zelda no Densetsu - Kamigami no Triforce (Japan).sfc")
-    romEntry = Entry(romDialogFrame, textvariable=romVar)
+    romEntry = Entry(baseRomFrame, textvariable=romVar)
 
     def RomSelect():
         rom = filedialog.askopenfilename(filetypes=[("Rom Files", (".sfc", ".smc")), ("All Files", "*")])
         romVar.set(rom)
-    romSelectButton = Button(romDialogFrame, text='Select Rom', command=RomSelect)
+    romSelectButton = Button(baseRomFrame, text='Select Rom', command=RomSelect)
 
     baseRomLabel.pack(side=LEFT)
-    romEntry.pack(side=LEFT, expand=True, fill=X)
+    romEntry.pack(side=LEFT, fill=X, expand=True)
     romSelectButton.pack(side=LEFT)
+    baseRomFrame.pack(fill=X, expand=True)
 
-    checkBoxFrame.pack(side=TOP, anchor=W, padx=5, pady=10)
-    romOptionsFrame.pack(expand=True, fill=BOTH, padx=3)
-
-    drowDownFrame = Frame(topFrame)
-
-    modeFrame = Frame(drowDownFrame)
-    modeVar = StringVar()
-    modeVar.set('open')
-    modeOptionMenu = OptionMenu(modeFrame, modeVar, 'standard', 'open', 'inverted')
-    modeOptionMenu.pack(side=RIGHT)
-    modeLabel = Label(modeFrame, text='Game mode')
-    modeLabel.pack(side=LEFT)
-
-    logicFrame = Frame(drowDownFrame)
-    logicVar = StringVar()
-    logicVar.set('noglitches')
-    logicOptionMenu = OptionMenu(logicFrame, logicVar, 'noglitches', 'minorglitches', 'nologic')
-    logicOptionMenu.pack(side=RIGHT)
-    logicLabel = Label(logicFrame, text='Game logic')
-    logicLabel.pack(side=LEFT)
-
-    goalFrame = Frame(drowDownFrame)
-    goalVar = StringVar()
-    goalVar.set('ganon')
-    goalOptionMenu = OptionMenu(goalFrame, goalVar, 'ganon', 'pedestal', 'dungeons', 'triforcehunt', 'crystals')
-    goalOptionMenu.pack(side=RIGHT)
-    goalLabel = Label(goalFrame, text='Game goal')
-    goalLabel.pack(side=LEFT)
-
-    crystalsGTFrame = Frame(drowDownFrame)
-    crystalsGTVar = StringVar()
-    crystalsGTVar.set('7')
-    crystalsGTOptionMenu = OptionMenu(crystalsGTFrame, crystalsGTVar, '0', '1', '2', '3', '4', '5', '6', '7', 'random')
-    crystalsGTOptionMenu.pack(side=RIGHT)
-    crystalsGTLabel = Label(crystalsGTFrame, text='Crystals to open Ganon\'s Tower')
-    crystalsGTLabel.pack(side=LEFT)
-
-    crystalsGanonFrame = Frame(drowDownFrame)
-    crystalsGanonVar = StringVar()
-    crystalsGanonVar.set('7')
-    crystalsGanonOptionMenu = OptionMenu(crystalsGanonFrame, crystalsGanonVar, '0', '1', '2', '3', '4', '5', '6', '7', 'random')
-    crystalsGanonOptionMenu.pack(side=RIGHT)
-    crystalsGanonLabel = Label(crystalsGanonFrame, text='Crystals to fight Ganon')
-    crystalsGanonLabel.pack(side=LEFT)
-
-    swordFrame = Frame(drowDownFrame)
-    swordVar = StringVar()
-    swordVar.set('random')
-    swordOptionMenu = OptionMenu(swordFrame, swordVar, 'random', 'assured', 'swordless', 'vanilla')
-    swordOptionMenu.pack(side=RIGHT)
-    swordLabel = Label(swordFrame, text='Sword availability')
-    swordLabel.pack(side=LEFT)
-
-    difficultyFrame = Frame(drowDownFrame)
-    difficultyVar = StringVar()
-    difficultyVar.set('normal')
-    difficultyOptionMenu = OptionMenu(difficultyFrame, difficultyVar, 'normal', 'hard', 'expert')
-    difficultyOptionMenu.pack(side=RIGHT)
-    difficultyLabel = Label(difficultyFrame, text='Difficulty: item pool')
-    difficultyLabel.pack(side=LEFT)
-
-    itemfunctionFrame = Frame(drowDownFrame)
-    itemfunctionVar = StringVar()
-    itemfunctionVar.set('normal')
-    itemfunctionOptionMenu = OptionMenu(itemfunctionFrame, itemfunctionVar, 'normal', 'hard', 'expert')
-    itemfunctionOptionMenu.pack(side=RIGHT)
-    itemfunctionLabel = Label(itemfunctionFrame, text='Difficulty: item functionality')
-    itemfunctionLabel.pack(side=LEFT)
-
-    timerFrame = Frame(drowDownFrame)
-    timerVar = StringVar()
-    timerVar.set('none')
-    timerOptionMenu = OptionMenu(timerFrame, timerVar, 'none', 'display', 'timed', 'timed-ohko', 'ohko', 'timed-countdown')
-    timerOptionMenu.pack(side=RIGHT)
-    timerLabel = Label(timerFrame, text='Timer setting')
-    timerLabel.pack(side=LEFT)
-
-    progressiveFrame = Frame(drowDownFrame)
-    progressiveVar = StringVar()
-    progressiveVar.set('on')
-    progressiveOptionMenu = OptionMenu(progressiveFrame, progressiveVar, 'on', 'off', 'random')
-    progressiveOptionMenu.pack(side=RIGHT)
-    progressiveLabel = Label(progressiveFrame, text='Progressive equipment')
-    progressiveLabel.pack(side=LEFT)
-
-    accessibilityFrame = Frame(drowDownFrame)
-    accessibilityVar = StringVar()
-    accessibilityVar.set('items')
-    accessibilityOptionMenu = OptionMenu(accessibilityFrame, accessibilityVar, 'items', 'locations', 'none')
-    accessibilityOptionMenu.pack(side=RIGHT)
-    accessibilityLabel = Label(accessibilityFrame, text='Item accessibility')
-    accessibilityLabel.pack(side=LEFT)
-
-    algorithmFrame = Frame(drowDownFrame)
-    algorithmVar = StringVar()
-    algorithmVar.set('balanced')
-    algorithmOptionMenu = OptionMenu(algorithmFrame, algorithmVar, 'freshness', 'flood', 'vt21', 'vt22', 'vt25', 'vt26', 'balanced')
-    algorithmOptionMenu.pack(side=RIGHT)
-    algorithmLabel = Label(algorithmFrame, text='Item distribution algorithm')
-    algorithmLabel.pack(side=LEFT)
-
-    shuffleFrame = Frame(drowDownFrame)
-    shuffleVar = StringVar()
-    shuffleVar.set('vanilla')
-    shuffleOptionMenu = OptionMenu(shuffleFrame, shuffleVar, 'vanilla', 'simple', 'restricted', 'full', 'crossed', 'insanity', 'restricted_legacy', 'full_legacy', 'madness_legacy', 'insanity_legacy', 'dungeonsfull', 'dungeonssimple')
-    shuffleOptionMenu.pack(side=RIGHT)
-    shuffleLabel = Label(shuffleFrame, text='Entrance shuffle algorithm')
-    shuffleLabel.pack(side=LEFT)
-
-    doorShuffleFrame = Frame(drowDownFrame)
-    doorShuffleVar = StringVar()
-    doorShuffleVar.set('basic')
-    doorShuffleOptionMenu = OptionMenu(doorShuffleFrame, doorShuffleVar, 'vanilla', 'basic', 'crossed', 'experimental')
-    doorShuffleOptionMenu.pack(side=RIGHT)
-    doorShuffleLabel = Label(doorShuffleFrame, text='Door shuffle algorithm')
-    doorShuffleLabel.pack(side=LEFT)
-
-    heartbeepFrame = Frame(drowDownFrame)
-    heartbeepVar = StringVar()
-    heartbeepVar.set('normal')
-    heartbeepOptionMenu = OptionMenu(heartbeepFrame, heartbeepVar, 'double', 'normal', 'half', 'quarter', 'off')
-    heartbeepOptionMenu.pack(side=RIGHT)
-    heartbeepLabel = Label(heartbeepFrame, text='Heartbeep sound rate')
-    heartbeepLabel.pack(side=LEFT)
-
-    heartcolorFrame = Frame(drowDownFrame)
-    heartcolorVar = StringVar()
-    heartcolorVar.set('red')
-    heartcolorOptionMenu = OptionMenu(heartcolorFrame, heartcolorVar, 'red', 'blue', 'green', 'yellow', 'random')
-    heartcolorOptionMenu.pack(side=RIGHT)
-    heartcolorLabel = Label(heartcolorFrame, text='Heart color')
-    heartcolorLabel.pack(side=LEFT)
-
-    fastMenuFrame = Frame(drowDownFrame)
-    fastMenuVar = StringVar()
-    fastMenuVar.set('normal')
-    fastMenuOptionMenu = OptionMenu(fastMenuFrame, fastMenuVar, 'normal', 'instant', 'double', 'triple', 'quadruple', 'half')
-    fastMenuOptionMenu.pack(side=RIGHT)
-    fastMenuLabel = Label(fastMenuFrame, text='Menu speed')
-    fastMenuLabel.pack(side=LEFT)
-
-    logicFrame.pack(expand=True, anchor=E)
-    accessibilityFrame.pack(expand=True, anchor=E)
-
-    goalFrame.pack(expand=True, anchor=E)
-    crystalsGTFrame.pack(expand=True, anchor=E)
-    crystalsGanonFrame.pack(expand=True, anchor=E)
-
-    modeFrame.pack(expand=True, anchor=E)
-    shuffleFrame.pack(expand=True, anchor=E)
-    doorShuffleFrame.pack(expand=True, anchor=E)
-
-    difficultyFrame.pack(expand=True, anchor=E)
-    itemfunctionFrame.pack(expand=True, anchor=E)
-    timerFrame.pack(expand=True, anchor=E)
-    progressiveFrame.pack(expand=True, anchor=E)
-    accessibilityFrame.pack(expand=True, anchor=E)
-    algorithmFrame.pack(expand=True, anchor=E)
-
-    enemizerFrame = LabelFrame(randomizerWindow, text="Enemizer", padx=5, pady=2)
-    enemizerFrame.columnconfigure(0, weight=1)
-    enemizerFrame.columnconfigure(1, weight=1)
-    enemizerFrame.columnconfigure(2, weight=1)
-    enemizerFrame.columnconfigure(3, weight=1)
-
-    enemizerPathFrame = Frame(enemizerFrame)
-    enemizerPathFrame.grid(row=0, column=0, columnspan=3, sticky=W+E, padx=3)
-    enemizerCLIlabel = Label(enemizerPathFrame, text="EnemizerCLI path: ")
-    enemizerCLIlabel.pack(side=LEFT)
-    enemizerCLIpathVar = StringVar(value="EnemizerCLI/EnemizerCLI.Core")
-    enemizerCLIpathEntry = Entry(enemizerPathFrame, textvariable=enemizerCLIpathVar)
-    enemizerCLIpathEntry.pack(side=LEFT, expand=True, fill=X)
-    def EnemizerSelectPath():
-        path = filedialog.askopenfilename(filetypes=[("EnemizerCLI executable", "*EnemizerCLI*")])
-        if path:
-            enemizerCLIpathVar.set(path)
-    enemizerCLIbrowseButton = Button(enemizerPathFrame, text='...', command=EnemizerSelectPath)
-    enemizerCLIbrowseButton.pack(side=LEFT)
-
-    potShuffleVar = IntVar()
-    potShuffleButton = Checkbutton(enemizerFrame, text="Pot shuffle", variable=potShuffleVar)
-    potShuffleButton.grid(row=0, column=3)
-
-    enemizerEnemyFrame = Frame(enemizerFrame)
-    enemizerEnemyFrame.grid(row=1, column=0, pady=5)
-    enemizerEnemyLabel = Label(enemizerEnemyFrame, text='Enemy shuffle')
-    enemizerEnemyLabel.pack(side=LEFT)
-    enemyShuffleVar = StringVar()
-    enemyShuffleVar.set('none')
-    enemizerEnemyOption = OptionMenu(enemizerEnemyFrame, enemyShuffleVar, 'none', 'shuffled', 'chaos')
-    enemizerEnemyOption.pack(side=LEFT)
-
-    enemizerBossFrame = Frame(enemizerFrame)
-    enemizerBossFrame.grid(row=1, column=1)
-    enemizerBossLabel = Label(enemizerBossFrame, text='Boss shuffle')
-    enemizerBossLabel.pack(side=LEFT)
-    enemizerBossVar = StringVar()
-    enemizerBossVar.set('none')
-    enemizerBossOption = OptionMenu(enemizerBossFrame, enemizerBossVar, 'none', 'basic', 'normal', 'chaos')
-    enemizerBossOption.pack(side=LEFT)
-
-    enemizerDamageFrame = Frame(enemizerFrame)
-    enemizerDamageFrame.grid(row=1, column=2)
-    enemizerDamageLabel = Label(enemizerDamageFrame, text='Enemy damage')
-    enemizerDamageLabel.pack(side=LEFT)
-    enemizerDamageVar = StringVar()
-    enemizerDamageVar.set('default')
-    enemizerDamageOption = OptionMenu(enemizerDamageFrame, enemizerDamageVar, 'default', 'shuffled', 'chaos')
-    enemizerDamageOption.pack(side=LEFT)
-
-    enemizerHealthFrame = Frame(enemizerFrame)
-    enemizerHealthFrame.grid(row=1, column=3)
-    enemizerHealthLabel = Label(enemizerHealthFrame, text='Enemy health')
-    enemizerHealthLabel.pack(side=LEFT)
-    enemizerHealthVar = StringVar()
-    enemizerHealthVar.set('default')
-    enemizerHealthOption = OptionMenu(enemizerHealthFrame, enemizerHealthVar, 'default', 'easy', 'normal', 'hard', 'expert')
-    enemizerHealthOption.pack(side=LEFT)
-
-    bottomFrame = Frame(randomizerWindow, pady=5)
-
-    worldLabel = Label(bottomFrame, text='Worlds')
-    worldVar = StringVar()
-    worldSpinbox = Spinbox(bottomFrame, from_=1, to=100, width=5, textvariable=worldVar)
-    namesLabel = Label(bottomFrame, text='Player names')
-    namesVar = StringVar()
-    namesEntry = Entry(bottomFrame, textvariable=namesVar)
-    seedLabel = Label(bottomFrame, text='Seed #')
+    seedCountFrame = Frame(generationSetupWindow)
+    seedCountFrame.pack()
+    ## Seed #
+    seedLabel = Label(seedCountFrame, text='Seed #')
     seedVar = StringVar()
-    seedEntry = Entry(bottomFrame, width=15, textvariable=seedVar)
-    countLabel = Label(bottomFrame, text='Count')
+    seedEntry = Entry(seedCountFrame, width=15, textvariable=seedVar)
+    seedLabel.pack(side=LEFT)
+    seedEntry.pack(side=LEFT)
+    ## Number of Generation attempts
+    countLabel = Label(seedCountFrame, text='Count')
     countVar = StringVar()
-    countSpinbox = Spinbox(bottomFrame, from_=1, to=100, width=5, textvariable=countVar)
+    countSpinbox = Spinbox(seedCountFrame, from_=1, to=100, width=5, textvariable=countVar)
+    countLabel.pack(side=LEFT)
+    countSpinbox.pack(side=LEFT)
 
     def generateRom():
         guiargs = Namespace()
@@ -511,28 +595,13 @@ def guiMain(args=None):
         else:
             messagebox.showinfo(title="Success", message="Rom patched successfully")
 
-    generateButton = Button(bottomFrame, text='Generate Patched Rom', command=generateRom)
-
-    worldLabel.pack(side=LEFT)
-    worldSpinbox.pack(side=LEFT)
-    namesLabel.pack(side=LEFT)
-    namesEntry.pack(side=LEFT)
-    seedLabel.pack(side=LEFT,  padx=(5, 0))
-    seedEntry.pack(side=LEFT)
-    countLabel.pack(side=LEFT, padx=(5, 0))
-    countSpinbox.pack(side=LEFT)
-    generateButton.pack(side=LEFT, padx=(5, 0))
+    ## Generate Button
+    generateButton = Button(generationSetupWindow, text='Generate Patched Rom', command=generateRom)
+    generateButton.pack()
 
     openOutputButton.pack(side=RIGHT)
 
-    drowDownFrame.pack(side=LEFT)
-    rightHalfFrame.pack(side=RIGHT)
-    topFrame.pack(side=TOP)
-    bottomFrame.pack(side=BOTTOM)
-    enemizerFrame.pack(side=BOTTOM, fill=BOTH)
-
     # Adjuster Controls
-
     topFrame2 = Frame(adjustWindow)
     rightHalfFrame2 = Frame(topFrame2)
     checkBoxFrame2 = Frame(rightHalfFrame2)
@@ -540,8 +609,8 @@ def guiMain(args=None):
     quickSwapCheckbutton2 = Checkbutton(checkBoxFrame2, text="Enabled L/R Item quickswapping", variable=quickSwapVar)
     disableMusicCheckbutton2 = Checkbutton(checkBoxFrame2, text="Disable game music", variable=disableMusicVar)
 
-    quickSwapCheckbutton2.pack(expand=True, anchor=W)
-    disableMusicCheckbutton2.pack(expand=True, anchor=W)
+    quickSwapCheckbutton2.pack(anchor=W)
+    disableMusicCheckbutton2.pack(anchor=W)
 
     fileDialogFrame2 = Frame(rightHalfFrame2)
 
@@ -609,11 +678,11 @@ def guiMain(args=None):
     uwPalettesLabel2 = Label(uwPalettesFrame2, text='Dungeon palettes')
     uwPalettesLabel2.pack(side=LEFT)
 
-    heartbeepFrame2.pack(expand=True, anchor=E)
-    heartcolorFrame2.pack(expand=True, anchor=E)
-    fastMenuFrame2.pack(expand=True, anchor=E)
-    owPalettesFrame2.pack(expand=True, anchor=E)
-    uwPalettesFrame2.pack(expand=True, anchor=E)
+    heartbeepFrame2.pack(anchor=E)
+    heartcolorFrame2.pack(anchor=E)
+    fastMenuFrame2.pack(anchor=E)
+    owPalettesFrame2.pack(anchor=E)
+    uwPalettesFrame2.pack(anchor=E)
 
     bottomFrame2 = Frame(topFrame2)
 
@@ -1237,6 +1306,30 @@ def guiMain(args=None):
     itemList4.pack(side=LEFT, padx=(0,0))
     itemList5.pack(side=LEFT, padx=(0,0))
     topFrame3.pack(side=TOP, pady=(17,0))
+
+    def txtEvent(event):
+      return "break"
+
+    aboutFrame = Frame(aboutWindow)
+    aboutText = Text(aboutFrame, bg='#f0f0f0', font='TkDefaultFont')
+    aboutText.insert(INSERT, "Entrance Randomizer:" + "\n")
+    aboutText.insert(INSERT, "  LLCoolDave" + "\n")
+    aboutText.insert(INSERT, "  KevinCathcart" + "\n")
+    aboutText.insert(INSERT, "  AmazingAmpharos" + "\n")
+    aboutText.insert(INSERT, "  qwertymodo" + "\n")
+    aboutText.insert(INSERT, "Enemizer:" + "\n")
+    aboutText.insert(INSERT, "  Zarby89" + "\n")
+    aboutText.insert(INSERT, "  Sosuke3" + "\n")
+    aboutText.insert(INSERT, "Dungeon Door Randomizer:" + "\n")
+    aboutText.insert(INSERT, "  Aerinon" + "\n")
+    aboutText.insert(INSERT, "  compiling" + "\n")
+    aboutText.insert(INSERT, "GUI Adjustments:" + "\n")
+    aboutText.insert(INSERT, "  Mike Trethewey" + "\n")
+
+    aboutText.pack()
+    aboutText.configure(cursor="arrow")
+    aboutText.bind("<Button-1>", lambda e: txtEvent(e))
+    aboutFrame.pack()
 
     if args is not None:
         for k,v in vars(args).items():
