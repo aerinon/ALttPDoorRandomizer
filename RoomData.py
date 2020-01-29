@@ -239,6 +239,8 @@ def create_rooms(world, player):
     world.get_room(0x61, player).swap(5, 6)  # puts the Incognito Entrance at the end, so it can be deleted
     world.get_room(0x62, player).swap(1, 4)  # puts the exit at pos 1 - enables pos 3
     world.get_room(0x77, player).swap(0, 1)  # fixes Hera Lobby Key Stairs - entrance now at pos 0
+    if world.enemy_shuffle[player] != 'none':
+        world.get_room(0xc0, player).change(0, DoorKind.Normal)  # fix this kill room if enemizer is on
 
 
 class Room(object):

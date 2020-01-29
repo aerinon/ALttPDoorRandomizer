@@ -2096,8 +2096,19 @@ def compass_code_good(rom):
 
 def update_compasses(rom, world, player):
     layouts = world.dungeon_layouts[player]
+    # cmp XX : bne escape
+    # cpy 32 : bne escape
+    # brl .itemCounts
+    # c9 02 d0 eastern
+    # nop #2
+    new_code = [0x07, 0xC0, 0x32, 0xD0, 0x03, 0x82, 0xB9, 0x01, 0xC9, 0x02, 0xD0, 0x10, 0xEA, 0xEA]
+    rom.write_bytes(compass_w_addr + 8, new_code)
+    # 05 06 07 08
+    # C9 00 D0 02 80 04 C9 02 D0 15 C0 32 D0 03 82 B3 01
+    # C9 XX D0 07 C0 32 D0 03 82 B9 01 C9 02 D0 10 EA EA
+
     for name, builder in layouts.items():
-        digit_offset, sram_byte, write_offset, jmp_nop_flag = compass_data[name]
+        digit_offset, sram_byte, write_offset, jmp_nop_flag, dungeon_id = compass_data[name]
         digit1 = builder.location_cnt // 10
         digit2 = builder.location_cnt % 10
         rom.write_byte(compass_r_addr+digit_offset, 0x90+digit1)
@@ -2122,6 +2133,8 @@ def update_compasses(rom, world, player):
         else:
             for i in range(0, jmp_nop_flag):
                 rom.write_byte(write_address+9+i, 0xea)  # nop
+        if builder.bk_provided:
+            rom.write_byte(compass_w_addr+6, dungeon_id)
 
 
 InconvenientDungeonEntrances = {'Turtle Rock': 'Turtle Rock Main',
