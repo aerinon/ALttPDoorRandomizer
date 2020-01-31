@@ -197,8 +197,9 @@ def read_entrance_data(old_rom='Zelda no Densetsu - Kamigami no Triforce (Japan)
             print("%s: %s" % (dp, bytes))
 
 
-def print_wiki_doors(d_regions, world, player):
-
+def print_wiki_rooms(d_regions, world, player):
+    dungeonList = ""
+    doorList = ""
     for d, region_list in d_regions.items():
         tile_map = {}
         for region in region_list:
@@ -213,28 +214,39 @@ def print_wiki_doors(d_regions, world, player):
                 if tile not in tile_map:
                     tile_map[tile] = []
                 tile_map[tile].append(r)
-        print(d)
-        print('{| class="wikitable"')
-        print('|-')
-        print('! Room')
-        print('! Supertile')
-        print('! Doors')
+        dungeonList += "<!-- " + d + " -->" + "\n"
+        dungeonList += '{| class="wikitable"' + "\n"
+        dungeonList += '|-' + "\n"
+        dungeonList += '! Room !! Supertile !! Doors' + "\n"
         for tile, region_list in tile_map.items():
             tile_done = False
             for region in region_list:
-                print('|-')
-                print('| '+region.name)
+                dungeonList += '|-' + "\n"
+                dungeonList += '| {{Dungeon Room|{{PAGENAME}}|'+region.name+'}}' + "\n"
                 if not tile_done:
                     listlen = len(region_list)
-                    link = '| {{UnderworldMapLink|'+str(tile)+'}}'
-                    print(link if listlen < 2 else '| rowspan = '+str(listlen)+' '+link)
+                    link = '| {{UnderworldMapLink|'+str(tile)+'}}' + "\n"
+                    dungeonList += link if listlen < 2 else '| rowspan = '+str(listlen)+' '+link + "\n"
                     tile_done = True
                 strs_to_print = []
                 for ext in region.exits:
-                    strs_to_print.append(ext.name)
-                print('| '+' <br /> '.join(strs_to_print))
-        print('|}')
+                    strs_to_print.append('{{Dungeon Door|{{PAGENAME}}|'+ext.name+'}}')
+                dungeonList += '| '+'<br />'.join(strs_to_print) + "\n"
+                doorList += print_wiki_doors(region)
+        dungeonList += '|}' + "\n\n"
+    print(dungeonList)
+    print(doorList)
 
+def print_wiki_doors(region):
+    doorList = ""
+    doorList += '<!-- '+region.name+' -->' + "\n"
+    doorList += '{| class="wikitable"' + "\n"
+    doorList += '|-' + "\n"
+    doorList += '! Door !! Room Side !! Requirement' + "\n"
+    for ext in region.exits:
+        doorList += '{{DungeonRoomDoorList/Row|{{ROOTPAGENAME}}|{{SUBPAGENAME}}|'+ext.name.replace(region.name + " ","")+'|Side|Requirement}}' + "\n"
+    doorList += '|}' + "\n\n"
+    return doorList
 
 if __name__ == '__main__':
     pass
