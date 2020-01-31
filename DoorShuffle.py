@@ -55,6 +55,9 @@ def link_doors(world, player):
         cross_dungeon(world, player)
     elif world.doorShuffle[player] == 'experimental':
         experiment(world, player)
+    else:
+        logging.getLogger('').error('Invalid door shuffle setting: %s' % world.doorShuffle[player])
+        raise Exception('Invalid door shuffle setting: %s' % world.doorShuffle[player])
 
     if world.doorShuffle[player] != 'vanilla':
         create_door_spoiler(world, player)
@@ -146,7 +149,8 @@ def vanilla_key_logic(world, player):
             analyze_dungeon(key_layout, world, player)
             world.key_logic[player][builder.name] = key_layout.key_logic
             last_key = None
-    validate_vanilla_key_logic(world, player)
+    if world.shuffle[player] == 'vanilla':
+        validate_vanilla_key_logic(world, player)
 
 
 # some useful functions
@@ -2023,18 +2027,19 @@ default_one_way_connections = [
 ]
 
 # For crossed
-compass_data = {  # offset from 0x122e17, sram storage, write offset from compass_w_addr, 0 = jmp or # of nops
-    'Hyrule Castle': (0x1, 0xc0, 0x16, 0),
-    'Eastern Palace': (0x1C, 0xc1, 0x28, 0),
-    'Desert Palace': (0x35, 0xc2, 0x4a, 0),
-    'Agahnims Tower': (0x51, 0xc3, 0x5c, 0),
-    'Swamp Palace': (0x6A, 0xc4, 0x7e, 0),
-    'Palace of Darkness': (0x83, 0xc5, 0xa4, 0),
-    'Misery Mire': (0x9C, 0xc6, 0xca, 0),
-    'Skull Woods': (0xB5, 0xc7, 0xf0, 0),
-    'Ice Palace': (0xD0, 0xc8, 0x102, 0),
-    'Tower of Hera': (0xEB, 0xc9, 0x114, 0),
-    'Thieves Town': (0x106, 0xca, 0x138, 0),
-    'Turtle Rock': (0x11F, 0xcb, 0x15e, 0),
-    'Ganons Tower': (0x13A, 0xcc, 0x170, 2)
+# offset from 0x122e17, sram storage, write offset from compass_w_addr, 0 = jmp or # of nops, dungeon_id
+compass_data = {
+    'Hyrule Castle': (0x1, 0xc0, 0x16, 0, 0x02),
+    'Eastern Palace': (0x1C, 0xc1, 0x28, 0, 0x04),
+    'Desert Palace': (0x35, 0xc2, 0x4a, 0, 0x06),
+    'Agahnims Tower': (0x51, 0xc3, 0x5c, 0, 0x08),
+    'Swamp Palace': (0x6A, 0xc4, 0x7e, 0, 0x0a),
+    'Palace of Darkness': (0x83, 0xc5, 0xa4, 0, 0x0c),
+    'Misery Mire': (0x9C, 0xc6, 0xca, 0, 0x0e),
+    'Skull Woods': (0xB5, 0xc7, 0xf0, 0, 0x10),
+    'Ice Palace': (0xD0, 0xc8, 0x102, 0, 0x12),
+    'Tower of Hera': (0xEB, 0xc9, 0x114, 0, 0x14),
+    'Thieves Town': (0x106, 0xca, 0x138, 0, 0x16),
+    'Turtle Rock': (0x11F, 0xcb, 0x15e, 0, 0x18),
+    'Ganons Tower': (0x13A, 0xcc, 0x170, 2, 0x1a)
 }

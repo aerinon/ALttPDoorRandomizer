@@ -23,7 +23,8 @@ from Fill import distribute_items_cutoff, distribute_items_staleness, distribute
 from ItemList import generate_itempool, difficulties, fill_prizes
 from Utils import output_path, parse_player_names, print_wiki_rooms
 
-__version__ = '0.0.7-pre'
+__version__ = '0.0.9-pre'
+
 
 def main(args, seed=None):
     if args.outputpath:

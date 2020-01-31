@@ -864,7 +864,8 @@ def validate_key_layout_sub_loop(key_layout, state, checked_states, flat_proposa
 
 def cnt_avail_small_locations(free_locations, key_only, state, world, player):
     if not world.keyshuffle[player] and not world.retro[player]:
-        avail_chest_keys = min(free_locations - state.used_locations + state.used_smalls, state.key_locations - key_only)
+        bk_adj = 1 if state.big_key_opened and not state.big_key_special else 0
+        avail_chest_keys = min(free_locations - bk_adj, state.key_locations - key_only)
         return max(0, avail_chest_keys + key_only - state.used_smalls)
     return state.key_locations - state.used_smalls
 
@@ -1146,20 +1147,22 @@ def val_mire(key_logic, world, player):
 
 
 def val_turtle(key_logic, world, player):
-    val_rule(key_logic.door_rules['TR Hub NW'], 1)
-    val_rule(key_logic.door_rules['TR Pokey 1 NW'], 2)
-    val_rule(key_logic.door_rules['TR Chain Chomps Down Stairs'], 3)
-    val_rule(key_logic.door_rules['TR Pokey 2 ES'], 6, True, 'Turtle Rock - Big Key Chest', 4, {'Turtle Rock - Big Key Chest'})
-    val_rule(key_logic.door_rules['TR Crystaroller Down Stairs'], 5)
-    val_rule(key_logic.door_rules['TR Dash Bridge WS'], 6)
-    assert world.get_location('Turtle Rock - Eye Bridge - Bottom Right', player) in key_logic.bk_restricted
-    assert world.get_location('Turtle Rock - Eye Bridge - Top Left', player) in key_logic.bk_restricted
-    assert world.get_location('Turtle Rock - Eye Bridge - Top Right', player) in key_logic.bk_restricted
-    assert world.get_location('Turtle Rock - Eye Bridge - Bottom Left', player) in key_logic.bk_restricted
-    assert world.get_location('Turtle Rock - Boss', player) in key_logic.bk_restricted
-    assert world.get_location('Turtle Rock - Crystaroller Room', player) in key_logic.bk_restricted
-    assert world.get_location('Turtle Rock - Big Chest', player) in key_logic.bk_restricted
-    assert len(key_logic.bk_restricted) == 7
+    # todo: check vanilla key logic when TR back doors are accessible
+    if world.shuffle[player] == 'vanilla' and world.mode[player] != 'inverted':
+        val_rule(key_logic.door_rules['TR Hub NW'], 1)
+        val_rule(key_logic.door_rules['TR Pokey 1 NW'], 2)
+        val_rule(key_logic.door_rules['TR Chain Chomps Down Stairs'], 3)
+        val_rule(key_logic.door_rules['TR Pokey 2 ES'], 6, True, 'Turtle Rock - Big Key Chest', 4, {'Turtle Rock - Big Key Chest'})
+        val_rule(key_logic.door_rules['TR Crystaroller Down Stairs'], 5)
+        val_rule(key_logic.door_rules['TR Dash Bridge WS'], 6)
+        assert world.get_location('Turtle Rock - Eye Bridge - Bottom Right', player) in key_logic.bk_restricted
+        assert world.get_location('Turtle Rock - Eye Bridge - Top Left', player) in key_logic.bk_restricted
+        assert world.get_location('Turtle Rock - Eye Bridge - Top Right', player) in key_logic.bk_restricted
+        assert world.get_location('Turtle Rock - Eye Bridge - Bottom Left', player) in key_logic.bk_restricted
+        assert world.get_location('Turtle Rock - Boss', player) in key_logic.bk_restricted
+        assert world.get_location('Turtle Rock - Crystaroller Room', player) in key_logic.bk_restricted
+        assert world.get_location('Turtle Rock - Big Chest', player) in key_logic.bk_restricted
+        assert len(key_logic.bk_restricted) == 7
 
 
 def val_ganons(key_logic, world, player):

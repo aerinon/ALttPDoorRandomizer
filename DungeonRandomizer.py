@@ -218,8 +218,8 @@ def parse_arguments(argv, no_defaults=False):
                              Select the rate at which the menu opens and closes.
                              (default: %(default)s)
                              ''')
-    parser.add_argument('--quickswap', help='Enable quick item swapping with L and R.', action='store_true')
-    parser.add_argument('--disablemusic', help='Disables game music.', action='store_true')
+    parser.add_argument('--quickswap', default=defval(False), help='Enable quick item swapping with L and R.', action='store_true')
+    parser.add_argument('--disablemusic', default=defval(False), help='Disables game music.', action='store_true')
     parser.add_argument('--mapshuffle', default=defval(False), help='Maps are no longer restricted to their dungeons, but can be anywhere', action='store_true')
     parser.add_argument('--compassshuffle', default=defval(False), help='Compasses are no longer restricted to their dungeons, but can be anywhere', action='store_true')
     parser.add_argument('--keyshuffle', default=defval(False), help='Small Keys are no longer restricted to their dungeons, but can be anywhere', action='store_true')

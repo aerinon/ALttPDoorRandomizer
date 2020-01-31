@@ -3,6 +3,7 @@ import logging
 import random
 import urllib.request
 import urllib.parse
+import re
 
 from DungeonRandomizer import parse_arguments
 from Main import main as DRMain
@@ -14,6 +15,7 @@ def parse_yaml(txt):
     ret = {}
     indents = {len(txt) - len(txt.lstrip(' ')): ret}
     for line in txt.splitlines():
+        line = re.sub(r'#.*', '', line)
         if not line:
             continue
         name, val = line.split(':', 1)

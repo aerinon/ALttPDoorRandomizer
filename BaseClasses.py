@@ -83,7 +83,7 @@ class World(object):
             set_player_attr('ganonstower_vanilla', True)
             set_player_attr('sewer_light_cone', self.mode[player] == 'standard')
             set_player_attr('fix_trock_doors', self.shuffle[player] != 'vanilla' or self.mode[player] == 'inverted')
-            set_player_attr('fix_skullwoods_exit', self.shuffle[player] not in ['vanilla', 'simple', 'restricted', 'dungeonssimple'])
+            set_player_attr('fix_skullwoods_exit', self.shuffle[player] not in ['vanilla', 'simple', 'restricted', 'dungeonssimple'] or self.doorShuffle[player] not in ['vanilla'])
             set_player_attr('fix_palaceofdarkness_exit', self.shuffle[player] not in ['vanilla', 'simple', 'restricted', 'dungeonssimple'])
             set_player_attr('fix_trock_exit', self.shuffle[player] not in ['vanilla', 'simple', 'restricted', 'dungeonssimple'])
             set_player_attr('can_access_trock_eyebridge', None)
@@ -450,17 +450,17 @@ class CollectionState(object):
                                         blocked.add(entrance.parent_region)
                             if color_type:
                                 ccr[candidate] = color_type
-                            for ext in candidate.exits:
-                                connect = ext.connected_region
-                                if connect in rrp and connect in ccr:
-                                    door = self.world.check_for_door(ext.name, player)
-                                    if door is not None and not door.blocked:
-                                        if ext.can_reach(self):
-                                            new_color = ccr[connect] | (ccr[candidate] & (door.crystal or CrystalBarrier.Either))
-                                            if new_color != ccr[connect]:
-                                                self.spread_crystal_access(candidate, new_color, rrp, ccr, player)
-                                        else:
-                                            blocked.add(candidate)
+                                for ext in candidate.exits:
+                                    connect = ext.connected_region
+                                    if connect in rrp and connect in ccr:
+                                        door = self.world.check_for_door(ext.name, player)
+                                        if door is not None and not door.blocked:
+                                            if ext.can_reach(self):
+                                                new_color = ccr[connect] | (ccr[candidate] & (door.crystal or CrystalBarrier.Either))
+                                                if new_color != ccr[connect]:
+                                                    self.spread_crystal_access(candidate, new_color, rrp, ccr, player)
+                                            else:
+                                                blocked.add(candidate)
             new_regions = len(rrp) > reachable_regions_count
             reachable_regions_count = len(rrp)
 

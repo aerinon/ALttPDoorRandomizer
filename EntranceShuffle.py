@@ -550,7 +550,7 @@ def link_entrances(world, player):
                         ('North Fairy Cave Exit', 'North Fairy Cave'),
                         ('Lost Woods Hideout Exit', 'Lost Woods Hideout (top)'),
                         ('Lumberjack Tree Exit', 'Lumberjack Tree (top)'),
-                        (('Skull Woods Second Section Exit (East)', 'Skull Woods Second Section Exit (West)'), 'Skull Woods Second Section (Drop)')]
+                        (('Skull Woods Second Section Exit (East)', 'Skull Woods Second Section Exit (West)'), 'Skull Back Drop')]
 
         if world.mode[player] == 'standard':
             # cannot move uncle cave
@@ -587,7 +587,7 @@ def link_entrances(world, player):
         else:
             sw_hole_pool = dw_hole_entrances
             mandatory_dark_world.append('Skull Woods First Section Exit')
-        for target in ['Skull Woods First Section (Left)', 'Skull Woods First Section (Right)', 'Skull Woods First Section (Top)']:
+        for target in ['Skull Left Drop', 'Skull Pinball', 'Skull Pot Circle']:
             connect_entrance(world, sw_hole_pool.pop(), target, player)
 
         # sanctuary has to be in light world
@@ -786,8 +786,8 @@ def link_entrances(world, player):
         hole_entrances = ['Kakariko Well Drop', 'Bat Cave Drop', 'North Fairy Cave Drop', 'Lost Woods Hideout Drop', 'Lumberjack Tree Tree', 'Sanctuary Grave',
                           'Skull Woods First Section Hole (East)', 'Skull Woods First Section Hole (West)', 'Skull Woods First Section Hole (North)', 'Skull Woods Second Section Hole']
 
-        hole_targets = ['Kakariko Well (top)', 'Bat Cave (right)', 'North Fairy Cave', 'Lost Woods Hideout (top)', 'Lumberjack Tree (top)', 'Sewer Drop', 'Skull Woods Second Section (Drop)',
-                        'Skull Woods First Section (Left)', 'Skull Woods First Section (Right)', 'Skull Woods First Section (Top)']
+        hole_targets = ['Kakariko Well (top)', 'Bat Cave (right)', 'North Fairy Cave', 'Lost Woods Hideout (top)', 'Lumberjack Tree (top)', 'Sewer Drop', 'Skull Back Drop',
+                        'Skull Left Drop', 'Skull Pinball', 'Skull Pot Circle']
 
         # tavern back door cannot be shuffled yet
         connect_doors(world, ['Tavern North'], ['Tavern'], player)
@@ -924,8 +924,8 @@ def link_entrances(world, player):
         hole_entrances = ['Kakariko Well Drop', 'Bat Cave Drop', 'North Fairy Cave Drop', 'Lost Woods Hideout Drop', 'Lumberjack Tree Tree', 'Sanctuary Grave',
                           'Skull Woods First Section Hole (East)', 'Skull Woods First Section Hole (West)', 'Skull Woods First Section Hole (North)', 'Skull Woods Second Section Hole']
 
-        hole_targets = ['Kakariko Well (top)', 'Bat Cave (right)', 'North Fairy Cave', 'Lost Woods Hideout (top)', 'Lumberjack Tree (top)', 'Sewer Drop', 'Skull Woods Second Section (Drop)',
-                        'Skull Woods First Section (Left)', 'Skull Woods First Section (Right)', 'Skull Woods First Section (Top)']
+        hole_targets = ['Kakariko Well (top)', 'Bat Cave (right)', 'North Fairy Cave', 'Lost Woods Hideout (top)', 'Lumberjack Tree (top)', 'Sewer Drop', 'Skull Back Drop',
+                        'Skull Left Drop', 'Skull Pinball', 'Skull Pot Circle']
 
         if world.mode[player] == 'standard':
             # cannot move uncle cave
@@ -1627,8 +1627,8 @@ def link_inverted_entrances(world, player):
         hole_entrances = ['Kakariko Well Drop', 'Bat Cave Drop', 'North Fairy Cave Drop', 'Lost Woods Hideout Drop', 'Lumberjack Tree Tree', 'Sanctuary Grave',
                           'Skull Woods First Section Hole (East)', 'Skull Woods First Section Hole (West)', 'Skull Woods First Section Hole (North)', 'Skull Woods Second Section Hole']
 
-        hole_targets = ['Kakariko Well (top)', 'Bat Cave (right)', 'North Fairy Cave', 'Lost Woods Hideout (top)', 'Lumberjack Tree (top)', 'Sewer Drop', 'Skull Woods Second Section (Drop)',
-                        'Skull Woods First Section (Left)', 'Skull Woods First Section (Right)', 'Skull Woods First Section (Top)']
+        hole_targets = ['Kakariko Well (top)', 'Bat Cave (right)', 'North Fairy Cave', 'Lost Woods Hideout (top)', 'Lumberjack Tree (top)', 'Sewer Drop', 'Skull Back Drop',
+                        'Skull Left Drop', 'Skull Pinball', 'Skull Pot Circle']
 
         # tavern back door cannot be shuffled yet
         connect_doors(world, ['Tavern North'], ['Tavern'], player)
@@ -3780,8 +3780,8 @@ exit_ids = {'Links House Exit': (0x01, 0x00),
             'Lost Woods Hideout (top)': 0x7A,
             'Lumberjack Tree (top)': 0x7F,
             'Sewer Drop': 0x81,
-            'Skull Woods Second Section (Drop)': 0x79,
-            'Skull Woods First Section (Left)': 0x77,
-            'Skull Woods First Section (Right)': 0x78,
-            'Skull Woods First Section (Top)': 0x76,
+            'Skull Back Drop': 0x79,
+            'Skull Left Drop': 0x77,
+            'Skull Pinball': 0x78,
+            'Skull Pot Circle': 0x76,
             'Pyramid': 0x7B}
