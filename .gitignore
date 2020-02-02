@@ -4,6 +4,7 @@
 *.pyc
 *.sfc
 *.srm
+*.bat
 *.bst
 *.wixobj
 build
@@ -17,6 +18,7 @@ EnemizerCLI/
 .mypy_cache/
 RaceRom.py
 weights/
+resources/user/working_dirs.json
 
 venv
 test
