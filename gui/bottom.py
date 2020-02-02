@@ -30,7 +30,7 @@ def bottom_frame(self,parent):
         guiargs.multi = int(parent.multiworldWindow.worldVar.get())
         guiargs.names = parent.multiworldWindow.namesVar.get()
         guiargs.seed = int(self.seedVar.get()) if self.seedVar.get() else None
-        guiargs.count = int(parent.multiworldWindow.countVar.get()) if parent.multiworldWindow.countVar.get() != '1' else None
+        guiargs.count = int(self.countVar.get()) if self.countVar.get() != '1' else None
         guiargs.mode = parent.itemWindow.modeVar.get()
         guiargs.logic = parent.itemWindow.logicVar.get()
 

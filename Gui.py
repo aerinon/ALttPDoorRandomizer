@@ -183,7 +183,7 @@ def guiMain(args=None):
         self.romOptionsWindow.quickSwapVar.set(int(args.quickswap))
         self.romOptionsWindow.disableMusicVar.set(int(args.disablemusic))
         if args.count:
-            self.multiworldWindow.countVar.set(str(args.count))
+            self.farBottomFrame.countVar.set(str(args.count))
         if args.seed:
             self.generationSetupWindow.seedVar.set(str(args.seed))
         self.itemWindow.modeVar.set(args.mode)
