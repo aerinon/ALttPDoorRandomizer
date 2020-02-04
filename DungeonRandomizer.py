@@ -2,6 +2,7 @@
 import argparse
 import copy
 import os
+import json
 import logging
 import random
 import textwrap
@@ -57,7 +58,7 @@ def parse_arguments(argv, no_defaults=False):
                              Select sword placement. (default: %(default)s)
                              Random:    All swords placed randomly.
                              Assured:   Start game with a sword already.
-                             Swordless: No swords. Curtains in Skull Woods and Agahnim\'s 
+                             Swordless: No swords. Curtains in Skull Woods and Agahnim\'s
                                         Tower are removed, Agahnim\'s Tower barrier can be
                                         destroyed with hammer. Misery Mire and Turtle Rock
                                         can be opened without a sword. Hammer damages Ganon.
@@ -182,11 +183,11 @@ def parse_arguments(argv, no_defaults=False):
                                         (Not yet implemented)
                             Vanilla:    All doors are connected the same way they were in the
                                         base game.
-                            Experimental: Experimental mixes live here. Use at your own risk.                        
+                            Experimental: Experimental mixes live here. Use at your own risk.
                         ''')
     parser.add_argument('--crystals_ganon', default=defval('7'), const='7', nargs='?', choices=['random', '0', '1', '2', '3', '4', '5', '6', '7'],
                         help='''\
-                             How many crystals are needed to defeat ganon. Any other 
+                             How many crystals are needed to defeat ganon. Any other
                              requirements for ganon for the selected goal still apply.
                              This setting does not apply when the all dungeons goal is
                              selected. (default: %(default)s)
@@ -235,7 +236,7 @@ def parse_arguments(argv, no_defaults=False):
     parser.add_argument('--accessibility', default=defval('items'), const='items', nargs='?', choices=['items', 'locations', 'none'], help='''\
                              Select Item/Location Accessibility. (default: %(default)s)
                              Items:     You can reach all unique inventory items. No guarantees about
-                                        reaching all locations or all keys. 
+                                        reaching all locations or all keys.
                              Locations: You will be able to reach every location in the game.
                              None:      You will be able to reach enough locations to beat the game.
                              ''')
@@ -317,6 +318,22 @@ def parse_arguments(argv, no_defaults=False):
 def start():
     args = parse_arguments(None)
 
+    # set default working dirs to same dir as script
+    working_dirs = {
+        "adjust.rom":   "./",
+        "enemizer.cli": "./EnemizerCLI/EnemizerCLI.Core",
+        "multi.names":  "",
+        "rom.base":     "./Zelda no Densetsu - Kamigami no Triforce (Japan).sfc",
+        "gen.seed":     "",
+    }
+    # read saved working dirs file if it exists and set these
+    working_dirs_path = os.path.join(".","resources","user","working_dirs.json")
+    if os.path.exists(working_dirs_path):
+        with(open(working_dirs_path)) as json_file:
+            data = json.load(json_file)
+            for k,v in data.items():
+                working_dirs[k] = v
+
     if is_bundled() and len(sys.argv) == 1:
         # for the bundled builds, if we have no arguments, the user
         # probably wants the gui. Users of the bundled build who want the command line
@@ -328,6 +345,18 @@ def start():
         sys.exit(0)
 
     # ToDo: Validate files further than mere existance
+
+    # Use working_dirs.json
+    # Base ROM
+    if not os.path.isfile(args.rom) and "rom.base" in working_dirs and not working_dirs["rom.base"] == "":
+        args.rom = working_dirs["rom.base"]
+    # Enemizer CLI
+    if not os.path.isfile(args.enemizercli) and "enemizer.cli" in working_dirs and not working_dirs["enemizer.cli"] == "":
+        args.enemizercli = working_dirs["enemizer.cli"]
+    # Multiworld Names
+    if not os.path.isfile(args.names) and "multi.names" in working_dirs and not working_dirs["multi.names"] == "":
+        args.names = working_dirs["multi.names"]
+
     if not args.jsonout and not os.path.isfile(args.rom):
         input('Could not find valid base rom for patching at expected path %s. Please run with -h to see help for further information. \nPress Enter to exit.' % args.rom)
         sys.exit(1)

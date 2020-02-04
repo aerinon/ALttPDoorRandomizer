@@ -5,7 +5,7 @@ import os
 import random
 from Utils import is_bundled, local_path, output_path, open_file
 
-def bottom_frame(self,parent):
+def bottom_frame(self,parent,args):
     self = ttk.Frame(parent)
     seedCountFrame = Frame(self)
     seedCountFrame.pack()
@@ -82,6 +82,7 @@ def bottom_frame(self,parent):
                                    int(parent.customWindow.triforcecountVar.get()), int(parent.customWindow.triforceVar.get()),  int(parent.customWindow.rupoorcostVar.get()), int(parent.customWindow.universalkeyVar.get())]
         guiargs.rom = self.romVar.get()
         guiargs.sprite = parent.romOptionsWindow.sprite
+        guiargs.outputpath = args.outputpath
         # get default values for missing parameters
         for k,v in vars(parent.parse_arguments(['--multi', str(guiargs.multi)])).items():
             if k not in vars(guiargs):
@@ -107,7 +108,10 @@ def bottom_frame(self,parent):
     generateButton.pack(side=LEFT)
 
     def open_output():
-        open_file(output_path(''))
+        if args.outputpath:
+            open_file(output_path(args.outputpath))
+        else:
+            open_file(output_path(''))
 
     openOutputButton = Button(self, text='Open Output Directory', command=open_output)
     openOutputButton.pack(side=RIGHT)

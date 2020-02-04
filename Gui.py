@@ -88,7 +88,7 @@ def guiMain(args=None):
     # Shared Controls
 
     # bottom of window: Open Output Directory, Open Documentation (if exists)
-    farBottomFrame = BottomFrame.bottom_frame(self,self)
+    farBottomFrame = BottomFrame.bottom_frame(self,self,args)
     # set bottom frame to main window
     farBottomFrame.pack(side=BOTTOM, fill=X, padx=5, pady=5)
 
@@ -180,8 +180,11 @@ def guiMain(args=None):
         self.dungeonRandoWindow.keyshuffleVar.set(args.keyshuffle)
         self.dungeonRandoWindow.bigkeyshuffleVar.set(args.bigkeyshuffle)
         self.itemWindow.retroVar.set(args.retro)
+        self.entrandoWindow.openpyramidVar.set(args.openpyramid)
         self.romOptionsWindow.quickSwapVar.set(int(args.quickswap))
         self.romOptionsWindow.disableMusicVar.set(int(args.disablemusic))
+        if args.multi:
+            self.multiworldWindow.worldVar.set(str(args.multi))
         if args.count:
             self.farBottomFrame.countVar.set(str(args.count))
         if args.seed:
@@ -199,12 +202,21 @@ def guiMain(args=None):
         self.itemWindow.algorithmVar.set(args.algorithm)
         self.entrandoWindow.shuffleVar.set(args.shuffle)
         self.dungeonRandoWindow.doorShuffleVar.set(args.door_shuffle)
+        self.romOptionsWindow.heartcolorVar.set(args.heartcolor)
         self.romOptionsWindow.heartbeepVar.set(args.heartbeep)
         self.romOptionsWindow.fastMenuVar.set(args.fastmenu)
         self.itemWindow.logicVar.set(args.logic)
         self.generationSetupWindow.romVar.set(args.rom)
         self.entrandoWindow.shuffleGanonVar.set(args.shuffleganon)
         self.romOptionsWindow.hintsVar.set(args.hints)
+        self.enemizerWindow.enemizerCLIpathVar.set(args.enemizercli)
+        self.enemizerWindow.potShuffleVar.set(args.shufflepots)
+        self.enemizerWindow.enemyShuffleVar.set(args.shuffleenemies)
+        self.enemizerWindow.enemizerBossVar.set(args.shufflebosses)
+        self.enemizerWindow.enemizerDamageVar.set(args.enemy_damage)
+        self.enemizerWindow.enemizerHealthVar.set(args.enemy_health)
+        self.romOptionsWindow.owPalettesVar.set(args.ow_palettes)
+        self.romOptionsWindow.uwPalettesVar.set(args.uw_palettes)
 #        if args.sprite is not None:
 #            self.romOptionsWindow.set_sprite(Sprite(args.sprite))
 
