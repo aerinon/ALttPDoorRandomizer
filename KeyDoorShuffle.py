@@ -1215,17 +1215,19 @@ def validate_key_placement(key_layout, world, player):
     for counter in key_layout.key_counters.values():
         if len(counter.child_doors) == 0:
             continue
-        found_keys = sum(1 for i in counter.free_locations if i.item is not None and i.item.name == smallkey_name and i.item.player == player) + \
+        big_found = any(i.item == dungeon.big_key for i in counter.free_locations if "- Big Chest" not in i.name) or big_key_outside
+        found_locations = set(i for i in counter.free_locations if big_found or "- Big Chest" not in i.name)
+        found_keys = sum(1 for i in found_locations if i.item is not None and i.item.name == smallkey_name and i.item.player == player) + \
                      len(counter.key_only_locations) + keys_outside
-        big_found = any(i.item == dungeon.big_key for i in counter.free_locations) or big_key_outside
-        can_progress = (not counter.big_key_opened and big_found) or found_keys > counter.used_keys and any(not d.bigKey for d in counter.child_doors)
+        can_progress = (not counter.big_key_opened and big_found and any(d.bigKey for d in counter.child_doors)) or \
+                       found_keys > counter.used_keys and any(not d.bigKey for d in counter.child_doors)
         if not can_progress:
-            missing_locations = set(max_counter.free_locations.keys()).difference(counter.free_locations.keys())
+            missing_locations = set(max_counter.free_locations.keys()).difference(found_locations)
             missing_key_only = set(max_counter.key_only_locations.keys()).difference(counter.key_only_locations.keys())
-            if world.accessibility[player] == 'items':
-                # Maybe ok if only locking keys
+            if world.accessibility[player] == 'items' or True: # locations is busted - just check items are accessible for now
+                # Ok if only locking keys
                 missing_key_only = []
-                missing_locations = [l for l in missing_locations if l.item is None or (l.item.name != smallkey_name and l.item != dungeon.big_key)]
+                missing_locations = [l for l in missing_locations if l.item is None or (l.item.name != smallkey_name and l.item != dungeon.big_key) or "- Boss" in l.name]
             if len(missing_locations) > 0 or len(missing_key_only) > 0:
                 logging.getLogger('').error("Keylock - can't open locations: ")
                 for i in missing_locations:
