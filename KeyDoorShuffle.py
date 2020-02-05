@@ -1223,12 +1223,9 @@ def validate_key_placement(key_layout, world, player):
                        found_keys > counter.used_keys and any(not d.bigKey for d in counter.child_doors)
         if not can_progress:
             missing_locations = set(max_counter.free_locations.keys()).difference(found_locations)
-            missing_key_only = set(max_counter.key_only_locations.keys()).difference(counter.key_only_locations.keys())
-            if world.accessibility[player] == 'items' or True: # locations is busted - just check items are accessible for now
-                # Ok if only locking keys
-                missing_key_only = []
-                missing_locations = [l for l in missing_locations if l.item is None or (l.item.name != smallkey_name and l.item != dungeon.big_key) or "- Boss" in l.name]
-            if len(missing_locations) > 0 or len(missing_key_only) > 0:
+            missing_items = [l for l in missing_locations if l.item is None or (l.item.name != smallkey_name and l.item != dungeon.big_key) or "- Boss" in l.name]
+            #missing_key_only = set(max_counter.key_only_locations.keys()).difference(counter.key_only_locations.keys()) # do freestanding keys matter for locations?
+            if len(missing_items) > 0: #world.accessibility[player]=='locations' and (len(missing_locations)>0 or len(missing_key_only) > 0):
                 logging.getLogger('').error("Keylock - can't open locations: ")
                 for i in missing_locations:
                     logging.getLogger('').error(i)
