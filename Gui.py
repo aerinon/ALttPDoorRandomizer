@@ -52,10 +52,10 @@ def guiMain(args=None):
 
     # set default working dirs to same dir as script
     self.working_dirs = {
-        "adjust.rom":   "./",
-        "enemizer.cli": "./EnemizerCLI/EnemizerCLI.Core",
+        "adjust.rom":   os.path.join("."),
+        "enemizer.cli": os.path.join(".","EnemizerCLI","EnemizerCLI.Core"),
         "multi.names":  "",
-        "rom.base":     "./Zelda no Densetsu - Kamigami no Triforce (Japan).sfc",
+        "rom.base":     os.path.join(".","Zelda no Densetsu - Kamigami no Triforce (Japan).sfc"),
         "gen.seed":     "",
     }
     # read saved working dirs file if it exists and set these

@@ -49,9 +49,9 @@ def bottom_frame(self,parent,args):
         guiargs.heartbeep = parent.romOptionsWindow.heartbeepVar.get()
         guiargs.heartcolor = parent.romOptionsWindow.heartcolorVar.get()
         guiargs.fastmenu = parent.romOptionsWindow.fastMenuVar.get()
-        guiargs.create_spoiler = bool(self.createSpoilerVar.get())
-        guiargs.skip_playthrough = not bool(self.createSpoilerVar.get())
-        guiargs.suppress_rom = bool(self.suppressRomVar.get())
+        guiargs.create_spoiler = bool(parent.generationSetupWindow.createSpoilerVar.get())
+        guiargs.skip_playthrough = not bool(parent.generationSetupWindow.createSpoilerVar.get())
+        guiargs.suppress_rom = bool(parent.generationSetupWindow.suppressRomVar.get())
         guiargs.openpyramid = bool(parent.entrandoWindow.openpyramidVar.get())
         guiargs.mapshuffle = bool(parent.dungeonRandoWindow.mapshuffleVar.get())
         guiargs.compassshuffle = bool(parent.dungeonRandoWindow.compassshuffleVar.get())
@@ -80,9 +80,9 @@ def bottom_frame(self,parent,args):
                                    int(parent.customWindow.arrow1Var.get()), int(parent.customWindow.arrow10Var.get()), int(parent.customWindow.bomb1Var.get()), int(parent.customWindow.bomb3Var.get()), int(parent.customWindow.rupee1Var.get()), int(parent.customWindow.rupee5Var.get()), int(parent.customWindow.rupee20Var.get()), int(parent.customWindow.rupee50Var.get()), int(parent.customWindow.rupee100Var.get()),
                                    int(parent.customWindow.rupee300Var.get()), int(parent.customWindow.rupoorVar.get()), int(parent.customWindow.blueclockVar.get()), int(parent.customWindow.greenclockVar.get()), int(parent.customWindow.redclockVar.get()), int(parent.customWindow.progbowVar.get()), int(parent.customWindow.bomb10Var.get()), int(parent.customWindow.triforcepieceVar.get()),
                                    int(parent.customWindow.triforcecountVar.get()), int(parent.customWindow.triforceVar.get()),  int(parent.customWindow.rupoorcostVar.get()), int(parent.customWindow.universalkeyVar.get())]
-        guiargs.rom = self.romVar.get()
+        guiargs.rom = parent.generationSetupWindow.romVar.get()
         guiargs.sprite = parent.romOptionsWindow.sprite
-        guiargs.outputpath = args.outputpath
+        guiargs.outputpath = args.outputpath if args else None
         # get default values for missing parameters
         for k,v in vars(parent.parse_arguments(['--multi', str(guiargs.multi)])).items():
             if k not in vars(guiargs):
@@ -108,10 +108,10 @@ def bottom_frame(self,parent,args):
     generateButton.pack(side=LEFT)
 
     def open_output():
-        if args.outputpath:
+        if args and args.outputpath:
             open_file(output_path(args.outputpath))
         else:
-            open_file(output_path(''))
+            open_file(output_path(os.path.join(".")))
 
     openOutputButton = Button(self, text='Open Output Directory', command=open_output)
     openOutputButton.pack(side=RIGHT)

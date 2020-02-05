@@ -347,14 +347,22 @@ def start():
     # ToDo: Validate files further than mere existance
 
     # Use working_dirs.json
+    #  If no args sent
+    #  or this arg isn't present
+    #  or this arg is empty
+    #  or this arg isn't a filepath (if applicable)
+    #   and we have a default
+    #   use the default
+    noargs = not args
+
     # Base ROM
-    if not os.path.isfile(args.rom) and "rom.base" in working_dirs and not working_dirs["rom.base"] == "":
+    if (noargs or (not args.rom) or (args.rom == "") or (not os.path.isfile(args.rom))) and (("rom.base" in working_dirs) and (not working_dirs["rom.base"] == "")):
         args.rom = working_dirs["rom.base"]
     # Enemizer CLI
-    if not os.path.isfile(args.enemizercli) and "enemizer.cli" in working_dirs and not working_dirs["enemizer.cli"] == "":
+    if (noargs or (not args.enemizercli) or (args.enemizercli == "") or (not os.path.isfile(args.enemizercli))) and (("enemizer.cli" in working_dirs) and (not working_dirs["enemizer.cli"] == "")):
         args.enemizercli = working_dirs["enemizer.cli"]
     # Multiworld Names
-    if not os.path.isfile(args.names) and "multi.names" in working_dirs and not working_dirs["multi.names"] == "":
+    if (noargs or (not args.names) or (args.names == "")) and (("multi.names" in working_dirs) and (not working_dirs["multi.names"] == "")):
         args.names = working_dirs["multi.names"]
 
     if not args.jsonout and not os.path.isfile(args.rom):
