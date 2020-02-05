@@ -1,4 +1,4 @@
-from tkinter import ttk, filedialog, messagebox, IntVar, StringVar, Button, Checkbutton, Entry, Frame, Label, OptionMenu, Spinbox, E, W, LEFT, RIGHT, X, BOTTOM
+from tkinter import ttk, filedialog, messagebox, StringVar, Button, Checkbutton, Entry, Frame, Label, OptionMenu, E, W, LEFT, RIGHT, X, BOTTOM
 from AdjusterMain import adjust
 from argparse import Namespace
 from classes.SpriteSelector import SpriteSelector

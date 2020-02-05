@@ -1,9 +1,11 @@
-from tkinter import ttk, filedialog, messagebox, IntVar, StringVar, Button, Checkbutton, Entry, Frame, Label, OptionMenu, Spinbox, E, W, LEFT, RIGHT, X
+from tkinter import ttk, messagebox, StringVar, Button, Entry, Frame, Label, Spinbox, E, W, LEFT, RIGHT, X
 from argparse import Namespace
 import logging
 import os
 import random
-from Utils import is_bundled, local_path, output_path, open_file
+from CLI import parse_arguments
+from Main import main
+from Utils import local_path, output_path, open_file
 
 def bottom_frame(self,parent,args):
     self = ttk.Frame(parent)
@@ -27,6 +29,7 @@ def bottom_frame(self,parent,args):
 
     def generateRom():
         guiargs = Namespace()
+        guiargs.remote_items = None
         guiargs.multi = int(parent.multiworldWindow.worldVar.get())
         guiargs.names = parent.multiworldWindow.namesVar.get()
         guiargs.seed = int(self.seedVar.get()) if self.seedVar.get() else None
@@ -70,33 +73,33 @@ def bottom_frame(self,parent,args):
         guiargs.enemy_health = parent.enemizerWindow.enemizerHealthVar.get()
         guiargs.enemy_damage = parent.enemizerWindow.enemizerDamageVar.get()
         guiargs.shufflepots = bool(parent.enemizerWindow.potShuffleVar.get())
-        guiargs.custom = bool(parent.romOptionsWindow.customVar.get())
-        guiargs.customitemarray = [int(parent.customWindow.bowVar.get()), int(parent.customWindow.silverarrowVar.get()), int(parent.customWindow.boomerangVar.get()), int(parent.customWindow.magicboomerangVar.get()), int(parent.customWindow.hookshotVar.get()), int(parent.customWindow.mushroomVar.get()), int(parent.customWindow.magicpowderVar.get()), int(parent.customWindow.firerodVar.get()),
-                                   int(parent.customWindow.icerodVar.get()), int(parent.customWindow.bombosVar.get()), int(parent.customWindow.etherVar.get()), int(parent.customWindow.quakeVar.get()), int(parent.customWindow.lampVar.get()), int(parent.customWindow.hammerVar.get()), int(parent.customWindow.shovelVar.get()), int(parent.customWindow.fluteVar.get()), int(parent.customWindow.bugnetVar.get()),
-                                   int(parent.customWindow.bookVar.get()), int(parent.customWindow.bottleVar.get()), int(parent.customWindow.somariaVar.get()), int(parent.customWindow.byrnaVar.get()), int(parent.customWindow.capeVar.get()), int(parent.customWindow.mirrorVar.get()), int(parent.customWindow.bootsVar.get()), int(parent.customWindow.powergloveVar.get()), int(parent.customWindow.titansmittVar.get()),
-                                   int(parent.customWindow.proggloveVar.get()), int(parent.customWindow.flippersVar.get()), int(parent.customWindow.pearlVar.get()), int(parent.customWindow.heartpieceVar.get()), int(parent.customWindow.fullheartVar.get()), int(parent.customWindow.sancheartVar.get()), int(parent.customWindow.sword1Var.get()), int(parent.customWindow.sword2Var.get()),
-                                   int(parent.customWindow.sword3Var.get()), int(parent.customWindow.sword4Var.get()), int(parent.customWindow.progswordVar.get()), int(parent.customWindow.shield1Var.get()), int(parent.customWindow.shield2Var.get()), int(parent.customWindow.shield3Var.get()), int(parent.customWindow.progshieldVar.get()), int(parent.customWindow.bluemailVar.get()),
-                                   int(parent.customWindow.redmailVar.get()), int(parent.customWindow.progmailVar.get()), int(parent.customWindow.halfmagicVar.get()), int(parent.customWindow.quartermagicVar.get()), int(parent.customWindow.bcap5Var.get()), int(parent.customWindow.bcap10Var.get()), int(parent.customWindow.acap5Var.get()), int(parent.customWindow.acap10Var.get()),
-                                   int(parent.customWindow.arrow1Var.get()), int(parent.customWindow.arrow10Var.get()), int(parent.customWindow.bomb1Var.get()), int(parent.customWindow.bomb3Var.get()), int(parent.customWindow.rupee1Var.get()), int(parent.customWindow.rupee5Var.get()), int(parent.customWindow.rupee20Var.get()), int(parent.customWindow.rupee50Var.get()), int(parent.customWindow.rupee100Var.get()),
-                                   int(parent.customWindow.rupee300Var.get()), int(parent.customWindow.rupoorVar.get()), int(parent.customWindow.blueclockVar.get()), int(parent.customWindow.greenclockVar.get()), int(parent.customWindow.redclockVar.get()), int(parent.customWindow.progbowVar.get()), int(parent.customWindow.bomb10Var.get()), int(parent.customWindow.triforcepieceVar.get()),
-                                   int(parent.customWindow.triforcecountVar.get()), int(parent.customWindow.triforceVar.get()),  int(parent.customWindow.rupoorcostVar.get()), int(parent.customWindow.universalkeyVar.get())]
+        guiargs.custom = bool(parent.generationSetupWindow.customVar.get())
+        guiargs.customitemarray = [int(parent.customContent.bowVar.get()), int(parent.customContent.silverarrowVar.get()), int(parent.customContent.boomerangVar.get()), int(parent.customContent.magicboomerangVar.get()), int(parent.customContent.hookshotVar.get()), int(parent.customContent.mushroomVar.get()), int(parent.customContent.magicpowderVar.get()), int(parent.customContent.firerodVar.get()),
+                                   int(parent.customContent.icerodVar.get()), int(parent.customContent.bombosVar.get()), int(parent.customContent.etherVar.get()), int(parent.customContent.quakeVar.get()), int(parent.customContent.lampVar.get()), int(parent.customContent.hammerVar.get()), int(parent.customContent.shovelVar.get()), int(parent.customContent.fluteVar.get()), int(parent.customContent.bugnetVar.get()),
+                                   int(parent.customContent.bookVar.get()), int(parent.customContent.bottleVar.get()), int(parent.customContent.somariaVar.get()), int(parent.customContent.byrnaVar.get()), int(parent.customContent.capeVar.get()), int(parent.customContent.mirrorVar.get()), int(parent.customContent.bootsVar.get()), int(parent.customContent.powergloveVar.get()), int(parent.customContent.titansmittVar.get()),
+                                   int(parent.customContent.proggloveVar.get()), int(parent.customContent.flippersVar.get()), int(parent.customContent.pearlVar.get()), int(parent.customContent.heartpieceVar.get()), int(parent.customContent.fullheartVar.get()), int(parent.customContent.sancheartVar.get()), int(parent.customContent.sword1Var.get()), int(parent.customContent.sword2Var.get()),
+                                   int(parent.customContent.sword3Var.get()), int(parent.customContent.sword4Var.get()), int(parent.customContent.progswordVar.get()), int(parent.customContent.shield1Var.get()), int(parent.customContent.shield2Var.get()), int(parent.customContent.shield3Var.get()), int(parent.customContent.progshieldVar.get()), int(parent.customContent.bluemailVar.get()),
+                                   int(parent.customContent.redmailVar.get()), int(parent.customContent.progmailVar.get()), int(parent.customContent.halfmagicVar.get()), int(parent.customContent.quartermagicVar.get()), int(parent.customContent.bcap5Var.get()), int(parent.customContent.bcap10Var.get()), int(parent.customContent.acap5Var.get()), int(parent.customContent.acap10Var.get()),
+                                   int(parent.customContent.arrow1Var.get()), int(parent.customContent.arrow10Var.get()), int(parent.customContent.bomb1Var.get()), int(parent.customContent.bomb3Var.get()), int(parent.customContent.rupee1Var.get()), int(parent.customContent.rupee5Var.get()), int(parent.customContent.rupee20Var.get()), int(parent.customContent.rupee50Var.get()), int(parent.customContent.rupee100Var.get()),
+                                   int(parent.customContent.rupee300Var.get()), int(parent.customContent.rupoorVar.get()), int(parent.customContent.blueclockVar.get()), int(parent.customContent.greenclockVar.get()), int(parent.customContent.redclockVar.get()), int(parent.customContent.progbowVar.get()), int(parent.customContent.bomb10Var.get()), int(parent.customContent.triforcepieceVar.get()),
+                                   int(parent.customContent.triforcecountVar.get()), int(parent.customContent.triforceVar.get()),  int(parent.customContent.rupoorcostVar.get()), int(parent.customContent.universalkeyVar.get())]
         guiargs.rom = parent.generationSetupWindow.romVar.get()
-        guiargs.sprite = parent.romOptionsWindow.sprite
+        guiargs.sprite = parent.romOptionsWindow.spriteNameVar
         guiargs.outputpath = args.outputpath if args else None
         # get default values for missing parameters
-        for k,v in vars(parent.parse_arguments(['--multi', str(guiargs.multi)])).items():
-            if k not in vars(guiargs):
-                setattr(guiargs, k, v)
-            elif type(v) is dict: # use same settings for every player
-                setattr(guiargs, k, {player: getattr(guiargs, k) for player in range(1, guiargs.multi + 1)})
+#        for k,v in vars(parse_arguments(['--multi', str(guiargs.multi)])).items():
+#            if k not in vars(guiargs):
+#                setattr(guiargs, k, v)
+#            elif type(v) is dict: # use same settings for every player
+#                setattr(guiargs, k, {player: getattr(guiargs, k) for player in range(1, guiargs.multi + 1)})
         try:
             if guiargs.count is not None:
                 seed = guiargs.seed
                 for _ in range(guiargs.count):
-                    parent.main(seed=seed, args=guiargs)
+                    main(seed=seed, args=guiargs)
                     seed = random.randint(0, 999999999)
             else:
-                parent.main(seed=guiargs.seed, args=guiargs)
+                main(seed=guiargs.seed, args=guiargs)
         except Exception as e:
             logging.exception(e)
             messagebox.showerror(title="Error while creating seed", message=str(e))

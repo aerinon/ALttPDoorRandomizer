@@ -1,4 +1,4 @@
-from tkinter import ttk, filedialog, messagebox, IntVar, StringVar, Button, Checkbutton, Entry, Frame, Label, OptionMenu, Spinbox, E, W, LEFT, RIGHT, X
+from tkinter import ttk, StringVar, Entry, Frame, Label, E, W, LEFT, RIGHT, X
 
 def custom_page(top,parent):
     self = ttk.Frame(parent)

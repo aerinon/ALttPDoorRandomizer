@@ -1,4 +1,4 @@
-from tkinter import ttk, IntVar, StringVar, Checkbutton, Entry, Frame, Label, OptionMenu, Spinbox, E, W, LEFT, RIGHT
+from tkinter import ttk, StringVar, Entry, Frame, Label, Spinbox, E, W, LEFT, RIGHT
 
 def multiworld_page(parent,working_dirs):
     self = ttk.Frame(parent)

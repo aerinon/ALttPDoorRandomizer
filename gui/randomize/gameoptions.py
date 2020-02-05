@@ -1,4 +1,4 @@
-from tkinter import ttk, IntVar, StringVar, Button, Checkbutton, Entry, Frame, Label, OptionMenu, Spinbox, E, W, LEFT, RIGHT
+from tkinter import ttk, IntVar, StringVar, Button, Checkbutton, Entry, Frame, Label, OptionMenu, E, W, LEFT, RIGHT
 from classes.SpriteSelector import SpriteSelector
 
 def gameoptions_page(parent):

@@ -1,7 +1,4 @@
-from tkinter import ttk, filedialog, messagebox, IntVar, StringVar, Button, Checkbutton, Entry, Frame, Label, OptionMenu, Spinbox, E, W, LEFT, RIGHT, X
-from argparse import Namespace
-import logging
-import random
+from tkinter import ttk, filedialog, IntVar, StringVar, Button, Checkbutton, Entry, Frame, Label, E, W, LEFT, RIGHT, X
 
 def generation_page(parent,working_dirs):
     self = ttk.Frame(parent)
@@ -22,11 +19,12 @@ def generation_page(parent,working_dirs):
     ## Locate base ROM
     baseRomFrame = Frame(self)
     baseRomLabel = Label(baseRomFrame, text='Base Rom: ')
-    self.romVar = StringVar(value=working_dirs["rom.base"])
+    self.romVar = StringVar()
     def saveBaseRom(caller,_,mode):
         working_dirs["rom.base"] = self.romVar.get()
     self.romVar.trace_add("write",saveBaseRom)
     romEntry = Entry(baseRomFrame, textvariable=self.romVar)
+    self.romVar.set(working_dirs["rom.base"])
 
     def RomSelect():
         rom = filedialog.askopenfilename(filetypes=[("Rom Files", (".sfc", ".smc")), ("All Files", "*")])

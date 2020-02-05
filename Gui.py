@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
-from argparse import Namespace
-from glob import glob
+import argparse
 import json
-import logging
 import random
 import os
 import sys
-import shutil
-from tkinter import Checkbutton, OptionMenu, Toplevel, LabelFrame, PhotoImage, Tk, LEFT, RIGHT, BOTTOM, TOP, INSERT, StringVar, IntVar, Frame, Label, Text, W, E, X, BOTH, Entry, Spinbox, Button, filedialog, messagebox, ttk
-from urllib.parse import urlparse
-from urllib.request import urlopen
+from tkinter import BOTTOM, TOP, INSERT, Frame, Text, W, E, X, Button, Tk, ttk
 
 import gui.randomize.item as ItemPage
 import gui.randomize.entrando as EntrandoPage
@@ -21,12 +16,10 @@ import gui.randomize.generation as GenerationPage
 import gui.adjust.overview as AdjustPage
 import gui.custom.overview as CustomPage
 import gui.bottom as BottomFrame
-from AdjusterMain import adjust
-from DungeonRandomizer import parse_arguments
-from GuiUtils import ToolTips, set_icon, BackgroundTaskProgress
+from CLI import parse_arguments, get_working_dirs
+from GuiUtils import set_icon
 from Main import main, __version__ as ESVersion
 from Rom import Sprite
-from Utils import is_bundled, local_path, output_path, open_file
 
 
 def guiMain(args=None):
@@ -43,6 +36,9 @@ def guiMain(args=None):
         save_working_dirs()
         sys.exit(0)
 
+    if args is None:
+        args = parse_arguments(args)
+
     # make main window
     # add program title & version number
     mainWindow = Tk()
@@ -50,24 +46,11 @@ def guiMain(args=None):
     mainWindow.wm_title("Door Shuffle %s" % ESVersion)
     mainWindow.protocol("WM_DELETE_WINDOW",guiExit) # intercept when user clicks the X
 
-    # set default working dirs to same dir as script
-    self.working_dirs = {
-        "adjust.rom":   os.path.join("."),
-        "enemizer.cli": os.path.join(".","EnemizerCLI","EnemizerCLI.Core"),
-        "multi.names":  "",
-        "rom.base":     os.path.join(".","Zelda no Densetsu - Kamigami no Triforce (Japan).sfc"),
-        "gen.seed":     "",
-    }
-    # read saved working dirs file if it exists and set these
-    working_dirs_path = os.path.join(".","resources","user","working_dirs.json")
-    if os.path.exists(working_dirs_path):
-        with(open(working_dirs_path)) as json_file:
-            data = json.load(json_file)
-            for k,v in data.items():
-                self.working_dirs[k] = v
-
     # set program icon
     set_icon(mainWindow)
+
+    # get working dirs
+    self.working_dirs = get_working_dirs()
 
     # make notebook pages: Randomize, Adjust, Custom
     #  Randomize: Main randomizer settings

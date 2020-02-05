@@ -15,11 +15,12 @@ def enemizer_page(parent,working_dirs):
     enemizerPathFrame.grid(row=0, column=0, columnspan=3, sticky=W+E)
     enemizerCLIlabel = Label(enemizerPathFrame, text="EnemizerCLI path: ")
     enemizerCLIlabel.pack(side=LEFT)
-    self.enemizerCLIpathVar = StringVar(value=working_dirs["enemizer.cli"])
+    self.enemizerCLIpathVar = StringVar()
     def saveEnemizerPath(caller,_,mode):
         working_dirs["enemizer.cli"] = self.enemizerCLIpathVar.get()
     self.enemizerCLIpathVar.trace_add("write",saveEnemizerPath)
     enemizerCLIpathEntry = Entry(enemizerPathFrame, textvariable=self.enemizerCLIpathVar)
+    self.enemizerCLIpathVar.set(working_dirs["enemizer.cli"])
     enemizerCLIpathEntry.pack(side=LEFT, fill=X, expand=True)
     def EnemizerSelectPath():
         path = filedialog.askopenfilename(filetypes=[("EnemizerCLI executable", "*EnemizerCLI*")])
