@@ -10,6 +10,7 @@ import zlib
 
 from BaseClasses import World, CollectionState, Item, Region, Location, Shop
 from Items import ItemFactory
+from KeyDoorShuffle import validate_key_placement
 from Regions import create_regions, create_shops, mark_light_world_regions, create_dungeon_regions
 from InvertedRegions import create_inverted_regions, mark_dark_world_regions
 from EntranceShuffle import link_entrances, link_inverted_entrances
@@ -131,6 +132,11 @@ def main(args, seed=None):
         fill_dungeons_restrictive(world, shuffled_locations)
     else:
         fill_dungeons(world)
+
+    for player in range(1, world.players+1):
+        for key_layout in world.key_layout[player].values():
+            if not validate_key_placement(key_layout, world, player):
+                raise RuntimeError("Keylock detected: %s (Player %d)" % (key_layout.sector.name, player))
 
     logger.info('Fill the world.')
 

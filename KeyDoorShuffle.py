@@ -147,8 +147,9 @@ def analyze_dungeon(key_layout, world, player):
             if not child.bigKey and child not in doors_completed:
                 best_counter = find_best_counter(child, odd_counter, key_counter, key_layout, world, player, False, empty_flag)
                 rule = create_rule(best_counter, key_counter, key_layout, world, player)
-                if not rule.is_valid:
-                    logging.getLogger('').warning('Key logic for door %s requires too many chests.  Seed may be beatable anyway.', child.name)
+                # todo: seems to be caused by best_counter not opening the big key door when that's logically required.  Re-evaluate usage of this
+                # if not rule.is_valid:
+                #     logging.getLogger('').warning('Key logic for door %s requires too many chests.  Seed may be beatable anyway.', child.name)
                 if smallest_rule is None or rule.small_key_num < smallest_rule:
                     smallest_rule = rule.small_key_num
                 check_for_self_lock_key(rule, child, best_counter, key_layout, world, player)
@@ -1194,3 +1195,42 @@ def val_rule(rule, skn, allow=False, loc=None, askn=None, setCheck=None):
     assert len(setCheck) == len(rule.alternate_big_key_loc)
     for loc in rule.alternate_big_key_loc:
         assert loc.name in setCheck
+
+
+# Soft lock stuff
+def validate_key_placement(key_layout, world, player):
+    if world.retro[player] or world.accessibility[player] == 'none':
+        return True # Can't keylock in retro.  Expected if beatable only.
+    max_counter = find_max_counter(key_layout)
+    keys_outside = 0
+    big_key_outside = False
+    dungeon = world.get_dungeon(key_layout.sector.name, player)
+    smallkey_name = 'Small Key (%s)' % (key_layout.sector.name if key_layout.sector.name != 'Hyrule Castle' else 'Escape')
+    if world.keyshuffle[player]:
+        keys_outside = key_layout.max_chests - sum(1 for i in max_counter.free_locations if i.item is not None and i.item.name == smallkey_name and i.item.player == player)
+    if world.bigkeyshuffle[player]:
+        max_counter = find_max_counter(key_layout)
+        big_key_outside = dungeon.big_key not in (l.item for l in max_counter.free_locations)
+
+    for counter in key_layout.key_counters.values():
+        if len(counter.child_doors) == 0:
+            continue
+        found_keys = sum(1 for i in counter.free_locations if i.item is not None and i.item.name == smallkey_name and i.item.player == player) + \
+                     len(counter.key_only_locations) + keys_outside
+        big_found = any(i.item == dungeon.big_key for i in counter.free_locations) or big_key_outside
+        can_progress = (not counter.big_key_opened and big_found) or found_keys > counter.used_keys and any(not d.bigKey for d in counter.child_doors)
+        if not can_progress:
+            missing_locations = set(max_counter.free_locations.keys()).difference(counter.free_locations.keys())
+            missing_key_only = set(max_counter.key_only_locations.keys()).difference(counter.key_only_locations.keys())
+            if world.accessibility[player] == 'items':
+                # Maybe ok if only locking keys
+                missing_key_only = []
+                missing_locations = [l for l in missing_locations if l.item is None or (l.item.name != smallkey_name and l.item != dungeon.big_key)]
+            if len(missing_locations) > 0 or len(missing_key_only) > 0:
+                logging.getLogger('').error("Keylock - can't open locations: ")
+                for i in missing_locations:
+                    logging.getLogger('').error(i)
+                return False
+
+    return True
+
