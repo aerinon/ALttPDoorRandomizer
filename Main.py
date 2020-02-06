@@ -43,32 +43,33 @@ def main(args, seed=None):
         world.seed = int(seed)
     random.seed(world.seed)
 
-    world.remote_items = args.remote_items.copy()
-    world.mapshuffle = args.mapshuffle.copy()
-    world.compassshuffle = args.compassshuffle.copy()
-    world.keyshuffle = args.keyshuffle.copy()
-    world.bigkeyshuffle = args.bigkeyshuffle.copy()
-    world.crystals_needed_for_ganon = {player: random.randint(0, 7) if args.crystals_ganon[player] == 'random' else int(args.crystals_ganon[player]) for player in range(1, world.players + 1)}
-    world.crystals_needed_for_gt = {player: random.randint(0, 7) if args.crystals_gt[player] == 'random' else int(args.crystals_gt[player]) for player in range(1, world.players + 1)}
-    world.open_pyramid = args.openpyramid.copy()
-    world.boss_shuffle = args.shufflebosses.copy()
-    world.enemy_shuffle = args.shuffleenemies.copy()
-    world.enemy_health = args.enemy_health.copy()
-    world.enemy_damage = args.enemy_damage.copy()
-    world.beemizer = args.beemizer.copy()
+    if args.remote_items is not None:
+        world.remote_items = copy.copy(args.remote_items)
+    world.mapshuffle = copy.copy(args.mapshuffle)
+    world.compassshuffle = copy.copy(args.compassshuffle)
+    world.keyshuffle = copy.copy(args.keyshuffle)
+    world.bigkeyshuffle = copy.copy(args.bigkeyshuffle)
+#    world.crystals_needed_for_ganon = {player: random.randint(0, 7) if args.crystals_ganon[player] == 'random' else int(args.crystals_ganon[player]) for player in range(1, world.players + 1)}
+#    world.crystals_needed_for_gt = {player: random.randint(0, 7) if args.crystals_gt[player] == 'random' else int(args.crystals_gt[player]) for player in range(1, world.players + 1)}
+    world.open_pyramid = copy.copy(args.openpyramid)
+    world.boss_shuffle = copy.copy(args.shufflebosses)
+    world.enemy_shuffle = copy.copy(args.shuffleenemies)
+    world.enemy_health = copy.copy(args.enemy_health)
+    world.enemy_damage = copy.copy(args.enemy_damage)
+#    world.beemizer = copy.copy(args.beemizer)
 
     world.rom_seeds = {player: random.randint(0, 999999999) for player in range(1, world.players + 1)}
 
     logger.info('ALttP Door Randomizer Version %s  -  Seed: %s\n', __version__, world.seed)
 
-    parsed_names = parse_player_names(args.names, world.players, args.teams)
-    world.teams = len(parsed_names)
-    for i, team in enumerate(parsed_names, 1):
-        if world.players > 1:
-            logger.info('%s%s', 'Team%d: ' % i if world.teams > 1 else 'Players: ', ', '.join(team))
-        for player, name in enumerate(team, 1):
-            world.player_names[player].append(name)
-    logger.info('')
+#    parsed_names = parse_player_names(args.names, world.players, args.teams)
+#    world.teams = len(parsed_names)
+#    for i, team in enumerate(parsed_names, 1):
+#        if world.players > 1:
+#            logger.info('%s%s', 'Team%d: ' % i if world.teams > 1 else 'Players: ', ', '.join(team))
+#        for player, name in enumerate(team, 1):
+#            world.player_names[player].append(name)
+#    logger.info('')
 
     for player in range(1, world.players + 1):
         world.difficulty_requirements[player] = difficulties[world.difficulty[player]]
@@ -214,24 +215,25 @@ def main(args, seed=None):
                         outfilepname += f"_{world.player_names[player][team].replace(' ', '_')}" if world.player_names[player][team] != 'Player %d' % player else ''
                     outfilesuffix = ('_%s_%s-%s-%s-%s%s_%s_%s-%s%s%s%s%s' % (world.logic[player], world.difficulty[player], world.difficulty_adjustments[player],
                                                                               world.mode[player], world.goal[player],
-                                                                              "" if world.timer in ['none', 'display'] else "-" + world.timer,
+                                                                              "" if world.timer[player] in ['none', 'display'] else "-" + world.timer[player],
                                                                               world.shuffle[player], world.doorShuffle[player], world.algorithm, mcsb_name,
                                                                               "-retro" if world.retro[player] else "",
                                                                               "-prog_" + world.progressive if world.progressive in ['off', 'random'] else "",
                                                                               "-nohints" if not world.hints[player] else "")) if not args.outputname else ''
                     rom.write_to_file(output_path(f'{outfilebase}{outfilepname}{outfilesuffix}.sfc'))
 
-        multidata = zlib.compress(json.dumps({"names": parsed_names,
-                                              "roms": rom_names,
-                                              "remote_items": [player for player in range(1, world.players + 1) if world.remote_items[player]],
-                                              "locations": [((location.address, location.player), (location.item.code, location.item.player))
-                                                            for location in world.get_filled_locations() if type(location.address) is int]
-                                              }).encode("utf-8"))
-        if args.jsonout:
-            jsonout["multidata"] = list(multidata)
-        else:
-            with open(output_path('%s_multidata' % outfilebase), 'wb') as f:
-                f.write(multidata)
+        if world.players > 1:
+            multidata = zlib.compress(json.dumps({"names": parsed_names,
+                                                  "roms": rom_names,
+                                                  "remote_items": [player for player in range(1, world.players + 1) if world.remote_items[player]],
+                                                  "locations": [((location.address, location.player), (location.item.code, location.item.player))
+                                                                for location in world.get_filled_locations() if type(location.address) is int]
+                                                  }).encode("utf-8"))
+            if args.jsonout:
+                jsonout["multidata"] = list(multidata)
+            else:
+                with open(output_path('%s_multidata' % outfilebase), 'wb') as f:
+                    f.write(multidata)
 
     if args.create_spoiler and not args.jsonout:
         world.spoiler.to_file(output_path('%s_Spoiler.txt' % outfilebase))

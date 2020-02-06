@@ -12,7 +12,9 @@ from Utils import is_bundled, close_console
 from Fill import FillError
 
 def start():
-    args = parse_arguments(None)
+    argv = sys.argv
+    del argv[0]
+    args = parse_arguments(argv)
 
     if is_bundled() and len(sys.argv) == 1:
         # for the bundled builds, if we have no arguments, the user
@@ -21,7 +23,7 @@ def start():
         # default if they like all the defaults
         from Gui import guiMain
         close_console()
-        guiMain()
+        guiMain(argv)
         sys.exit(0)
 
     # ToDo: Validate files further than mere existance
@@ -32,7 +34,7 @@ def start():
 
     if args.gui:
         from Gui import guiMain
-        guiMain(args)
+        guiMain(argv)
     elif args.count is not None:
         seed = args.seed or random.randint(0, 999999999)
         failures = []

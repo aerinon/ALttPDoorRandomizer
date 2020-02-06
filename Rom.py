@@ -747,10 +747,10 @@ def patch_rom(world, rom, player, team, enemized):
                      difficulty.progressive_shield_limit, overflow_replacement,
                      difficulty.progressive_armor_limit, overflow_replacement,
                      difficulty.progressive_bottle_limit, overflow_replacement])
-    
+
     #Work around for json patch ordering issues - write bow limit separately so that it is replaced in the patch
     rom.write_bytes(0x180098, [difficulty.progressive_bow_limit, overflow_replacement])
-    
+
     if difficulty.progressive_bow_limit < 2 and world.swords == 'swordless':
         rom.write_bytes(0x180098, [2, overflow_replacement])
         rom.write_byte(0x180181, 0x01) # Make silver arrows work only on ganon
@@ -1272,8 +1272,9 @@ def patch_rom(world, rom, player, team, enemized):
     rom.write_bytes(0x7FC0, rom.name)
 
     # set player names
-    for p in range(1, min(world.players, 64) + 1):
-        rom.write_bytes(0x186380 + ((p - 1) * 32), hud_format_text(world.player_names[p][team]))
+    if world.players > 1:
+        for p in range(1, min(world.players, 64) + 1):
+            rom.write_bytes(0x186380 + ((p - 1) * 32), hud_format_text(world.player_names[p][team]))
 
     # Write title screen Code
     hashint = int(rom.get_hash(), 16)
@@ -2066,9 +2067,9 @@ def patch_shuffled_dark_sanc(world, rom, player):
     dark_sanc_entrance = str(world.get_region('Inverted Dark Sanctuary', player).entrances[0].name)
     room_id, ow_area, vram_loc, scroll_y, scroll_x, link_y, link_x, camera_y, camera_x, unknown_1, unknown_2, door_1, door_2 = door_addresses[dark_sanc_entrance][1]
     door_index = door_addresses[str(dark_sanc_entrance)][0]
-    
+
     rom.write_byte(0x180241, 0x01)
-    rom.write_byte(0x180248, door_index + 1) 
+    rom.write_byte(0x180248, door_index + 1)
     write_int16(rom, 0x180250, room_id)
     rom.write_byte(0x180252, ow_area)
     write_int16s(rom, 0x180253, [vram_loc, scroll_y, scroll_x, link_y, link_x, camera_y, camera_x])

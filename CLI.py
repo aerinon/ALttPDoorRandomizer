@@ -16,10 +16,13 @@ def parse_arguments(argv, no_defaults=False):
     def defval(value):
         return value if not no_defaults else None
 
+    working_dirs = get_working_dirs()
+
     # we need to know how many players we have first
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument('--multi', default=defval(1), type=lambda value: min(max(int(value), 1), 255))
+    parser.add_argument('--multi', default=defval(working_dirs["multi.worlds"]), type=lambda value: min(max(int(value), 1), 255))
     multiargs, _ = parser.parse_known_args(argv)
+    print(multiargs)
 
     parser = argparse.ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('--create_spoiler', help='Output a Spoiler File', action='store_true')
@@ -78,6 +81,8 @@ def parse_arguments(argv, no_defaults=False):
                              Hard:            A harder setting with less equipment and reduced health.
                              Expert:          A harder yet setting with minimum equipment and health.
                              ''')
+    parser.add_argument('--difficulty_requirements', default=defval('normal'), const='normal', nargs='?', choices=['normal', 'hard', 'expert'],
+                        help='')
     parser.add_argument('--item_functionality', default=defval('normal'), const='normal', nargs='?', choices=['normal', 'hard', 'expert'],
                              help='''\
                              Select limits on item functionality to increase difficulty. (default: %(default)s)
@@ -196,7 +201,7 @@ def parse_arguments(argv, no_defaults=False):
     parser.add_argument('--openpyramid', default=defval(False), help='''\
                             Pre-opens the pyramid hole, this removes the Agahnim 2 requirement for it
                              ''', action='store_true')
-    parser.add_argument('--rom', default=defval('Zelda no Densetsu - Kamigami no Triforce (Japan).sfc'), help='Path to an ALttP JAP(1.0) rom to use as a base.')
+    parser.add_argument('--rom', default=defval(working_dirs["rom.base"]), help='Path to an ALttP JAP(1.0) rom to use as a base.')
     parser.add_argument('--loglevel', default=defval('info'), const='info', nargs='?', choices=['error', 'info', 'warning', 'debug'], help='Select level of logging for output.')
     parser.add_argument('--seed', help='Define seed number to generate.', type=int)
     parser.add_argument('--count', help='''\
@@ -264,7 +269,7 @@ def parse_arguments(argv, no_defaults=False):
                             for VT site integration, do not use otherwise.
                             ''')
     parser.add_argument('--skip_playthrough', action='store_true', default=defval(False))
-    parser.add_argument('--enemizercli', default=defval('EnemizerCLI/EnemizerCLI.Core'))
+    parser.add_argument('--enemizercli', default=defval(working_dirs["enemizer.cli"]))
     parser.add_argument('--shufflebosses', default=defval('none'), choices=['none', 'basic', 'normal', 'chaos'])
     parser.add_argument('--shuffleenemies', default=defval('none'), choices=['none', 'shuffled', 'chaos'])
     parser.add_argument('--enemy_health', default=defval('default'), choices=['default', 'easy', 'normal', 'hard', 'expert'])
@@ -273,9 +278,9 @@ def parse_arguments(argv, no_defaults=False):
     parser.add_argument('--beemizer', default=defval(0), type=lambda value: min(max(int(value), 0), 4))
     parser.add_argument('--remote_items', default=defval(False), action='store_true')
     parser.add_argument('--multi', default=defval(1), type=lambda value: min(max(int(value), 1), 255))
-    parser.add_argument('--names', default=defval(''))
+    parser.add_argument('--names', default=defval(working_dirs["multi.names"]))
     parser.add_argument('--teams', default=defval(1), type=lambda value: max(int(value), 1))
-    parser.add_argument('--outputpath')
+    parser.add_argument('--outputpath', default=defval(working_dirs["outputpath"]))
     parser.add_argument('--race', default=defval(False), action='store_true')
     parser.add_argument('--outputname')
 
@@ -318,18 +323,18 @@ def parse_arguments(argv, no_defaults=False):
     if ret.keysanity:
         ret.mapshuffle, ret.compassshuffle, ret.keyshuffle, ret.bigkeyshuffle = [True] * 4
 
-    if argv and (not argv.gui) and multiargs.multi:
+    if multiargs.multi:
         defaults = copy.deepcopy(ret)
         for player in range(1, multiargs.multi + 1):
             playerargs = parse_arguments(shlex.split(getattr(ret,f"p{player}")), True)
 
             for name in ['logic', 'mode', 'swords', 'goal', 'difficulty', 'item_functionality',
-                         'shuffle', 'door_shuffle', 'crystals_ganon', 'crystals_gt', 'openpyramid',
+                         'shuffle', 'door_shuffle', 'crystals_ganon', 'crystals_gt', 'openpyramid', 'timer',
                          'mapshuffle', 'compassshuffle', 'keyshuffle', 'bigkeyshuffle', 'startinventory',
                          'retro', 'accessibility', 'hints', 'beemizer',
                          'shufflebosses', 'shuffleenemies', 'enemy_health', 'enemy_damage', 'shufflepots',
                          'ow_palettes', 'uw_palettes', 'sprite', 'disablemusic', 'quickswap', 'fastmenu', 'heartcolor', 'heartbeep',
-                         'remote_items']:
+                         'remote_items', 'progressive']:
                 value = getattr(defaults, name) if getattr(playerargs, name) is None else getattr(playerargs, name)
                 if player == 1:
                     setattr(ret, name, {1: value})
@@ -343,10 +348,16 @@ def get_working_dirs():
   working_dirs = {
       "adjust.rom":   os.path.join("."),
       "enemizer.cli": os.path.join(".","EnemizerCLI","EnemizerCLI.Core"),
+      "multi.worlds": 1,
       "multi.names":  "",
       "rom.base":     os.path.join(".","Zelda no Densetsu - Kamigami no Triforce (Japan).sfc"),
       "gen.seed":     "",
+      "gen.count":    1,
+      "outputpath":   os.path.join("."),
   }
+  if sys.platform.lower().find("windows"):
+      working_dirs["enemizer.cli"] += ".exe"
+
   # read saved working dirs file if it exists and set these
   working_dirs_path = os.path.join(".","resources","user","working_dirs.json")
   if os.path.exists(working_dirs_path):

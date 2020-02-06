@@ -23,6 +23,7 @@ from Rom import Sprite
 
 
 def guiMain(args=None):
+    print(args)
     def save_working_dirs():
         user_resources_path = os.path.join(".","resources","user")
         working_dirs_path = os.path.join(user_resources_path)
@@ -36,8 +37,7 @@ def guiMain(args=None):
         save_working_dirs()
         sys.exit(0)
 
-    if args is None:
-        args = parse_arguments(args)
+    args = parse_arguments(args)
 
     # make main window
     # add program title & version number

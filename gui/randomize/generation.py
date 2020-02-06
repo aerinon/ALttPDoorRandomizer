@@ -1,3 +1,4 @@
+import os
 from tkinter import ttk, filedialog, IntVar, StringVar, Button, Checkbutton, Entry, Frame, Label, E, W, LEFT, RIGHT, X
 
 def generation_page(parent,working_dirs):
@@ -27,7 +28,7 @@ def generation_page(parent,working_dirs):
     self.romVar.set(working_dirs["rom.base"])
 
     def RomSelect():
-        rom = filedialog.askopenfilename(filetypes=[("Rom Files", (".sfc", ".smc")), ("All Files", "*")])
+        rom = filedialog.askopenfilename(filetypes=[("Rom Files", (".sfc", ".smc")), ("All Files", "*")], initialdir=os.path.join("."))
         self.romVar.set(rom)
     romSelectButton = Button(baseRomFrame, text='Select Rom', command=RomSelect)
 

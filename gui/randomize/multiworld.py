@@ -7,7 +7,7 @@ def multiworld_page(parent,working_dirs):
     multiFrame = Frame(self)
     ## Number of Worlds
     worldLabel = Label(multiFrame, text='Worlds')
-    self.worldVar = StringVar()
+    self.worldVar = StringVar(value=working_dirs["multi.worlds"])
     worldSpinbox = Spinbox(multiFrame, from_=1, to=100, width=5, textvariable=self.worldVar)
     worldLabel.pack(side=LEFT)
     worldSpinbox.pack(side=LEFT)
