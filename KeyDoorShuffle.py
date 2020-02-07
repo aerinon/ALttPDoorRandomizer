@@ -470,7 +470,7 @@ def bk_restricted_rules(rule, door, odd_counter, empty_flag, key_counter, key_la
         return
     best_counter = find_best_counter(door, odd_counter, key_counter, key_layout, world, player, True, empty_flag)
     bk_rule = create_rule(best_counter, key_counter, key_layout, world, player)
-    if bk_rule.small_key_num >= rule.small_key_num:
+    if bk_rule.small_key_num >= rule.small_key_num and bk_rule.is_valid:
         return
     door_open = find_next_counter(door, best_counter, key_layout)
     ignored_doors = dict_intersection(best_counter.child_doors, door_open.child_doors)
@@ -482,11 +482,11 @@ def bk_restricted_rules(rule, door, odd_counter, empty_flag, key_counter, key_la
     post_counter = open_some_counter(door_open, key_layout, ignored_doors.keys())
     unique_loc = dict_difference(post_counter.free_locations, best_counter.free_locations)
     # todo: figure out the intention behind this change - better way to detect the big key is blocking needed key onlys?
-    if len(unique_loc) > 0:  # and bk_rule.is_valid
+    if len(unique_loc) > 0 and bk_rule.is_valid:
         rule.alternate_small_key = bk_rule.small_key_num
         rule.alternate_big_key_loc.update(unique_loc)
-    # elif not bk_rule.is_valid:
-    #     key_layout.key_logic.bk_restricted.update(unique_loc)
+    elif not bk_rule.is_valid:
+        key_layout.key_logic.bk_restricted.update(unique_loc)
 
 
 def open_a_door(door, child_state, flat_proposal):
