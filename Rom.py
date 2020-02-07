@@ -241,9 +241,9 @@ def patch_enemizer(world, player, rom, baserom_path, enemizercli, shufflepots, r
             'IcePalace': world.get_dungeon("Ice Palace", player).boss.enemizer_name,
             'MiseryMire': world.get_dungeon("Misery Mire", player).boss.enemizer_name,
             'TurtleRock': world.get_dungeon("Turtle Rock", player).boss.enemizer_name,
-            'GanonsTower1': world.get_dungeon('Ganons Tower', player).bosses['bottom'].enemizer_name,
-            'GanonsTower2': world.get_dungeon('Ganons Tower', player).bosses['middle'].enemizer_name,
-            'GanonsTower3': world.get_dungeon('Ganons Tower', player).bosses['top'].enemizer_name,
+            'GanonsTower1': [x for x in world.dungeons if x.player == player and 'bottom' in x.bosses.keys()][0].bosses['bottom'].enemizer_name,
+            'GanonsTower2': [x for x in world.dungeons if x.player == player and 'middle' in x.bosses.keys()][0].bosses['middle'].enemizer_name,
+            'GanonsTower3': [x for x in world.dungeons if x.player == player and 'top' in x.bosses.keys()][0].bosses['top'].enemizer_name,
             'GanonsTower4': 'Agahnim2',
             'Ganon': 'Ganon',
         }
@@ -612,10 +612,11 @@ def patch_rom(world, rom, player, team, enemized):
     for paired_door in world.paired_doors[player]:
         rom.write_bytes(paired_door.address_a(world, player), paired_door.rom_data_a(world, player))
         rom.write_bytes(paired_door.address_b(world, player), paired_door.rom_data_b(world, player))
-    for builder in world.dungeon_layouts[player].values():
-        if builder.pre_open_stonewall:
-            if builder.pre_open_stonewall.name == 'Desert Wall Slide NW':
-                dr_flags |= DROptions.Open_Desert_Wall
+    if world.doorShuffle[player] != 'vanilla':
+        for builder in world.dungeon_layouts[player].values():
+            if builder.pre_open_stonewall:
+                if builder.pre_open_stonewall.name == 'Desert Wall Slide NW':
+                    dr_flags |= DROptions.Open_Desert_Wall
     rom.write_byte(0x139006, dr_flags.value)
 
     # fix skull woods exit, if not fixed during exit patching
