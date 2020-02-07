@@ -951,6 +951,7 @@ def find_valid_combination(builder, start_regions, world, player, drop_keys=True
     reassign_key_doors(builder, proposal, world, player)
     log_key_logic(builder.name, key_layout.key_logic)
     world.key_logic[player][builder.name] = key_layout.key_logic
+    world.key_layout[player][builder.name] = key_layout
     return True
 
 
