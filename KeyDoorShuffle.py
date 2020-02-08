@@ -1238,7 +1238,7 @@ def val_rule(rule, skn, allow=False, loc=None, askn=None, setCheck=None):
 # Soft lock stuff
 def validate_key_placement(key_layout, world, player):
     if world.retro[player] or world.accessibility[player] == 'none':
-        return True # Can't keylock in retro.  Expected if beatable only.
+        return True  # Can't keylock in retro.  Expected if beatable only.
     max_counter = find_max_counter(key_layout)
     keys_outside = 0
     big_key_outside = False
@@ -1254,6 +1254,8 @@ def validate_key_placement(key_layout, world, player):
         if len(counter.child_doors) == 0:
             continue
         big_found = any(i.item == dungeon.big_key for i in counter.free_locations if "- Big Chest" not in i.name) or big_key_outside
+        if counter.big_key_opened and not big_found:
+            continue  # Can't get to this state
         found_locations = set(i for i in counter.free_locations if big_found or "- Big Chest" not in i.name)
         found_keys = sum(1 for i in found_locations if i.item is not None and i.item.name == smallkey_name and i.item.player == player) + \
                      len(counter.key_only_locations) + keys_outside
