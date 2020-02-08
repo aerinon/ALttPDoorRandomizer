@@ -244,7 +244,7 @@ def relative_empty_counter(odd_counter, key_counter):
 def unique_child_door(child, key_counter):
     if child in key_counter.child_doors or child.dest in key_counter.child_doors:
         return False
-    if child in key_counter.open_doors or child.dest in key_counter.child_doors:
+    if child in key_counter.open_doors or child.dest in key_counter.open_doors:
         return False
     if child.bigKey and key_counter.big_key_opened:
         return False
@@ -258,26 +258,18 @@ def find_best_counter(door, odd_counter, key_counter, key_layout, world, player,
     bk_opened = key_counter.big_key_opened
     # new_counter = key_counter
     last_counter = key_counter
-    while not finished:
-        door_set = find_potential_open_doors(last_counter, ignored_doors, key_layout, skip_bk)
-        if door_set is None or len(door_set) == 0:
-            finished = True
-            continue
-        for new_door in door_set:
-            proposed_doors = {**opened_doors, **dict.fromkeys([new_door, new_door.dest])}
-            bk_open = bk_opened or new_door.bigKey
-            new_counter = find_counter(proposed_doors, bk_open, key_layout)
-            bk_open = new_counter.big_key_opened
-            # this means the new_door invalidates the door / leads to the same stuff
-            if not empty_flag and relative_empty_counter(odd_counter, new_counter):
-                ignored_doors.add(new_door)
-            elif empty_flag or key_wasted(new_door, door, last_counter, new_counter, key_layout, world, player):
-                last_counter = new_counter
-                opened_doors = proposed_doors
-                bk_opened = bk_open
-            else:
-                ignored_doors.add(new_door)
-    return last_counter
+
+    def score(counter):
+        return (counter.used_keys - len(counter.key_only_locations), counter.used_keys)
+
+    best_counter = max((i for i in key_layout.key_counters.values() if door not in i.open_doors and
+                    set(i.open_doors.keys()).issuperset(set(key_counter.open_doors.keys())) and
+                    (empty_flag or not relative_empty_counter(odd_counter, i)) and
+                    (not skip_bk or bk_opened or not i.big_key_opened) and
+                    (skip_bk or i.big_key_opened or len(i.key_only_locations) + available_chest_small_keys(i, world, player) > i.used_keys)), 
+                    key=score, default=key_counter)
+
+    return best_counter
 
 
 def find_potential_open_doors(key_counter, ignored_doors, key_layout, skip_bk):
@@ -1264,8 +1256,8 @@ def validate_key_placement(key_layout, world, player):
         if not can_progress:
             missing_locations = set(max_counter.free_locations.keys()).difference(found_locations)
             missing_items = [l for l in missing_locations if l.item is None or (l.item.name != smallkey_name and l.item != dungeon.big_key) or "- Boss" in l.name]
-            #missing_key_only = set(max_counter.key_only_locations.keys()).difference(counter.key_only_locations.keys()) # do freestanding keys matter for locations?
-            if len(missing_items) > 0: #world.accessibility[player]=='locations' and (len(missing_locations)>0 or len(missing_key_only) > 0):
+            # missing_key_only = set(max_counter.key_only_locations.keys()).difference(counter.key_only_locations.keys()) # do freestanding keys matter for locations?
+            if len(missing_items) > 0: # world.accessibility[player]=='locations' and (len(missing_locations)>0 or len(missing_key_only) > 0):
                 logging.getLogger('').error("Keylock - can't open locations: ")
                 for i in missing_locations:
                     logging.getLogger('').error(i)
