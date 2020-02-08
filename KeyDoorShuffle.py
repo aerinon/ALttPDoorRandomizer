@@ -252,15 +252,10 @@ def unique_child_door(child, key_counter):
 
 
 def find_best_counter(door, odd_counter, key_counter, key_layout, world, player, skip_bk, empty_flag):  # try to waste as many keys as possible?
-    ignored_doors = {door, door.dest} if door is not None else {}
-    finished = False
-    opened_doors = dict(key_counter.open_doors)
     bk_opened = key_counter.big_key_opened
-    # new_counter = key_counter
-    last_counter = key_counter
 
     def score(counter):
-        return (counter.used_keys - len(counter.key_only_locations), counter.used_keys)
+        return (counter.used_keys - len(counter.key_only_locations), counter.used_keys, counter.big_key_opened)
 
     best_counter = max((i for i in key_layout.key_counters.values() if door not in i.open_doors and
                     set(i.open_doors.keys()).issuperset(set(key_counter.open_doors.keys())) and
