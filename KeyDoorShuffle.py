@@ -1227,6 +1227,7 @@ def validate_key_placement(key_layout, world, player):
     if world.retro[player] or world.accessibility[player] == 'none':
         return True  # Can't keylock in retro.  Expected if beatable only.
     max_counter = find_max_counter(key_layout)
+    original_key_counter = find_counter({}, False, key_layout)
     keys_outside = 0
     big_key_outside = False
     dungeon = world.get_dungeon(key_layout.sector.name, player)
@@ -1237,26 +1238,37 @@ def validate_key_placement(key_layout, world, player):
         max_counter = find_max_counter(key_layout)
         big_key_outside = dungeon.big_key not in (l.item for l in max_counter.free_locations)
 
-    for counter in key_layout.key_counters.values():
-        if len(counter.child_doors) == 0:
-            continue
-        big_found = any(i.item == dungeon.big_key for i in counter.free_locations if "- Big Chest" not in i.name) or big_key_outside
-        if counter.big_key_opened and not big_found:
-            continue  # Can't get to this state
-        found_locations = set(i for i in counter.free_locations if big_found or "- Big Chest" not in i.name)
-        found_keys = sum(1 for i in found_locations if i.item is not None and i.item.name == smallkey_name and i.item.player == player) + \
-                     len(counter.key_only_locations) + keys_outside
-        can_progress = (not counter.big_key_opened and big_found and any(d.bigKey for d in counter.child_doors)) or \
-                       found_keys > counter.used_keys and any(not d.bigKey for d in counter.child_doors)
-        if not can_progress:
-            missing_locations = set(max_counter.free_locations.keys()).difference(found_locations)
-            missing_items = [l for l in missing_locations if l.item is None or (l.item.name != smallkey_name and l.item != dungeon.big_key) or "- Boss" in l.name]
-            # missing_key_only = set(max_counter.key_only_locations.keys()).difference(counter.key_only_locations.keys()) # do freestanding keys matter for locations?
-            if len(missing_items) > 0: # world.accessibility[player]=='locations' and (len(missing_locations)>0 or len(missing_key_only) > 0):
-                logging.getLogger('').error("Keylock - can't open locations: ")
-                for i in missing_locations:
-                    logging.getLogger('').error(i)
-                return False
+    checked = False
+    while not checked:
+        for counter in key_layout.key_counters.values():
+            if len(counter.child_doors) == 0:
+                continue
+            big_found = any(i.item == dungeon.big_key for i in counter.free_locations if "- Big Chest" not in i.name) or big_key_outside
+            if counter.big_key_opened and not big_found:
+                continue  # Can't get to this state
+            found_locations = set(i for i in counter.free_locations if big_found or "- Big Chest" not in i.name)
+            found_keys = sum(1 for i in found_locations if i.item is not None and i.item.name == smallkey_name and i.item.player == player) + \
+                         len(counter.key_only_locations) + keys_outside
+            can_progress = (not counter.big_key_opened and big_found and any(d.bigKey for d in counter.child_doors)) or \
+                           found_keys > counter.used_keys and any(not d.bigKey for d in counter.child_doors)
+            if not can_progress:
+                missing_locations = set(max_counter.free_locations.keys()).difference(found_locations)
+                missing_keys = [l for l in missing_locations if l.item is not None and l.item.name == smallkey_name]
+                free_locations = [l for l in original_key_counter.free_locations if l.item is None and "- Big Chest" not in l.name]
+                missing_items = [l for l in missing_locations if l.item is None or (l.item.name != smallkey_name and l.item != dungeon.big_key) or "- Boss" in l.name]
+                # missing_key_only = set(max_counter.key_only_locations.keys()).difference(counter.key_only_locations.keys()) # do freestanding keys matter for locations?
+                if len(missing_items) > 0:  # world.accessibility[player]=='locations' and (len(missing_locations)>0 or len(missing_key_only) > 0):
+                    if len(missing_keys) > 0 and len(free_locations) > 0:
+                        # Try to recover by moving a key
+                        logging.getLogger('').warning("Found a keylock in %s: trying to recover" % key_layout.sector.name)
+                        missing_keys[0].item, free_locations[0].item = free_locations[0].item, missing_keys[0].item
+                        break
+                    logging.getLogger('').error("Keylock - can't open locations: ")
+                    for i in missing_locations:
+                        logging.getLogger('').error(i)
+                    return False
+        else:
+            checked = True
 
     return True
 
