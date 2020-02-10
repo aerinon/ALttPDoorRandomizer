@@ -1588,6 +1588,27 @@ def write_strings(rom, world, player, team):
             hint = dest.pedestal_hint_text if dest.pedestal_hint_text else "unknown item"
         else:
             hint = dest.hint_text if dest.hint_text else "something"
+
+        # Corrections to the location of the chest in cross doorshuffle.
+        if world.doorShuffle[player] in ['crossed'] and not ped_hint:
+            if dest.name in ['Eastern Palace - Boss', 'Desert Palace - Boss', 'Tower of Hera - Boss', 'Skull Woods - Boss', 'Turtle Rock - Boss',
+                             "Thieves' Town - Boss", 'Palace of Darkness - Boss', 'Misery Mire - Boss' 'Swamp Palace - Boss', 'Ice Palace - Boss']:
+                pass
+            else:
+                if hasattr(dest, "parent_region"):
+                    if hasattr(dest.parent_region.dungeon, "name"):
+                        hint = f"in {dest.parent_region.dungeon.name}"
+                elif hasattr(dest, "location"):
+                    if hasattr(dest.location.parent_region, "name"):
+                        if  hasattr(dest.location.parent_region.dungeon, "name"):
+                            hint += f"in {dest.location.parent_region.dungeon.name}"
+                if hint == 'in Thieves Town':
+                    hint = "in Thieves' Town"
+                elif hint == 'in Ganons Tower':
+                    hint = "in Ganon's Tower"
+                elif hint == 'in Agahnims Tower':
+                    hint = "in Castle Tower"
+
         if dest.player != player:
             if ped_hint:
                 hint += f" for {world.player_names[dest.player][team]}!"
@@ -1675,55 +1696,58 @@ def write_strings(rom, world, player, team):
                     break
 
         # Next we write a few hints for specific inconvenient locations. We don't make many because in entrance this is highly unpredictable.
-        locations_to_hint = InconvenientLocations.copy()
-        if world.shuffle[player] in ['vanilla', 'dungeonssimple', 'dungeonsfull']:
-            locations_to_hint.extend(InconvenientVanillaLocations)
-        random.shuffle(locations_to_hint)
-        hint_count = 3 if world.shuffle[player] not in ['vanilla', 'dungeonssimple', 'dungeonsfull'] else 5
-        del locations_to_hint[hint_count:]
-        for location in locations_to_hint:
-            if location == 'Swamp Left':
-                if random.randint(0, 1) == 0:
-                    first_item = hint_text(world.get_location('Swamp Palace - West Chest', player).item)
-                    second_item = hint_text(world.get_location('Swamp Palace - Big Key Chest', player).item)
+        if world.doorShuffle[player] in ['crossed']:  # Skipped for cross doorshuffle.
+            pass
+        else:
+            locations_to_hint = InconvenientLocations.copy()
+            if world.shuffle[player] in ['vanilla', 'dungeonssimple', 'dungeonsfull']:
+                locations_to_hint.extend(InconvenientVanillaLocations)
+            random.shuffle(locations_to_hint)
+            hint_count = 3 if world.shuffle[player] not in ['vanilla', 'dungeonssimple', 'dungeonsfull'] else 5
+            del locations_to_hint[hint_count:]
+            for location in locations_to_hint:
+                if location == 'Swamp Left':
+                    if random.randint(0, 1) == 0:
+                        first_item = hint_text(world.get_location('Swamp Palace - West Chest', player).item)
+                        second_item = hint_text(world.get_location('Swamp Palace - Big Key Chest', player).item)
+                    else:
+                        second_item = hint_text(world.get_location('Swamp Palace - West Chest', player).item)
+                        first_item = hint_text(world.get_location('Swamp Palace - Big Key Chest', player).item)
+                    this_hint = ('The westmost chests in Swamp Palace contain ' + first_item + ' and ' + second_item + '.')
+                    tt[hint_locations.pop(0)] = this_hint
+                elif location == 'Mire Left':
+                    if random.randint(0, 1) == 0:
+                        first_item = hint_text(world.get_location('Misery Mire - Compass Chest', player).item)
+                        second_item = hint_text(world.get_location('Misery Mire - Big Key Chest', player).item)
+                    else:
+                        second_item = hint_text(world.get_location('Misery Mire - Compass Chest', player).item)
+                        first_item = hint_text(world.get_location('Misery Mire - Big Key Chest', player).item)
+                    this_hint = ('The westmost chests in Misery Mire contain ' + first_item + ' and ' + second_item + '.')
+                    tt[hint_locations.pop(0)] = this_hint
+                elif location == 'Tower of Hera - Big Key Chest':
+                    this_hint = 'Waiting in the Tower of Hera basement leads to ' + hint_text(world.get_location(location, player).item) + '.'
+                    tt[hint_locations.pop(0)] = this_hint
+                elif location == 'Ganons Tower - Big Chest':
+                    this_hint = 'The big chest in Ganon\'s Tower contains ' + hint_text(world.get_location(location, player).item) + '.'
+                    tt[hint_locations.pop(0)] = this_hint
+                elif location == 'Thieves\' Town - Big Chest':
+                    this_hint = 'The big chest in Thieves\' Town contains ' + hint_text(world.get_location(location, player).item) + '.'
+                    tt[hint_locations.pop(0)] = this_hint
+                elif location == 'Ice Palace - Big Chest':
+                    this_hint = 'The big chest in Ice Palace contains ' + hint_text(world.get_location(location, player).item) + '.'
+                    tt[hint_locations.pop(0)] = this_hint
+                elif location == 'Eastern Palace - Big Key Chest':
+                    this_hint = 'The antifairy guarded chest in Eastern Palace contains ' + hint_text(world.get_location(location, player).item) + '.'
+                    tt[hint_locations.pop(0)] = this_hint
+                elif location == 'Sahasrahla':
+                    this_hint = 'Sahasrahla seeks a green pendant for ' + hint_text(world.get_location(location, player).item) + '.'
+                    tt[hint_locations.pop(0)] = this_hint
+                elif location == 'Graveyard Cave':
+                    this_hint = 'The cave north of the graveyard contains ' + hint_text(world.get_location(location, player).item) + '.'
+                    tt[hint_locations.pop(0)] = this_hint
                 else:
-                    second_item = hint_text(world.get_location('Swamp Palace - West Chest', player).item)
-                    first_item = hint_text(world.get_location('Swamp Palace - Big Key Chest', player).item)
-                this_hint = ('The westmost chests in Swamp Palace contain ' + first_item + ' and ' + second_item + '.')
-                tt[hint_locations.pop(0)] = this_hint
-            elif location == 'Mire Left':
-                if random.randint(0, 1) == 0:
-                    first_item = hint_text(world.get_location('Misery Mire - Compass Chest', player).item)
-                    second_item = hint_text(world.get_location('Misery Mire - Big Key Chest', player).item)
-                else:
-                    second_item = hint_text(world.get_location('Misery Mire - Compass Chest', player).item)
-                    first_item = hint_text(world.get_location('Misery Mire - Big Key Chest', player).item)
-                this_hint = ('The westmost chests in Misery Mire contain ' + first_item + ' and ' + second_item + '.')
-                tt[hint_locations.pop(0)] = this_hint
-            elif location == 'Tower of Hera - Big Key Chest':
-                this_hint = 'Waiting in the Tower of Hera basement leads to ' + hint_text(world.get_location(location, player).item) + '.'
-                tt[hint_locations.pop(0)] = this_hint
-            elif location == 'Ganons Tower - Big Chest':
-                this_hint = 'The big chest in Ganon\'s Tower contains ' + hint_text(world.get_location(location, player).item) + '.'
-                tt[hint_locations.pop(0)] = this_hint
-            elif location == 'Thieves\' Town - Big Chest':
-                this_hint = 'The big chest in Thieves\' Town contains ' + hint_text(world.get_location(location, player).item) + '.'
-                tt[hint_locations.pop(0)] = this_hint
-            elif location == 'Ice Palace - Big Chest':
-                this_hint = 'The big chest in Ice Palace contains ' + hint_text(world.get_location(location, player).item) + '.'
-                tt[hint_locations.pop(0)] = this_hint
-            elif location == 'Eastern Palace - Big Key Chest':
-                this_hint = 'The antifairy guarded chest in Eastern Palace contains ' + hint_text(world.get_location(location, player).item) + '.'
-                tt[hint_locations.pop(0)] = this_hint
-            elif location == 'Sahasrahla':
-                this_hint = 'Sahasrahla seeks a green pendant for ' + hint_text(world.get_location(location, player).item) + '.'
-                tt[hint_locations.pop(0)] = this_hint
-            elif location == 'Graveyard Cave':
-                this_hint = 'The cave north of the graveyard contains ' + hint_text(world.get_location(location, player).item) + '.'
-                tt[hint_locations.pop(0)] = this_hint
-            else:
-                this_hint = location + ' contains ' + hint_text(world.get_location(location, player).item) + '.'
-                tt[hint_locations.pop(0)] = this_hint
+                    this_hint = location + ' contains ' + hint_text(world.get_location(location, player).item) + '.'
+                    tt[hint_locations.pop(0)] = this_hint
 
         # Lastly we write hints to show where certain interesting items are. It is done the way it is to re-use the silver code and also to give one hint per each type of item regardless of how many exist. This supports many settings well.
         items_to_hint = RelevantItems.copy()
@@ -1733,6 +1757,8 @@ def write_strings(rom, world, player, team):
             items_to_hint.extend(BigKeys)
         random.shuffle(items_to_hint)
         hint_count = 5 if world.shuffle[player] not in ['vanilla', 'dungeonssimple', 'dungeonsfull'] else 8
+        if world.doorShuffle[player] in ['crossed']:
+            hint_count += 3
         while hint_count > 0:
             this_item = items_to_hint.pop(0)
             this_location = world.find_items_not_key_only(this_item, player)
@@ -1746,7 +1772,7 @@ def write_strings(rom, world, player, team):
                 tt[hint_locations.pop(0)] = this_hint
                 hint_count -= 1
 
-        # Adding a hint for the Thieves' Town Attic location in Crossed Doorshufle.
+        # Adding a hint for the Thieves' Town Attic location in cross doorshuffle.
         if world.doorShuffle[player] in ['crossed']:
             attic_hint = world.get_location("Thieves' Town - Attic", player).parent_region.dungeon.name
             this_hint = 'A cracked floor can be found in ' + attic_hint + '.'
