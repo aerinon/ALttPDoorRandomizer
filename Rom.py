@@ -1591,8 +1591,7 @@ def write_strings(rom, world, player, team):
 
         # Corrections to the location of the chest in cross doorshuffle.
         if world.doorShuffle[player] in ['crossed'] and not ped_hint:
-            if dest.name in ['Eastern Palace - Boss', 'Desert Palace - Boss', 'Tower of Hera - Boss', 'Skull Woods - Boss', 'Turtle Rock - Boss',
-                             "Thieves' Town - Boss", 'Palace of Darkness - Boss', 'Misery Mire - Boss' 'Swamp Palace - Boss', 'Ice Palace - Boss']:
+            if dest.name.endswith('Boss'):
                 pass
             else:
                 if hasattr(dest, "parent_region"):
