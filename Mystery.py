@@ -85,7 +85,6 @@ def main():
         erargs.enemizercli = args.enemizercli
 
     settings_cache = {k: (roll_settings(v) if args.samesettings else None) for k, v in weights_cache.items()}
-
     for player in range(1, args.multi + 1):
         path = getattr(args, f'p{player}') if getattr(args, f'p{player}') else args.weights
         if path:
@@ -104,9 +103,8 @@ def main():
 
 def get_weights(path):
     try:
-        if urllib.parse.urlparse(path).scheme:
-            yaml = str(urllib.request.urlopen(path).read(), "utf-8")
-        else:
+        parsed_url = urllib.parse.urlparse(path)
+        if all(parsed_url.scheme, parsed_url.netloc, parsed_url.path):
             with open(path, 'rb') as f:
                 yaml = str(f.read(), "utf-8")
     except Exception as e:
@@ -128,10 +126,10 @@ def roll_settings(weights):
     ret = argparse.Namespace()
 
     glitches_required = get_choice('glitches_required')
-    if glitches_required not in ['none', 'no_logic']:
-        print("Only NMG and No Logic supported")
+    if glitches_required not in ['none', 'no_logic', 'overworld_glitches']:
+        print("Only NMG, OWG and No Logic supported")
         glitches_required = 'none'
-    ret.logic = {'none': 'noglitches', 'no_logic': 'nologic'}[glitches_required]
+    ret.logic = {'none': 'noglitches', 'no_logic': 'nologic', 'overworld_glitches': 'owglitches'}[glitches_required]
 
     item_placement = get_choice('item_placement')
     # not supported in ER
