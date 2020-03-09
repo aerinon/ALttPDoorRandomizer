@@ -44,6 +44,7 @@
       "options": {
         "No Glitches": "noglitches",
         "Minor Glitches": "minorglitches",
+        "Overworld Glitches": "owglitches",
         "No Logic": "nologic"
       }
     },
