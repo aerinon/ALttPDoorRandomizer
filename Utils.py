@@ -3,6 +3,7 @@ import os
 import re
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 
 def int16_as_bytes(value):
     value = value & 0xFFFF
@@ -239,6 +240,46 @@ def print_wiki_doors(d_regions, world, player):
                     strs_to_print.append(ext.name)
                 print('| '+' <br /> '.join(strs_to_print))
         print('|}')
+
+
+def print_xml_doors(d_regions, world, player):
+    root = ET.Element('root')
+    for d, region_list in d_regions.items():
+        tile_map = {}
+        for region in region_list:
+            tile = None
+            r = world.get_region(region, player)
+            for ext in r.exits:
+                door = world.check_for_door(ext.name, player)
+                if door is not None and door.roomIndex != -1:
+                    tile = door.roomIndex
+                    break
+            if tile is not None:
+                if tile not in tile_map:
+                    tile_map[tile] = []
+                tile_map[tile].append(r)
+        dungeon = ET.SubElement(root, 'dungeon', {'name': d})
+        for tile, r_list in tile_map.items():
+            supertile = ET.SubElement(dungeon, 'supertile', {'id': str(tile)})
+            for region in r_list:
+                room = ET.SubElement(supertile, 'room', {'name': region.name})
+                for ext in region.exits:
+                    ET.SubElement(room, 'door', {'name': ext.name})
+    ET.dump(root)
+
+
+def print_graph(world):
+    root = ET.Element('root')
+    for region in world.regions:
+        r = ET.SubElement(root, 'region', {'name': region.name})
+        for ext in region.exits:
+            attribs = {'name': ext.name}
+            if ext.connected_region:
+                attribs['connected_region'] = ext.connected_region.name
+            if ext.door and ext.door.dest:
+                attribs['dest'] = ext.door.dest.name
+            ET.SubElement(r, 'exit', attribs)
+    ET.dump(root)
 
 
 if __name__ == '__main__':

@@ -76,7 +76,8 @@ LoadRoomHorz:
 	sty $06 : sta $07 : lda $a0 : pha ; Store normal room on stack
 	lda $07 : jsr LookupNewRoom ; New room is in A, Room Data is in $00
 	lda $01 : and.b #$80 : cmp #$80 : bne .gtg
-	jsr HorzEdge : pla : bcs .end
+	; jsr HorzEdge : pla : bcs .end
+	pla
 	sta $a0 : bra .end ; Restore normal room, abort (straight staircases and open edges can get in this routine)
 
 	.gtg ;Good to Go!
@@ -106,7 +107,8 @@ LoadRoomVert:
 	sty $06 : sta $07 : lda $a0 : pha ; Store normal room on stack
 	lda $07 : jsr LookupNewRoom ; New room is in A, Room Data is in $00
 	lda $01 : and.b #$80 : cmp #$80 : bne .gtg
-	jsr VertEdge : pla : bcs .end
+	; jsr VertEdge : pla : bcs .end
+	pla
 	sta $a0 : bra .end ; Restore normal room, abort (straight staircases and open edges can get in this routine)
 	.gtg ;Good to Go!
 	pla ; Throw away normal room (don't fill up the stack)

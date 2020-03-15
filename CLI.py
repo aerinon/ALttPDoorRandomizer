@@ -360,7 +360,7 @@ def get_settings():
         "bigkeyshuffle": False,
         "keysanity": False,
         "door_shuffle": "basic",
-        "experimental": 0,
+        "experimental": False,
         "dungeon_counters": "default",
 
         "multi": 1,

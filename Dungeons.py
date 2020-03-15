@@ -132,7 +132,6 @@ def fill_dungeons_restrictive(world, shuffled_locations):
     # with shuffled dungeon items they are distributed as part of the normal item pool
     for item in world.get_items():
         if (item.smallkey and world.keyshuffle[item.player]) or (item.bigkey and world.bigkeyshuffle[item.player]):
-            all_state_base.collect(item, True)
             item.advancement = True
         elif (item.map and world.mapshuffle[item.player]) or (item.compass and world.compassshuffle[item.player]):
             item.priority = True
@@ -146,7 +145,8 @@ def fill_dungeons_restrictive(world, shuffled_locations):
     sort_order = {"BigKey": 3, "SmallKey": 2}
     dungeon_items.sort(key=lambda item: sort_order.get(item.type, 1))
 
-    fill_restrictive(world, all_state_base, shuffled_locations, dungeon_items, True)
+    fill_restrictive(world, all_state_base, shuffled_locations, dungeon_items,
+                     keys_in_itempool={player: not world.keyshuffle[player] for player in range(1, world.players+1)}, single_player_placement=True)
 
 
 dungeon_music_addresses = {'Eastern Palace - Prize': [0x1559A],

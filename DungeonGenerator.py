@@ -836,6 +836,8 @@ class ExplorationState(object):
     def add_all_doors_check_keys(self, region, key_door_proposal, world, player):
         for door in get_doors(world, region, player):
             if self.can_traverse(door):
+                if door.controller:
+                    door = door.controller
                 if door in key_door_proposal and door not in self.opened_doors:
                     if not self.in_door_list(door, self.small_doors):
                         self.append_door_to_list(door, self.small_doors)

@@ -161,7 +161,7 @@ def distribute_items_staleness(world):
     logging.getLogger('').debug('Unplaced items: %s - Unfilled Locations: %s', [item.name for item in itempool], [location.name for location in fill_locations])
 
 
-def fill_restrictive(world, base_state, locations, itempool, single_player_placement = False):
+def fill_restrictive(world, base_state, locations, itempool, keys_in_itempool = None, single_player_placement = False):
     def sweep_from_pool():
         new_state = base_state.copy()
         for item in itempool:
@@ -202,7 +202,7 @@ def fill_restrictive(world, base_state, locations, itempool, single_player_place
                         test_state = maximum_exploration_state
                     if (not single_player_placement or location.player == item_to_place.player)\
                             and location.can_fill(test_state, item_to_place, perform_access_check)\
-                            and valid_key_placement(item_to_place, location, itempool, world):
+                            and valid_key_placement(item_to_place, location, itempool if (keys_in_itempool and keys_in_itempool[item_to_place.player]) else world.itempool, world):
                         spot_to_fill = location
                         break
                     elif item_to_place.smallkey or item_to_place.bigkey:
@@ -233,7 +233,7 @@ def valid_key_placement(item, location, itempool, world):
         if dungeon.name not in item.name and (dungeon.name != 'Hyrule Castle' or 'Escape' not in item.name):
             return True
         key_logic = world.key_logic[item.player][dungeon.name]
-        unplaced_keys = len([x for x in itempool+world.itempool if x.name == key_logic.small_key_name and x.player == item.player])
+        unplaced_keys = len([x for x in itempool if x.name == key_logic.small_key_name and x.player == item.player])
         return key_logic.check_placement(unplaced_keys)
     else:
         inside_dungeon_item = ((item.smallkey and not world.keyshuffle[item.player])
@@ -290,7 +290,8 @@ def distribute_items_restrictive(world, gftower_trash=False, fill_locations=None
     # todo: crossed
     progitempool.sort(key=lambda item: 1 if item.name == 'Small Key (Escape)' and world.keyshuffle[item.player] and world.mode[item.player] == 'standard' else 0)
 
-    fill_restrictive(world, world.state, fill_locations, progitempool)
+    fill_restrictive(world, world.state, fill_locations, progitempool,
+                     keys_in_itempool={player: world.keyshuffle[player] for player in range(1, world.players+1)})
 
     random.shuffle(fill_locations)
 

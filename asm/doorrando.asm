@@ -19,8 +19,8 @@ incsrc spiral.asm
 incsrc gfx.asm
 incsrc keydoors.asm
 incsrc overrides.asm
-incsrc edges.asm
-incsrc math.asm
+;incsrc edges.asm
+;incsrc math.asm
 warnpc $279000
 
 ; Data Section

@@ -666,8 +666,8 @@ def create_doors(world, player):
         create_door(player, 'Ice Freezors Bomb Hole', Hole), # combine these two? -- they have to lead to the same spot
         create_door(player, 'Ice Freezors Ledge Hole', Hole),
         create_door(player, 'Ice Freezors Ledge ES', Intr).dir(Ea, 0x7e, Bot, High).pos(2),
-        create_door(player, 'Ice Tall Hint WS', Intr).dir(We, 0x7e, Bot, High).pos(2),
-        create_door(player, 'Ice Tall Hint EN', Nrml).dir(Ea, 0x7e, Top, High).pos(1),
+        create_door(player, 'Ice Tall Hint WS', Intr).dir(We, 0x7e, Bot, High).pos(1),
+        create_door(player, 'Ice Tall Hint EN', Nrml).dir(Ea, 0x7e, Top, High).pos(2),
         create_door(player, 'Ice Tall Hint SE', Nrml).dir(So, 0x7e, Right, High).small_key().pos(0),
         create_door(player, 'Ice Hookshot Ledge WN', Nrml).dir(We, 0x7f, Top, High).no_exit().trap(0x4).pos(0).kill(),
         create_door(player, 'Ice Hookshot Ledge Path', Lgcl),
