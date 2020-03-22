@@ -1050,8 +1050,9 @@ def log_key_logic(d_name, key_logic):
             logger.debug('*Rule for %s:', rule.door_reference)
             if rule.bk_conditional_set:
                 logger.debug('**BK Checks %s', ','.join([x.name for x in rule.bk_conditional_set]))
-                logger.debug('**BK Blocked By Door (%s) : %s', rule.needed_keys_wo_bk, ','.join([x.name for x in rule.check_locations_wo_bk]))
-            logger.debug('**BK Elsewhere (%s) : %s', rule.needed_keys_w_bk, ','.join([x.name for x in rule.check_locations_w_bk]))
+                logger.debug('**BK Blocked (%s) : %s', rule.needed_keys_wo_bk, ','.join([x.name for x in rule.check_locations_wo_bk]))
+            if rule.needed_keys_w_bk:
+                logger.debug('**BK Available (%s) : %s', rule.needed_keys_w_bk, ','.join([x.name for x in rule.check_locations_w_bk]))
 
 
 def build_pair_list(flat_list):
@@ -1579,10 +1580,12 @@ logical_connections = [
     ('Ice Big Chest Landing Push Blocks', 'Ice Big Chest View'),
     ('Mire Lobby Gap', 'Mire Post-Gap'),
     ('Mire Post-Gap Gap', 'Mire Lobby'),
-    ('Mire Hub Upper Blue Barrier', 'Mire Hub Top'),
+    ('Mire Hub Upper Blue Barrier', 'Mire Hub Switch'),
     ('Mire Hub Lower Blue Barrier', 'Mire Hub Right'),
     ('Mire Hub Right Blue Barrier', 'Mire Hub'),
-    ('Mire Hub Top Blue Barrier', 'Mire Hub'),
+    ('Mire Hub Top Blue Barrier', 'Mire Hub Switch'),
+    ('Mire Hub Switch Blue Barrier N', 'Mire Hub Top'),
+    ('Mire Hub Switch Blue Barrier S', 'Mire Hub'),
     ('Mire Map Spike Side Drop Down', 'Mire Lone Shooter'),
     ('Mire Map Spike Side Blue Barrier', 'Mire Crystal Dead End'),
     ('Mire Map Spot Blue Barrier', 'Mire Crystal Dead End'),

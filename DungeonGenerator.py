@@ -734,7 +734,7 @@ class ExplorationState(object):
                         self.key_locations += 1
                     if location.name not in dungeon_events and '- Prize' not in location.name and location.name not in ['Agahnim 1', 'Agahnim 2']:
                         self.ttl_locations += 1
-                if location not in self.found_locations:
+                if location not in self.found_locations:  # todo: special logic for TT Boss?
                     self.found_locations.append(location)
                     if not bk_Flag:
                         self.bk_found.add(location)
