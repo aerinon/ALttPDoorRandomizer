@@ -176,7 +176,8 @@ def get_invalid_bunny_revival_dungeons():
     Dungeon regions that can't be bunny revived from.
     '''
     return [
-        'Tower of Hera (Bottom)',
-        'Swamp Palace (Entrance)',
-        'Turtle Rock (Entrance)',
+        'Hera Lobby',
+        'Swamp Lobby',
+        'TR Main Lobby',
+        'Skull Pot Circle',
         ]
