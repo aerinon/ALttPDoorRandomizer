@@ -24,6 +24,8 @@ from Fill import distribute_items_cutoff, distribute_items_staleness, distribute
 from ItemList import generate_itempool, difficulties, fill_prizes
 from Utils import output_path, parse_player_names
 
+import Mapper
+
 __version__ = '0.0.21dev'
 
 
@@ -157,6 +159,8 @@ def main(args, seed=None, fish=None):
                     player
                   )
                 )
+        Mapper.map(world)
+
 
     logger.info(world.fish.translate("cli","cli","fill.world"))
 

@@ -185,6 +185,9 @@ oppositemap = {
 def switch_dir(direction):
     return oppositemap[direction]
 
+def switch_dir_safe(direction):
+    return oppositemap.get(direction)
+
 
 def convert_key_doors(key_doors, world, player):
     result = []
