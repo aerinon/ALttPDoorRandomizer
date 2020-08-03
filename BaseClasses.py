@@ -1773,7 +1773,7 @@ class Spoiler(object):
                 # locations: Change up location names; in the instance of a location with multiple sections, it'll try to translate the room name
                 # items: Item names
                 outfile.write('\n\nUnreachable Items:\n\n')
-                outfile.write('\n'.join(['%s: %s' % (self.world.fish.translate("meta","items",unreachable.item), self.world.fish.translate("meta","locations",unreachable)) for unreachable in self.unreachables]))
+                outfile.write('\n'.join(['%s: %s' % (self.world.fish.translate("meta","items",unreachable.item.name), self.world.fish.translate("meta","locations",unreachable.name)) for unreachable in self.unreachables]))
 
             # rooms: Change up room names; only if it's got no locations in it
             # entrances: To/From overworld; Checking w/ & w/out "Exit" and translating accordingly

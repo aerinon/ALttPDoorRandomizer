@@ -924,6 +924,14 @@ def count_key_only_locations(state):
     return cnt
 
 
+def count_small_key_only_locations(state):
+    cnt = 0
+    for loc in state.found_locations:
+        if loc.name in key_only_locations and loc.name != 'Hyrule Castle - Big Key Drop':
+            cnt += 1
+    return cnt
+
+
 def big_chest_in_locations(locations):
     return len(find_big_chest_locations(locations)) > 0
 
@@ -1169,8 +1177,8 @@ def validate_key_layout_sub_loop(key_layout, state, checked_states, flat_proposa
         return True   # I think that's the end
     # todo: fix state to separate out these types
     ttl_locations = count_free_locations(state) if state.big_key_opened else count_locations_exclude_big_chest(state)
-    ttl_key_only = count_key_only_locations(state)
-    available_small_locations = cnt_avail_small_locations(ttl_locations, ttl_key_only, state, world, player)
+    ttl_small_key_only = count_small_key_only_locations(state)
+    available_small_locations = cnt_avail_small_locations(ttl_locations, ttl_small_key_only, state, world, player)
     available_big_locations = cnt_avail_big_locations(ttl_locations, state, world, player)
     if invalid_self_locking_key(key_layout, state, prev_state, prev_avail, world, player):
         return False
@@ -1184,7 +1192,7 @@ def validate_key_layout_sub_loop(key_layout, state, checked_states, flat_proposa
                 state_copy = state.copy()
                 open_a_door(exp_door.door, state_copy, flat_proposal)
                 state_copy.used_smalls += 1
-                if state_copy.used_smalls > ttl_key_only:
+                if state_copy.used_smalls > ttl_small_key_only:
                     state_copy.used_locations += 1
                 code = state_id(state_copy, flat_proposal)
                 if code not in checked_states.keys():
@@ -1260,7 +1268,10 @@ def create_key_counters(key_layout, world, player):
     key_counters = {}
     flat_proposal = key_layout.flat_prop
     state = ExplorationState(dungeon=key_layout.sector.name)
-    state.key_locations = len(world.get_dungeon(key_layout.sector.name, player).small_keys)
+    if world.doorShuffle[player] == 'vanilla':
+        state.key_locations = len(world.get_dungeon(key_layout.sector.name, player).small_keys)
+    else:
+        state.key_locations = world.dungeon_layouts[player][key_layout.sector.name].key_doors_num
     state.big_key_special = world.get_region('Hyrule Dungeon Cellblock', player) in key_layout.sector.regions
     for region in key_layout.start_regions:
         state.visit_region(region, key_checks=True)
@@ -1604,7 +1615,7 @@ def validate_key_placement(key_layout, world, player):
     for code, counter in key_layout.key_counters.items():
         if len(counter.child_doors) == 0:
             continue
-        big_found = any(i.item == dungeon.big_key for i in counter.free_locations if "- Big Chest" not in i.name) or big_key_outside
+        big_found = any((i.item is not None and i.item == dungeon.big_key) or i.name == 'Hyrule Castle - Big Key Drop' for i in counter.free_locations if "- Big Chest" not in i.name) or big_key_outside
         if counter.big_key_opened and not big_found:
             continue  # Can't get to this state
         found_locations = set(i for i in counter.free_locations if big_found or "- Big Chest" not in i.name)

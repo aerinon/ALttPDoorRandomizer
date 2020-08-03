@@ -940,7 +940,9 @@ def find_small_key_door_candidates(builder, start_regions, world, player):
     checked_doors = set()
     for region in start_regions:
         possible, checked = find_key_door_candidates(region, checked_doors, world, player)
-        candidates.extend(possible)
+        for candidate in possible:
+            if candidate not in candidates:
+                candidates.append(candidate)
         checked_doors.update(checked)
     flat_candidates = []
     for candidate in candidates:
@@ -1182,8 +1184,8 @@ def reassign_key_doors(builder, world, player):
                         dp.pair = False
                 if not found:
                     world.paired_doors[player].append(PairedDoor(d1.name, d2.name))
-                    change_door_to_small_key(d1, world, player)
-                    change_door_to_small_key(d2, world, player)
+                change_door_to_small_key(d1, world, player)
+                change_door_to_small_key(d2, world, player)
             world.spoiler.set_door_type(d1.name+' <-> '+d2.name, 'Key Door', player)
             logger.debug('Key Door: %s', d1.name+' <-> '+d2.name)
         else:
