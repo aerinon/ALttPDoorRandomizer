@@ -316,7 +316,7 @@ def create_dungeon_regions(world, player):
         create_dungeon_region(player, 'Hera Beetles', 'Tower of Hera', None, ['Hera Beetles Down Stairs', 'Hera Beetles WS', 'Hera Beetles Holes']),
         create_dungeon_region(player, 'Hera Startile Corner', 'Tower of Hera', None, ['Hera Startile Corner ES', 'Hera Startile Corner NW', 'Hera Startile Corner Holes']),
         create_dungeon_region(player, 'Hera Startile Wide', 'Tower of Hera', None, ['Hera Startile Wide SW', 'Hera Startile Wide Up Stairs', 'Hera Startile Wide Holes']),
-        create_dungeon_region(player, 'Hera 4F', 'Tower of Hera', ['Tower of Hera - Compass Chest'], ['Hera 4F Down Stairs', 'Hera 4F Up Stairs', 'Hera 4F Holes']),
+        create_dungeon_region(player, 'Hera 4F', 'Tower of Hera', ['Tower of Hera - Compass Chest'], ['Hera 4F Down Stairs', 'Hera 4F Up Stairs', 'Hera Big Chest Hook Path', 'Hera 4F Holes']),
         create_dungeon_region(player, 'Hera Big Chest Landing', 'Tower of Hera', ['Tower of Hera - Big Chest'], ['Hera Big Chest Landing Exit', 'Hera Big Chest Landing Holes']),
         create_dungeon_region(player, 'Hera 5F', 'Tower of Hera', None, ['Hera 5F Down Stairs', 'Hera 5F Up Stairs', 'Hera 5F Star Hole', 'Hera 5F Pothole Chain', 'Hera 5F Normal Holes']),
         create_dungeon_region(player, 'Hera Fairies', 'Tower of Hera', None, ['Hera Fairies\' Warp']),

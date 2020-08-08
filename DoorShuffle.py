@@ -1318,6 +1318,7 @@ logical_connections = [
     ('Desert Main Lobby Right Path', 'Desert Right Alcove'),
     ('Desert Left Alcove Path', 'Desert Main Lobby'),
     ('Desert Right Alcove Path', 'Desert Main Lobby'),
+    ('Hera Big Chest Hook Path', 'Hera Big Chest Landing'),
     ('Hera Big Chest Landing Exit', 'Hera 4F'),
     ('PoD Pit Room Block Path N', 'PoD Pit Room Blocked'),
     ('PoD Pit Room Block Path S', 'PoD Pit Room'),

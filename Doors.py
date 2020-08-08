@@ -261,6 +261,7 @@ def create_doors(world, player):
         create_door(player, 'Hera 4F Down Stairs', Sprl).dir(Dn, 0x27, 0, HTH).ss(S, 0x62, 0xc0),
         create_door(player, 'Hera 4F Up Stairs', Sprl).dir(Up, 0x27, 1, HTH).ss(A, 0x6b, 0x2c),
         create_door(player, 'Hera 4F Holes', Hole),
+        create_door(player, 'Hera Big Chest Hook Path', Lgcl),
         create_door(player, 'Hera Big Chest Landing Exit', Lgcl),
         create_door(player, 'Hera Big Chest Landing Holes', Hole),
         create_door(player, 'Hera 5F Down Stairs', Sprl).dir(Dn, 0x17, 1, HTH).ss(A, 0x62, 0x40),
