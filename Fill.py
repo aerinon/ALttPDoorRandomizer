@@ -1,8 +1,13 @@
 import random
 import logging
 
-from BaseClasses import CollectionState
+from BaseClasses import CollectionState, RegionType
 
+extra_loc_mode = {}
+extra_locations = ["Link's House", "Sahasrahla", "Pyramid Fairy - Left", "Pyramid Fairy - Right", "Master Sword Pedestal", "Lumberjack Tree"]
+extra_loc_mode['open'] = extra_locations+["Link's Uncle", "Secret Passage", "Sahasrahla's Hut - Left", "Sahasrahla's Hut - Middle", "Sahasrahla's Hut - Right"]
+extra_loc_mode['inverted'] = extra_locations+["Hype Cave - Top", "Hype Cave - Middle Right", "Hype Cave - Middle Left", "Hype Cave - Bottom", "Hype Cave - Generous Guy"]
+extra_loc_mode['standard'] = extra_loc_mode['open']
 
 class FillError(RuntimeError):
     pass
@@ -270,22 +275,34 @@ def distribute_items_restrictive(world, gftower_trash=False, fill_locations=None
     prioitempool = [item for item in world.itempool if not item.advancement and item.priority]
     restitempool = [item for item in world.itempool if not item.advancement and not item.priority]
 
-    # fill in gtower locations with trash first
-    for player in range(1, world.players + 1):
-        if not gftower_trash or not world.ganonstower_vanilla[player] or world.doorShuffle[player] == 'crossed':
-            continue
+    if gftower_trash:
+        free_dungeon_spots = {}
+        for player in range(1, world.players + 1):
+            free_dungeon_spots[player] = 0
+        for loc in fill_locations:
+            if world.dungeon_only[loc.player] and (loc.parent_region.type == RegionType.Dungeon or loc.name in extra_loc_mode[world.mode[loc.player]]):
+                free_dungeon_spots[loc.player] += 1
+        for item in world.itempool:
+            if world.dungeon_only[item.player] and (item.advancement or item.priority or "Heart Container" in item.name):
+                free_dungeon_spots[item.player] -= 1
 
-        gftower_trash_count = (random.randint(15, 50) if world.goal[player] == 'triforcehunt' else random.randint(0, 15))
+        # fill in gtower locations with trash first
+        for player in range(1, world.players + 1):
+            if not world.ganonstower_vanilla[player] or world.doorShuffle[player] == 'crossed':
+                continue
+            gftower_trash_count = (random.randint(15, 50) if world.goal[player] == 'triforcehunt' else random.randint(0, 15))
+            if world.dungeon_only[player]:
+                gftower_trash_count = min(gftower_trash_count, free_dungeon_spots[player])
 
-        gtower_locations = [location for location in fill_locations if 'Ganons Tower' in location.name and location.player == player]
-        random.shuffle(gtower_locations)
-        trashcnt = 0
-        while gtower_locations and restitempool and trashcnt < gftower_trash_count:
-            spot_to_fill = gtower_locations.pop()
-            item_to_place = restitempool.pop()
-            world.push_item(spot_to_fill, item_to_place, False)
-            fill_locations.remove(spot_to_fill)
-            trashcnt += 1
+            gtower_locations = [location for location in fill_locations if 'Ganons Tower' in location.name and location.player == player]
+            random.shuffle(gtower_locations)
+            trashcnt = 0
+            while gtower_locations and restitempool and trashcnt < gftower_trash_count:
+                spot_to_fill = gtower_locations.pop()
+                item_to_place = restitempool.pop()
+                world.push_item(spot_to_fill, item_to_place, False)
+                fill_locations.remove(spot_to_fill)
+                trashcnt += 1
 
     random.shuffle(fill_locations)
     fill_locations.reverse()
@@ -294,12 +311,29 @@ def distribute_items_restrictive(world, gftower_trash=False, fill_locations=None
     # todo: crossed
     progitempool.sort(key=lambda item: 1 if item.name == 'Small Key (Escape)' and world.keyshuffle[item.player] and world.mode[item.player] == 'standard' else 0)
 
-    fill_restrictive(world, world.state, fill_locations, progitempool,
+    prioitempool += [item for item in restitempool if "Heart Container" in item.name]
+    restitempool = [item for item in restitempool if "Heart Container" not in item.name]
+
+    important_locations = []
+    rest_locations = []
+    for loc in fill_locations:
+        if world.dungeon_only[loc.player] and loc.parent_region.type != RegionType.Dungeon and loc.name not in extra_loc_mode[world.mode[loc.player]]:
+            rest_locations.append(loc)
+        else:
+            important_locations.append(loc)
+
+    fill_restrictive(world, world.state, important_locations, progitempool,
                      keys_in_itempool={player: world.keyshuffle[player] for player in range(1, world.players + 1)})
+    if progitempool:
+        raise FillError('No more spots to place progression item(s) %s' % [item.name for item in progitempool])
+                     
+    fast_fill(world, prioitempool, important_locations)
+    if prioitempool:
+        raise FillError('No more spots to place important item(s) %s' % [item.name for item in prioitempool])
+
+    fill_locations = rest_locations+important_locations;
 
     random.shuffle(fill_locations)
-
-    fast_fill(world, prioitempool, fill_locations)
 
     fast_fill(world, restitempool, fill_locations)
 
@@ -442,7 +476,7 @@ def balance_multiworld_progression(world):
                                 items_to_replace.append(testing)
 
                 replaced_items = False
-                replacement_locations = [l for l in checked_locations if not l.event and not l.locked]
+                replacement_locations = [l for l in checked_locations if not l.event and not l.locked and not (world.dungeon_only[l.player] and l.parent_region.type != RegionType.Dungeon and l.name not in extra_loc_mode[world.mode[l.player]])]
                 while replacement_locations and items_to_replace:
                     new_location = replacement_locations.pop()
                     old_location = items_to_replace.pop()

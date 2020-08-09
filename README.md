@@ -44,6 +44,13 @@ a guaranteed Small Key still is. These items will be distributed according to th
 of the itempool will respect the algorithm setting. Music for dungeons is randomized so it cannot be used as a tell
 for which dungeons contain pendants and crystals; finding a Map for a dungeon will allow the overworld map to display its prize.
 
+## Dungeon-Only Progression Items
+
+This setting places Progression Items, Mail Upgrades and Heart Containers only in Dungeons. 11 Overworld Locations are also considered Dungeon Locations:
+Link's House, Sahasrahla, Pyramid Fairy (2), Lumberjack Tree, Pedestal, and 5 more depending on Mode:
+in Open/Standard/Retro: Uncle Tunnel (2) and Sahasrahla's Hut (3), and in Inverted: Hype Cave (5). The player always starts with 10 bombs.
+Only works with the balanced (default), vt26 and vt25 fill algorithms. If combined with Triforce Hunt, the goal is to collect 10 out of 15 Triforce Pieces.
+
 ## Retro
 
 This setting turns all Small Keys into universal Small Keys that can be used in any dungeon and are distributed across the world.

@@ -253,6 +253,7 @@
       "None:           You will be able to reach enough locations to beat the game."
     ],
     "hints": [ "Make telepathic tiles and storytellers give helpful hints. (default: %(default)s)" ],
+    "dungeon_only": [ "Forces Progression Items, Mail Upgrades and Heart Containers in Dungeons and 11 selected Overworld Locations. (default: %(default)s)" ],
     "shuffleganon": [
       "Include the Ganon's Tower and Pyramid Hole in the",
       "entrance shuffle pool. (default: %(default)s)"

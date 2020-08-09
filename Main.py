@@ -60,6 +60,7 @@ def main(args, seed=None, fish=None):
     world.enemy_health = args.enemy_health.copy()
     world.enemy_damage = args.enemy_damage.copy()
     world.beemizer = args.beemizer.copy()
+    world.dungeon_only = args.dungeon_only.copy()
     world.experimental = args.experimental.copy()
     world.dungeon_counters = args.dungeon_counters.copy()
     world.fish = fish
@@ -171,7 +172,6 @@ def main(args, seed=None, fish=None):
     elif args.algorithm == 'vt25':
         distribute_items_restrictive(world, False)
     elif args.algorithm == 'vt26':
-
         distribute_items_restrictive(world, True, shuffled_locations)
     elif args.algorithm == 'balanced':
         distribute_items_restrictive(world, True)
@@ -355,6 +355,7 @@ def copy_world(world):
     ret.compassshuffle = world.compassshuffle.copy()
     ret.keyshuffle = world.keyshuffle.copy()
     ret.bigkeyshuffle = world.bigkeyshuffle.copy()
+    ret.dungeon_only = world.dungeon_only.copy()
     ret.crystals_needed_for_ganon = world.crystals_needed_for_ganon.copy()
     ret.crystals_needed_for_gt = world.crystals_needed_for_gt.copy()
     ret.open_pyramid = world.open_pyramid.copy()

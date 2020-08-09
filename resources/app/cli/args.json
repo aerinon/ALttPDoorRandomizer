@@ -212,6 +212,10 @@
     "dest": "hints",
     "help": "suppress"
   },
+  "dungeon_only": {
+    "action": "store_true",
+    "type": "bool"
+  },
   "heartbeep": {
     "choices": [
       "normal",

@@ -87,6 +87,7 @@ SETTINGSTOPROCESS = {
       "smallkeyshuffle": "keyshuffle",
       "bigkeyshuffle": "bigkeyshuffle",
       "dungeondoorshuffle": "door_shuffle",
+      "dungeon_only": "dungeon_only",
       "experimental": "experimental",
       "dungeon_counters": "dungeon_counters"
     },

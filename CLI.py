@@ -92,7 +92,7 @@ def parse_cli(argv, no_defaults=False):
             for name in ['logic', 'mode', 'swords', 'goal', 'difficulty', 'item_functionality',
                          'shuffle', 'door_shuffle', 'crystals_ganon', 'crystals_gt', 'openpyramid',
                          'mapshuffle', 'compassshuffle', 'keyshuffle', 'bigkeyshuffle', 'startinventory',
-                         'retro', 'accessibility', 'hints', 'beemizer', 'experimental', 'dungeon_counters',
+                         'retro', 'accessibility', 'hints', 'beemizer', 'dungeon_only', 'experimental', 'dungeon_counters',
                          'shufflebosses', 'shuffleenemies', 'enemy_health', 'enemy_damage', 'shufflepots',
                          'ow_palettes', 'uw_palettes', 'sprite', 'disablemusic', 'quickswap', 'fastmenu', 'heartcolor', 'heartbeep',
                          'remote_items']:
@@ -141,6 +141,7 @@ def parse_settings():
         "bigkeyshuffle": False,
         "keysanity": False,
         "door_shuffle": "basic",
+        "dungeon_only": False,
         "experimental": False,
         "dungeon_counters": "default",
 

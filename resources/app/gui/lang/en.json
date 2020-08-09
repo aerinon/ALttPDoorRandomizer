@@ -66,6 +66,8 @@
     "randomizer.dungeon.dungeon_counters.on": "On",
     "randomizer.dungeon.dungeon_counters.pickup": "On Compass Pickup",
 
+    "randomizer.dungeon.dungeon_only": "Force Progression Items, Mail Upgrades and Heart Containers in Dungeons and 11 selected Overworld Locations",
+
 
     "randomizer.enemizer.potshuffle": "Pot Shuffle",
 

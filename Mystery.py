@@ -150,6 +150,7 @@ def roll_settings(weights):
     door_shuffle = get_choice('door_shuffle')
     ret.door_shuffle = door_shuffle if door_shuffle != 'none' else 'vanilla'
     ret.experimental = get_choice('experimental') == 'on'
+    ret.dungeon_only = get_choice('dungeon_only') == 'on'
 
     ret.dungeon_counters = get_choice('dungeon_counters') if 'dungeon_counters' in weights else 'default'
     if ret.dungeon_counters == 'default':

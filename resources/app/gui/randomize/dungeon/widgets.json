@@ -19,6 +19,7 @@
         "on",
         "pickup"
       ]
-    }
+    },
+    "dungeon_only": { "type": "checkbox" }
   }
 }

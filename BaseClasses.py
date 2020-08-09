@@ -1688,6 +1688,7 @@ class Spoiler(object):
                          'enemy_shuffle': self.world.enemy_shuffle,
                          'enemy_health': self.world.enemy_health,
                          'enemy_damage': self.world.enemy_damage,
+                         'dungeon_only': self.world.dungeon_only,
                          'players': self.world.players,
                          'teams': self.world.teams,
                          'experimental' : self.world.experimental
@@ -1748,6 +1749,7 @@ class Spoiler(object):
                 outfile.write('Enemy health:                    %s\n' % self.metadata['enemy_health'][player])
                 outfile.write('Enemy damage:                    %s\n' % self.metadata['enemy_damage'][player])
                 outfile.write('Hints:                           %s\n' % ('Yes' if self.metadata['hints'][player] else 'No'))
+                outfile.write('Dungeon-Only Progression:        %s\n' % ('Yes' if self.metadata['dungeon_only'][player] else 'No'))
                 outfile.write('Experimental:                    %s\n' % ('Yes' if self.metadata['experimental'][player] else 'No'))
             if self.doors:
                 outfile.write('\n\nDoors:\n\n')
