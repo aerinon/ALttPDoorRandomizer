@@ -720,12 +720,11 @@ def create_dungeon_regions(world, player):
         create_dungeon_region(player, 'GT Speed Torch', 'Ganon\'s Tower', None, ['GT Speed Torch WS', 'GT Speed Torch SE', 'GT Speed Torch North Path']),
         create_dungeon_region(player, 'GT Speed Torch Upper', 'Ganon\'s Tower', None, ['GT Speed Torch WN', 'GT Speed Torch NE', 'GT Speed Torch South Path']),
         create_dungeon_region(player, 'GT Pots n Blocks', 'Ganon\'s Tower', None, ['GT Pots n Blocks ES']),
-        create_dungeon_region(player, 'GT Crystal Conveyor', 'Ganon\'s Tower', None, ['GT Crystal Conveyor NE', 'GT Crystal Conveyor to Corner Barrier - Blue', 'GT Crystal Conveyor to Ranged Crystal']),
+        create_dungeon_region(player, 'GT Crystal Conveyor', 'Ganon\'s Tower', None, ['GT Crystal Conveyor NE', 'GT Crystal Conveyor to Corner Barrier - Blue', 'GT Crystal Conveyor to Ranged Crystal', 'GT Crystal Conveyor to Left Bypass']),
         create_dungeon_region(player, 'GT Crystal Conveyor Corner', 'Ganon\'s Tower', None, ['GT Crystal Conveyor Corner to Barrier - Blue', 'GT Crystal Conveyor Corner to Barrier - Orange', 'GT Crystal Conveyor Corner to Ranged Crystal']),
-        create_dungeon_region(player, 'GT Crystal Conveyor Left', 'Ganon\'s Tower', None, ['GT Crystal Conveyor WN', 'GT Crystal Conveyor Left to Corner Barrier - Orange', 'GT Crystal Conveyor Left to Ranged Crystal']),
+        create_dungeon_region(player, 'GT Crystal Conveyor Left', 'Ganon\'s Tower', None, ['GT Crystal Conveyor WN', 'GT Crystal Conveyor Left to Corner Barrier - Orange']),
         create_dungeon_region(player, 'GT Crystal Conveyor - Ranged Crystal', 'Ganon\'s Tower', None, ['GT Crystal Conveyor Ranged Crystal Exit']),
         create_dungeon_region(player, 'GT Crystal Conveyor Corner - Ranged Crystal', 'Ganon\'s Tower', None, ['GT Crystal Conveyor Corner Ranged Crystal Exit']),
-        create_dungeon_region(player, 'GT Crystal Conveyor Left - Ranged Crystal', 'Ganon\'s Tower', None, ['GT Crystal Conveyor Left Ranged Crystal Exit']),
 
         create_dungeon_region(player, 'GT Compass Room', 'Ganon\'s Tower', ['Ganons Tower - Compass Room - Top Left', 'Ganons Tower - Compass Room - Top Right', 'Ganons Tower - Compass Room - Bottom Left', 'Ganons Tower - Compass Room - Bottom Right'],
                               ['GT Compass Room EN', 'GT Compass Room Warp']),
@@ -855,7 +854,6 @@ def create_dungeon_regions(world, player):
     world.get_region('TR Crystal Maze End - Ranged Crystal', player).crystal_switch = True
     world.get_region('GT Crystal Conveyor - Ranged Crystal', player).crystal_switch = True
     world.get_region('GT Crystal Conveyor Corner - Ranged Crystal', player).crystal_switch = True
-    world.get_region('GT Crystal Conveyor Left - Ranged Crystal', player).crystal_switch = True
     world.get_region('GT Hookshot South Platform', player).crystal_switch = True
     world.get_region('GT Hookshot South Entry - Ranged Crystal', player).crystal_switch = True
     # Relevant to indicate north door can access c_switch

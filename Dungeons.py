@@ -296,7 +296,7 @@ gt_regions = [
     'GT Lobby', 'GT Bob\'s Torch', 'GT Hope Room', 'GT Big Chest', 'GT Blocked Stairs', 'GT Bob\'s Room',
     'GT Tile Room', 'GT Speed Torch', 'GT Speed Torch Upper', 'GT Pots n Blocks', 'GT Crystal Conveyor',
     'GT Crystal Conveyor Corner', 'GT Crystal Conveyor Left', 'GT Crystal Conveyor - Ranged Crystal',
-    'GT Crystal Conveyor Corner - Ranged Crystal', 'GT Crystal Conveyor Left - Ranged Crystal',
+    'GT Crystal Conveyor Corner - Ranged Crystal',
     'GT Compass Room', 'GT Invisible Bridges', 'GT Invisible Catwalk', 'GT Conveyor Cross', 'GT Hookshot East Platform',
     'GT Hookshot North Platform', 'GT Hookshot South Platform', 'GT Hookshot South Entry', 'GT Hookshot South Entry - Ranged Crystal', 'GT Map Room',
     'GT Double Switch Entry', 'GT Double Switch Pot Corners - Ranged Switches', 'GT Double Switch Pot Corners',

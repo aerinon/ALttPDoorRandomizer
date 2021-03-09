@@ -1039,15 +1039,14 @@ def create_doors(world, player):
         create_door(player, 'GT Speed Torch SE', Nrml).dir(So, 0x8d, Right, High).trap(0x4).pos(0).portal(X, 0x02),
         create_door(player, 'GT Crystal Conveyor NE', Nrml).dir(No, 0x9d, Right, High).pos(0).kill(),
         create_door(player, 'GT Crystal Conveyor to Corner Barrier - Blue', Lgcl),
+        create_door(player, 'GT Crystal Conveyor to Left Bypass', Lgcl),
         create_door(player, 'GT Crystal Conveyor to Ranged Crystal', Lgcl),
         create_door(player, 'GT Crystal Conveyor Corner to Barrier - Blue', Lgcl),
         create_door(player, 'GT Crystal Conveyor Corner to Barrier - Orange', Lgcl),
         create_door(player, 'GT Crystal Conveyor Corner to Ranged Crystal', Lgcl),
         create_door(player, 'GT Crystal Conveyor Left to Corner Barrier - Orange', Lgcl),
-        create_door(player, 'GT Crystal Conveyor Left to Ranged Crystal', Lgcl),
         create_door(player, 'GT Crystal Conveyor Ranged Crystal Exit', Lgcl),
         create_door(player, 'GT Crystal Conveyor Corner Ranged Crystal Exit', Lgcl),
-        create_door(player, 'GT Crystal Conveyor Left Ranged Crystal Exit', Lgcl),
         create_door(player, 'GT Crystal Conveyor WN', Intr).dir(We, 0x9d, Top, High).pos(2),
         create_door(player, 'GT Compass Room EN', Intr).dir(Ea, 0x9d, Top, High).pos(2),
         create_door(player, 'GT Compass Room Warp', Warp),
@@ -1356,7 +1355,7 @@ def create_doors(world, player):
     world.get_door('GT Crystal Conveyor Left to Corner Barrier - Orange', player).barrier(CrystalBarrier.Orange)
     world.get_door('GT Crystal Conveyor Ranged Crystal Exit', player).c_switch()
     world.get_door('GT Crystal Conveyor Corner Ranged Crystal Exit', player).c_switch()
-    world.get_door('GT Crystal Conveyor Left Ranged Crystal Exit', player).c_switch()
+    world.get_door('GT Crystal Conveyor to Left Bypass', player).c_switch()
     world.get_door('GT Hookshot South-North Path', player).c_switch()
     world.get_door('GT Hookshot South-East Path', player).c_switch()
     world.get_door('GT Hookshot ES', player).c_switch()
