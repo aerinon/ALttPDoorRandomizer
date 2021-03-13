@@ -578,10 +578,10 @@ class CollectionState(object):
 
 
     def can_reach_blue(self, region, player):
-        return region in self.reachable_regions[player] and self.reachable_regions[player][region] in [CrystalBarrier.Blue, CrystalBarrier.Either] and self.can_hit_switch(player)
+        return region in self.reachable_regions[player] and self.reachable_regions[player][region] in [CrystalBarrier.Blue, CrystalBarrier.Either]
 
     def can_reach_orange(self, region, player):
-        return region in self.reachable_regions[player] and self.reachable_regions[player][region] in [CrystalBarrier.Orange, CrystalBarrier.Either] and self.can_hit_switch(player)
+        return region in self.reachable_regions[player] and self.reachable_regions[player][region] in [CrystalBarrier.Orange, CrystalBarrier.Either]
 
     def _do_not_flood_the_keys(self, reachable_events):
         adjusted_checks = list(reachable_events)
@@ -665,11 +665,6 @@ class CollectionState(object):
             basemagic = 16
         else:
             basemagic = 8
-        if self.world.futuro[player]:
-            if basemagic == 8:
-                basemagic = 0
-            else:
-                basemagic = int(basemagic/2)
         if self.can_buy_unlimited('Green Potion', player) or self.can_buy_unlimited('Blue Potion', player):
             if self.world.difficulty_adjustments[player] == 'hard' and not fullrefill:
                 basemagic = basemagic + int(basemagic * 0.5 * self.bottle_count(player))
@@ -690,7 +685,7 @@ class CollectionState(object):
     def can_use_bombs(self, player):
         return (self.has('Bomb Upgrade (+10)', player) or not self.world.futuro[player])
 
-    def can_hit_switch(self, player):
+    def can_hit_crystal(self, player):
         return (self.can_use_bombs(player)
                 or self.can_shoot_arrows(player)
                 or self.has_blunt_weapon(player)
@@ -702,10 +697,9 @@ class CollectionState(object):
                 or self.has('Cane of Somaria', player)
                 or self.has('Cane of Byrna', player))
     
-    def can_hit_switch_through_barrier(self, player):
+    def can_hit_crystal_through_barrier(self, player):
         return (self.can_use_bombs(player)
             or self.can_shoot_arrows(player)
-            or self.has_beam_sword(player)
             or self.has('Blue Boomerang', player)
             or self.has('Red Boomerang', player)
             or self.has('Fire Rod', player)

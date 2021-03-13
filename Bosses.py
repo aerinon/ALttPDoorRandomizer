@@ -39,7 +39,7 @@ def MoldormDefeatRule(state, player):
     return state.has_blunt_weapon(player)
 
 def HelmasaurKingDefeatRule(state, player):
-    return state.has('Hammer', player) or (state.can_use_bombs(player) and (state.has_sword(player) or state.can_shoot_arrows(player)))
+    return (state.has('Hammer', player) or state.can_use_bombs(player)) and (state.has_sword(player) or state.can_shoot_arrows(player))
 
 def ArrghusDefeatRule(state, player):
     if not state.has('Hookshot', player):
