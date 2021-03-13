@@ -741,7 +741,7 @@ class CollectionState(object):
         return self.has('Moon Pearl', player)
 
     def has_fire_source(self, player):
-        return self.has('Fire Rod', player) or self.has('Lamp', player)
+        return self.has('Fire Rod', player) or (self.has('Lamp', player) and (not self.world.futuro[player] or self.has('Magic Upgrade (1/2)', player) or self.has('Magic Upgrade (1/4', player)))
 
     def can_flute(self, player):
         lw = self.world.get_region('Light World', player)
