@@ -454,9 +454,6 @@ class World(object):
         return False
 
 
-# Items to test for ability to use magic in has()
-magic_items = ['Magic Powder', 'Fire Rod', 'Ice Rod', 'Bombos', 'Ether', 'Quake', 'Cane of Somaria', 'Cane of Byrna', 'Cape']
-
 class CollectionState(object):
 
     def __init__(self, parent):
@@ -603,8 +600,8 @@ class CollectionState(object):
         return True
 
     def has(self, item, player, count=1):
-        if self.world.futuro[player]:
-            if item in magic_items and self.prog_items['Magic Upgrade (1/2)', player] == 0 and self.prog_items['Magic Upgrade (1/4)', player] == 0:
+        if not self.can_use_magic(player):
+            if item in ['Magic Powder', 'Fire Rod', 'Ice Rod', 'Bombos', 'Ether', 'Quake', 'Cane of Somaria', 'Cane of Byrna', 'Cape']: # Lamp is checked in has_fire_source() instead
                 return False
         if count == 1:
             return (item, player) in self.prog_items
@@ -685,6 +682,9 @@ class CollectionState(object):
     def can_use_bombs(self, player):
         return (self.has('Bomb Upgrade (+10)', player) or not self.world.futuro[player])
 
+    def can_use_magic(self, player):
+        return not self.world.futuro[player] or self.prog_items['Magic Upgrade (1/2)', player] > 0 or self.prog_items['Magic Upgrade (1/4)', player] > 0
+
     def can_hit_crystal(self, player):
         return (self.can_use_bombs(player)
                 or self.can_shoot_arrows(player)
@@ -741,7 +741,7 @@ class CollectionState(object):
         return self.has('Moon Pearl', player)
 
     def has_fire_source(self, player):
-        return self.has('Fire Rod', player) or (self.has('Lamp', player) and (not self.world.futuro[player] or self.has('Magic Upgrade (1/2)', player) or self.has('Magic Upgrade (1/4', player)))
+        return self.has('Fire Rod', player) or (self.has('Lamp', player) and self.can_use_magic(player))
 
     def can_flute(self, player):
         lw = self.world.get_region('Light World', player)

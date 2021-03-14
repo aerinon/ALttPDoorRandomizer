@@ -35,7 +35,7 @@ Difficulty = namedtuple('Difficulty',
                         ['baseitems', 'bottles', 'bottle_count', 'same_bottle', 'progressiveshield',
                          'basicshield', 'progressivearmor', 'basicarmor', 'swordless',
                          'progressivesword', 'basicsword', 'basicbow', 'timedohko', 'timedother',
-                         'triforcehunt', 'triforce_pieces_required', 'retro',
+                         'triforcehunt', 'triforce_pieces_required', 'retro', 'futuro',
                          'extras', 'progressive_sword_limit', 'progressive_shield_limit',
                          'progressive_armor_limit', 'progressive_bottle_limit',
                          'progressive_bow_limit', 'heart_piece_limit', 'boss_heart_container_limit'])
@@ -61,6 +61,7 @@ difficulties = {
         triforcehunt = ['Triforce Piece'] * 30,
         triforce_pieces_required = 20,
         retro = ['Small Key (Universal)'] * 18 + ['Rupees (20)'] * 10,
+        futuro = ['Bomb Upgrade (+10)'] * 2 + ['Magic Upgrade (1/2)'],
         extras = [normalfirst15extra, normalsecond15extra, normalthird10extra, normalfourth5extra, normalfinal25extra],
         progressive_sword_limit = 4,
         progressive_shield_limit = 3,
@@ -88,6 +89,7 @@ difficulties = {
         triforcehunt = ['Triforce Piece'] * 30,
         triforce_pieces_required = 20,
         retro = ['Small Key (Universal)'] * 13 + ['Rupees (5)'] * 15,
+        futuro = ['Bomb Upgrade (+10)'] * 2 + ['Magic Upgrade (1/2)'],
         extras = [normalfirst15extra, normalsecond15extra, normalthird10extra, normalfourth5extra, normalfinal25extra],
         progressive_sword_limit = 3,
         progressive_shield_limit = 2,
@@ -115,6 +117,7 @@ difficulties = {
         triforcehunt = ['Triforce Piece'] * 30,
         triforce_pieces_required = 20,
         retro = ['Small Key (Universal)'] * 13 + ['Rupees (5)'] * 15,
+        futuro = ['Bomb Upgrade (+10)'] * 2 + ['Magic Upgrade (1/2)'],
         extras = [normalfirst15extra, normalsecond15extra, normalthird10extra, normalfourth5extra, normalfinal25extra],
         progressive_sword_limit = 2,
         progressive_shield_limit = 1,
@@ -517,6 +520,9 @@ def get_pool_core(progressive, shuffle, difficulty, timer, goal, mode, swords, r
     diff = difficulties[difficulty]
     pool.extend(diff.baseitems)
 
+    if futuro:
+        pool.extend(diff.futuro)
+
     # expert+ difficulties produce the same contents for
     # all bottles, since only one bottle is available
     if diff.same_bottle:
@@ -583,10 +589,11 @@ def get_pool_core(progressive, shuffle, difficulty, timer, goal, mode, swords, r
         treasure_hunt_count = diff.triforce_pieces_required
         treasure_hunt_icon = 'Triforce Piece'
 
-    for extra in diff.extras:
-        if extraitems > 0:
-            pool.extend(extra)
-            extraitems -= len(extra)
+    for extraPool in diff.extras:
+        for extra in extraPool:
+            if extraitems > 0:
+                pool.append(extra)
+                extraitems -= 1
 
     if goal == 'pedestal' and swords != 'vanilla':
         place_item('Master Sword Pedestal', 'Triforce')
@@ -604,24 +611,6 @@ def get_pool_core(progressive, shuffle, difficulty, timer, goal, mode, swords, r
                 pool.extend(['Small Key (Universal)'])
         else:
             pool.extend(['Small Key (Universal)'])
-
-    if futuro:
-        magic_count = 0
-        bomb_count = 0
-        for item in pool:
-            if item == 'Magic Upgrade (1/2)':
-                magic_count += 1
-            if item == 'Bomb Upgrade (+10)':
-                bomb_count += 1
-        if magic_count == 0:
-            pool.append('Magic Upgrade (1/2)')
-        if 'Magic Upgrade (1/4)' not in pool and magic_count < 2:
-            pool.append('Magic Upgrade (1/2)')
-        if bomb_count == 0:
-            pool.append('Bomb Upgrade (+10)')
-            pool.append('Bomb Upgrade (+10)')
-        elif bomb_count == 1:
-            pool.append('Bomb Upgrade (+10)')
     
     return (pool, placed_items, precollected_items, clock_mode, treasure_hunt_count, treasure_hunt_icon, lamps_needed_for_dark_rooms)
 
