@@ -520,9 +520,6 @@ def get_pool_core(progressive, shuffle, difficulty, timer, goal, mode, swords, r
     diff = difficulties[difficulty]
     pool.extend(diff.baseitems)
 
-    if futuro:
-        pool.extend(diff.futuro)
-
     # expert+ difficulties produce the same contents for
     # all bottles, since only one bottle is available
     if diff.same_bottle:
@@ -542,12 +539,18 @@ def get_pool_core(progressive, shuffle, difficulty, timer, goal, mode, swords, r
     else:
         pool.extend(diff.basicarmor)
 
-    if want_progressives():
-        pool.extend(['Progressive Bow'] * 2)
-    elif swords != 'swordless':
-        pool.extend(diff.basicbow)
+    if futuro:
+        pool = [item.replace('Bomb Upgrade (+5)','Rupees (5)') for item in pool]
+        pool = [item.replace('Bomb Upgrade (+10)','Rupees (5)') for item in pool]
+        pool.extend(['Bow', 'Bow', 'Silver Arrows'])
+        pool.extend(diff.futuro)
     else:
-        pool.extend(['Bow', 'Silver Arrows'])
+        if want_progressives():
+            pool.extend(['Progressive Bow'] * 2)
+        elif swords != 'swordless':
+            pool.extend(diff.basicbow)
+        else:
+            pool.extend(['Bow', 'Silver Arrows'])
 
     if swords == 'swordless':
         pool.extend(diff.swordless)
