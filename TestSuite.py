@@ -25,10 +25,10 @@ SETTINGS = {
 }
 
 SETTINGS = {
-    'mode': ['open'],
-    'goal': ['ganon'],
-    'swords': ['random'],
-    'shuffle': ['vanilla'],
+    'mode': ['standard'],
+    'goal': ['ganon', 'pedestal', 'triforcehunt'],
+    'swords': ['random', 'vanilla'],
+    'shuffle': ['dungeonsfull'],
     'accessibility': [True, False],
     'difficulty': [True, False],
     'shufflepots': [True, False],
@@ -187,7 +187,7 @@ def main(args=None):
     for result in results:
         successes.append(result)
 
-    tabresultsfile = args.dr + '.tsv'
+    tabresultsfile = './output/' + args.dr + '.tsv'
     with open(tabresultsfile, 'w+', newline='') as f:
         writer = csv.writer(f, delimiter='\t')
         header = headerList.copy()
@@ -244,13 +244,13 @@ if __name__ == "__main__":
             print()
 
             if errors:
-                with open(f"{dr[0]}{(f'-{tense}' if dr[0] in ['basic', 'crossed'] else '')}-errors.txt", 'w') as stream:
+                with open(f"./output/{dr[0]}{(f'-{tense}' if dr[0] in ['basic', 'crossed'] else '')}-errors.txt", 'w') as stream:
                     for error in errors:
                         stream.write(error[0] + "\n")
                         stream.write(error[1] + "\n")
                         stream.write(error[2] + "\n\n")
 
-    with open("success.txt", "w") as stream:
+    with open("./output/success.txt", "w") as stream:
         stream.write(str.join("\n", successes))
 
     input("Press enter to continue")
