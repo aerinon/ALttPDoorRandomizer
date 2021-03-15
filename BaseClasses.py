@@ -93,8 +93,8 @@ class World(object):
             def set_player_attr(attr, val):
                 self.__dict__.setdefault(attr, {})[player] = val
             # Futuro doesn't support standard start
-            if self.futuro[player] and self.mode[player] == "standard":
-                self.mode[player] == "open" 
+            if self.futuro[player] and self.mode[player] == 'standard':
+                self.mode[player] = "open" 
             set_player_attr('_region_cache', {})
             set_player_attr('player_names', [])
             set_player_attr('remote_items', False)
@@ -596,7 +596,7 @@ class CollectionState(object):
             flood_location = world.get_location(flooded_keys[location.name], location.player)
             item = flood_location.item
             item_is_important = False if not item else item.advancement or item.bigkey or item.smallkey
-            return flood_location in self.locations_checked or not item_is_important
+            return flood_location in self.locations_checked or not item_is_important or location.parent_region.name not 'Swamp Trench 2 Alcove'
         return True
 
     def has(self, item, player, count=1):
