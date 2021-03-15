@@ -6,24 +6,19 @@ import sys
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 
-
 def int16_as_bytes(value):
     value = value & 0xFFFF
     return [value & 0xFF, (value >> 8) & 0xFF]
-
 
 def int32_as_bytes(value):
     value = value & 0xFFFFFFFF
     return [value & 0xFF, (value >> 8) & 0xFF, (value >> 16) & 0xFF, (value >> 24) & 0xFF]
 
-
 def pc_to_snes(value):
-    return ((value << 1) & 0x7F0000) | (value & 0x7FFF) | 0x8000
-
+    return ((value<<1) & 0x7F0000)|(value & 0x7FFF)|0x8000
 
 def snes_to_pc(value):
-    return ((value & 0x7F0000) >> 1) | (value & 0x7FFF)
-
+    return ((value & 0x7F0000)>>1)|(value & 0x7FFF)
 
 def parse_player_names(names, players, teams):
     names = [n for n in re.split(r'[, ]', names) if n]
@@ -37,10 +32,8 @@ def parse_player_names(names, players, teams):
         names = names[players:]
     return ret
 
-
 def is_bundled():
     return getattr(sys, 'frozen', False)
-
 
 def local_path(path):
     # just do stuff here and bail
@@ -51,25 +44,50 @@ def local_path(path):
 
     if is_bundled():
         # we are running in a bundle
-        local_path.cached_path = sys._MEIPASS  # pylint: disable=protected-access,no-member
+        local_path.cached_path = sys._MEIPASS # pylint: disable=protected-access,no-member
     else:
         # we are running in a normal Python environment
         local_path.cached_path = os.path.dirname(os.path.abspath(__file__))
 
     return os.path.join(local_path.cached_path, path)
 
-
 local_path.cached_path = None
 
-
 def output_path(path):
-    if output_path.cached_path is None:
-        output_path.cached_path = '.'
-    return os.path.join(output_path.cached_path, path)
+    # just do stuff here and bail
+    return os.path.join(".", path)
 
+    if output_path.cached_path is not None:
+        return os.path.join(output_path.cached_path, path)
+
+    if not is_bundled():
+        output_path.cached_path = '.'
+        return os.path.join(output_path.cached_path, path)
+    else:
+        # has been packaged, so cannot use CWD for output.
+        if sys.platform == 'win32':
+            #windows
+            documents = os.path.join(os.path.expanduser("~"),"Documents")
+        elif sys.platform == 'darwin':
+            from AppKit import NSSearchPathForDirectoriesInDomains # pylint: disable=import-error
+            # http://developer.apple.com/DOCUMENTATION/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Functions/Reference/reference.html#//apple_ref/c/func/NSSearchPathForDirectoriesInDomains
+            NSDocumentDirectory = 9
+            NSUserDomainMask = 1
+            # True for expanding the tilde into a fully qualified path
+            documents = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, True)[0]
+        elif sys.platform.find("linux") or sys.platform.find("ubuntu") or sys.platform.find("unix"):
+            documents = os.path.join(os.path.expanduser("~"),"Documents")
+        else:
+            raise NotImplementedError('Not supported yet')
+
+        output_path.cached_path = os.path.join(documents, 'ALttPDoorRandomizer')
+        if not os.path.exists(output_path.cached_path):
+            os.makedirs(output_path.cached_path)
+        if not os.path.join(output_path.cached_path, path):
+            os.makedirs(os.path.join(output_path.cached_path, path))
+        return os.path.join(output_path.cached_path, path)
 
 output_path.cached_path = None
-
 
 def open_file(filename):
     if sys.platform == 'win32':
@@ -78,16 +96,14 @@ def open_file(filename):
         open_command = 'open' if sys.platform == 'darwin' else 'xdg-open'
         subprocess.call([open_command, filename])
 
-
 def close_console():
     if sys.platform == 'win32':
-        # windows
+        #windows
         import ctypes.wintypes
         try:
             ctypes.windll.kernel32.FreeConsole()
         except Exception:
             pass
-
 
 def make_new_base2current(old_rom='Zelda no Densetsu - Kamigami no Triforce (Japan).sfc', new_rom='working.sfc'):
     from collections import OrderedDict
@@ -109,7 +125,7 @@ def make_new_base2current(old_rom='Zelda no Densetsu - Kamigami no Triforce (Jap
         if offset - 1 in out_data:
             out_data[offset-1].extend(out_data.pop(offset))
     with open('data/base2current.json', 'wt') as outfile:
-        json.dump([{key: value} for key, value in out_data.items()], outfile, separators=(",", ":"))
+        json.dump([{key:value} for key, value in out_data.items()], outfile, separators=(",", ":"))
 
     basemd5 = hashlib.md5()
     basemd5.update(new_rom_data)
@@ -225,6 +241,7 @@ def room_palette_data(old_rom):
         print(f'{hex(header_offset)}: {[hex(x) for x in rooms]}')
 
 
+
 # Palette notes:
 # HC: 0
 # Sewer/Dungeon: 1
@@ -286,22 +303,21 @@ def print_wiki_doors_by_region(d_regions, world, player):
                 toprint += ('| '+'<br />'.join(strs_to_print))
                 toprint += "\n"
         toprint += ('|}') + "\n"
-        with open(os.path.join(".", "resources", "user", "regions-" + d + ".txt"), "w+") as f:
+        with open(os.path.join(".","resources", "user", "regions-" + d + ".txt"),"w+") as f:
             f.write(toprint)
-
 
 def update_deprecated_args(args):
     if args:
         argVars = vars(args)
-        truthy = [1, True, "True", "true"]
+        truthy = [ 1, True, "True", "true" ]
         # Hints default to TRUE
         # Don't do: Yes
         # Do:       No
         if "no_hints" in argVars:
             src = "no_hints"
-            if isinstance(argVars["hints"], dict):
+            if isinstance(argVars["hints"],dict):
                 tmp = {}
-                for idx in range(1, len(argVars["hints"]) + 1):
+                for idx in range(1,len(argVars["hints"]) + 1):
                     tmp[idx] = argVars[src] not in truthy  # tmp = !src
                 args.hints = tmp  # dest = tmp
             else:
@@ -310,9 +326,9 @@ def update_deprecated_args(args):
         # Do:       Yes
         if "hints" in argVars:
             src = "hints"
-            if isinstance(argVars["hints"], dict):
+            if isinstance(argVars["hints"],dict):
                 tmp = {}
-                for idx in range(1, len(argVars["hints"]) + 1):
+                for idx in range(1,len(argVars["hints"]) + 1):
                     tmp[idx] = argVars[src] not in truthy  # tmp = !src
                 args.no_hints = tmp  # dest = tmp
             else:
@@ -360,7 +376,6 @@ def update_deprecated_args(args):
 
     return args
 
-
 def print_wiki_doors_by_room(d_regions, world, player):
     for d, region_list in d_regions.items():
         tile_map = {}
@@ -392,14 +407,13 @@ def print_wiki_doors_by_room(d_regions, world, player):
                 toprint += ('|-') + "\n"
                 toprint += ('! Door !! Room Side !! Requirement') + "\n"
                 for ext in region.exits:
-                    ext_part = ext.name.replace(region.name, '')
+                    ext_part = ext.name.replace(region.name,'')
                     ext_part = ext_part.strip()
                     toprint += ('{{DungeonRoomDoorList/Row|{{ROOTPAGENAME}}|{{SUBPAGENAME}}|' + ext_part + '|Side|}}') + "\n"
                 toprint += ('|}') + "\n"
                 toprint += ('') + "\n"
-        with open(os.path.join(".", "resources", "user", "rooms-" + d + ".txt"), "w+") as f:
+        with open(os.path.join(".","resources", "user", "rooms-" + d + ".txt"),"w+") as f:
             f.write(toprint)
-
 
 def print_xml_doors(d_regions, world, player):
     root = ET.Element('root')
