@@ -278,7 +278,7 @@ def main(args, seed=None, fish=None):
                       "algorithm": world.algorithm,                                   # 8
                       "mscb": mcsb_name,                                              # 9
                       "retro": world.retro[player],                                   # A
-                      "futuro": world.futuro[player],                                  # B
+                      "futuro": world.futuro[player],                                 # B
                       "progressive": world.progressive,                               # C
                       "hints": 'True' if world.hints[player] else 'False'             # D
                     }
