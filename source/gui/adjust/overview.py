@@ -7,6 +7,8 @@ import json
 import logging
 import os
 
+from Utils import output_path
+
 def adjust_page(top, parent, settings):
     # Adjust page
     self = ttk.Frame(parent)
@@ -90,6 +92,8 @@ def adjust_page(top, parent, settings):
 
     # These are the options to Adjust
     def adjustRom():
+        if output_path.cached_path is None:
+                output_path.cached_path = top.settings["outputpath"]
         options = {
           "heartbeep": "heartbeep",
           "heartcolor": "heartcolor",

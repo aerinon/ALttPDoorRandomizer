@@ -596,7 +596,7 @@ class CollectionState(object):
             flood_location = world.get_location(flooded_keys[location.name], location.player)
             item = flood_location.item
             item_is_important = False if not item else item.advancement or item.bigkey or item.smallkey
-            return flood_location in self.locations_checked or not item_is_important
+            return flood_location in self.locations_checked or not item_is_important or location.parent_region.name is not 'Swamp Trench 2 Alcove'
         return True
 
     def has(self, item, player, count=1):

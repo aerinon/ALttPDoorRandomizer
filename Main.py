@@ -25,7 +25,7 @@ from Fill import distribute_items_cutoff, distribute_items_staleness, distribute
 from ItemList import generate_itempool, difficulties, fill_prizes, fill_specific_items
 from Utils import output_path, parse_player_names
 
-__version__ = '0.2.1-dev'
+__version__ = '0.2.2-dev'
 
 class EnemizerError(RuntimeError):
     pass

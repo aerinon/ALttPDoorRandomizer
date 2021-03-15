@@ -146,10 +146,13 @@ def bottom_frame(self, parent, args=None):
     self.widgets[widget].pieces["button"].pack(side=LEFT)
 
     def open_output():
-        if args and args.outputpath:
-            open_file(output_path(args.outputpath))
-        else:
-            open_file(output_path(parent.settings["outputpath"]))
+        if output_path.cached_path is None:
+            if args and args.outputpath:
+                output_path.cached_path = args.outputpath
+            else:
+                output_path.cached_path = parent.settings["outputpath"]
+
+        open_file(output_path('.'))
 
     ## Output Button
     # widget ID

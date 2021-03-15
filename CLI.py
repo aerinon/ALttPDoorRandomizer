@@ -6,7 +6,6 @@ import textwrap
 import shlex
 import sys
 
-import source.classes.constants as CONST
 from source.classes.BabelFish import BabelFish
 
 from Utils import update_deprecated_args
@@ -16,6 +15,7 @@ class ArgumentDefaultsHelpFormatter(argparse.RawTextHelpFormatter):
 
     def _get_help_string(self, action):
         return textwrap.dedent(action.help)
+
 
 def parse_cli(argv, no_defaults=False):
     def defval(value):
@@ -28,50 +28,56 @@ def parse_cli(argv, no_defaults=False):
     fish = BabelFish(lang=lang)
 
     # we need to know how many players we have first
+    # also if we're loading our own settings file, we should do that now
     parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('--settingsfile', help="input json file of settings", type=str)
     parser.add_argument('--multi', default=defval(settings["multi"]), type=lambda value: min(max(int(value), 1), 255))
     multiargs, _ = parser.parse_known_args(argv)
+
+    if multiargs.settingsfile:
+        settings = apply_settings_file(settings, multiargs.settingsfile)
 
     parser = argparse.ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
 
     # get args
     args = []
-    with open(os.path.join("resources","app","cli","args.json")) as argsFile:
-      args = json.load(argsFile)
-      for arg in args:
-        argdata = args[arg]
-        argname = "--" + arg
-        argatts = {}
-        argatts["help"] = "(default: %(default)s)"
-        if "action" in argdata:
-          argatts["action"] = argdata["action"]
-        if "choices" in argdata:
-          argatts["choices"] = argdata["choices"]
-          argatts["const"] = argdata["choices"][0]
-          argatts["default"] = argdata["choices"][0]
-          argatts["nargs"] = "?"
-        if arg in settings:
-          default = settings[arg]
-          if "type" in argdata and argdata["type"] == "bool":
-              default = settings[arg] != 0
-          argatts["default"] = defval(default)
-        arghelp = fish.translate("cli","help",arg)
-        if "help" in argdata and argdata["help"] == "suppress":
-          argatts["help"] = argparse.SUPPRESS
-        elif not isinstance(arghelp,str):
-          argatts["help"] = '\n'.join(arghelp).replace("\\'","'")
-        else:
-          argatts["help"] = arghelp + " " + argatts["help"]
-        parser.add_argument(argname,**argatts)
+    with open(os.path.join("resources", "app", "cli", "args.json")) as argsFile:
+        args = json.load(argsFile)
+        for arg in args:
+            argdata = args[arg]
+            argname = "--" + arg
+            argatts = {}
+            argatts["help"] = "(default: %(default)s)"
+            if "action" in argdata:
+                argatts["action"] = argdata["action"]
+            if "choices" in argdata:
+                argatts["choices"] = argdata["choices"]
+                argatts["const"] = argdata["choices"][0]
+                argatts["default"] = argdata["choices"][0]
+                argatts["nargs"] = "?"
+            if arg in settings:
+                default = settings[arg]
+                if "type" in argdata and argdata["type"] == "bool":
+                    default = settings[arg] != 0
+                argatts["default"] = defval(default)
+            arghelp = fish.translate("cli", "help", arg)
+            if "help" in argdata and argdata["help"] == "suppress":
+                argatts["help"] = argparse.SUPPRESS
+            elif not isinstance(arghelp, str):
+                argatts["help"] = '\n'.join(arghelp).replace("\\'", "'")
+            else:
+                argatts["help"] = arghelp + " " + argatts["help"]
+            parser.add_argument(argname, **argatts)
 
-    parser.add_argument('--seed', default=defval(int(settings["seed"]) if settings["seed"] != "" and settings["seed"] is not None else None), help="\n".join(fish.translate("cli","help","seed")), type=int)
-    parser.add_argument('--count', default=defval(int(settings["count"]) if settings["count"] != "" and settings["count"] is not None else 1), help="\n".join(fish.translate("cli","help","count")), type=int)
+    parser.add_argument('--seed', default=defval(int(settings["seed"]) if settings["seed"] != "" and settings["seed"] is not None else None), help="\n".join(fish.translate("cli", "help", "seed")), type=int)
+    parser.add_argument('--count', default=defval(int(settings["count"]) if settings["count"] != "" and settings["count"] is not None else 1), help="\n".join(fish.translate("cli", "help", "count")), type=int)
     parser.add_argument('--customitemarray', default={}, help=argparse.SUPPRESS)
 
     # included for backwards compatibility
     parser.add_argument('--beemizer', default=defval(settings["beemizer"]), type=lambda value: min(max(int(value), 0), 4))
     parser.add_argument('--multi', default=defval(settings["multi"]), type=lambda value: min(max(int(value), 1), 255))
     parser.add_argument('--teams', default=defval(1), type=lambda value: max(int(value), 1))
+    parser.add_argument('--settingsfile', dest="filename", help="input json file of settings", type=str)
 
     if multiargs.multi:
         for player in range(1, multiargs.multi + 1):
@@ -85,7 +91,7 @@ def parse_cli(argv, no_defaults=False):
     if multiargs.multi:
         defaults = copy.deepcopy(ret)
         for player in range(1, multiargs.multi + 1):
-            playerargs = parse_cli(shlex.split(getattr(ret,f"p{player}")), True)
+            playerargs = parse_cli(shlex.split(getattr(ret, f"p{player}")), True)
 
             for name in ['logic', 'mode', 'swords', 'goal', 'difficulty', 'item_functionality',
                          'shuffle', 'door_shuffle', 'intensity', 'crystals_ganon', 'crystals_gt', 'openpyramid',
@@ -101,6 +107,15 @@ def parse_cli(argv, no_defaults=False):
                     getattr(ret, name)[player] = value
 
     return ret
+
+
+def apply_settings_file(settings, settings_path):
+    if os.path.exists(settings_path):
+        with open(settings_path) as json_file:
+            data = json.load(json_file)
+            for k, v in data.items():
+                settings[k] = v
+    return settings
 
 
 def parse_settings():
@@ -157,7 +172,7 @@ def parse_settings():
         "quickswap": False,
         "heartcolor": "red",
         "heartbeep": "normal",
-        "sprite": os.path.join(".","data","sprites","official","001.link.1.zspr"),
+        "sprite": os.path.join(".", "data", "sprites", "official", "001.link.1.zspr"),
         "fastmenu": "normal",
         "ow_palettes": "default",
         "uw_palettes": "default",
@@ -263,17 +278,15 @@ def parse_settings():
 
     # read saved settings file if it exists and set these
     settings_path = os.path.join(".", "resources", "user", "settings.json")
-    if os.path.exists(settings_path):
-        with(open(settings_path)) as json_file:
-            data = json.load(json_file)
-            for k, v in data.items():
-                settings[k] = v
+    settings = apply_settings_file(settings, settings_path)
     return settings
 
 # Priority fallback is:
 #  1: CLI
-#  2: Settings file
+#  2: Settings file(s)
 #  3: Canned defaults
+
+
 def get_args_priority(settings_args, gui_args, cli_args):
     args = {}
     args["settings"] = parse_settings() if settings_args is None else settings_args
@@ -300,7 +313,7 @@ def get_args_priority(settings_args, gui_args, cli_args):
     for k in vars(args["cli"]):
         load_doesnt_have_key = k not in args["load"]
         cli_val = cli[k]
-        if isinstance(cli_val,dict) and 1 in cli_val:
+        if isinstance(cli_val, dict) and 1 in cli_val:
             cli_val = cli_val[1]
         different_val = (k in args["load"] and k in cli) and (str(args["load"][k]) != str(cli_val))
         cli_has_empty_dict = k in cli and isinstance(cli_val, dict) and len(cli_val) == 0
@@ -309,9 +322,9 @@ def get_args_priority(settings_args, gui_args, cli_args):
                 args["load"][k] = cli_val
 
     newArgs = {}
-    for key in [ "settings", "gui", "cli", "load" ]:
+    for key in ["settings", "gui", "cli", "load"]:
         if args[key]:
-            if isinstance(args[key],dict):
+            if isinstance(args[key], dict):
                 newArgs[key] = argparse.Namespace(**args[key])
             else:
                 newArgs[key] = args[key]

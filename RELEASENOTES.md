@@ -1,5 +1,6 @@
 # Notes
 
+* Added support for a settings file so SahasrahBot and the main website can use it easier. (Thanks Synack)
 * You'll need to download sprites separately from the official website using the "Update official sprites" button on
  the sprite picker in the GUI 
 
