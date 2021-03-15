@@ -24,6 +24,20 @@ SETTINGS = {
     'futuro': [True, False]
 }
 
+SETTINGS = {
+    'mode': ['open'],
+    'goal': ['ganon'],
+    'swords': ['random'],
+    'shuffle': ['vanilla'],
+    'accessibility': [True, False],
+    'difficulty': [True, False],
+    'shufflepots': [True, False],
+    'keydropshuffle': [True, False],
+    'keysanity': [True, False],
+    'retro': [True, False],
+    'futuro': [True, False]
+}
+
 optionsList = []
 for sett,options in SETTINGS.items():
     for option in options:
@@ -213,9 +227,10 @@ if __name__ == "__main__":
 
     cpu_threads = args.cpu_threads
 
-    for dr in [['vanilla', args.count if args.count else 2, 1],
-               ['basic', args.count if args.count else 5, 1],
-               ['crossed', args.count if args.count else 10, 1]]:
+#    for dr in [['vanilla', args.count if args.count else 2, 1],
+#               ['basic', args.count if args.count else 5, 1],
+#               ['crossed', args.count if args.count else 10, 1]]:
+    for dr in [['vanilla', args.count if args.count else 2, 1]]:
 
         for tense in range(1, dr[2] + 1):
             args = argparse.Namespace()
