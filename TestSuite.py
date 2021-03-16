@@ -12,8 +12,8 @@ py_version = f"{sys.version_info.major}.{sys.version_info.minor}"
 
 SETTINGS = {
     'mode': ['open', 'standard', 'inverted'],
-    'goal': ['ganon', 'pedestal', 'triforcehunt'],
-    'swords': ['random', 'swordless'],
+    'goal': ['ganon', 'pedestal', 'triforcehunt', 'crystals', 'dungeons'],
+    'swords': ['random', 'swordless', 'assured'],
     'shuffle': ['vanilla','simple','restricted','full','dungeonssimple','dungeonsfull', 'crossed','insanity'],
     'accessibility': [True, False],
     'difficulty': [True, False],
@@ -25,17 +25,17 @@ SETTINGS = {
 }
 
 SETTINGS = {
-    'mode': ['standard'],
-    'goal': ['ganon', 'pedestal', 'triforcehunt'],
-    'swords': ['random', 'vanilla'],
-    'shuffle': ['dungeonsfull'],
-    'accessibility': [True, False],
-    'difficulty': [True, False],
-    'shufflepots': [True, False],
-    'keydropshuffle': [True, False],
-    'keysanity': [True, False],
-    'retro': [True, False],
-    'futuro': [True, False]
+    'mode': ['open'],
+    'goal': ['ganon'],
+    'swords': ['random'],
+    'shuffle': ['vanilla'],
+    'accessibility': [True],
+    'difficulty': [False],
+    'shufflepots': [False],
+    'keydropshuffle': [True],
+    'keysanity': [False],
+    'retro': [True],
+    'futuro': [False]
 }
 
 optionsList = []
@@ -46,14 +46,7 @@ for sett,options in SETTINGS.items():
         else:
             optionsList.append('{}-{}'.format(sett,str(option)))
 
-headerList = []
-for sett,options in SETTINGS.items():
-    for option in options:
-        if isinstance(option, str):
-            headerList.append(f'{option}')
-        else:
-            if option:
-                headerList.append(f'{sett}')
+headerList = list(SETTINGS.keys())
 
 def main(args=None):
     successes = []
