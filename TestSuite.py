@@ -21,21 +21,23 @@ SETTINGS = {
     'keydropshuffle': [True, False],
     'keysanity': [True, False],
     'retro': [True, False],
-    'futuro': [True, False]
+    'futuro': [True, False],
+    'shopsanity': [True, False]
 }
 
 SETTINGS = {
-    'mode': ['open'],
+    'mode': ['open', 'inverted'],
     'goal': ['ganon'],
     'swords': ['random'],
-    'shuffle': ['vanilla'],
+    'shuffle': ['vanilla','crossed'],
     'accessibility': [True],
     'difficulty': [False],
     'shufflepots': [False],
-    'keydropshuffle': [True],
-    'keysanity': [False],
-    'retro': [True],
-    'futuro': [False]
+    'keydropshuffle': [True, False],
+    'keysanity': [True, False],
+    'retro': [False],
+    'futuro': [True, False],
+    'shopsanity': [True, False]
 }
 
 optionsList = []
@@ -89,53 +91,59 @@ def main(args=None):
                                     for keysanity in SETTINGS['keysanity']:
                                         for retro in SETTINGS['retro']:
                                             for futuro in SETTINGS['futuro']:
-                                                commands = ''
-                                                name = []
-                                                commands = commands + f' --mode {mode}'
-                                                name.append(mode)
-                                                commands = commands + f' --goal {goal}'
-                                                name.append(goal)
-                                                commands = commands + f' --swords {swords}'
-                                                name.append(swords)
-                                                commands = commands + f' --shuffle {shuffle}'
-                                                name.append(shuffle)
-                                                if difficulty:
-                                                    commands = commands + f' --difficulty expert'
-                                                    commands = commands + f' --item_functionality expert'
-                                                    name.append('difficulty-True')
-                                                else:
-                                                    name.append('difficulty-False')
-                                                if shufflepots:
-                                                    commands = commands + f' --shufflepots'
-                                                    name.append('shufflepots-True')
-                                                else:
-                                                    name.append('shufflepots-False')
-                                                if not accessibility:
-                                                    commands = commands + f' --accessibility none'
-                                                    name.append('accessibility-False')
-                                                else:
-                                                    name.append('accessibility-True')
-                                                if keydropshuffle:
-                                                    commands = commands + f' --keydropshuffle'
-                                                    name.append('keydropshuffle-True')
-                                                else:
-                                                    name.append('keydropshuffle-False')
-                                                if keysanity:
-                                                    commands = commands + f' --keysanity'
-                                                    name.append('keysanity-True')
-                                                else:
-                                                    name.append('keysanity-False')
-                                                if retro:
-                                                    commands = commands + f' --retro'
-                                                    name.append('retro-True')
-                                                else:
-                                                    name.append('retro-False')
-                                                if futuro:
-                                                    commands = commands + f' --futuro'
-                                                    name.append('futuro-True')
-                                                else:
-                                                    name.append('futuro-False')
-                                                test(name, commands)
+                                                for shopsanity in SETTINGS['shopsanity']:
+                                                    commands = ''
+                                                    name = []
+                                                    commands = commands + f' --mode {mode}'
+                                                    name.append(mode)
+                                                    commands = commands + f' --goal {goal}'
+                                                    name.append(goal)
+                                                    commands = commands + f' --swords {swords}'
+                                                    name.append(swords)
+                                                    commands = commands + f' --shuffle {shuffle}'
+                                                    name.append(shuffle)
+                                                    if difficulty:
+                                                        commands = commands + f' --difficulty expert'
+                                                        commands = commands + f' --item_functionality expert'
+                                                        name.append('difficulty-True')
+                                                    else:
+                                                        name.append('difficulty-False')
+                                                    if shufflepots:
+                                                        commands = commands + f' --shufflepots'
+                                                        name.append('shufflepots-True')
+                                                    else:
+                                                        name.append('shufflepots-False')
+                                                    if not accessibility:
+                                                        commands = commands + f' --accessibility none'
+                                                        name.append('accessibility-False')
+                                                    else:
+                                                        name.append('accessibility-True')
+                                                    if keydropshuffle:
+                                                        commands = commands + f' --keydropshuffle'
+                                                        name.append('keydropshuffle-True')
+                                                    else:
+                                                        name.append('keydropshuffle-False')
+                                                    if keysanity:
+                                                        commands = commands + f' --keysanity'
+                                                        name.append('keysanity-True')
+                                                    else:
+                                                        name.append('keysanity-False')
+                                                    if retro:
+                                                        commands = commands + f' --retro'
+                                                        name.append('retro-True')
+                                                    else:
+                                                        name.append('retro-False')
+                                                    if futuro:
+                                                        commands = commands + f' --futuro'
+                                                        name.append('futuro-True')
+                                                    else:
+                                                        name.append('futuro-False')
+                                                    if shopsanity:
+                                                        commands = commands + f' --shopsanity'
+                                                        name.append('shopsanity-True')
+                                                    else:
+                                                        name.append('shopsanity-False')
+                                                    test(name, commands)
 
 #    test("Vanilla   ", "--futuro --shuffle vanilla")
 #    test("Basic     ", "--futuro --retro --shuffle vanilla")
@@ -220,10 +228,10 @@ if __name__ == "__main__":
 
     cpu_threads = args.cpu_threads
 
-#    for dr in [['vanilla', args.count if args.count else 2, 1],
-#               ['basic', args.count if args.count else 5, 1],
-#               ['crossed', args.count if args.count else 10, 1]]:
-    for dr in [['vanilla', args.count if args.count else 2, 1]]:
+    for dr in [['vanilla', args.count if args.count else 2, 1],
+               ['basic', args.count if args.count else 5, 1],
+               ['crossed', args.count if args.count else 10, 1]]:
+#    for dr in [['basic', args.count if args.count else 2, 1]]:
 
         for tense in range(1, dr[2] + 1):
             args = argparse.Namespace()
