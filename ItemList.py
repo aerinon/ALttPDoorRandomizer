@@ -286,7 +286,7 @@ def generate_itempool(world, player):
                     if not found_sword and world.swords[player] != 'swordless':
                         found_sword = True
                         possible_weapons.append(item)
-                if item in ['Progressive Bow', 'Bow'] and not found_bow:
+                if item in ['Progressive Bow', 'Bow'] and not world.retro[player] and not found_bow:
                     found_bow = True
                     possible_weapons.append(item)
                 if item in ['Hammer']:
