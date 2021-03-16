@@ -301,9 +301,8 @@ def generate_itempool(world, player):
                         possible_weapons.append(item)
             starting_weapon = random.choice(possible_weapons)
             placed_items["Link's Uncle"] = starting_weapon
-            placed_items["Secret Passage"] = 'Bow'
             pool.remove(starting_weapon)
-            pool.remove('Bow')
+            print(starting_weapon)
         if placed_items["Link's Uncle"] in ['Bow', 'Progressive Bow', 'Bombs (10)', 'Bomb Upgrade (+10)', 'Cane of Somaria', 'Cane of Byrna'] and world.enemy_health[player] not in ['default', 'easy']:
             world.escape_assist[player].append('bombs')
 
