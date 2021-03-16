@@ -92,9 +92,6 @@ class World(object):
                 self.retro[player] = True
             def set_player_attr(attr, val):
                 self.__dict__.setdefault(attr, {})[player] = val
-            # Futuro doesn't support standard start
-            if self.futuro[player] and self.mode[player] == 'standard':
-                self.mode[player] = "open" 
             set_player_attr('_region_cache', {})
             set_player_attr('player_names', [])
             set_player_attr('remote_items', False)

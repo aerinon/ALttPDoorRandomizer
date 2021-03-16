@@ -290,17 +290,23 @@ def generate_itempool(world, player):
                 if item in ['Progressive Bow', 'Bow'] and not found_bow:
                     found_bow = True
                     possible_weapons.append(item)
-                if item in ['Hammer', 'Fire Rod', 'Cane of Somaria', 'Cane of Byrna']:
+                if item in ['Hammer']:
                     if item not in possible_weapons:
                         possible_weapons.append(item)
-                if item in ['Bombs (10)']:
+                if not world.futuro[player] and item in ['Fire Rod', 'Cane of Somaria', 'Cane of Byrna']:
+                    if item not in possible_weapons:
+                        possible_weapons.append(item)
+                if item in ['Bomb Upgrade (+10)' if world.futuro[player] else 'Bombs (10)']:
                     if item not in possible_weapons and world.doorShuffle[player] != 'crossed':
                         possible_weapons.append(item)
             starting_weapon = random.choice(possible_weapons)
             placed_items["Link's Uncle"] = starting_weapon
+            placed_items["Secret Passage"] = 'Bow'
             pool.remove(starting_weapon)
-        if placed_items["Link's Uncle"] in ['Bow', 'Progressive Bow', 'Bombs (10)', 'Cane of Somaria', 'Cane of Byrna'] and world.enemy_health[player] not in ['default', 'easy']:
+            pool.remove('Bow')
+        if placed_items["Link's Uncle"] in ['Bow', 'Progressive Bow', 'Bombs (10)', 'Bomb Upgrade (+10)', 'Cane of Somaria', 'Cane of Byrna'] and world.enemy_health[player] not in ['default', 'easy']:
             world.escape_assist[player].append('bombs')
+
 
     for (location, item) in placed_items.items():
         world.push_item(world.get_location(location, player), ItemFactory(item, player), False)

@@ -1438,7 +1438,7 @@ def patch_rom(world, rom, player, team, enemized):
             rom.write_bytes(0x180188, [0, 0, 10])  # Zelda respawn refills (magic, bombs, arrows)
             rom.write_bytes(0x18018B, [0, 0, 10])  # Mantle respawn refills (magic, bombs, arrows)
             bow_max, bow_small = 70, 10
-        elif uncle_location.item is not None and uncle_location.item.name in ['Bombs (10)']:
+        elif uncle_location.item is not None and uncle_location.item.name in ['Bomb Upgrade (+10)' if world.futuro[player] else 'Bombs (10)']:
             rom.write_byte(0x18004E, 2)  # Escape Fill (bombs)
             rom.write_bytes(0x180185, [0, 50, 0])  # Uncle respawn refills (magic, bombs, arrows)
             rom.write_bytes(0x180188, [0, 3, 0])  # Zelda respawn refills (magic, bombs, arrows)
