@@ -199,7 +199,7 @@ def generate_itempool(world, player):
         region = world.get_region('Light World',player)
 
         loc = Location(player, "Murahdahla", parent=region)
-        loc.access_rule = lambda state: state.item_count('Triforce Piece', player) + state.item_count('Power Star', player) >= state.world.treasure_hunt_count[player]
+#        loc.access_rule = lambda state: ( state.item_count('Triforce Piece', player) + state.item_count('Power Star', player)) >= state.world.treasure_hunt_count[player]
         region.locations.append(loc)
         world.dynamic_locations.append(loc)
 
@@ -302,7 +302,6 @@ def generate_itempool(world, player):
             starting_weapon = random.choice(possible_weapons)
             placed_items["Link's Uncle"] = starting_weapon
             pool.remove(starting_weapon)
-            print(starting_weapon)
         if placed_items["Link's Uncle"] in ['Bow', 'Progressive Bow', 'Bombs (10)', 'Bomb Upgrade (+10)', 'Cane of Somaria', 'Cane of Byrna'] and world.enemy_health[player] not in ['default', 'easy']:
             world.escape_assist[player].append('bombs')
 
