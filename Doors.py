@@ -1078,7 +1078,6 @@ def create_doors(world, player):
         create_door(player, 'GT Speed Torch SE', Nrml).dir(So, 0x8d, Right, High).trap(0x4).pos(0).portal(X, 0x02),
         create_door(player, 'GT Crystal Conveyor NE', Nrml).dir(No, 0x9d, Right, High).pos(0).kill(),
         create_door(player, 'GT Crystal Conveyor to Corner Barrier - Blue', Lgcl),
-        create_door(player, 'GT Crystal Conveyor to Left Bypass', Lgcl),
         create_door(player, 'GT Crystal Conveyor to Ranged Crystal', Lgcl),
         create_door(player, 'GT Crystal Conveyor Corner to Left Bypass', Lgcl),
         create_door(player, 'GT Crystal Conveyor Corner to Barrier - Blue', Lgcl),
