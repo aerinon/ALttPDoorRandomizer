@@ -334,15 +334,15 @@ def update_deprecated_args(args):
             else:
                 args.no_hints = args.hints not in truthy  # dest = !src
 
-        # Spoiler defaults to FALSE
-        # Don't do: No
-        # Do:       Yes
-        if "create_spoiler" in argVars:
-            args.suppress_spoiler = not args.create_spoiler in truthy
+        # Spoiler defaults to TRUE
         # Don't do: Yes
         # Do:       No
         if "suppress_spoiler" in argVars:
             args.create_spoiler = not args.suppress_spoiler in truthy
+        # Don't do: No
+        # Do:       Yes
+        if "create_spoiler" in argVars:
+            args.suppress_spoiler = not args.create_spoiler in truthy
 
         # ROM defaults to TRUE
         # Don't do: Yes
@@ -459,7 +459,8 @@ def extract_data_from_us_rom(rom):
     with open(rom, 'rb') as stream:
         rom_data = bytearray(stream.read())
 
-    rooms = [0x9a, 0x69, 0x78, 0x79, 0x7a, 0x88, 0x8a, 0xad]
+    rooms = [0x1c, 0x1d, 0x4e]
+    # rooms = [0x9a, 0x69, 0x78, 0x79, 0x7a, 0x88, 0x8a, 0xad]
     for room in rooms:
         b2idx = room*2
         b3idx = room*3
@@ -470,11 +471,20 @@ def extract_data_from_us_rom(rom):
             header.append(rom_data[headerloc+i])
         objectptr = 0xF8000 + b3idx
         objectloc = rom_data[objectptr] + rom_data[objectptr+1]*0x100 + rom_data[objectptr+2]*0x10000
-        objectloc -= 0x100000
+        bank = rom_data[objectptr+2]
+        even = bank % 2 == 0
+        adjustment = ((bank // 2 if even else bank // 2 + 1) << 16) + (0x8000 if even else 0)
+        objectloc -= adjustment
         stop, idx = False,  0
         ffcnt = 0
         mode = 0
-        while ffcnt < 2:
+        # first two bytes
+        b1 = rom_data[objectloc+idx]
+        b2 = rom_data[objectloc+idx+1]
+        objectdata.append(b1)
+        objectdata.append(b2)
+        idx += 2
+        while ffcnt < 3:
             b1 = rom_data[objectloc+idx]
             b2 = rom_data[objectloc+idx+1]
             b3 = rom_data[objectloc+idx+2]
@@ -483,9 +493,11 @@ def extract_data_from_us_rom(rom):
             if b1 == 0xff and b2 == 0xff:
                 ffcnt += 1
                 mode = 0
-            if b1 == 0xf0 and b2 == 0xff:
+                idx += 2
+            elif b1 == 0xf0 and b2 == 0xff:
                 mode = 1
-            if not mode and ffcnt < 2:
+                idx += 2
+            elif not mode and ffcnt < 3:
                 objectdata.append(b3)
                 idx += 3
             else:
@@ -573,8 +585,9 @@ def extract_data_from_jp_rom(rom):
     with open(rom, 'rb') as stream:
         rom_data = bytearray(stream.read())
 
+    rooms = [0x1c, 0x1d, 0x4e]
     # rooms = [0x7b, 0x7c, 0x7d, 0x8b, 0x8c, 0x8d, 0x9b, 0x9c, 0x9d]
-    rooms = [0x1a, 0x2a, 0xd1]
+    # rooms = [0x1a, 0x2a, 0xd1]
     for room in rooms:
         b2idx = room*2
         b3idx = room*3
@@ -585,11 +598,20 @@ def extract_data_from_jp_rom(rom):
             header.append(rom_data[headerloc+i])
         objectptr = 0xF8000 + b3idx
         objectloc = rom_data[objectptr] + rom_data[objectptr+1]*0x100 + rom_data[objectptr+2]*0x10000
-        objectloc -= 0x100000
+        bank = rom_data[objectptr+2]
+        even = bank % 2 == 0
+        adjustment = ((bank // 2 if even else bank // 2 + 1) << 16) + (0x8000 if even else 0)
+        objectloc -= adjustment
         stop, idx = False,  0
         ffcnt = 0
         mode = 0
-        while ffcnt < 2:
+        # first two bytes
+        b1 = rom_data[objectloc+idx]
+        b2 = rom_data[objectloc+idx+1]
+        objectdata.append(b1)
+        objectdata.append(b2)
+        idx += 2
+        while ffcnt < 3:
             b1 = rom_data[objectloc+idx]
             b2 = rom_data[objectloc+idx+1]
             b3 = rom_data[objectloc+idx+2]
@@ -598,9 +620,11 @@ def extract_data_from_jp_rom(rom):
             if b1 == 0xff and b2 == 0xff:
                 ffcnt += 1
                 mode = 0
-            if b1 == 0xf0 and b2 == 0xff:
+                idx += 2
+            elif b1 == 0xf0 and b2 == 0xff:
                 mode = 1
-            if not mode and ffcnt < 2:
+                idx += 2
+            elif not mode and ffcnt < 3:
                 objectdata.append(b3)
                 idx += 3
             else:

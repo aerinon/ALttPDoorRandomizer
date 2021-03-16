@@ -204,3 +204,17 @@ ApplyScroll:
     sta $00e2, y
     sta $00e0, y
     stz $ab : sep #$30 : rts
+
+QuadrantLoadOrderBeforeScroll:
+    lda $045f : beq .end
+    lda #$08 : sta $045c ; start with opposite quadrant row
+    .end
+    jsl $0091c4 ; what we overwrote
+    rtl
+
+QuadrantLoadOrderAfterScroll:
+    lda $045f : beq .end
+    stz $045c : stz $045f ; draw other row and clear flag
+    .end
+    jsl $0091c4 ; what we overwrote
+    rtl

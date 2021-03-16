@@ -8,7 +8,7 @@ import random
 import time
 import zlib
 
-from BaseClasses import World, CollectionState, Item, Region, Location, Shop, Entrance
+from BaseClasses import World, CollectionState, Item, Region, Location, Shop, Entrance, Settings
 from Items import ItemFactory
 from KeyDoorShuffle import validate_key_placement
 from PotShuffle import shuffle_pots
@@ -17,15 +17,17 @@ from InvertedRegions import create_inverted_regions, mark_dark_world_regions
 from EntranceShuffle import link_entrances, link_inverted_entrances
 from Rom import patch_rom, patch_race_rom, patch_enemizer, apply_rom_settings, LocalRom, JsonRom, get_hash_string
 from Doors import create_doors
-from DoorShuffle import link_doors, connect_portal_copy
+from DoorShuffle import link_doors, connect_portal
 from RoomData import create_rooms
 from Rules import set_rules
 from Dungeons import create_dungeons, fill_dungeons, fill_dungeons_restrictive
-from Fill import distribute_items_cutoff, distribute_items_staleness, distribute_items_restrictive, flood_items, balance_multiworld_progression
-from ItemList import generate_itempool, difficulties, fill_prizes, fill_specific_items
+from Fill import distribute_items_cutoff, distribute_items_staleness, distribute_items_restrictive, flood_items
+from Fill import sell_potions, sell_keys, balance_multiworld_progression, balance_money_progression, lock_shop_locations
+from ItemList import generate_itempool, difficulties, fill_prizes, customize_shops
 from Utils import output_path, parse_player_names
 
-__version__ = '0.2.1-dev'
+__version__ = '0.3.1.5-u'
+
 
 class EnemizerError(RuntimeError):
     pass
@@ -38,7 +40,14 @@ def main(args, seed=None, fish=None):
 
     start = time.perf_counter()
 
+    # if args.securerandom:
+    #     random.use_secure()
+
     # initialize the world
+    if args.code:
+        for player, code in args.code.items():
+            if code:
+                Settings.adjust_args_from_code(code, player, args)
     world = World(args.multi, args.shuffle, args.door_shuffle, args.logic, args.mode, args.swords,
                   args.difficulty, args.item_functionality, args.timer, args.progressive, args.goal, args.algorithm,
                   args.accessibility, args.shuffleganon, args.retro, args.futuro, args.custom, args.customitemarray, args.hints)
@@ -49,6 +58,9 @@ def main(args, seed=None, fish=None):
     else:
         world.seed = int(seed)
     random.seed(world.seed)
+
+    if args.securerandom:
+        world.seed = None
 
     world.remote_items = args.remote_items.copy()
     world.mapshuffle = args.mapshuffle.copy()
@@ -70,6 +82,7 @@ def main(args, seed=None, fish=None):
     world.dungeon_counters = args.dungeon_counters.copy()
     world.potshuffle = args.shufflepots.copy()
     world.fish = fish
+    world.shopsanity = args.shopsanity.copy()
     world.keydropshuffle = args.keydropshuffle.copy()
     world.mixed_travel = args.mixed_travel.copy()
     world.standardize_palettes = args.standardize_palettes.copy()
@@ -147,6 +160,15 @@ def main(args, seed=None, fish=None):
     for player in range(1, world.players + 1):
         set_rules(world, player)
 
+    for player in range(1, world.players + 1):
+        if world.shopsanity[player]:
+            sell_potions(world, player)
+            if world.retro[player]:
+                sell_keys(world, player)
+        else:
+            lock_shop_locations(world, player)
+
+
     logger.info(world.fish.translate("cli","cli","placing.dungeon.prizes"))
 
     fill_prizes(world)
@@ -205,7 +227,12 @@ def main(args, seed=None, fish=None):
     if not world.can_beat_game():
         raise RuntimeError(world.fish.translate("cli","cli","cannot.beat.game"))
 
-    outfilebase = 'DR_%s' % (args.outputname if args.outputname else world.seed)
+    for player in range(1, world.players+1):
+        if world.shopsanity[player]:
+            customize_shops(world, player)
+    balance_money_progression(world)
+
+    outfilebase = f'DR_{args.outputname if args.outputname else world.seed}'
 
     rom_names = []
     jsonout = {}
@@ -238,7 +265,7 @@ def main(args, seed=None, fish=None):
                         logging.warning(enemizerMsg)
                         raise EnemizerError(enemizerMsg)
 
-                patch_rom(world, rom, player, team, enemized)
+                patch_rom(world, rom, player, team, enemized, bool(args.outputname))
 
                 if args.race:
                     patch_race_rom(rom)
@@ -251,61 +278,12 @@ def main(args, seed=None, fish=None):
                 if args.jsonout:
                     jsonout[f'patch_t{team}_p{player}'] = rom.patches
                 else:
-                    mcsb_name = ''
-                    if all([world.mapshuffle[player], world.compassshuffle[player], world.keyshuffle[player], world.bigkeyshuffle[player]]):
-                        mcsb_name = '-keysanity'
-                    elif [world.mapshuffle[player], world.compassshuffle[player], world.keyshuffle[player], world.bigkeyshuffle[player]].count(True) == 1:
-                        mcsb_name = '-mapshuffle' if world.mapshuffle[player] else '-compassshuffle' if world.compassshuffle[player] else '-keyshuffle' if world.keyshuffle[player] else '-bigkeyshuffle'
-                    elif any([world.mapshuffle[player], world.compassshuffle[player], world.keyshuffle[player], world.bigkeyshuffle[player]]):
-                        mcsb_name = '-%s%s%s%sshuffle' % (
-                        'M' if world.mapshuffle[player] else '', 'C' if world.compassshuffle[player] else '',
-                        'S' if world.keyshuffle[player] else '', 'B' if world.bigkeyshuffle[player] else '')
-
                     outfilepname = f'_T{team+1}' if world.teams > 1 else ''
                     if world.players > 1:
                         outfilepname += f'_P{player}'
                     if world.players > 1 or world.teams > 1:
                         outfilepname += f"_{world.player_names[player][team].replace(' ', '_')}" if world.player_names[player][team] != 'Player %d' % player else ''
-                    outfilestuffs = {
-                      "logic": world.logic[player],                                   # 0
-                      "difficulty": world.difficulty[player],                         # 1
-                      "difficulty_adjustments": world.difficulty_adjustments[player], # 2
-                      "mode": world.mode[player],                                     # 3
-                      "goal": world.goal[player],                                     # 4
-                      "timer": str(world.timer),                                      # 5
-                      "shuffle": world.shuffle[player],                               # 6
-                      "doorShuffle": world.doorShuffle[player],                       # 7
-                      "algorithm": world.algorithm,                                   # 8
-                      "mscb": mcsb_name,                                              # 9
-                      "retro": world.retro[player],                                   # A
-                      "futuro": world.futuro[player],                                 # B
-                      "progressive": world.progressive,                               # C
-                      "hints": 'True' if world.hints[player] else 'False'             # D
-                    }
-                    #                  0  1  2  3  4 5  6  7  8 9 A B C D
-                    outfilesuffix = ('_%s_%s-%s-%s-%s%s_%s_%s-%s%s%s%s%s%s' % (
-                      #  0          1      2      3    4     5    6      7     8        9         A     B        C         D
-                      # _noglitches_normal-normal-open-ganon-ohko_simple_basic-balanced-keysanity-retro-futuro-prog_swords-nohints
-                      # _noglitches_normal-normal-open-ganon     _simple_basic-balanced-keysanity-retro
-                      # _noglitches_normal-normal-open-ganon     _simple_basic-balanced-keysanity             -prog_swords
-                      # _noglitches_normal-normal-open-ganon     _simple_basic-balanced-keysanity                         -nohints
-                      outfilestuffs["logic"], # 0
-
-                      outfilestuffs["difficulty"],             # 1
-                      outfilestuffs["difficulty_adjustments"], # 2
-                      outfilestuffs["mode"],                   # 3
-                      outfilestuffs["goal"],                   # 4
-                      "" if outfilestuffs["timer"] in ['False', 'none', 'display'] else "-" + outfilestuffs["timer"], # 5
-
-                      outfilestuffs["shuffle"],     # 6
-                      outfilestuffs["doorShuffle"], # 7
-                      outfilestuffs["algorithm"],   # 8
-                      outfilestuffs["mscb"],        # 9
-
-                      "-retro" if outfilestuffs["retro"] == "True" else "", # A
-                      "-futuro" if outfilestuffs["futuro"] == "True" else "", # B
-                      "-prog_" + outfilestuffs["progressive"] if outfilestuffs["progressive"] in ['off', 'random'] else "", # C
-                      "-nohints" if not outfilestuffs["hints"] == "True" else "")) if not args.outputname else '' # D
+                    outfilesuffix = f'_{Settings.make_code(world, player)}' if not args.outputname else ''
                     rom.write_to_file(output_path(f'{outfilebase}{outfilepname}{outfilesuffix}.sfc'))
 
         if world.players > 1:
@@ -397,6 +375,7 @@ def copy_world(world):
     ret.beemizer = world.beemizer.copy()
     ret.intensity = world.intensity.copy()
     ret.experimental = world.experimental.copy()
+    ret.shopsanity = world.shopsanity.copy()
     ret.keydropshuffle = world.keydropshuffle.copy()
     ret.mixed_travel = world.mixed_travel.copy()
     ret.standardize_palettes = world.standardize_palettes.copy()
@@ -425,17 +404,19 @@ def copy_world(world):
         for level, boss in dungeon.bosses.items():
             ret.get_dungeon(dungeon.name, dungeon.player).bosses[level] = boss
 
-    for shop in world.shops:
-        copied_shop = ret.get_region(shop.region.name, shop.region.player).shop
-        copied_shop.inventory = copy.copy(shop.inventory)
+    for player in range(1, world.players + 1):
+        for shop in world.shops[player]:
+            copied_shop = ret.get_region(shop.region.name, shop.region.player).shop
+            copied_shop.inventory = copy.copy(shop.inventory)
 
     # connect copied world
+    copied_locations = {(loc.name, loc.player): loc for loc in ret.get_locations()}  # caches all locations
     for region in world.regions:
         copied_region = ret.get_region(region.name, region.player)
         copied_region.is_light_world = region.is_light_world
         copied_region.is_dark_world = region.is_dark_world
         copied_region.dungeon = region.dungeon
-        copied_region.locations = [Location(location.player, location.name, parent=copied_region) for location in region.locations]
+        copied_region.locations = [copied_locations[(location.name, location.player)] for location in region.locations]
         for entrance in region.entrances:
             ret.get_entrance(entrance.name, entrance.player).connect(copied_region)
 
@@ -479,13 +460,14 @@ def copy_world(world):
     ret.dungeon_portals = world.dungeon_portals
     for player, portals in world.dungeon_portals.items():
         for portal in portals:
-            connect_portal_copy(portal, ret, player)
+            connect_portal(portal, ret, player)
     ret.sanc_portal = world.sanc_portal
 
     for player in range(1, world.players + 1):
         set_rules(ret, player)
 
     return ret
+
 
 def copy_dynamic_regions_and_locations(world, ret):
     for region in world.dynamic_regions:
@@ -497,8 +479,9 @@ def copy_dynamic_regions_and_locations(world, ret):
         # Note: ideally exits should be copied here, but the current use case (Take anys) do not require this
 
         if region.shop:
-            new_reg.shop = Shop(new_reg, region.shop.room_id, region.shop.type, region.shop.shopkeeper_config, region.shop.custom, region.shop.locked)
-            ret.shops.append(new_reg.shop)
+            new_reg.shop = Shop(new_reg, region.shop.room_id, region.shop.type, region.shop.shopkeeper_config,
+                                region.shop.custom, region.shop.locked, region.shop.sram_address)
+            ret.shops[region.player].append(new_reg.shop)
 
     for location in world.dynamic_locations:
         new_reg = ret.get_region(location.parent_region.name, location.parent_region.player)

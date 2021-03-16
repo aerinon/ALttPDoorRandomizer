@@ -156,6 +156,11 @@ def roll_settings(weights):
     if ret.dungeon_counters == 'default':
         ret.dungeon_counters = 'pickup' if ret.door_shuffle != 'vanilla' or ret.compassshuffle == 'on' else 'off'
 
+    ret.shopsanity = get_choice('shopsanity') == 'on'
+    ret.keydropshuffle = get_choice('keydropshuffle') == 'on'
+    ret.mixed_travel = get_choice('mixed_travel') if 'mixed_travel' in weights else 'prevent'
+    ret.standardize_palettes = get_choice('standardize_palettes') if 'standardize_palettes' in weights else 'standardize'
+
     goal = get_choice('goals')
     ret.goal = {'ganon': 'ganon',
                 'fast_ganon': 'crystals',
@@ -173,6 +178,7 @@ def roll_settings(weights):
     if ret.mode == 'retro':
         ret.mode = 'open'
         ret.retro = True
+    ret.retro = get_choice('retro') == 'on'  # this overrides world_state if used
 
     ret.futuro = get_choice('futuro', weights)
 

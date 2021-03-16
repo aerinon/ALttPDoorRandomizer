@@ -2,6 +2,8 @@ import random
 import logging
 
 from BaseClasses import CollectionState
+from Items import ItemFactory
+from Regions import shop_to_location_table
 
 
 class FillError(RuntimeError):
@@ -374,6 +376,48 @@ def flood_items(world):
                 itempool.remove(item_to_place)
                 break
 
+
+def lock_shop_locations(world, player):
+    for shop, loc_names in shop_to_location_table.items():
+        for loc in loc_names:
+            world.get_location(loc, player).event = True
+            world.get_location(loc, player).locked = True
+    # I don't believe these locations exist in non-shopsanity
+    # if world.retro[player]:
+    #     for shop, loc_names in retro_shops.items():
+    #         for loc in loc_names:
+    #             world.get_location(loc, player).event = True
+    #             world.get_location(loc, player).locked = True
+
+
+def sell_potions(world, player):
+    loc_choices = []
+    for shop in world.shops[player]:
+        # potions are excluded from the cap fairy due to visual problem
+        if shop.region.name in shop_to_location_table and shop.region.name != 'Capacity Upgrade':
+            loc_choices += [world.get_location(loc, player) for loc in shop_to_location_table[shop.region.name]]
+    locations = [loc for loc in loc_choices if not loc.item]
+    for potion in ['Green Potion', 'Blue Potion', 'Red Potion']:
+        location = random.choice(locations)
+        locations.remove(location)
+        p_item = next(item for item in world.itempool if item.name == potion and item.player == player)
+        world.push_item(location, p_item, collect=False)
+        world.itempool.remove(p_item)
+
+
+def sell_keys(world, player):
+    # exclude the old man or take any caves because free keys are too good
+    shop_names = {shop.region.name: shop for shop in world.shops[player] if shop.region.name in shop_to_location_table}
+    choices = [(world.get_location(loc, player), shop) for shop in shop_names for loc in shop_to_location_table[shop]]
+    locations = [(loc, shop) for loc, shop in choices if not loc.item]
+    location, shop = random.choice(locations)
+    universal_key = next(i for i in world.itempool if i.name == 'Small Key (Universal)' and i.player == player)
+    world.push_item(location, universal_key, collect=False)
+    idx = shop_to_location_table[shop_names[shop].region.name].index(location.name)
+    shop_names[shop].add_inventory(idx, 'Small Key (Universal)', 100)
+    world.itempool.remove(universal_key)
+
+
 def balance_multiworld_progression(world):
     state = CollectionState(world)
     checked_locations = []
@@ -470,3 +514,153 @@ def balance_multiworld_progression(world):
             break
         elif not sphere_locations:
             raise RuntimeError('Not all required items reachable. Something went terribly wrong here.')
+
+
+def balance_money_progression(world):
+    logger = logging.getLogger('')
+    state = CollectionState(world)
+    unchecked_locations = world.get_locations().copy()
+    wallet = {player: 0 for player in range(1, world.players+1)}
+    kiki_check = {player: False for player in range(1, world.players+1)}
+    kiki_paid = {player: False for player in range(1, world.players+1)}
+    rooms_visited = {player: set() for player in range(1, world.players+1)}
+    balance_locations = {player: set() for player in range(1, world.players+1)}
+
+    pay_for_locations = {'Bottle Merchant': 100, 'Chest Game': 30, 'Digging Game': 80,
+                         'King Zora': 500, 'Blacksmith': 10}
+    rupee_chart = {'Rupee (1)': 1, 'Rupees (5)': 5, 'Rupees (20)': 20, 'Rupees (50)': 50,
+                   'Rupees (100)': 100, 'Rupees (300)': 300}
+    rupee_rooms = {'Eastern Rupees': 90, 'Mire Key Rupees': 45, 'Mire Shooter Rupees': 90,
+                   'TR Rupees': 270, 'PoD Dark Basement': 270}
+    acceptable_balancers = ['Bombs (3)', 'Arrows (10)', 'Bombs (10)']
+
+    def get_sphere_locations(sphere_state, locations):
+        sphere_state.sweep_for_events(key_only=True, locations=locations)
+        return [loc for loc in locations if sphere_state.can_reach(loc) and sphere_state.not_flooding_a_key(sphere_state.world, loc)]
+
+    def interesting_item(location, item, world, player):
+        if item.advancement:
+            return True
+        if item.type is not None or item.name.startswith('Rupee'):
+            return True
+        if item.name in ['Progressive Armor', 'Blue Mail', 'Red Mail']:
+            return True
+        if world.retro[player] and (item.name in ['Single Arrow', 'Small Key (Universal)']):
+            return True
+        if location.name in pay_for_locations:
+            return True
+        return False
+
+    def kiki_required(state, location):
+        path = state.path[location.parent_region]
+        if path:
+            while path[1]:
+                if path[0] == 'Palace of Darkness':
+                    return True
+                path = path[1]
+        return False
+
+    done = False
+    while not done:
+        sphere_costs = {player: 0 for player in range(1, world.players+1)}
+        locked_by_money = {player: set() for player in range(1, world.players+1)}
+        sphere_locations = get_sphere_locations(state, unchecked_locations)
+        checked_locations = []
+        for player in range(1, world.players+1):
+            kiki_payable = state.prog_items[('Moon Pearl', player)] > 0 or world.mode[player] == 'inverted'
+            if kiki_payable and world.get_region('East Dark World', player) in state.reachable_regions[player]:
+                if not kiki_paid[player]:
+                    kiki_check[player] = True
+                    sphere_costs[player] += 110
+                    locked_by_money[player].add('Kiki')
+        for location in sphere_locations:
+            location_free, loc_player = True, location.player
+            if location.parent_region.name in shop_to_location_table and location.name != 'Potion Shop':
+                slot = shop_to_location_table[location.parent_region.name].index(location.name)
+                shop = location.parent_region.shop
+                shop_item = shop.inventory[slot]
+                if interesting_item(location, location.item, world, location.item.player):
+                    sphere_costs[loc_player] += shop_item['price']
+                    location_free = False
+                    locked_by_money[loc_player].add(location)
+            elif location.name in pay_for_locations:
+                sphere_costs[loc_player] += pay_for_locations[location.name]
+                location_free = False
+                locked_by_money[loc_player].add(location)
+            if kiki_check[loc_player] and not kiki_paid[loc_player] and kiki_required(state, location):
+                locked_by_money[loc_player].add(location)
+                location_free = False
+            if location_free:
+                state.collect(location.item, True, location)
+                unchecked_locations.remove(location)
+                if location.item.name.startswith('Rupee'):
+                    wallet[location.item.player] += rupee_chart[location.item.name]
+                    if location.item.name != 'Rupees (300)':
+                        balance_locations[location.item.player].add(location)
+                if interesting_item(location, location.item, world, location.item.player):
+                    checked_locations.append(location)
+                elif location.item.name in acceptable_balancers:
+                    balance_locations[location.item.player].add(location)
+        for room, income in rupee_rooms.items():
+            for player in range(1, world.players+1):
+                if room not in rooms_visited[player] and world.get_region(room, player) in state.reachable_regions[player]:
+                    wallet[player] += income
+                    rooms_visited[player].add(room)
+        if checked_locations:
+            if world.has_beaten_game(state):
+                done = True
+                continue
+            # else go to next sphere
+        else:
+            # check for solvent players
+            solvent = set()
+            insolvent = set()
+            for player in range(1, world.players+1):
+                if wallet[player] >= sphere_costs[player] > 0:
+                    solvent.add(player)
+                if sphere_costs[player] > 0 and sphere_costs[player] > wallet[player]:
+                    insolvent.add(player)
+            if len(solvent) == 0:
+                target_player = min(insolvent, key=lambda p: sphere_costs[p]-wallet[p])
+                difference = sphere_costs[target_player]-wallet[target_player]
+                logger.debug(f'Money balancing needed: Player {target_player} short {difference}')
+                while difference > 0:
+                    swap_targets = [x for x in unchecked_locations if x not in sphere_locations and x.item.name.startswith('Rupees') and x.item.player == target_player]
+                    if len(swap_targets) == 0:
+                        best_swap, best_value = None, 300
+                    else:
+                        best_swap = max(swap_targets, key=lambda t: rupee_chart[t.item.name])
+                        best_value = rupee_chart[best_swap.item.name]
+                    increase_targets = [x for x in balance_locations[target_player] if x.item.name in rupee_chart and rupee_chart[x.item.name] < best_value]
+                    if len(increase_targets) == 0:
+                        increase_targets = [x for x in balance_locations[target_player] if (rupee_chart[x.item.name] if x.item.name in rupee_chart else 0) < best_value]
+                    if len(increase_targets) == 0:
+                        raise Exception('No early sphere swaps for rupees - money grind would be required - bailing for now')
+                    best_target = min(increase_targets, key=lambda t: rupee_chart[t.item.name] if t.item.name in rupee_chart else 0)
+                    old_value = rupee_chart[best_target.item.name] if best_target.item.name in rupee_chart else 0
+                    if best_swap is None:
+                        logger.debug(f'Upgrading {best_target.item.name} @ {best_target.name} for 300 Rupees')
+                        best_target.item = ItemFactory('Rupees (300)', best_target.item.player)
+                        best_target.item.location = best_target
+                    else:
+                        old_item = best_target.item
+                        logger.debug(f'Swapping {best_target.item.name} @ {best_target.name} for {best_swap.item.name} @ {best_swap.name}')
+                        best_target.item = best_swap.item
+                        best_target.item.location = best_target
+                        best_swap.item = old_item
+                        best_swap.item.location = best_swap
+                    increase = best_value - old_value
+                    difference -= increase
+                    wallet[target_player] += increase
+                solvent.add(target_player)
+            # apply solvency
+            for player in solvent:
+                wallet[player] -= sphere_costs[player]
+                for location in locked_by_money[player]:
+                    if location == 'Kiki':
+                        kiki_paid[player] = True
+                    else:
+                        state.collect(location.item, True, location)
+                        unchecked_locations.remove(location)
+                        if location.item.name.startswith('Rupee'):
+                            wallet[location.item.player] += rupee_chart[location.item.name]

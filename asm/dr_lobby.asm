@@ -1,5 +1,6 @@
 CheckDarkWorldSanc:
 	STA $A0 : STA $048E ; what we wrote over
+	LDA.l InvertedMode : BNE +
 	LDA.l SancDarkWorldFlag : BEQ +
 		SEP #$30
 		LDA $A0 : CMP #$12 : BNE ++

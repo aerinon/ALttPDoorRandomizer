@@ -57,6 +57,7 @@ SETTINGSTOPROCESS = {
     "item": {
       "retro": "retro",
       "futuro": "futuro",
+      "shopsanity": "shopsanity",
       "worldstate": "mode",
       "logiclevel": "logic",
       "goal": "goal",

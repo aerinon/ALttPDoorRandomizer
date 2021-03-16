@@ -60,7 +60,7 @@
 
     "randomizer.dungeon.dungeonintensity": "Intensity Level",
     "randomizer.dungeon.dungeonintensity.1": "1: Normal Supertile and Spiral Stairs",
-    "randomizer.dungeon.dungeonintensity.2": "2: Open Edges and Straight Stairs",
+    "randomizer.dungeon.dungeonintensity.2": "2: Open Edges, Straight Stairs and In-Room Stairs",
     "randomizer.dungeon.dungeonintensity.3": "3: Dungeon Lobbies",
     "randomizer.dungeon.dungeonintensity.random": "Random",
 
@@ -237,6 +237,8 @@
     "randomizer.item.itempool.normal": "Normal",
     "randomizer.item.itempool.hard": "Hard",
     "randomizer.item.itempool.expert": "Expert",
+
+    "randomizer.item.shopsanity": "Shopsanity",
 
     "randomizer.item.itemfunction": "Item Functionality",
     "randomizer.item.itemfunction.normal": "Normal",

@@ -37,6 +37,8 @@ OnFileLoadOverride:
     jsl OnFileLoad ; what I wrote over
     lda.l DRFlags : and #$80 : beq +  ;flag is off
         lda $7ef086 : ora #$80 : sta $7ef086
+    + lda.l DRFlags : and #$40 : beq +  ;flag is off
+        lda $7ef036 : ora #$80 : sta $7ef036
     + lda.l DRFlags : and #$02 : beq +
         lda $7ef353 : bne +
             lda #$01 : sta $7ef353
@@ -139,4 +141,11 @@ RainPrevention:
 				LDA.l RainDoorMatch, X : CMP $00 : BNE -
 					PLA : LDA #$0008 : RTL
 	.done PLA : RTL
+
+; A should be how much dmg to do to Aga when leaving this function
+StandardAgaDmg:
+	LDX.b #$00 ; part of what we wrote over
+	LDA.l $7EF3C6 : AND #$04 : BEQ + ; zelda's not been rescued
+		LDA.b #$10 ; hurt him!
+	+ RTL ; A is zero if the AND results in zero and then Agahnim's invincible!
 

@@ -71,6 +71,7 @@ def parse_cli(argv, no_defaults=False):
     # included for backwards compatibility
     parser.add_argument('--beemizer', default=defval(settings["beemizer"]), type=lambda value: min(max(int(value), 0), 4))
     parser.add_argument('--multi', default=defval(settings["multi"]), type=lambda value: min(max(int(value), 1), 255))
+    parser.add_argument('--securerandom', default=defval(settings["securerandom"]), action='store_true')
     parser.add_argument('--teams', default=defval(1), type=lambda value: max(int(value), 1))
 
     if multiargs.multi:
@@ -93,7 +94,7 @@ def parse_cli(argv, no_defaults=False):
                          'retro', 'futuro', 'accessibility', 'hints', 'beemizer', 'experimental', 'dungeon_counters',
                          'shufflebosses', 'shuffleenemies', 'enemy_health', 'enemy_damage', 'shufflepots',
                          'ow_palettes', 'uw_palettes', 'sprite', 'disablemusic', 'quickswap', 'fastmenu', 'heartcolor', 'heartbeep',
-                         'remote_items', 'keydropshuffle', 'mixed_travel', 'standardize_palettes']:
+                         'remote_items', 'shopsanity', 'keydropshuffle', 'mixed_travel', 'standardize_palettes', 'code']:
                 value = getattr(defaults, name) if getattr(playerargs, name) is None else getattr(playerargs, name)
                 if player == 1:
                     setattr(ret, name, {1: value})
@@ -134,6 +135,7 @@ def parse_settings():
         "enemy_health": "default",
         "enemizercli": os.path.join(".", "EnemizerCLI", "EnemizerCLI.Core"),
 
+        "shopsanity": False,
         "keydropshuffle": False,
         "mapshuffle": False,
         "compassshuffle": False,
@@ -147,8 +149,10 @@ def parse_settings():
         "mixed_travel": "prevent",
         "standardize_palettes": "standardize",
 
+        "code": "",
         "multi": 1,
         "names": "",
+        "securerandom": False,
 
         # Hints default to TRUE
         "hints": True,
@@ -162,10 +166,10 @@ def parse_settings():
         "ow_palettes": "default",
         "uw_palettes": "default",
 
-        # Spoiler     defaults to FALSE
+        # Spoiler     defaults to TRUE
         # Playthrough defaults to TRUE
         # ROM         defaults to TRUE
-        "create_spoiler": False,
+        "create_spoiler": True,
         "calc_playthrough": True,
         "create_rom": True,
         "usestartinventory": False,

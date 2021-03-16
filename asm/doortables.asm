@@ -1,4 +1,4 @@
-org $279700
+org $279C00
 KeyDoorOffset:
 ;      0     1     2     3     4     5     6     7     8     9     a     b     c     d     e     f --Offset Ruler
 dw $0000,$0001,$0003,$0000,$0006,$0000,$000b,$0000,$0000,$0000,$000c,$000d,$0010,$0011,$0012,$0000
@@ -58,7 +58,7 @@ db $9f
 
 org $27A000
 DoorTable:
-;; NW 00  N  01  N  02  WN 00  W  01  WS 02  SW 00  S  01  SE 02  EN 00  E  01  ES 02 - Door ruler
+;; NW 00  N  01  NE 02  WN 00  W  01  WS 02  SW 00  S  01  SE 02  EN 00  E  01  ES 02 - Door ruler
 dw $0003, $0003, $0003, $0003, $0003, $0003, $0003, $0003, $0003, $0003, $0003, $0003 ; Default/Garbage row
 dw $0003, $0003, $0003, $0450, $0003, $0003, $0003, $0003, $0003, $0452, $0003, $0003 ; HC Back Hall (x01)
 dw $0003, $0003, $0003, $0003, $0003, $0003, $0003, $0003, $0003, $0003, $0003, $0003 ; Sewer Switches (x02)
@@ -227,7 +227,7 @@ dw $0003, $0003, $0003, $0003, $0003, $0003, $0003, $0003, $0003, $0003, $0003, 
 ;dw $0080, $1f50 ; ->zelda's cellblock
 
 org $27B000
-SpiralTable: ;113 4 byte entries - should end at 27B44C
+SpiralTable: ;113 4 byte entries - should end at 27B1C4
 dw $0203, $8080 ;null row
 dw $0203, $8080 ;HC Backhallway
 dw $0203, $8080 ;Sewer Pull
@@ -556,6 +556,20 @@ db $58,$50,$30 ; TT Nook
 MultDivInfo: ; (1, 2, 3, 4, 5, 6, 10, 20)
 db $01, $02, $03, $04, $05, $06, $0a, $14
 ; indices: 0-7
+
+; In-room stairs in North/South pairs. From left to right:
+; PoD, IP right side, IP Freezor chest and GT
+org $27C700
+InroomStairsTable:
+dw $0003,$0003, $0003,$0003, $0003,$0003, $0003,$0003
+
+org $27C720
+InroomStairsRoom:
+db $0B,$1B, $3F,$1F, $7E,$5E, $96,$3D
+InroomStairsX:
+dw $0190, $0160, $0040, $0178
+InroomStairsY:
+dw $0058, $0148, $0198, $0190
 
 
 ; dungeon tables

@@ -252,6 +252,13 @@ def create_rooms(world, player):
     world.get_room(0x77, player).swap(0, 1)  # fixes Hera Lobby Key Stairs - entrance now at pos 0
     if world.enemy_shuffle[player] != 'none':
         world.get_room(0xc0, player).change(0, DoorKind.Normal)  # fix this kill room if enemizer is on
+        world.get_room(0x0e, player).change(1, DoorKind.TrapTriggerable)  # fix this kill room if enemizer is on
+
+
+def reset_rooms(world, player):
+    world.rooms = [x for x in world.rooms if x.player != player]
+    world._room_cache.clear()
+    create_rooms(world, player)
 
 
 class Room(object):
@@ -363,7 +370,7 @@ class DoorKind(Enum):
     IncognitoEntrance = 0x12
     DungeonChanger = 0x14
     ToggleFlag = 0x16
-    Trap = 0x18
+    Trap = 0x18  # both sides trapped
     UnknownD6 = 0x1A
     SmallKey = 0x1C
     BigKey = 0x1E
@@ -376,8 +383,8 @@ class DoorKind(Enum):
     Bombable = 0x2E
     BlastWall = 0x30
     Hidden = 0x32
-    TrapTriggerable = 0x36
-    Trap2 = 0x38
+    TrapTriggerable = 0x36  # right side trap or south side trap
+    Trap2 = 0x38  # left side trap or north side trap
     NormalLow2 = 0x40
     TrapTriggerableLow = 0x44
     Warp = 0x46

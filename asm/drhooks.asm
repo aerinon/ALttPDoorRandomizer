@@ -46,8 +46,19 @@ org $029396 ; <- 11396 - Bank02.asm : 3641 (LDA $01C322, X)
 jsl StraightStairLayerFix
 org $02c06d ; <- Bank02.asm : 9874 (LDX $0418, CMP.b #$02)
 jsl DoorToStraight : nop
+org $02c092 ; STA $0020, Y : LDX #$00
+jsl DoorToInroom : nop
+org $02c0f8 ; CMP $02C034, X
+jsl DoorToInroomEnd
 org $02941a ; <- Bank02.asm : 3748 module 7.12.11 (LDA $0464 : BNE BRANCH_$11513 : INC $B0 : RTS)
 jsl StraightStairsTrapDoor : rts
+org $028b54 ; <- Bank02.asm : 2200 (JSL UseImplicitRegIndexedLocalJumpTable)
+jsl InroomStairsTrapDoor
+
+org $0289a0 ; JSL $0091C4
+jsl QuadrantLoadOrderBeforeScroll
+org $02bd9c ; JSL $0091C4
+jsl QuadrantLoadOrderAfterScroll
 
 
 ; Graphics fix
@@ -158,6 +169,9 @@ JSL CheckDarkWorldSanc : NOP
 
 org $01891e ; <- Bank 01.asm : 991 Dungeon_LoadType2Object (LDA $00 : XBA : AND.w #$00FF)
 JSL RainPrevention : NOP #2
+
+org $1edabf ; <- sprite_energy_ball.asm : 86-7 Sprite_EnergyBall (LDA.b #$10 : LDX.b #$00)
+JSL StandardAgaDmg
 
 ; These two, if enabled together, have implications for vanilla BK doors in IP/Hera/Mire
 ; IPBJ is common enough to consider not doing this. Mire is not a concern for vanilla - maybe glitched modes

@@ -31,6 +31,13 @@ WarpUp:
 	jsr Cleanup
 	rtl
 
+; Checks if $a0 is equal to <Room>. If it is, opens its stonewall if it's there
+macro StonewallCheck(Room)
+    lda $a0 : cmp.b #<Room> : bne ?end
+        lda.l <Room>*2+$7ef000 : ora #$80 : sta.l <Room>*2+$7ef000
+    ?end
+endmacro
+
 WarpDown:
     lda.l DRMode : beq .end
 	lda $040c : cmp.b #$ff : beq .end
@@ -38,6 +45,7 @@ WarpDown:
 	jsr CalcIndex
 	!add #$0c : ldy #$ff ; offsets in A, Y
 	jsr LoadRoomVert
+    %StonewallCheck($43)
 .end
 	jsr Cleanup
 	rtl
@@ -130,15 +138,20 @@ LoadRoomVert:
 	.gtg ;Good to Go!
 	pla ; Throw away normal room (don't fill up the stack)
 	lda $a0 : and.b #$F0 : lsr #3 : !sub $21 : !add $06 : sta $02
-	ldy #$01 : jsr ShiftVariablesMainDir
 
-	lda $01 : and #$80 : beq .normal
+	lda $01 : and #$80 : beq .notEdge
+	    ldy #$01 : jsr ShiftVariablesMainDir
         ldy $06 : cpy #$ff : beq +
             lda $01 : jsr LoadSouthMidpoint : bra ++
         + lda $01 : jsr LoadNorthMidpoint
 	++ jsr PrepScrollToEdge : bra .scroll
 
+    .notEdge
+    lda $01 : and #$03 : cmp #$03 : bne .normal
+        jsr ScrollToInroomStairs
+        bra .end
     .normal
+	ldy #$01 : jsr ShiftVariablesMainDir
     jsr PrepScrollToNormal
     .scroll
     lda $01 : and #$40 : pha
@@ -180,6 +193,68 @@ ShiftVariablesMainDir:
 	rts
 }
 
+; Normal Flags should be in $01
+ScrollToInroomStairs:
+{
+    jsr PrepScrollToInroomStairs
+    ldy #$01 : jsr ShiftVariablesMainDir
+    jsr ScrollX
+    ldy #$00 : jsr ApplyScroll
+    lda $a0 : and #$0f : cmp #$0f : bne +
+        stz $e0 : stz $e2 ; special case camera fix
+        lda #$1f : sta $e1 : sta $e3
+    +
+    rts
+}
+
+; Direction should be in $06, Shift Value (see above) in $02 and other info in $01
+; Sets $02, $04, $05, $ee, $045e, $045f and things related to Y coordinate
+PrepScrollToInroomStairs:
+{
+    lda $01 : and #$30 : lsr #3 : tay
+    lda.w InroomStairsX,y : sta $04
+    lda.w InroomStairsX+1,y : sta $05
+    lda $06 : cmp #$ff : beq .south
+        lda.w InroomStairsY+1,y : bne +
+            inc $045f ; flag indicating special screen transition
+            dec $02 ; shift variables further
+            stz $aa
+            lda $a8 : and #%11111101 : sta $a8
+            stz $0613 ; North scroll target
+            inc $0603 : inc $0607
+            dec $0619 : dec $061b
+        +
+        lda.w InroomStairsY,y : !add #$20 : sta $20
+        !sub #$38 : sta $045e
+        lda $01 : and #$40 : beq +
+            lda $20 : !add #$20 : sta $20
+            stz $045f
+        +
+        dec $21
+        %StonewallCheck($1b)
+        bra ++
+    .south
+        lda.w InroomStairsY+1,y : beq +
+            inc $045f ; flag indicating special screen transition
+            inc $02 ; shift variables further
+            lda #$02 : sta $aa
+            lda $a8 : ora #%00000010 : sta $a8
+            inc $0611 ; South scroll target
+            dec $0603 : dec $0607
+            inc $0619 : inc $061b
+        +
+        lda.w InroomStairsY,y : !sub #$20 : sta $20
+        !add #$38 : sta $045e
+        lda $01 : and #$40 : beq +
+            lda $20 : !sub #$20 : sta $20
+            stz $045f
+        +
+        inc $21
+    ++
+    lda $01 : and #$04 : lsr #2 : sta $ee : bne +
+    	stz $0476
+    + rts
+}
 
 ; Target pixel should be in A, other info in $01
 ; Sets $04 $05 and $ee
@@ -214,6 +289,7 @@ StraightStairsAdj:
 {
     stx $0464 : sty $012e ; what we wrote over
     lda.l DRMode : beq +
+        lda $045e : bne .toInroom
         jsr GetTileAttribute : tax
         lda $11 : cmp #$12 : beq .goingNorth
             lda $a2 : cmp #$51 : bne ++
@@ -234,6 +310,9 @@ StraightStairsAdj:
             pla : !add #$f6 : pha
         ++ pla : !add $0464 : sta $0464
     + rtl
+    .toInroom
+    lda #$32 : sta $0464 : stz $045e
+    rtl
 }
 
 GetTileAttribute:
@@ -283,11 +362,32 @@ DoorToStraight:
     rtl
 }
 
+DoorToInroom:
+{
+    ldx $045e : bne .end
+        sta $0020, y ; what we wrote over
+    .end
+    ldx #$00 ; what we wrote over
+    rtl
+}
+
+DoorToInroomEnd:
+{
+    ldy $045e : beq .vanilla
+    cmp $045e : bne .return
+        stz $045e ; clear
+    .return
+    rtl
+    .vanilla
+    cmp $02c034, x ; what we wrote over
+    rtl
+}
+
 StraightStairsTrapDoor:
 {
     lda $0464 : bne +
         ; reset function
-        phk : pea.w .jslrtsreturn-1
+        .reset phk : pea.w .jslrtsreturn-1
         pea.w $02802c
         jml $028c73 ; $10D71 .reset label of Bank02
         .jslrtsreturn
@@ -300,5 +400,15 @@ StraightStairsTrapDoor:
             inc $0468 : stz $068e : stz $0690
         ++ rtl
     + jsl Dungeon_ApproachFixedColor ; what we wrote over
-    .end rtl
+    rtl
+}
+
+InroomStairsTrapDoor:
+{
+    lda $0200 : cmp #$05 : beq .reset
+    lda $b0 : jml $008781 ; what we wrote over (essentially)
+    .reset
+    pla : pla : pla
+    jsl StraightStairsTrapDoor_reset
+    jml $028b15 ; just some RTS in bank 02
 }

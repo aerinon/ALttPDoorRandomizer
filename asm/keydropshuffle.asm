@@ -26,7 +26,7 @@ Sprite_LoadProperties:
 org $288000 ;140000
 ShuffleKeyDrops:
 db 0
-ShuffleKeyDropsReserved:
+MultiClientFlags: ; 140001 -> stored in SRAM at 7ef33d
 db 0
 
 LootTable: ;PC: 140002

@@ -52,6 +52,12 @@ class Context:
         self.awaiting_rom = False
         self.rom = None
         self.auth = None
+        self.total_locations = None
+        self.mode_flags = None
+        self.key_drop_mode = False
+        self.shop_mode = False
+        self.retro_mode = False
+        self.ignore_count = 0
 
 def color_code(*args):
     codes = {'reset': 0, 'bold': 1, 'underline': 4, 'black': 30, 'red': 31, 'green': 32, 'yellow': 33, 'blue': 34,
@@ -86,6 +92,13 @@ SCOUT_LOCATION_ADDR = SAVEDATA_START + 0x4D7        # 1 byte
 SCOUTREPLY_LOCATION_ADDR = SAVEDATA_START + 0x4D8   # 1 byte
 SCOUTREPLY_ITEM_ADDR = SAVEDATA_START + 0x4D9       # 1 byte
 SCOUTREPLY_PLAYER_ADDR = SAVEDATA_START + 0x4DA     # 1 byte
+SHOP_ADDR = SAVEDATA_START + 0x302                  # 2 bytes?
+DYNAMIC_TOTAL_ADDR = SAVEDATA_START + 0x33E         # 2 bytes
+MODE_FLAGS = SAVEDATA_START + 0x33D         # 1 byte
+
+SHOP_SRAM_LEN = 0x29  # 41 tracked items
+location_shop_order = [Regions.shop_to_location_table.keys()] + [Regions.retro_shops.keys()]
+location_shop_ids = {0x0112, 0x0110, 0x010F, 0x00FF, 0x011F, 0x0109, 0x0115}
 
 location_table_uw = {"Blind's Hideout - Top": (0x11d, 0x10),
                      "Blind's Hideout - Left": (0x11d, 0x20),
@@ -769,7 +782,8 @@ async def console_loop(ctx : Context):
                     get_location_name_from_address(item.location), index, len(ctx.items_received)))
 
         if command[0] == '/missing':
-            for location in [k for k, v in Regions.lookup_name_to_id.items() if type(v) is int]:
+            for location in [k for k, v in Regions.lookup_name_to_id.items()
+                             if type(v) is int and not filter_location(ctx, k)]:
                 if location not in ctx.locations_checked:
                     logging.info('Missing: ' + location)
         if command[0] == '/getitem' and len(command) > 1:
@@ -797,13 +811,50 @@ def get_location_name_from_address(address):
     return Regions.lookup_id_to_name.get(address, f'Unknown location (ID:{address})')
 
 
+def filter_location(ctx, location):
+    if not ctx.key_drop_mode and ('Key Drop' in location or 'Pot Key' in location):
+        return True
+    if not ctx.shop_mode and location in Regions.flat_normal_shops:
+        return True
+    if not ctx.retro_mode and location in Regions.flat_retro_shops:
+        return True
+    return False
+
+
 async def track_locations(ctx : Context, roomid, roomdata):
     new_locations = []
 
+    if ctx.total_locations is None:
+        total_data = await snes_read(ctx, DYNAMIC_TOTAL_ADDR, 2)
+        ttl = total_data[0] | (total_data[1] << 8)
+        if ttl > 0:
+            ctx.total_locations = ttl
+
+    if ctx.mode_flags is None:
+        flags = await snes_read(ctx, MODE_FLAGS, 1)
+        ctx.key_drop_mode = flags[0] & 0x1
+        ctx.shop_mode = flags[0] & 0x2
+        ctx.retro_mode = flags[0] & 0x4
+
     def new_check(location):
         ctx.locations_checked.add(location)
-        logging.info("New check: %s (%d/216)" % (location, len(ctx.locations_checked)))
-        new_locations.append(Regions.lookup_name_to_id[location])
+        ignored = filter_location(ctx, location)
+        if ignored:
+            ctx.ignore_count += 1
+        else:
+            logging.info(f"New check: {location} ({len(ctx.locations_checked)-ctx.ignore_count}/{ctx.total_locations})")
+            new_locations.append(Regions.lookup_name_to_id[location])
+
+    try:
+        if roomid in location_shop_ids:
+            misc_data = await snes_read(ctx, SHOP_ADDR, SHOP_SRAM_LEN)
+            for cnt, b in enumerate(misc_data):
+                my_check = Regions.shop_table_by_location_id[0x400000 + cnt]
+                if int(b) > 0 and my_check not in ctx.locations_checked:
+                    new_check(my_check)
+    except Exception as e:
+        print(e)
+        logging.warning(e)
 
     for location, (loc_roomid, loc_mask) in location_table_uw.items():
         if location not in ctx.locations_checked and loc_roomid == roomid and (roomdata << 4) & loc_mask != 0:

@@ -208,7 +208,6 @@ jobs:
         body="${body//$'\n'/'%0A'}"
         body="${body//$'\r'/'%0D'}"
         echo "::set-output name=body::$body"
-      if: contains(github.event, 'push')
     # create a pre/release
     - name: Create a Pre/Release
       id: create_release

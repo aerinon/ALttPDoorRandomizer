@@ -52,14 +52,20 @@ LoadEdgeRoomVert:
     lda $03 : sta $a0
     sty $06
     and.b #$f0 : lsr #3 : !sub $21 : !add $06 : sta $02
-    ldy #$01 : jsr ShiftVariablesMainDir
 
     lda $04 : and #$80 : bne .edge
     lda $04 : sta $01 ; load up flags in $01
+    and #$03 : cmp #$03 : beq .inroom
+    ldy #$01 : jsr ShiftVariablesMainDir
     jsr PrepScrollToNormal
     bra .scroll
 
+    .inroom
+    jsr ScrollToInroomStairs
+    rts
+
     .edge
+    ldy #$01 : jsr ShiftVariablesMainDir
     lda $04 : and #$10 : beq +
        lda #$01
     + sta $ee ; layer stuff

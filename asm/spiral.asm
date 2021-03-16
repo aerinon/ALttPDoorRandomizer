@@ -2,9 +2,10 @@ RecordStairType: {
     pha
     lda.l DRMode : beq .norm
     lda $040c : cmp #$ff : beq .norm
-         lda $0e : sta $045e
-         cmp #$26 : beq .norm ; skipping in-floor staircases
-            pla : bra +
+        lda $0e
+        cmp #$25 : bcc ++ ; don't record straight staircases
+            sta $045e
+        ++ pla : bra +
     .norm pla : sta $a0
     + lda $063d, x
     rtl
@@ -15,8 +16,13 @@ SpiralWarp: {
     lda $040c : cmp.b #$ff : beq .abort ; abort if not in dungeon
     lda $045e : cmp #$5e : beq .gtg ; abort if not spiral - intended room is in A!
     cmp #$5f : beq .gtg
+    cmp #$26 : beq .inroom
     .abort
     stz $045e : lda $a2 : and #$0f : rtl ; clear,run hijacked code and get out
+    .inroom
+    jsr InroomStairsWarp
+    lda $a2 : and #$0f ; this is the code we are hijacking
+    rtl
 
     .gtg
     phb : phk : plb : phx : phy ; push stuff
@@ -70,6 +76,13 @@ SpiralWarp: {
     lda $01 : and #$20 : sta $07 ; zeroVtCam check
     ldy #$01 : jsr SetCamera
 
+    jsr StairCleanup
+    ply : plx : plb ; pull the stuff we pushed
+    lda $a2 : and #$0f ; this is the code we are hijacking
+    rtl
+}
+
+StairCleanup: {
     stz $045e ; clear the staircase flag
 
     ; animated tiles fix
@@ -81,9 +94,7 @@ SpiralWarp: {
             jsl DecompDungAnimatedTiles
     +
     stz $047a
-    ply : plx : plb ; pull the stuff we pushed
-    lda $a2 : and #$0f ; this is the code we are hijacking
-    rtl
+    rts
 }
 
 ;Sets the offset in A
@@ -105,7 +116,7 @@ LookupSpiralOffset: {
     lda $a9 : ora $aa : and #$03 : beq .quad0
     cmp #$01 : beq .quad1
     cmp #$02 : beq .quad2
-    cmp #$03 : beq .quad3
+    bra .quad3
     .quad0
     inc $01 : lda $a2
     cmp #$0c : beq .q0diff ;gt ent
@@ -135,6 +146,116 @@ LookupSpiralOffset: {
     .done
     lda $a2 : tax : lda.w SpiralOffset,x
     !add $01 ;add a thing (0 in easy case)
+    rts
+}
+
+InroomStairsWarp: {
+    phb : phk : plb : phx : phy ; push stuff
+    ; find stairs by room and store index in X
+    lda $a0 : ldx #$07
+    .loop
+        cmp.w InroomStairsRoom,x
+        beq .found
+        dex
+        bne .loop
+    .found
+    rep #$30
+    txa : and #$00ff : asl : tay
+    lda.w InroomStairsTable,y : sta $00
+	sep #$30
+    sta $a0
+
+    ; set position and everything else based on target door type
+    txa : and #$01 : eor #$01 : sta $07
+    ; should be the same as lda $0462 : and #$04 : lsr #2 : eor #$01 : sta $07
+    lda $01 : and #$80 : beq .notEdge
+        lda $07 : sta $03 : beq +
+            lda $01 : jsr LoadSouthMidpoint : sta $22 : lda #$f4
+            bra ++
+        +
+            lda $01 : jsr LoadNorthMidpoint : sta $22 : dec $21 : lda #$f7
+        ++
+        sta $20
+        lda $01 : and #$20 : beq +
+            lda #$01
+        +
+        sta $02
+        stz $07
+        lda $01 : and #$10 : lsr #4
+        brl .layer
+    .notEdge
+    lda $01 : and #$03 : cmp #$03 : bne .normal
+        txa : and #$06 : sta $07
+        lda $01 : and #$30 : lsr #3 : tay
+        lda.w InroomStairsX+1,y : sta $02
+        lda.w InroomStairsY+1,y : sta $03
+        cpy $07 : beq .vanillaTransition
+            lda.w InroomStairsX,y : sta $22
+            lda.w InroomStairsY,y
+            ldy $07 : beq +
+                !add #$07
+            +
+            sta $20
+            inc $07
+            bra ++
+        .vanillaTransition
+            lda #$c0 : sta $07 ; leave camera
+        ++
+        %StonewallCheck($1b)
+        lda $01 : and #$04 : lsr #2
+        bra .layer
+    .normal
+        lda $01 : sta $fe ; trap door
+        lda $07 : sta $03 : beq +
+            ldy $a0 : cpy #$51 : beq .specialFix ; throne room
+            cpy #$02 : beq .specialFix ; sewers pull switch
+            cpy #$71 : beq .specialFix ; castle armory
+            lda #$e0
+            bra ++
+            .specialFix
+            lda #$c8
+            bra ++
+        +
+            %StonewallCheck($43)
+            lda #$1b
+        ++
+        sta $20
+        inc $07 : stz $02 : lda #$78 : sta $22
+        lda $01 : and #$03 : beq ++
+            cmp #$02 : !bge +
+                lda #$f8 : sta $22 : stz $07 : bra ++
+            + inc $02
+        ++
+        lda $01 : and #$04 : lsr #2
+
+    .layer
+    sta $ee
+    bne +
+    	stz $0476
+    +
+
+    lda $02 : !sub $a9
+    beq .skipXQuad
+        sta $06 : !add $a9 : sta $a9
+        ldy #$00 : jsr ShiftQuadSimple
+    .skipXQuad
+    lda $aa : lsr : sta $06 : lda $03 : !sub $06
+    beq .skipYQuad
+        sta $06 : asl : !add $aa : sta $aa
+        ldy #$01 : jsr ShiftQuadSimple
+    .skipYQuad
+
+    lda $07 : bmi .skipCamera
+    ldy #$00 : jsr SetCamera ; horizontal camera
+    ldy #$01 : sty $07 : jsr SetCamera ; vertical camera
+    lda $20 : cmp #$e0 : bcc +
+    lda $e8 : bne +
+        lda #$10 : sta $e8 ; adjust vertical camera at bottom
+    +
+    .skipCamera
+
+    jsr StairCleanup
+    ply : plx : plb ; pull the stuff we pushed
     rts
 }
 

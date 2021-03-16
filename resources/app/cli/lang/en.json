@@ -202,7 +202,7 @@
     "intensity" : [
       "Door Shuffle Intensity Level (default: %(default)s)",
       "1:       Shuffles normal doors and spiral staircases",
-      "2:       And shuffles open edges and straight staircases",
+      "2:       And shuffles open edges and both types of straight staircases",
       "3:       And shuffles dungeon lobbies",
       "random:  Picks one of those at random"
     ],
@@ -245,6 +245,7 @@
     "compassshuffle": [ "Compasses are no longer restricted to their dungeons, but can be anywhere. (default: %(default)s)" ],
     "keyshuffle": [ "Small Keys are no longer restricted to their dungeons, but can be anywhere. (default: %(default)s)" ],
     "bigkeyshuffle": [ "Big Keys are no longer restricted to their dungeons, but can be anywhere. (default: %(default)s)" ],
+    "shopsanity": ["Shop contents are shuffle in the main item pool and other items can take their place. (default: %(default)s)"],
     "keydropshuffle": [ "Key Drops (Pots and Enemies) are shuffled and other items can take their place (default: %(default)s)" ],
     "mixed_travel": [
       "How to handle potential traversal between dungeon in Crossed door shuffle",

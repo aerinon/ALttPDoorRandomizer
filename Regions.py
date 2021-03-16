@@ -1,4 +1,5 @@
 import collections
+from Items import ItemFactory
 from BaseClasses import Region, Location, Entrance, RegionType, Shop, ShopType
 
 
@@ -38,7 +39,7 @@ def create_regions(world, player):
         create_cave_region(player, 'Bush Covered House', 'the grass man'),
         create_cave_region(player, 'Tavern (Front)', 'the tavern'),
         create_cave_region(player, 'Light World Bomb Hut', 'a restock room'),
-        create_cave_region(player, 'Kakariko Shop', 'a common shop'),
+        create_cave_region(player, 'Kakariko Shop', 'a common shop', ['Kakariko Shop - Left', 'Kakariko Shop - Middle', 'Kakariko Shop - Right']),
         create_cave_region(player, 'Fortune Teller (Light)', 'a fortune teller'),
         create_cave_region(player, 'Lake Hylia Fortune Teller', 'a fortune teller'),
         create_cave_region(player, 'Lumberjack House', 'a boring house'),
@@ -78,14 +79,14 @@ def create_regions(world, player):
         create_cave_region(player, 'Ice Rod Cave', 'a cave with a chest', ['Ice Rod Cave']),
         create_cave_region(player, 'Good Bee Cave', 'a cold bee'),
         create_cave_region(player, '20 Rupee Cave', 'a cave with some cash'),
-        create_cave_region(player, 'Cave Shop (Lake Hylia)', 'a common shop'),
-        create_cave_region(player, 'Cave Shop (Dark Death Mountain)', 'a common shop'),
+        create_cave_region(player, 'Cave Shop (Lake Hylia)', 'a common shop', ['Lake Hylia Shop - Left', 'Lake Hylia Shop - Middle', 'Lake Hylia Shop - Right']),
+        create_cave_region(player, 'Cave Shop (Dark Death Mountain)', 'a common shop', ['Dark Death Mountain Shop - Left', 'Dark Death Mountain Shop - Middle', 'Dark Death Mountain Shop - Right']),
         create_cave_region(player, 'Bonk Rock Cave', 'a cave with a chest', ['Bonk Rock Cave']),
         create_cave_region(player, 'Library', 'the library', ['Library']),
         create_cave_region(player, 'Kakariko Gamble Game', 'a game of chance'),
-        create_cave_region(player, 'Potion Shop', 'the potion shop', ['Potion Shop']),
+        create_cave_region(player, 'Potion Shop', 'the potion shop', ['Potion Shop', 'Potion Shop - Left', 'Potion Shop - Middle', 'Potion Shop - Right']),
         create_lw_region(player, 'Lake Hylia Island', ['Lake Hylia Island']),
-        create_cave_region(player, 'Capacity Upgrade', 'the queen of fairies'),
+        create_cave_region(player, 'Capacity Upgrade', 'the queen of fairies', ['Capacity Upgrade - Left', 'Capacity Upgrade - Right']),
         create_cave_region(player, 'Two Brothers House', 'a connector', None, ['Two Brothers House Exit (East)', 'Two Brothers House Exit (West)']),
         create_lw_region(player, 'Maze Race Ledge', ['Maze Race'], ['Two Brothers House (West)']),
         create_cave_region(player, '50 Rupee Cave', 'a cave with some cash'),
@@ -122,7 +123,7 @@ def create_regions(world, player):
                                                                       'Paradox Cave Upper - Right'],
                            ['Paradox Cave Push Block', 'Paradox Cave Bomb Jump']),
         create_cave_region(player, 'Paradox Cave', 'a connector', None, ['Paradox Cave Exit (Middle)', 'Paradox Cave Exit (Top)', 'Paradox Cave Drop']),
-        create_cave_region(player, 'Light World Death Mountain Shop', 'a common shop'),
+        create_cave_region(player, 'Light World Death Mountain Shop', 'a common shop', ['Paradox Shop - Left', 'Paradox Shop - Middle', 'Paradox Shop - Right']),
         create_lw_region(player, 'East Death Mountain (Top)', None, ['Paradox Cave (Top)', 'Death Mountain (Top)', 'Spiral Cave Ledge Access', 'East Death Mountain Drop', 'Turtle Rock Teleporter', 'Fairy Ascension Ledge']),
         create_lw_region(player, 'Spiral Cave Ledge', None, ['Spiral Cave', 'Spiral Cave Ledge Drop']),
         create_cave_region(player, 'Spiral Cave (Top)', 'a connector', ['Spiral Cave'], ['Spiral Cave (top to bottom)', 'Spiral Cave Exit (Top)']),
@@ -157,16 +158,16 @@ def create_regions(world, player):
         create_dw_region(player, 'Hammer Peg Area', ['Dark Blacksmith Ruins'], ['Bat Cave Drop Ledge Mirror Spot', 'Dark World Hammer Peg Cave', 'Peg Area Rocks']),
         create_dw_region(player, 'Bumper Cave Entrance', None, ['Bumper Cave (Bottom)', 'Bumper Cave Entrance Mirror Spot', 'Bumper Cave Entrance Drop']),
         create_cave_region(player, 'Fortune Teller (Dark)', 'a fortune teller'),
-        create_cave_region(player, 'Village of Outcasts Shop', 'a common shop'),
-        create_cave_region(player, 'Dark Lake Hylia Shop', 'a common shop'),
-        create_cave_region(player, 'Dark World Lumberjack Shop', 'a common shop'),
-        create_cave_region(player, 'Dark World Potion Shop', 'a common shop'),
+        create_cave_region(player, 'Village of Outcasts Shop', 'a common shop', ['Village of Outcasts Shop - Left', 'Village of Outcasts Shop - Middle', 'Village of Outcasts Shop - Right']),
+        create_cave_region(player, 'Dark Lake Hylia Shop', 'a common shop', ['Dark Lake Hylia Shop - Left', 'Dark Lake Hylia Shop - Middle', 'Dark Lake Hylia Shop - Right']),
+        create_cave_region(player, 'Dark World Lumberjack Shop', 'a common shop', ['Dark Lumberjack Shop - Left', 'Dark Lumberjack Shop - Middle', 'Dark Lumberjack Shop - Right']),
+        create_cave_region(player, 'Dark World Potion Shop', 'a common shop', ['Dark Potion Shop - Left', 'Dark Potion Shop - Middle', 'Dark Potion Shop - Right']),
         create_cave_region(player, 'Dark World Hammer Peg Cave', 'a cave with an item', ['Peg Cave']),
         create_cave_region(player, 'Pyramid Fairy', 'a cave with two chests', ['Pyramid Fairy - Left', 'Pyramid Fairy - Right']),
         create_cave_region(player, 'Brewery', 'a house with a chest', ['Brewery']),
         create_cave_region(player, 'C-Shaped House', 'a house with a chest', ['C-Shaped House']),
         create_cave_region(player, 'Chest Game', 'a game of 16 chests', ['Chest Game']),
-        create_cave_region(player, 'Red Shield Shop', 'the rare shop'),
+        create_cave_region(player, 'Red Shield Shop', 'the rare shop', ['Red Shield Shop - Left', 'Red Shield Shop - Middle', 'Red Shield Shop - Right']),
         create_cave_region(player, 'Dark Sanctuary Hint', 'a storyteller'),
         create_cave_region(player, 'Bumper Cave', 'a connector', None, ['Bumper Cave Exit (Bottom)', 'Bumper Cave Exit (Top)']),
         create_dw_region(player, 'Bumper Cave Ledge', ['Bumper Cave Ledge'], ['Bumper Cave Ledge Drop', 'Bumper Cave (Top)', 'Bumper Cave Ledge Mirror Spot']),
@@ -499,8 +500,8 @@ def create_dungeon_regions(world, player):
         create_dungeon_region(player, 'Skull Compass Room', 'Skull Woods', ['Skull Woods - Compass Chest'], ['Skull Compass Room NE', 'Skull Compass Room ES', 'Skull Compass Room WS']),
         create_dungeon_region(player, 'Skull Left Drop', 'Skull Woods', None, ['Skull Left Drop ES']),
         create_dungeon_region(player, 'Skull 2 East Lobby', 'Skull Woods', None, ['Skull 2 East Lobby NW', 'Skull 2 East Lobby WS', 'Skull 2 East Lobby SW']),
-        create_dungeon_region(player, 'Skull Big Key', 'Skull Woods', ['Skull Woods - Big Key Chest'], ['Skull Big Key SW', 'Skull Big Key WN']),
-        create_dungeon_region(player, 'Skull Lone Pot', 'Skull Woods', None, ['Skull Lone Pot EN']),
+        create_dungeon_region(player, 'Skull Big Key', 'Skull Woods', ['Skull Woods - Big Key Chest'], ['Skull Big Key SW', 'Skull Big Key EN']),
+        create_dungeon_region(player, 'Skull Lone Pot', 'Skull Woods', None, ['Skull Lone Pot WN']),
         create_dungeon_region(player, 'Skull Small Hall', 'Skull Woods', None, ['Skull Small Hall ES', 'Skull Small Hall WS']),
         create_dungeon_region(player, 'Skull Back Drop', 'Skull Woods', None, ['Skull Back Drop Star Path']),
         create_dungeon_region(player, 'Skull 2 West Lobby', 'Skull Woods', ['Skull Woods - West Lobby Pot Key'], ['Skull 2 West Lobby ES', 'Skull 2 West Lobby NW', 'Skull 2 West Lobby S']),
@@ -942,16 +943,24 @@ def mark_light_world_regions(world, player):
 
 
 def create_shops(world, player):
-    for region_name, (room_id, type, shopkeeper, custom, locked, inventory) in shop_table.items():
+    world.shops[player] = []
+    for region_name, (room_id, type, shopkeeper, custom, locked, inventory, sram) in shop_table.items():
         if world.mode[player] == 'inverted' and region_name == 'Dark Lake Hylia Shop':
             locked = True
             inventory = [('Blue Potion', 160), ('Blue Shield', 50), ('Bombs (10)', 50)]
         region = world.get_region(region_name, player)
-        shop = Shop(region, room_id, type, shopkeeper, custom, locked)
+        shop = Shop(region, room_id, type, shopkeeper, custom, locked, sram)
         region.shop = shop
-        world.shops.append(shop)
+        world.shops[player].append(shop)
         for index, item in enumerate(inventory):
             shop.add_inventory(index, *item)
+        if not world.shopsanity[player]:
+            if region_name in shop_to_location_table.keys():
+                for index, location in enumerate(shop_to_location_table[region_name]):
+                    loc = world.get_location(location, player)
+                    loc.skip = True
+                    loc.forced_item = loc.item = ItemFactory(shop.inventory[index]['item'], player)
+                    loc.item.location = loc
 
 
 def adjust_locations(world, player):
@@ -974,6 +983,13 @@ def adjust_locations(world, player):
                 dungeon.small_keys.append(key_item)
             elif key_item.bigkey:
                 dungeon.big_key = key_item
+    if world.shopsanity[player]:
+        index = 0
+        for shop, location_list in shop_to_location_table.items():
+            for location in location_list:
+                world.get_location(location, player).address = 0x400000 + index
+                # player address? it is in the shop table
+                index += 1
 
 
 # (type, room_id, shopkeeper, custom, locked, [items])
@@ -981,18 +997,50 @@ def adjust_locations(world, player):
 _basic_shop_defaults = [('Red Potion', 150), ('Small Heart', 10), ('Bombs (10)', 50)]
 _dark_world_shop_defaults = [('Red Potion', 150), ('Blue Shield', 50), ('Bombs (10)', 50)]
 shop_table = {
-    'Cave Shop (Dark Death Mountain)': (0x0112, ShopType.Shop, 0xC1, False, False, _basic_shop_defaults),
-    'Red Shield Shop': (0x0110, ShopType.Shop, 0xC1, False, False, [('Red Shield', 500), ('Bee', 10), ('Arrows (10)', 30)]),
-    'Dark Lake Hylia Shop': (0x010F, ShopType.Shop, 0xC1, False, False, _dark_world_shop_defaults),
-    'Dark World Lumberjack Shop': (0x010F, ShopType.Shop, 0xC1, False, False, _dark_world_shop_defaults),
-    'Village of Outcasts Shop': (0x010F, ShopType.Shop, 0xC1, False, False, _dark_world_shop_defaults),
-    'Dark World Potion Shop': (0x010F, ShopType.Shop, 0xC1, False, False, _dark_world_shop_defaults),
-    'Light World Death Mountain Shop': (0x00FF, ShopType.Shop, 0xA0, False, False, _basic_shop_defaults),
-    'Kakariko Shop': (0x011F, ShopType.Shop, 0xA0, False, False, _basic_shop_defaults),
-    'Cave Shop (Lake Hylia)': (0x0112, ShopType.Shop, 0xA0, False, False, _basic_shop_defaults),
-    'Potion Shop': (0x0109, ShopType.Shop, 0xFF, False, True, [('Red Potion', 120), ('Green Potion', 60), ('Blue Potion', 160)]),
-    'Capacity Upgrade': (0x0115, ShopType.UpgradeShop, 0x04, True, True, [('Bomb Upgrade (+5)', 100, 7), ('Arrow Upgrade (+5)', 100, 7)])
+    'Cave Shop (Dark Death Mountain)': (0x0112, ShopType.Shop, 0xC1, False, False, _basic_shop_defaults, 0),
+    'Red Shield Shop': (0x0110, ShopType.Shop, 0xC1, False, False,
+                        [('Red Shield', 500), ('Bee', 10), ('Arrows (10)', 30)], 3),
+    'Dark Lake Hylia Shop': (0x010F, ShopType.Shop, 0xC1, False, False, _dark_world_shop_defaults, 6),
+    'Dark World Lumberjack Shop': (0x010F, ShopType.Shop, 0xC1, False, False, _dark_world_shop_defaults, 9),
+    'Village of Outcasts Shop': (0x010F, ShopType.Shop, 0xC1, False, False, _dark_world_shop_defaults, 12),
+    'Dark World Potion Shop': (0x010F, ShopType.Shop, 0xC1, False, False, _dark_world_shop_defaults, 15),
+    'Light World Death Mountain Shop': (0x00FF, ShopType.Shop, 0xA0, False, False, _basic_shop_defaults, 18),
+    'Kakariko Shop': (0x011F, ShopType.Shop, 0xA0, False, False, _basic_shop_defaults, 21),
+    'Cave Shop (Lake Hylia)': (0x0112, ShopType.Shop, 0xA0, False, False, _basic_shop_defaults, 24),
+    'Potion Shop': (0x0109, ShopType.Shop, 0xFF, False, True,
+                    [('Red Potion', 120), ('Green Potion', 60), ('Blue Potion', 160)], 27),
+    'Capacity Upgrade': (0x0115, ShopType.UpgradeShop, 0x04, True, True,
+                         [('Bomb Upgrade (+5)', 100, 7), ('Arrow Upgrade (+5)', 100, 7)], 30)
 }
+
+
+shop_to_location_table = {
+    'Cave Shop (Dark Death Mountain)': ['Dark Death Mountain Shop - Left', 'Dark Death Mountain Shop - Middle', 'Dark Death Mountain Shop - Right'],
+    'Red Shield Shop': ['Red Shield Shop - Left', 'Red Shield Shop - Middle', 'Red Shield Shop - Right'],
+    'Dark Lake Hylia Shop': ['Dark Lake Hylia Shop - Left', 'Dark Lake Hylia Shop - Middle', 'Dark Lake Hylia Shop - Right'],
+    'Dark World Lumberjack Shop': ['Dark Lumberjack Shop - Left', 'Dark Lumberjack Shop - Middle', 'Dark Lumberjack Shop - Right'],
+    'Village of Outcasts Shop': ['Village of Outcasts Shop - Left', 'Village of Outcasts Shop - Middle', 'Village of Outcasts Shop - Right'],
+    'Dark World Potion Shop': ['Dark Potion Shop - Left', 'Dark Potion Shop - Middle', 'Dark Potion Shop - Right'],
+    'Light World Death Mountain Shop': ['Paradox Shop - Left', 'Paradox Shop - Middle', 'Paradox Shop - Right'],
+    'Kakariko Shop': ['Kakariko Shop - Left', 'Kakariko Shop - Middle', 'Kakariko Shop - Right'],
+    'Cave Shop (Lake Hylia)': ['Lake Hylia Shop - Left', 'Lake Hylia Shop - Middle', 'Lake Hylia Shop - Right'],
+    'Potion Shop': ['Potion Shop - Left', 'Potion Shop - Middle', 'Potion Shop - Right'],
+    'Capacity Upgrade': ['Capacity Upgrade - Left', 'Capacity Upgrade - Right'],
+}
+
+retro_shops = {
+    'Old Man Sword Cave': ['Old Man Sword Cave Item 1'],
+    'Take-Any #1': ['Take-Any #1 Item 1', 'Take-Any #1 Item 2'],
+    'Take-Any #2': ['Take-Any #2 Item 1', 'Take-Any #2 Item 2'],
+    'Take-Any #3': ['Take-Any #3 Item 1', 'Take-Any #3 Item 2'],
+    'Take-Any #4': ['Take-Any #4 Item 1', 'Take-Any #4 Item 2'],
+}
+
+flat_normal_shops = [loc_name for name, location_list in shop_to_location_table.items() for loc_name in location_list]
+flat_retro_shops = [loc_name for name, location_list in retro_shops.items() for loc_name in location_list]
+shop_table_by_location_id = {0x400000+cnt: x for cnt, x in enumerate(flat_normal_shops)}
+shop_table_by_location_id = {**shop_table_by_location_id, **{0x400020+cnt: x for cnt, x in enumerate(flat_retro_shops)}}
+shop_table_by_location = {y: x for x, y in shop_table_by_location_id.items()}
 
 key_drop_data = {
     'Hyrule Castle - Map Guard Key Drop': [0x140036, 0x140037, 'in Hyrule Castle', 'Small Key (Escape)'],
@@ -1287,9 +1335,44 @@ location_table = {'Mushroom': (0x180013, 0x186338, False, 'in the woods'),
                   'Skull Woods - Prize': ([0x120A3, 0x53F12, 0x53F13, 0x180058, 0x18007B, 0xC704], None, True, 'Skull Woods'),
                   'Ice Palace - Prize': ([0x120A4, 0x53F5A, 0x53F5B, 0x180059, 0x180073, 0xC705], None, True, 'Ice Palace'),
                   'Misery Mire - Prize': ([0x120A2, 0x53F48, 0x53F49, 0x180057, 0x180075, 0xC703], None, True, 'Misery Mire'),
-                  'Turtle Rock - Prize': ([0x120A7, 0x53F24, 0x53F25, 0x18005C, 0x180079, 0xC708], None, True, 'Turtle Rock')}
+                  'Turtle Rock - Prize': ([0x120A7, 0x53F24, 0x53F25, 0x18005C, 0x180079, 0xC708], None, True, 'Turtle Rock'),
+                  'Kakariko Shop - Left': (None, None, False, 'for sale in Kakariko'),
+                  'Kakariko Shop - Middle': (None, None, False, 'for sale in Kakariko'),
+                  'Kakariko Shop - Right': (None, None, False, 'for sale in Kakariko'),
+                  'Lake Hylia Shop - Left': (None, None, False, 'for sale near the lake'),
+                  'Lake Hylia Shop - Middle': (None, None, False, 'for sale near the lake'),
+                  'Lake Hylia Shop - Right': (None, None, False, 'for sale near the lake'),
+                  'Paradox Shop - Left': (None, None, False, 'for sale near seven chests'),
+                  'Paradox Shop - Middle': (None, None, False, 'for sale near seven chests'),
+                  'Paradox Shop - Right': (None, None, False, 'for sale near seven chests'),
+                  'Capacity Upgrade - Left': (None, None, False, 'for sale near the queen'),
+                  'Capacity Upgrade - Right': (None, None, False, 'for sale near the queen'),
+                  'Village of Outcasts Shop - Left': (None, None, False, 'for sale near outcasts'),
+                  'Village of Outcasts Shop - Middle': (None, None, False, 'for sale near outcasts'),
+                  'Village of Outcasts Shop - Right': (None, None, False, 'for sale near outcasts'),
+                  'Dark Lumberjack Shop - Left': (None, None, False, 'for sale in the far north'),
+                  'Dark Lumberjack Shop - Middle': (None, None, False, 'for sale in the far north'),
+                  'Dark Lumberjack Shop - Right': (None, None, False, 'for sale in the far north'),
+                  'Dark Lake Hylia Shop - Left': (None, None, False, 'for sale near the dark lake'),
+                  'Dark Lake Hylia Shop - Middle': (None, None, False, 'for sale near the dark lake'),
+                  'Dark Lake Hylia Shop - Right': (None, None, False, 'for sale near the dark lake'),
+                  'Dark Potion Shop - Left': (None, None, False, 'for sale near a catfish'),
+                  'Dark Potion Shop - Middle': (None, None, False, 'for sale near a catfish'),
+                  'Dark Potion Shop - Right': (None, None, False, 'for sale near a catfish'),
+                  'Dark Death Mountain Shop - Left': (None, None, False, 'for sale on the dark mountain'),
+                  'Dark Death Mountain Shop - Middle': (None, None, False, 'for sale on the dark mountain'),
+                  'Dark Death Mountain Shop - Right': (None, None, False, 'for sale on the dark mountain'),
+                  'Red Shield Shop - Left': (None, None, False, 'for sale as a curiosity'),
+                  'Red Shield Shop - Middle': (None, None, False, 'for sale as a curiosity'),
+                  'Red Shield Shop - Right': (None, None, False, 'for sale as a curiosity'),
+                  'Potion Shop - Left': (None, None, False, 'for sale near the witch'),
+                  'Potion Shop - Middle': (None, None, False, 'for sale near the witch'),
+                  'Potion Shop - Right': (None, None, False, 'for sale near the witch'),
+                  }
 
 lookup_id_to_name = {data[0]: name for name, data in location_table.items() if type(data[0]) == int}
 lookup_id_to_name = {**lookup_id_to_name, **{data[1]: name for name, data in key_drop_data.items()}}
+lookup_id_to_name.update(shop_table_by_location_id)
 lookup_name_to_id = {name: data[0] for name, data in location_table.items() if type(data[0]) == int}
 lookup_name_to_id = {**lookup_name_to_id, **{name: data[1] for name, data in key_drop_data.items()}}
+lookup_name_to_id.update(shop_table_by_location)

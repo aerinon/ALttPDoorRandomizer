@@ -19,7 +19,7 @@
         "random"
       ],
       "config": {
-        "width": 35
+        "width": 45
       }
     },
     "potshuffle": { "type": "checkbox" },

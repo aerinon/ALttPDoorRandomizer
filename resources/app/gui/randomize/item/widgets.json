@@ -1,7 +1,8 @@
 {
   "checkboxes": {
     "retro": { "type": "checkbox" },
-    "futuro": { "type": "checkbox" }
+    "futuro": { "type": "checkbox" },
+    "shopsanity": { "type": "checkbox" }
   },
   "leftItemFrame": {
     "worldstate": {

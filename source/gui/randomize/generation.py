@@ -1,8 +1,11 @@
-from tkinter import ttk, filedialog, StringVar, Button, Entry, Frame, Label, E, W, LEFT, X
+from tkinter import ttk, filedialog, StringVar, Button, Entry, Frame, Label, E, W, LEFT, X, Text, Tk, INSERT
+import source.classes.diags as diagnostics
 import source.gui.widgets as widgets
 import json
 import os
+from functools import partial
 from source.classes.Empty import Empty
+from Main import __version__
 
 def generation_page(parent,settings):
     # Generation Setup
@@ -63,7 +66,7 @@ def generation_page(parent,settings):
     # FIXME: Translate these
     def RomSelect():
         rom = filedialog.askopenfilename(filetypes=[("Rom Files", (".sfc", ".smc")), ("All Files", "*")], initialdir=os.path.join("."))
-        self.widgets[widget].storageVar.set(rom)
+        self.widgets["rom"].storageVar.set(rom)
     # dialog button
     self.widgets[widget].pieces["button"] = Button(self.widgets[widget].pieces["frame"], text='Select Rom', command=RomSelect)
 
@@ -76,4 +79,45 @@ def generation_page(parent,settings):
     # frame: pack
     self.widgets[widget].pieces["frame"].pack(fill=X)
 
+    ## Run Diagnostics
+    # This one's more-complicated, build it and stuff it
+    # widget ID
+    widget = "diags"
+
+    # Empty object
+    self.widgets[widget] = Empty()
+    # pieces
+    self.widgets[widget].pieces = {}
+
+    # frame
+    self.frames["diags"] = Frame(self)
+    self.frames["diags"].pack()
+    self.widgets[widget].pieces["frame"] = Frame(self.frames["diags"])
+
+
+    def diags():
+        # Debugging purposes
+        dims = {
+            "window": {
+                "width": 800,
+                "height": 500
+            },
+            "textarea.characters": {
+                "width": 120,
+                "height": 50
+            }
+		    }
+        diag = Tk()
+        diag.title("Door Shuffle " + __version__)
+        diag.geometry(str(dims["window"]["width"]) + 'x' + str(dims["window"]["height"]))
+        text = Text(diag, width=dims["textarea.characters"]["width"], height=dims["textarea.characters"]["height"])
+        text.pack()
+        text.insert(INSERT,"\n".join(diagnostics.output(__version__)))
+    # dialog button
+    self.widgets[widget].pieces["button"] = Button(self.widgets[widget].pieces["frame"], text='Run Diagnostics', command=partial(diags))
+
+    # button: pack
+    self.widgets[widget].pieces["button"].pack(side=LEFT)
+    # frame: pack
+    self.widgets[widget].pieces["frame"].pack(fill=X)
     return self,settings

@@ -55,19 +55,21 @@ def pre_validate(builder, entrance_region_names, split_dungeon, world, player):
 
 
 def generate_dungeon(builder, entrance_region_names, split_dungeon, world, player):
-    stonewall = check_for_stonewall(builder)
+    stonewalls = check_for_stonewalls(builder)
     sector = generate_dungeon_main(builder, entrance_region_names, split_dungeon, world, player)
-    if stonewall and not stonewall_valid(stonewall):
-        builder.pre_open_stonewall = stonewall
+    for stonewall in stonewalls:
+        if not stonewall_valid(stonewall):
+            builder.pre_open_stonewalls.add(stonewall)
     return sector
 
 
-def check_for_stonewall(builder):
+def check_for_stonewalls(builder):
+    stonewalls = set()
     for sector in builder.sectors:
         for door in sector.outstanding_doors:
             if door.stonewall:
-                return door
-    return None
+                stonewalls.add(door)
+    return stonewalls
 
 
 def generate_dungeon_main(builder, entrance_region_names, split_dungeon, world, player):
@@ -418,8 +420,7 @@ def check_valid(name, dungeon, hangers, hooks, proposed_map, doors_to_connect, a
         true_origin_hooks = [x for x in dungeon['Origin'].hooks.keys() if not x.bigKey or possible_bks > 0 or not bk_needed]
         if len(true_origin_hooks) == 0 and len(proposed_map.keys()) < len(doors_to_connect):
             return False
-        if len(true_origin_hooks) == 0 and bk_needed and possible_bks == 0 and len(proposed_map.keys()) == len(
-             doors_to_connect):
+        if len(true_origin_hooks) == 0 and bk_needed and possible_bks == 0 and len(proposed_map.keys()) == len(doors_to_connect):
             return False
     for key in hangers.keys():
         if len(hooks[key]) > 0 and len(hangers[key]) == 0:
@@ -694,17 +695,17 @@ hang_dir_map = {
 def hanger_from_door(door):
     if door.type == DoorType.SpiralStairs:
         return Hook.Stairs
-    if door.type in [DoorType.Normal, DoorType.Open, DoorType.StraightStairs]:
+    if door.type in [DoorType.Normal, DoorType.Open, DoorType.StraightStairs, DoorType.Ladder]:
         return hang_dir_map[door.direction]
     return None
 
 
 def connect_doors(a, b):
     # Return on unsupported types.
-    if a.type in [DoorType.Hole, DoorType.Warp, DoorType.Ladder, DoorType.Interior, DoorType.Logical]:
+    if a.type in [DoorType.Hole, DoorType.Warp, DoorType.Interior, DoorType.Logical]:
         return
     # Connect supported types
-    if a.type in [DoorType.Normal, DoorType.SpiralStairs, DoorType.Open, DoorType.StraightStairs]:
+    if a.type in [DoorType.Normal, DoorType.SpiralStairs, DoorType.Open, DoorType.StraightStairs, DoorType.Ladder]:
         if a.blocked:
             connect_one_way(b.entrance, a.entrance)
         elif b.blocked:
@@ -1171,7 +1172,7 @@ class DungeonBuilder(object):
         self.path_entrances = None  # used for pathing/key doors, I think
         self.split_flag = False
 
-        self.pre_open_stonewall = None  # used by stonewall system
+        self.pre_open_stonewalls = set()  # used by stonewall system
 
         self.candidates = None
         self.key_doors_num = None
@@ -1225,15 +1226,15 @@ def simple_dungeon_builder(name, sector_list):
 def create_dungeon_builders(all_sectors, connections_tuple, world, player,
                             dungeon_entrances=None, split_dungeon_entrances=None):
     logger = logging.getLogger('')
+    logger.info('Shuffling Dungeon Sectors')
 
     if dungeon_entrances is None:
         dungeon_entrances = default_dungeon_entrances
     if split_dungeon_entrances is None:
         split_dungeon_entrances = split_region_starts
     define_sector_features(all_sectors)
-    finished, dungeon_map = False, {}
+    finished, dungeon_map, attempts = False, {}, 0
     while not finished:
-        logger.info('Shuffling Dungeon Sectors')
         candidate_sectors = dict.fromkeys(all_sectors)
         global_pole = GlobalPolarity(candidate_sectors)
 
@@ -1248,6 +1249,7 @@ def create_dungeon_builders(all_sectors, connections_tuple, world, player,
                 for r_name in ['Hyrule Dungeon Cellblock', 'Sanctuary']:  # need to deliver zelda
                     assign_sector(find_sector(r_name, candidate_sectors), current_dungeon,
                                   candidate_sectors, global_pole)
+                standard_stair_check(dungeon_map, current_dungeon, candidate_sectors, global_pole)
         entrances_map, potentials, connections = connections_tuple
         accessible_sectors, reverse_d_map = set(), {}
         for key in dungeon_entrances.keys():
@@ -1324,9 +1326,25 @@ def create_dungeon_builders(all_sectors, connections_tuple, world, player,
             assign_the_rest(dungeon_map, neutral_sectors, global_pole, builder_info)
             dungeon_map.update(complete_dungeons)
             finished = True
-        except NeutralizingException:
-            pass
+        except (NeutralizingException, GenerationException) as e:
+            attempts += 1
+            logger.debug(f'Attempt {attempts} failed with {str(e)}')
+            if attempts >= 10:
+                raise Exception('Could not find a valid seed quickly, something is likely horribly wrong.', e)
     return dungeon_map
+
+
+def standard_stair_check(dungeon_map, dungeon, candidate_sectors, global_pole):
+    # this is because there must be at least one non-dead stairway in hc to get out
+    # this check may not be necessary
+    filtered_sectors = [x for x in candidate_sectors if any(y for y in x.outstanding_doors if not y.dead and y.type == DoorType.SpiralStairs)]
+    valid = False
+    while not valid:
+        chosen_sector = random.choice(filtered_sectors)
+        filtered_sectors.remove(chosen_sector)
+        valid = global_pole.is_valid_choice(dungeon_map, dungeon, [chosen_sector])
+        if valid:
+            assign_sector(chosen_sector, dungeon, candidate_sectors, global_pole)
 
 
 def identify_destination_sectors(accessible_sectors, reverse_d_map, dungeon_map, connections, dungeon_entrances, split_dungeon_entrances):
@@ -1578,6 +1596,8 @@ def assign_crystal_switch_sectors(dungeon_map, crystal_switches, crystal_barrier
     if len(crystal_switches) == 0:
         raise GenerationException('No crystal switches to assign')
     sector_list = list(crystal_switches)
+    if len(population) > len(sector_list):
+        raise GenerationException('Not enough crystal switch sectors for those needed')
     choices = random.sample(sector_list, k=len(population))
     for i, choice in enumerate(choices):
         builder = dungeon_map[population[i]]
@@ -1588,7 +1608,7 @@ def assign_crystal_switch_sectors(dungeon_map, crystal_switches, crystal_barrier
 def ensure_crystal_switches_reachable(dungeon_map, crystal_switches, polarized_sectors, crystal_barriers, global_pole):
     invalid_builders = []
     for name, builder in dungeon_map.items():
-        if builder.c_switch_present and not builder.c_locked:
+        if builder.c_switch_present and builder.c_switch_required and not builder.c_locked:
             invalid_builders.append(builder)
     while len(invalid_builders) > 0:
         valid_builders = []
@@ -1597,7 +1617,7 @@ def ensure_crystal_switches_reachable(dungeon_map, crystal_switches, polarized_s
             reachable_crystals = defaultdict()
             for sector in builder.sectors:
                 if sector.equations is None:
-                    sector.equations = calc_sector_equations(sector, builder)
+                    sector.equations = calc_sector_equations(sector)
                 if sector.is_entrance_sector() and not sector.destination_entrance:
                     need_switch = True
                     for region in sector.get_start_regions():
@@ -1690,7 +1710,7 @@ def find_pol_cand_for_c_switch(access, reachable_crystals, polarized_candidates)
 
 def pol_cand_matches_access_reach(sector, access, reachable_crystals):
     if sector.equations is None:
-        sector.equations = calc_sector_equations(sector, None)
+        sector.equations = calc_sector_equations(sector)
     for eq in sector.equations:
         key, cost_door = eq.cost
         if key in access.keys() and access[key]:
@@ -1712,7 +1732,7 @@ def find_crystal_cand(access, crystal_switches):
 
 def crystal_cand_matches_access(sector, access):
     if sector.equations is None:
-        sector.equations = calc_sector_equations(sector, None)
+        sector.equations = calc_sector_equations(sector)
     for eq in sector.equations:
         key, cost_door = eq.cost
         if key in access.keys() and access[key] and eq.c_switch and len(sector.outstanding_doors) > 1:
@@ -1984,6 +2004,9 @@ def polarity_step_3(dungeon_map, polarized_sectors, global_pole):
         sample_target = 100 if combos > 10 else combos * 2
         while best_choices is None or samples < sample_target:
             samples += 1
+            if len(odd_candidates) < len(odd_builders):
+                raise GenerationException(f'Unable to fix dungeon parity - not enough candidates.'
+                                          f' Ref: {next(iter(odd_builders)).name}')
             choices = random.sample(odd_candidates, k=len(odd_builders))
             valid = global_pole.is_valid_multi_choice(dungeon_map, odd_builders, choices)
             charge = calc_total_charge(dungeon_map, odd_builders, choices)
@@ -3649,14 +3672,14 @@ def copy_door_equations(builder, sector_list):
     for sector in builder.sectors + sector_list:
         if sector.equations is None:
             # todo: sort equations?
-            sector.equations = calc_sector_equations(sector, builder)
+            sector.equations = calc_sector_equations(sector)
         curr_list = equations[sector] = []
         for equation in sector.equations:
             curr_list.append(equation.copy())
     return equations
 
 
-def calc_sector_equations(sector, builder):
+def calc_sector_equations(sector):
     equations = []
     is_entrance = sector.is_entrance_sector() and not sector.destination_entrance
     if is_entrance:
@@ -3686,6 +3709,8 @@ def calc_door_equation(door, sector, look_for_entrance):
             eq.benefit[hook_from_door(door)].append(door)
             eq.required = True
             eq.c_switch = door.crystal == CrystalBarrier.Either
+            # exceptions for long entrances ???
+            # if door.name in ['PoD Dark Alley']:
             eq.entrance_flag = True
             return eq, flag
     eq = DoorEquation(door)

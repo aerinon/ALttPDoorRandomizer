@@ -45,7 +45,7 @@ Doors are not shuffled.
 #### Level 1
 Normal door and spiral staircases are shuffled
 #### Level 2
-Same as Level 1 plus open edges and straight staircases are shuffled.
+Same as Level 1 plus open edges and both types of straight staircases are shuffled.
 #### Level 3
 Same as Level 2 plus Dungeon Lobbies are shuffled
 

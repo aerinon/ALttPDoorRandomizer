@@ -5,13 +5,13 @@
     "type": "bool"
   },
   "create_spoiler": {
-    "action": "store_true",
-    "type": "bool"
+    "action": "store_false",
+    "dest": "suppress_spoiler",
+    "type": "bool",
+    "help": "suppress"
   },
   "suppress_spoiler": {
-    "action": "store_false",
-    "dest": "create_spoiler",
-    "help": "suppress"
+    "action": "store_true"
   },
   "logic": {
     "choices": [
@@ -58,6 +58,10 @@
       "hard",
       "expert"
     ]
+  },
+  "shopsanity" : {
+    "action": "store_true",
+    "type": "bool"
   },
   "keydropshuffle" : {
     "action": "store_true",
@@ -359,5 +363,6 @@
       "never"
     ]
   },
-  "outputname": {}
+  "outputname": {},
+  "code": {}
 }
