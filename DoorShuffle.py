@@ -2093,6 +2093,8 @@ logical_connections = [
     ('PoD Falling Bridge Path S', 'PoD Falling Bridge'),
     ('PoD Bow Statue Left to Right Barrier - Orange', 'PoD Bow Statue Right'),
     ('PoD Bow Statue Left to Right Bypass', 'PoD Bow Statue Right'),
+    ('PoD Bow Statue Left to Crystal', 'PoD Bow Statue Left - Crystal'),
+    ('PoD Bow Statue Left Crystal Exit', 'PoD Bow Statue Left'),    
     ('PoD Bow Statue Right to Left Barrier - Orange', 'PoD Bow Statue Left'),
     ('PoD Bow Statue Right to Ranged Crystal', 'PoD Bow Statue Right - Ranged Crystal'),
     ('PoD Bow Statue Ranged Crystal Exit', 'PoD Bow Statue Right'),

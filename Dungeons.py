@@ -217,7 +217,7 @@ pod_regions = [
     'PoD Map Balcony', 'PoD Map Balcony - Ranged Crystal', 'PoD Conveyor', 'PoD Mimics 1', 'PoD Jelly Hall', 'PoD Warp Hint', 'PoD Warp Room',
     'PoD Stalfos Basement', 'PoD Basement Ledge', 'PoD Big Key Landing', 'PoD Falling Bridge',
     'PoD Falling Bridge Ledge', 'PoD Dark Maze', 'PoD Big Chest Balcony', 'PoD Compass Room', 'PoD Dark Basement',
-    'PoD Harmless Hellway', 'PoD Mimics 2', 'PoD Bow Statue Left', 'PoD Bow Statue Right', 'PoD Bow Statue Right - Ranged Crystal',
+    'PoD Harmless Hellway', 'PoD Mimics 2', 'PoD Bow Statue Left', 'PoD Bow Statue Left - Crystal', 'PoD Bow Statue Right', 'PoD Bow Statue Right - Ranged Crystal',
     'PoD Dark Pegs Landing', 'PoD Dark Pegs Right', 'PoD Dark Pegs Middle', 'PoD Dark Pegs Left', 'PoD Dark Pegs Landing - Ranged Crystal',
     'PoD Dark Pegs Middle - Ranged Crystal', 'PoD Dark Pegs Left - Ranged Crystal', 'PoD Lonely Turtle', 'PoD Turtle Party',
     'PoD Dark Alley', 'PoD Callback', 'PoD Boss', 'Palace of Darkness Portal'
