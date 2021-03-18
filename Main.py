@@ -26,7 +26,7 @@ from Fill import sell_potions, sell_keys, balance_multiworld_progression, balanc
 from ItemList import generate_itempool, difficulties, fill_prizes, customize_shops
 from Utils import output_path, parse_player_names
 
-__version__ = '0.3.1.5-u'
+__version__ = '0.3.1.6-u'
 
 
 class EnemizerError(RuntimeError):
@@ -86,6 +86,8 @@ def main(args, seed=None, fish=None):
     world.keydropshuffle = args.keydropshuffle.copy()
     world.mixed_travel = args.mixed_travel.copy()
     world.standardize_palettes = args.standardize_palettes.copy()
+    world.treasure_hunt_count = args.triforce_goal.copy()
+    world.treasure_hunt_total = args.triforce_pool.copy()
 
     world.rom_seeds = {player: random.randint(0, 999999999) for player in range(1, world.players + 1)}
 

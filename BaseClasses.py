@@ -129,6 +129,7 @@ class World(object):
             set_player_attr('open_pyramid', False)
             set_player_attr('treasure_hunt_icon', 'Triforce Piece')
             set_player_attr('treasure_hunt_count', 0)
+            set_player_attr('treasure_hunt_total', 0)
             set_player_attr('potshuffle', False)
             set_player_attr('pot_contents', None)
 
@@ -587,7 +588,8 @@ class CollectionState(object):
         for event in reachable_events:
             if event.name in flooded_keys.keys():
                 flood_location = self.world.get_location(flooded_keys[event.name], event.player)
-                if flood_location.item and flood_location not in self.locations_checked and flood_location.parent_region.name in ['Swamp Trench 1 Alcove', 'Swamp Trench 2 Alcove']:
+                if (flood_location.item and flood_location not in self.locations_checked
+                   and self.location_can_be_flooded(flood_location)):
                     adjusted_checks.remove(event)
         if len(adjusted_checks) < len(reachable_events):
             return adjusted_checks
@@ -598,8 +600,13 @@ class CollectionState(object):
             flood_location = world.get_location(flooded_keys[location.name], location.player)
             item = flood_location.item
             item_is_important = False if not item else item.advancement or item.bigkey or item.smallkey
-            return flood_location in self.locations_checked or not item_is_important or flood_location.parent_region.name not in ['Swamp Trench 1 Alcove', 'Swamp Trench 2 Alcove']
+            return (flood_location in self.locations_checked or not item_is_important
+                    or not self.location_can_be_flooded(flood_location))
         return True
+
+    @staticmethod
+    def location_can_be_flooded(location):
+        return location.parent_region.name in ['Swamp Trench 1 Alcove', 'Swamp Trench 2 Alcove']
 
     def has(self, item, player, count=1):
         if not self.can_use_magic(player):
@@ -809,14 +816,17 @@ class CollectionState(object):
             elif 'Shield' in item.name:
                 if self.has('Mirror Shield', item.player):
                     pass
-                elif self.has('Red Shield', item.player) and self.world.difficulty_requirements[item.player].progressive_shield_limit >= 3:
+                elif self.has('Shield Level', item.player, 2) and self.world.difficulty_requirements[item.player].progressive_shield_limit >= 3:
                     self.prog_items['Mirror Shield', item.player] += 1
+                    self.prog_items['Shield Level', item.player] += 1
                     changed = True
-                elif self.has('Blue Shield', item.player)  and self.world.difficulty_requirements[item.player].progressive_shield_limit >= 2:
+                elif self.has('Shield Level', item.player, 1) and self.world.difficulty_requirements[item.player].progressive_shield_limit >= 2:
                     self.prog_items['Red Shield', item.player] += 1
+                    self.prog_items['Shield Level', item.player] += 1
                     changed = True
                 elif self.world.difficulty_requirements[item.player].progressive_shield_limit >= 1:
                     self.prog_items['Blue Shield', item.player] += 1
+                    self.prog_items['Shield Level', item.player] += 1
                     changed = True
             elif 'Bow' in item.name:
                 if self.has('Silver Arrows', item.player):
@@ -2008,6 +2018,8 @@ class Spoiler(object):
                          'experimental': self.world.experimental,
                          'keydropshuffle': self.world.keydropshuffle,
                          'shopsanity': self.world.shopsanity,
+						 'triforcegoal': self.world.treasure_hunt_count,
+						 'triforcepool': self.world.treasure_hunt_total,
                          'code': {p: Settings.make_code(self.world, p) for p in range(1, self.world.players + 1)}
                          }
 
@@ -2052,6 +2064,9 @@ class Spoiler(object):
                 outfile.write('Futuro:                          %s\n' % ('Yes' if self.metadata['futuro'][player] else 'No'))
                 outfile.write('Swords:                          %s\n' % self.metadata['weapons'][player])
                 outfile.write('Goal:                            %s\n' % self.metadata['goal'][player])
+                if self.metadata['goal'][player] == 'triforcehunt':
+                    outfile.write('Triforce Pieces Required:        %s\n' % self.metadata['triforcegoal'][player])
+                    outfile.write('Triforce Pieces Total:           %s\n' % self.metadata['triforcepool'][player])
                 outfile.write('Difficulty:                      %s\n' % self.metadata['item_pool'][player])
                 outfile.write('Item Functionality:              %s\n' % self.metadata['item_functionality'][player])
                 outfile.write('Entrance Shuffle:                %s\n' % self.metadata['shuffle'][player])

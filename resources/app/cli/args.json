@@ -222,6 +222,13 @@
   "usestartinventory": {
     "type": "bool"
   },
+  "triforce_pool": {},
+  "triforce_goal": {},
+  "triforce_pool_min": {},
+  "triforce_pool_max": {},
+  "triforce_goal_min": {},
+  "triforce_goal_max": {},
+  "triforce_min_difference": {},
   "custom": {
     "type": "bool",
     "help": "suppress"

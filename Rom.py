@@ -729,6 +729,8 @@ def patch_rom(world, rom, player, team, enemized, is_mystery=False):
         aga_portal = world.get_portal('Agahnims Tower', player)
         gt_portal = world.get_portal('Ganons Tower', player)
         aga_portal.exit_offset, gt_portal.exit_offset = gt_portal.exit_offset, aga_portal.exit_offset
+        aga_portal.default = False
+        gt_portal.default = False
 
     for portal in world.dungeon_portals[player]:
         if not portal.default:
@@ -1141,7 +1143,7 @@ def patch_rom(world, rom, player, team, enemized, is_mystery=False):
 
     # set up goals for treasure hunt
     rom.write_bytes(0x180165, [0x0E, 0x28] if world.treasure_hunt_icon[player] == 'Triforce Piece' else [0x0D, 0x28])
-    rom.write_byte(0x180167, world.treasure_hunt_count[player] % 256)
+    rom.write_byte(0x180167, int(world.treasure_hunt_count[player]) % 256)
     rom.write_byte(0x180194, 1) # Must turn in triforced pieces (instant win not enabled)
 
     rom.write_bytes(0x180213, [0x00, 0x01]) # Not a Tournament Seed
@@ -2101,7 +2103,7 @@ def write_strings(rom, world, player, team):
         tt['ganon_fall_in_alt'] = 'Why are you even here?\n You can\'t even hurt me! Get the Triforce Pieces.'
         tt['ganon_phase_3_alt'] = 'Seriously? Go Away, I will not Die.'
         tt['sign_ganon'] = 'Go find the Triforce pieces... Ganon is invincible!'
-        tt['murahdahla'] = "Hello @. I\nam Murahdahla, brother of\nSahasrahla and Aginah. Behold the power of\ninvisibility.\n\n\n\n… … …\n\nWait! you can see me? I knew I should have\nhidden in  a hollow tree. If you bring\n%d triforce pieces, I can reassemble it." % world.treasure_hunt_count[player]
+        tt['murahdahla'] = "Hello @. I\nam Murahdahla, brother of\nSahasrahla and Aginah. Behold the power of\ninvisibility.\n\n\n\n… … …\n\nWait! you can see me? I knew I should have\nhidden in  a hollow tree. If you bring\n%d triforce pieces, I can reassemble it." % int(world.treasure_hunt_count[player])
     elif world.goal[player] in ['pedestal']:
         tt['ganon_fall_in_alt'] = 'Why are you even here?\n You can\'t even hurt me! Your goal is at the pedestal.'
         tt['ganon_phase_3_alt'] = 'Seriously? Go Away, I will not Die.'

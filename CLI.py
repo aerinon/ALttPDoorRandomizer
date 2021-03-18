@@ -92,6 +92,9 @@ def parse_cli(argv, no_defaults=False):
                          'shuffle', 'door_shuffle', 'intensity', 'crystals_ganon', 'crystals_gt', 'openpyramid',
                          'mapshuffle', 'compassshuffle', 'keyshuffle', 'bigkeyshuffle', 'startinventory',
                          'retro', 'futuro', 'accessibility', 'hints', 'beemizer', 'experimental', 'dungeon_counters',
+                         'triforce_pool_min', 'triforce_pool_max', 'triforce_goal_min', 'triforce_goal_max',
+                         'triforce_min_difference', 'triforce_goal', 'triforce_pool',
+                         'retro', 'accessibility', 'hints', 'beemizer', 'experimental', 'dungeon_counters',
                          'shufflebosses', 'shuffleenemies', 'enemy_health', 'enemy_damage', 'shufflepots',
                          'ow_palettes', 'uw_palettes', 'sprite', 'disablemusic', 'quickswap', 'fastmenu', 'heartcolor', 'heartbeep',
                          'remote_items', 'shopsanity', 'keydropshuffle', 'mixed_travel', 'standardize_palettes', 'code']:
@@ -148,6 +151,14 @@ def parse_settings():
         "dungeon_counters": "default",
         "mixed_travel": "prevent",
         "standardize_palettes": "standardize",
+        
+        "triforce_pool": 30,
+        "triforce_goal": 20,
+        "triforce_pool_min": 0,
+        "triforce_pool_max": 0,
+        "triforce_goal_min": 0,
+        "triforce_goal_max": 0,
+        "triforce_min_difference": 10,
 
         "code": "",
         "multi": 1,

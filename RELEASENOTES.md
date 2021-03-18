@@ -51,6 +51,7 @@ All prices range approx. from half the base price to the base price in increment
 | Major Progression | Hammer, Hookshot, Mirror, Ocarina, Boots, Somaria, Fire Rod, Ice Rod | 250 | 125-250
 |                   | Moon Pearl | 200 | 100-200
 |                   | Lamp, Progressive Bows, Gloves, & Swords | 150 | 75-150
+|                   | Triforce Piece | 100 | 50-100
 | Medallions        | Bombos, Ether, Quake | 100 | 50-100
 | Safety/Fetch      | Cape, Mushroom, Shovel, Powder, Bug Net, Byrna, Progressive Armor & Shields, Half Magic | 50 | 25-50
 | Bottles			| Empty Bottle or Bee Bottle | 50 | 25-50
@@ -60,8 +61,8 @@ All prices range approx. from half the base price to the base price in increment
 | Health            | Heart Container | 40 | 20-40
 |                   | Sanctuary Heart | 50 | 25-50 
 |                   | Piece of Heart | 10 | 5-10
-| Dungeon           | Big Keys | 50 | 25-50
-|                   | Small Keys | 30 | 15-30
+| Dungeon           | Big Keys | 60 | 30-60
+|                   | Small Keys | 40 | 20-40
 |                   | Info Maps | 20 | 10-20
 |                   | Other Maps & Compasses | 10 | 5-10
 | Rupees			| Green | Free | Free
@@ -74,7 +75,7 @@ All prices range approx. from half the base price to the base price in increment
 |       			| Single Arrow | 3 | 3
 | Original Shop Items | Other Ammo, Refills, Non-Progressive Shields, Capacity Upgrades, Small Hearts, Retro Quiver, Universal Key | Original | Could be Discounted as Above  				
 
-In addition, 4-7 items are steeply discounted at random.
+~~In addition, 4-7 items are steeply discounted at random.~~ Sales are over.
 
 #### Rupee Balancing Algorithm
 
@@ -122,12 +123,36 @@ Added to CLI only now. With more testing, this will be added to the GUI to be ab
 The Mystery.py file has been updated for those who like to use that for generating games. Supports keydropshuffle, 
 shopsanity, and other settings that have been added.
 
+## Triforce Hunt Options
+
+Thanks to deathFouton!
+
+--triforce_pool and --triforce_goal added to the CLI. 
+
+Also, to the Mystery.py he added the following options:
+* triforce_goal_min
+* triforce_goal_max
+* triforce_pool_min
+* triforce_pool_max
+* triforce_min_difference
+
+See the example yaml file for demonstrated usage.
+
 ## Experimental Item Counter
 
 New item counter modified to show total
 
 # Bug Fixes and Notes.
 
+* 0.3.1.6-u
+	* Fix for inverted. AT or GT vanilla lobby in intensity 3 should not softlock on exit in non-ER modes.
+	* Backward compatibility for "chaos" enemizer flags. (Thanks krebel)
+	* Fix for potshuffle and swamp trench generation errors (Thanks StructuralMike)
+	* Fix for TFH playthrough (Thanks StructuralMike)
+	* Fix for Standard+Retro (Thanks StructuralMike)
+	* New options for TFH in CLI and Mystery (Thanks deathFouton)
+	* A few price adjustments for Shopsanity
+	* Fixed a subtle problem with Progressive Shields introduced by Shopsanity
 * 0.3.1.5-u
 	* Ganon hints fixed for shops
 	* Added support for a settings file so SahasrahBot and the main website can use it easier. (Thanks Synack)
