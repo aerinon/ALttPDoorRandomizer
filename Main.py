@@ -26,7 +26,7 @@ from Fill import sell_potions, sell_keys, balance_multiworld_progression, balanc
 from ItemList import generate_itempool, difficulties, fill_prizes, customize_shops
 from Utils import output_path, parse_player_names
 
-__version__ = '0.3.1.6-u'
+__version__ = '0.3.1.7-u'
 
 
 class EnemizerError(RuntimeError):

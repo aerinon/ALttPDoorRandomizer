@@ -1143,10 +1143,11 @@ def patch_rom(world, rom, player, team, enemized, is_mystery=False):
 
     # set up goals for treasure hunt
     rom.write_bytes(0x180165, [0x0E, 0x28] if world.treasure_hunt_icon[player] == 'Triforce Piece' else [0x0D, 0x28])
-    rom.write_byte(0x180167, int(world.treasure_hunt_count[player]) % 256)
-    rom.write_byte(0x180194, 1) # Must turn in triforced pieces (instant win not enabled)
+    if world.goal[player] == 'triforcehunt':
+        rom.write_byte(0x180167, int(world.treasure_hunt_count[player]) % 256)
+    rom.write_byte(0x180194, 1)  # Must turn in triforced pieces (instant win not enabled)
 
-    rom.write_bytes(0x180213, [0x00, 0x01]) # Not a Tournament Seed
+    rom.write_bytes(0x180213, [0x00, 0x01])  # Not a Tournament Seed
 
     gametype = 0x04 # item
     if world.shuffle[player] != 'vanilla' or world.doorShuffle[player] != 'vanilla' or world.keydropshuffle[player]:

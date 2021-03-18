@@ -144,6 +144,11 @@ New item counter modified to show total
 
 # Bug Fixes and Notes.
 
+* 0.3.1.7-u
+	* TFH counter off in modes where it should be off
+	* Fixed Big Bomb logic for inverted (bad merge)
+	* Updated pip requirements for MultiClient
+	* Updated local_install.py and instructions (Thanks MikeTrethewey)
 * 0.3.1.6-u
 	* Fix for inverted. AT or GT vanilla lobby in intensity 3 should not softlock on exit in non-ER modes.
 	* Backward compatibility for "chaos" enemizer flags. (Thanks krebel)

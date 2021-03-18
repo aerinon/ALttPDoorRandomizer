@@ -27,15 +27,15 @@ jobs:
     strategy:
       matrix:
         os-name: [ ubuntu-latest, ubuntu-18.04, macOS-latest, windows-latest ]
-        python-version: [ 3.8 ]
+        python-version: [ 3.9 ]
 #    needs: [ install-test ]
     steps:
     # checkout commit
     - name: Checkout commit
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
     # install python
     - name: Install python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
         architecture: "x64"
@@ -48,6 +48,28 @@ jobs:
       run: |
         python ./resources/ci/common/install.py
         pip install pyinstaller
+    # get parent directory
+    - name: Get Repo Name
+      uses: mad9000/actions-find-and-replace-string@1
+      id: repoName
+      with:
+        source: ${{ github.repository }}
+        find: '${{ github.repository_owner }}/'
+        replace: ''
+    - name: Get Parent Directory Path (!Windows)
+      uses: mad9000/actions-find-and-replace-string@1
+      id: parentDirNotWin
+      with:
+        source: ${{ github.workspace }}
+        find: '${{ steps.repoName.outputs.value }}/${{ steps.repoName.outputs.value }}'
+        replace: ${{ steps.repoName.outputs.value }}
+    - name: Get Parent Directory Path (Windows)
+      uses: mad9000/actions-find-and-replace-string@1
+      id: parentDir
+      with:
+        source: ${{ steps.parentDirNotWin.outputs.value }}
+        find: '${{ steps.repoName.outputs.value }}\${{ steps.repoName.outputs.value }}'
+        replace: ${{ steps.repoName.outputs.value }}
     # try to get UPX
     - name: Get UPX
       env:
@@ -70,10 +92,10 @@ jobs:
         python ./resources/ci/common/prepare_binary.py
     # upload binary artifacts for later step
     - name: Upload Binary Artifacts
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: binaries-${{ matrix.os-name }}
-        path: ../artifact
+        path: ${{ steps.parentDir.outputs.value }}/artifact
 
   # Install & Preparing Release
   #  Set up environment
@@ -87,18 +109,18 @@ jobs:
     #  os & python versions
     strategy:
       matrix:
-        # install/release on not xenial
+        # install/release on not bionic
         os-name: [ ubuntu-latest, ubuntu-18.04, macOS-latest, windows-latest ]
-        python-version: [ 3.8 ]
+        python-version: [ 3.9 ]
 
     needs: [ install-build ]
     steps:
     # checkout commit
     - name: Checkout commit
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
     # install python
     - name: Install Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
         architecture: "x64"
@@ -110,9 +132,31 @@ jobs:
         OS_NAME: ${{ matrix.os-name }}
       run: |
         python ./resources/ci/common/install.py
+    # get parent directory
+    - name: Get Repo Name
+      uses: mad9000/actions-find-and-replace-string@1
+      id: repoName
+      with:
+        source: ${{ github.repository }}
+        find: '${{ github.repository_owner }}/'
+        replace: ''
+    - name: Get Parent Directory Path (!Windows)
+      uses: mad9000/actions-find-and-replace-string@1
+      id: parentDirNotWin
+      with:
+        source: ${{ github.workspace }}
+        find: '${{ steps.repoName.outputs.value }}/${{ steps.repoName.outputs.value }}'
+        replace: ${{ steps.repoName.outputs.value }}
+    - name: Get Parent Directory Path (Windows)
+      uses: mad9000/actions-find-and-replace-string@1
+      id: parentDir
+      with:
+        source: ${{ steps.parentDirNotWin.outputs.value }}
+        find: '${{ steps.repoName.outputs.value }}\${{ steps.repoName.outputs.value }}'
+        replace: ${{ steps.repoName.outputs.value }}
     # download binary artifact
     - name: Download Binary Artifact
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v2
       with:
         name: binaries-${{ matrix.os-name }}
         path: ./
@@ -126,22 +170,22 @@ jobs:
         python ./resources/ci/common/prepare_release.py
     # upload appversion artifact for later step
     - name: Upload AppVersion Artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: appversion-${{ matrix.os-name }}
         path: ./resources/app/meta/manifests/app_version.txt
     # upload archive artifact for later step
     - name: Upload Archive Artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         name: archive-${{ matrix.os-name }}
-        path: ../deploy
+        path: ${{ steps.parentDir.outputs.value }}/deploy
 
   # Deploy to GitHub Releases
   #  Release Name:  ALttPDoorRandomizer v${GITHUB_TAG}
   #  Release Body:  Inline content of RELEASENOTES.md
   #  Release Body:  Fallback to URL to RELEASENOTES.md
-  #  Release Files: ../deploy
+  #  Release Files: ${{ steps.parentDir.outputs.value }}/deploy
   deploy-release:
     name: Deploy GHReleases
     runs-on: ${{ matrix.os-name }}
@@ -150,42 +194,64 @@ jobs:
     #  os & python versions
     strategy:
       matrix:
-        # release only on focal/bionic
+        # release only on focal
         os-name: [ ubuntu-latest ]
-        python-version: [ 3.8 ]
+        python-version: [ 3.9 ]
 
     needs: [ install-prepare-release ]
     steps:
     # checkout commit
     - name: Checkout commit
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
+    # get parent directory
+    - name: Get Repo Name
+      uses: mad9000/actions-find-and-replace-string@1
+      id: repoName
+      with:
+        source: ${{ github.repository }}
+        find: '${{ github.repository_owner }}/'
+        replace: ''
+    - name: Get Parent Directory Path (!Windows)
+      uses: mad9000/actions-find-and-replace-string@1
+      id: parentDirNotWin
+      with:
+        source: ${{ github.workspace }}
+        find: '${{ steps.repoName.outputs.value }}/${{ steps.repoName.outputs.value }}'
+        replace: ${{ steps.repoName.outputs.value }}
+    - name: Get Parent Directory Path (Windows)
+      uses: mad9000/actions-find-and-replace-string@1
+      id: parentDir
+      with:
+        source: ${{ steps.parentDirNotWin.outputs.value }}
+        find: '${{ steps.repoName.outputs.value }}\${{ steps.repoName.outputs.value }}'
+        replace: ${{ steps.repoName.outputs.value }}
     - name: Install Dependencies via pip
       run: |
         python -m pip install pytz requests
     # download appversion artifact
     - name: Download AppVersion Artifact
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v2
       with:
         name: appversion-${{ matrix.os-name }}
-        path: ../build
+        path: ${{ steps.parentDir.outputs.value }}/build
     # download ubuntu archive artifact
     - name: Download Ubuntu Archive Artifact
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v2
       with:
         name: archive-ubuntu-latest
-        path: ../deploy/linux
+        path: ${{ steps.parentDir.outputs.value }}/deploy/linux
     # download macos archive artifact
     - name: Download MacOS Archive Artifact
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v2
       with:
         name: archive-macOS-latest
-        path: ../deploy/macos
+        path: ${{ steps.parentDir.outputs.value }}/deploy/macos
     # download windows archive artifact
     - name: Download Windows Archive Artifact
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v2
       with:
         name: archive-windows-latest
-        path: ../deploy/windows
+        path: ${{ steps.parentDir.outputs.value }}/deploy/windows
     # debug info
     - name: Debug Info
       id: debug_info
@@ -199,44 +265,35 @@ jobs:
         RELEASE_NAME="ALttPDoorRandomizer ${GITHUB_TAG}"
         echo "Release Name: ${RELEASE_NAME}"
         echo "Git Tag:      ${GITHUB_TAG}"
-    # read releasenotes
-    - name: Read RELEASENOTES
-      id: release_notes
-      run: |
-        body="$(cat RELEASENOTES.md)"
-        body="${body//'%'/'%25'}"
-        body="${body//$'\n'/'%0A'}"
-        body="${body//$'\r'/'%0D'}"
-        echo "::set-output name=body::$body"
     # create a pre/release
     - name: Create a Pre/Release
       id: create_release
-      uses: actions/create-release@master
+      uses: actions/create-release@v1.1.4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: v${{ steps.debug_info.outputs.github_tag }}
         release_name: ALttPDoorRandomizer v${{ steps.debug_info.outputs.github_tag }}
-        body: ${{ steps.release_notes.outputs.body }}
+        body_path: RELEASENOTES.md
         draft: true
         prerelease: true
       if: contains(github.ref, 'master') || contains(github.ref, 'stable') || contains(github.ref, 'dev') || contains(github.ref, 'DoorRelease')
     # upload linux archive asset
     - name: Upload Linux Archive Asset
       id: upload-linux-asset
-      uses: actions/upload-release-asset@v1.0.1
+      uses: actions/upload-release-asset@v1.0.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ../deploy/linux/ALttPDoorRandomizer.tar.gz
-        asset_name: ALttPDoorRandomizer-${{ steps.debug_info.outputs.github_tag }}-linux-bionic.tar.gz
+        asset_name: ALttPDoorRandomizer-${{ steps.debug_info.outputs.github_tag }}-linux-focal.tar.gz
         asset_content_type: application/gzip
       if: contains(github.ref, 'master') || contains(github.ref, 'stable') || contains(github.ref, 'dev') || contains(github.ref, 'DoorRelease')
     # upload macos archive asset
     - name: Upload MacOS Archive Asset
       id: upload-macos-asset
-      uses: actions/upload-release-asset@v1.0.1
+      uses: actions/upload-release-asset@v1.0.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -248,7 +305,7 @@ jobs:
     # upload windows archive asset
     - name: Upload Windows Archive Asset
       id: upload-windows-asset
-      uses: actions/upload-release-asset@v1.0.1
+      uses: actions/upload-release-asset@v1.0.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
