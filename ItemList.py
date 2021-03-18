@@ -262,8 +262,12 @@ def generate_itempool(world, player):
     if player in world.pool_adjustment.keys():
         amt = world.pool_adjustment[player]
         if amt < 0:
+            removals = ['Rupees (20)', 'Rupees (5)', 'Rupee (1)']
             for _ in range(amt, 0):
-                pool.remove(next(iter([x for x in pool if x in ['Rupees (20)', 'Rupees (5)', 'Rupee (1)']])))
+                try:
+                    pool.remove(next(iter([x for x in pool if x in removals])))
+                except StopIteration:
+                    removals = ['Bombs (3)', 'Arrows (10)']
         elif amt > 0:
             for _ in range(0, amt):
                 pool.append('Rupees (20)')
