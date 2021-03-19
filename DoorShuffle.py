@@ -1957,7 +1957,6 @@ def determine_init_crystal(initial, state, start_regions):
         return CrystalBarrier.Orange
     else:
         raise Exception(f'Can\'t get to {start_region.name} from initial state')
-#        raise Exception(f'Can\'t get to {start_region.name} from initial state\n{state.dungeon}\n{state.found_locations}')
 
 
 def explore_state(state, world, player):

@@ -16,7 +16,7 @@ from BaseClasses import CollectionState, ShopType, Region, Location, Door, DoorT
 from DoorShuffle import compass_data, DROptions, boss_indicator
 from Dungeons import dungeon_music_addresses
 from KeyDoorShuffle import count_locations_exclude_logic
-from Regions import location_table, shop_to_location_table
+from Regions import location_table, shop_to_location_table, shop_table_by_location
 from RoomData import DoorKind
 from Text import MultiByteTextMapper, CompressedTextMapper, text_addresses, Credits, TextTable
 from Text import Uncle_texts, Ganon1_texts, TavernMan_texts, Sahasrahla2_texts, Triforce_texts, Blind_texts, BombShop2_texts, junk_texts
@@ -1610,8 +1610,9 @@ def write_custom_shops(rom, world, player):
                 break
             if world.shopsanity[player] or shop.type == ShopType.TakeAny:
                 rom.write_byte(0x186560 + shop.sram_address + index, 1)
-            loc_item = world.get_location(shop_to_location_table[shop.region.name][index], player).item
-            if not loc_item:
+            if world.shopsanity[player] and shop.region.name in shop_to_location_table:
+                loc_item = world.get_location(shop_to_location_table[shop.region.name][index], player).item
+            else:
                 loc_item = ItemFactory(item['item'], player)
             item_id = loc_item.code
             price = int16_as_bytes(item['price'])
