@@ -2218,6 +2218,7 @@ logical_connections = [
     ('Mire Compass Chest Exit', 'Mire Compass Room'),
     ('Mire South Fish Blue Barrier', 'Mire Fishbone'),
     ('Mire Fishbone Blue Barrier', 'Mire South Fish'),
+    ('Mire Fishbone Blue Barrier Bypass', 'Mire South Fish'),
 
     ('TR Main Lobby Gap', 'TR Lobby Ledge'),
     ('TR Lobby Ledge Gap', 'TR Main Lobby'),

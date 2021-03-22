@@ -875,6 +875,7 @@ def create_doors(world, player):
         create_door(player, 'Mire Left Bridge Down Stairs', Sprl).dir(Dn, 0xa2, 0, HTL).ss(A, 0x12, 0x00),
         create_door(player, 'Mire Fishbone E', Nrml).dir(Ea, 0xa1, Mid, High).pos(1),
         create_door(player, 'Mire Fishbone Blue Barrier', Lgcl),
+        create_door(player, 'Mire Fishbone Blue Barrier Bypass', Lgcl),
         create_door(player, 'Mire South Fish Blue Barrier', Lgcl),
         create_door(player, 'Mire Fishbone SE', Nrml).dir(So, 0xa1, Right, High).small_key().pos(0),
         create_door(player, 'Mire Spike Barrier NE', Nrml).dir(No, 0xb1, Right, High).small_key().pos(1),
@@ -1374,6 +1375,7 @@ def create_doors(world, player):
     world.get_door('Mire Crystal Dead End Right Barrier', player).barrier(CrystalBarrier.Blue)
     world.get_door('Mire Fishbone Blue Barrier', player).barrier(CrystalBarrier.Blue)
     world.get_door('Mire South Fish Blue Barrier', player).barrier(CrystalBarrier.Blue)
+    world.get_door('Mire Fishbone Blue Barrier Bypass', player).barrier(CrystalBarrier.Orange)
     world.get_door('Mire Compass Blue Barrier', player).barrier(CrystalBarrier.Blue)
     world.get_door('Mire Crystal Mid Blue Barrier', player).barrier(CrystalBarrier.Blue)
     world.get_door('Mire Crystal Left Blue Barrier', player).barrier(CrystalBarrier.Blue)
