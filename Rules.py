@@ -454,7 +454,7 @@ def global_rules(world, player):
 
     set_rule(world.get_entrance('Mire Conveyor to Crystal', player), lambda state: state.can_hit_crystal(player))
     set_rule(world.get_entrance('Mire Tall Dark and Roomy to Ranged Crystal', player), lambda state: True) # Can always throw pots
-    set_rule(world.get_entrance('Mire Fishbone Blue Barrier Bypass', player), lambda state: False) # (state.world.can_take_damage or state.has('Cape', player) or state.has('Cane of Byrna', player)) and state.can_tastate.can_use_bombs(player) // Easy to do but obscure. Should it be in logic?
+    set_rule(world.get_entrance('Mire Fishbone Blue Barrier Bypass', player), lambda state: False) # state.can_use_bombs(player) // Is very easy to do, but should it be in logic?
 
     set_rule(world.get_location('Turtle Rock - Chain Chomps', player), lambda state: state.can_reach('TR Chain Chomps Top', 'Region', player) and state.can_hit_crystal_through_barrier(player))
     set_rule(world.get_entrance('TR Chain Chomps Top to Bottom Barrier - Orange', player), lambda state: state.can_reach_orange(world.get_region('TR Chain Chomps Top', player), player))
