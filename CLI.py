@@ -112,7 +112,7 @@ def parse_settings():
     settings = {
         "lang": "en",
         "retro": False,
-        "futuro": "none",
+        "futuro": False,
         "mode": "open",
         "logic": "noglitches",
         "goal": "ganon",

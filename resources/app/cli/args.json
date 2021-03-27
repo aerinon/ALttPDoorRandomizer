@@ -214,7 +214,10 @@
     "action": "store_true",
     "type": "bool"
   },
-  "futuro": {},
+  "futuro": {
+    "action": "store_true",
+    "type": "bool"
+  },
   "startinventory": {},
   "usestartinventory": {
     "type": "bool"

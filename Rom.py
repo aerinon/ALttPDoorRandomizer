@@ -27,7 +27,7 @@ from EntranceShuffle import door_addresses, exit_ids
 
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '18201e7e25722abf7d854b39b0502cdf'
+RANDOMIZERBASEHASH = 'bd69d6ddc54fce1fcf7cbeb67fa00f38'
 
 
 class JsonRom(object):
@@ -950,7 +950,7 @@ def patch_rom(world, rom, player, team, enemized, is_mystery=False):
     difficulty = world.difficulty_requirements[player]
 
     #Shift magic consumption costs if futuro
-    if 'magic' in world.futuro[player]:
+    if world.futuro[player]:
         for item in magic_cost:
             magic_cost[item][1][2] = magic_cost[item][1][1]
             magic_cost[item][1][1] = magic_cost[item][1][0]
@@ -1049,12 +1049,12 @@ def patch_rom(world, rom, player, team, enemized, is_mystery=False):
     rom.write_bytes(0x184000, [
         # original_item, limit, replacement_item, filler
         0x12, 0x01, 0x35, 0xFF, # lamp -> 5 rupees
-        0x51, 0x00 if 'bomb' in world.futuro[player] else 0x06, 0x31 if 'bomb' in world.futuro[player] else 0x52, 0xFF, # 6 +5 bomb upgrades -> +10 bomb upgrade. If futuro, turns into Bombs (10)
+        0x51, 0x00 if world.futuro[player] else 0x06, 0x31 if world.futuro[player] else 0x52, 0xFF, # 6 +5 bomb upgrades -> +10 bomb upgrade. If futuro, turns into Bombs (10)
         0x53, 0x06, 0x54, 0xFF, # 6 +5 arrow upgrades -> +10 arrow upgrade
         0x58, 0x01, 0x36 if world.retro[player] else 0x43, 0xFF, # silver arrows -> single arrow (red 20 in retro mode)
         0x3E, difficulty.boss_heart_container_limit, 0x47, 0xFF, # boss heart -> green 20
         0x17, difficulty.heart_piece_limit, 0x47, 0xFF, # piece of heart -> green 20
-        0x0B, 0x01, 0x54 if 'bow' in world.futuro[player] else 0x47, 0xFF, # Non-progressive bows -> Arrow+10 in futuro, else green 20
+        0x0B, 0x01, 0x54 if world.futuro[player] else 0x47, 0xFF, # Non-progressive bows -> Arrow+10 in futuro, else green 20
         0xFF, 0xFF, 0xFF, 0xFF, # end of table sentinel
     ])
 
@@ -1164,7 +1164,7 @@ def patch_rom(world, rom, player, team, enemized, is_mystery=False):
     rom.write_byte(0x180171, 0x01 if world.ganon_at_pyramid[player] else 0x00)  # Enable respawning on pyramid after ganon death
     rom.write_byte(0x180173, 0x01) # Bob is enabled
     rom.write_byte(0x180168, 0x08)  # Spike Cave Damage
-    if 'magic' in world.futuro[player]:
+    if world.futuro[player]:
         rom.write_bytes(0x18016B, [0x81, 0x04, 0x02])  # Set spike cave and MM spike room Byrna usage
         rom.write_bytes(0x18016E, [0x01, 0x04, 0x08])  # Set spike cave and MM spike room Cape usage
     else:
@@ -1188,7 +1188,7 @@ def patch_rom(world, rom, player, team, enemized, is_mystery=False):
     equip[0x36C] = 0x18
     equip[0x36D] = 0x18
     equip[0x379] = 0x68
-    if 'bomb' in world.futuro[player]:
+    if world.futuro[player]:
         starting_max_bombs = 0
     else:
         starting_max_bombs = 10
@@ -1328,15 +1328,10 @@ def patch_rom(world, rom, player, team, enemized, is_mystery=False):
             raise RuntimeError(f'Unsupported item in starting equipment: {item.name}')
 
     # Set basepatch switches for the futuro mode
-    if 'magic' in world.futuro[player]:
+    if world.futuro[player]:
         rom.write_byte(0x18008D, 0x01)
     else:
         rom.write_byte(0x18008D, 0x00)
-
-    if 'portal' in world.futuro[player]:
-        rom.write_byte(0x18008E, 0x01)
-    else:
-        rom.write_byte(0x18008E, 0x00)
 
     equip[0x343] = min(equip[0x343], starting_max_bombs)
     rom.write_byte(0x180034, starting_max_bombs)
@@ -1494,7 +1489,7 @@ def patch_rom(world, rom, player, team, enemized, is_mystery=False):
             rom.write_bytes(0x180188, [0, 0, 10])  # Zelda respawn refills (magic, bombs, arrows)
             rom.write_bytes(0x18018B, [0, 0, 10])  # Mantle respawn refills (magic, bombs, arrows)
             bow_max, bow_small = 70, 10
-        elif uncle_location.item is not None and uncle_location.item.name in ['Bomb Upgrade (+10)' if 'bomb' in world.futuro[player] else 'Bombs (10)']:
+        elif uncle_location.item is not None and uncle_location.item.name in ['Bomb Upgrade (+10)' if world.futuro[player] else 'Bombs (10)']:
             rom.write_byte(0x18004E, 2)  # Escape Fill (bombs)
             rom.write_bytes(0x180185, [0, 50, 0])  # Uncle respawn refills (magic, bombs, arrows)
             rom.write_bytes(0x180188, [0, 3, 0])  # Zelda respawn refills (magic, bombs, arrows)
