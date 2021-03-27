@@ -4,3 +4,4 @@ python-bps-continued
 colorama
 aioconsole
 websockets
+pyyaml
