@@ -263,8 +263,13 @@
       "and a few other little things make this more like Zelda-1. (default: %(default)s)"
     ],
     "futuro": [
-      "You start with 0 bomb capacity, and without magic meter,",
-      "you have to find your capacity upgrades to use them. (default: %(default)s)"
+      "Combine any or all futuro settings. I.e 'bomb,magic,bow,portal' for all options (default: %(default)s)",
+      "bomb:         Start with 0 bomb capacity. Two capacity upgrades are added to the pool",
+      "magic:        Start without a magic meter. Two capacity upgrades are added to the pool",
+      "bow:          There are 2 non-progressive bows & 1 separate silver arrows.",
+                    "Extra bows turn into Arrow capacity upgrades after the first one.",
+      "portal:       The Agahnim1 dark-world portal is active from start (or after rescuing Zelda).",
+                    "Agahnim still needs to be defeated for goals and for LJ access."
     ],
     "startinventory": [ "Specifies a list of items that will be in your starting inventory (separated by commas). (default: %(default)s)" ],
     "usestartinventory": [ "Toggle usage of Starting Inventory." ],

@@ -689,10 +689,10 @@ class CollectionState(object):
                 )
 
     def can_use_bombs(self, player):
-        return (self.has('Bomb Upgrade (+10)', player) or not self.world.futuro[player])
+        return (self.has('Bomb Upgrade (+10)', player) or 'bomb' not in self.world.futuro[player])
 
     def can_use_magic(self, player):
-        return not self.world.futuro[player] or self.prog_items['Magic Upgrade (1/2)', player] > 0 or self.prog_items['Magic Upgrade (1/4)', player] > 0
+        return 'magic' not in self.world.futuro[player] or self.prog_items['Magic Upgrade (1/2)', player] > 0 or self.prog_items['Magic Upgrade (1/4)', player] > 0
 
     def can_hit_crystal(self, player):
         return (self.can_use_bombs(player)
@@ -730,6 +730,11 @@ class CollectionState(object):
             cave.can_reach(self) and
             self.is_not_bunny(cave, player)
         )
+
+    def has_futuro_access(self, player):
+        if self.world.mode[player] == 'standard':
+            return state.has('Zelda Delivered', player) and 'portal' in self.world.futuro[player]
+        return 'portal' in self.world.futuro[player]
 
     def has_sword(self, player):
         return self.has('Fighter Sword', player) or self.has('Master Sword', player) or self.has('Tempered Sword', player) or self.has('Golden Sword', player)
@@ -2061,7 +2066,7 @@ class Spoiler(object):
                 outfile.write('Logic:                           %s\n' % self.metadata['logic'][player])
                 outfile.write('Mode:                            %s\n' % self.metadata['mode'][player])
                 outfile.write('Retro:                           %s\n' % ('Yes' if self.metadata['retro'][player] else 'No'))
-                outfile.write('Futuro:                          %s\n' % ('Yes' if self.metadata['futuro'][player] else 'No'))
+                outfile.write('Futuro:                          %s\n' % self.metadata['futuro'][player])
                 outfile.write('Swords:                          %s\n' % self.metadata['weapons'][player])
                 outfile.write('Goal:                            %s\n' % self.metadata['goal'][player])
                 if self.metadata['goal'][player] == 'triforcehunt':

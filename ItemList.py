@@ -37,7 +37,7 @@ Difficulty = namedtuple('Difficulty',
                         ['baseitems', 'bottles', 'bottle_count', 'same_bottle', 'progressiveshield',
                          'basicshield', 'progressivearmor', 'basicarmor', 'swordless',
                          'progressivesword', 'basicsword', 'basicbow', 'timedohko', 'timedother',
-                         'retro', 'futuro',
+                         'retro', 'futurobombs', 'futurobows', 'futuromagic',
                          'extras', 'progressive_sword_limit', 'progressive_shield_limit',
                          'progressive_armor_limit', 'progressive_bottle_limit',
                          'progressive_bow_limit', 'heart_piece_limit', 'boss_heart_container_limit'])
@@ -61,7 +61,9 @@ difficulties = {
         timedohko = ['Green Clock'] * 25,
         timedother = ['Green Clock'] * 20 + ['Blue Clock'] * 10 + ['Red Clock'] * 10,
         retro = ['Small Key (Universal)'] * 18 + ['Rupees (20)'] * 10,
-        futuro = ['Bomb Upgrade (+10)'] * 2 + ['Magic Upgrade (1/2)'],
+        futurobombs = ['Bomb Upgrade (+10)'] * 2,
+        futuromagic = ['Magic Upgrade (1/2)'],
+        futurobows = ['Bow', 'Bow', 'Silver Arrows'],
         extras = [normalfirst15extra, normalsecond15extra, normalthird10extra, normalfourth5extra, normalfinal25extra],
         progressive_sword_limit = 4,
         progressive_shield_limit = 3,
@@ -87,7 +89,9 @@ difficulties = {
         timedohko = ['Green Clock'] * 25,
         timedother = ['Green Clock'] * 20 + ['Blue Clock'] * 10 + ['Red Clock'] * 10,
         retro = ['Small Key (Universal)'] * 13 + ['Rupees (5)'] * 15,
-        futuro = ['Bomb Upgrade (+10)'] * 2 + ['Magic Upgrade (1/2)'],
+        futurobombs = ['Bomb Upgrade (+10)'] * 2,
+        futuromagic = ['Magic Upgrade (1/2)'],
+        futurobows = ['Bow', 'Bow', 'Silver Arrows'],
         extras = [normalfirst15extra, normalsecond15extra, normalthird10extra, normalfourth5extra, normalfinal25extra],
         progressive_sword_limit = 3,
         progressive_shield_limit = 2,
@@ -113,7 +117,9 @@ difficulties = {
         timedohko = ['Green Clock'] * 20 + ['Red Clock'] * 5,
         timedother = ['Green Clock'] * 20 + ['Blue Clock'] * 10 + ['Red Clock'] * 10,
         retro = ['Small Key (Universal)'] * 13 + ['Rupees (5)'] * 15,
-        futuro = ['Bomb Upgrade (+10)'] * 2 + ['Magic Upgrade (1/2)'],
+        futurobombs = ['Bomb Upgrade (+10)'] * 2,
+        futuromagic = ['Magic Upgrade (1/2)'],
+        futurobows = ['Bow', 'Bow', 'Silver Arrows'],
         extras = [normalfirst15extra, normalsecond15extra, normalthird10extra, normalfourth5extra, normalfinal25extra],
         progressive_sword_limit = 2,
         progressive_shield_limit = 1,
@@ -291,10 +297,10 @@ def generate_itempool(world, player):
                 if item in ['Hammer']:
                     if item not in possible_weapons:
                         possible_weapons.append(item)
-                if not world.futuro[player] and item in ['Fire Rod', 'Cane of Somaria', 'Cane of Byrna']:
+                if 'magic' not in world.futuro[player] and item in ['Fire Rod', 'Cane of Somaria', 'Cane of Byrna']:
                     if item not in possible_weapons:
                         possible_weapons.append(item)
-                if not world.futuro[player] and item in ['Bombs (10)']:
+                if 'bomb' not in world.futuro[player] and item in ['Bombs (10)']:
                     if item not in possible_weapons and world.doorShuffle[player] != 'crossed':
                         possible_weapons.append(item)
             starting_weapon = random.choice(possible_weapons)
@@ -693,11 +699,16 @@ def get_pool_core(progressive, shuffle, difficulty, treasure_hunt_total, timer, 
     else:
         pool.extend(diff.basicarmor)
 
-    if futuro:
+    if 'bomb' in futuro:
         pool = [item.replace('Bomb Upgrade (+5)','Rupees (5)') for item in pool]
         pool = [item.replace('Bomb Upgrade (+10)','Rupees (5)') for item in pool]
-        pool.extend(['Bow', 'Bow', 'Silver Arrows'])
-        pool.extend(diff.futuro)
+        pool.extend(diff.futurobombs)
+    
+    if 'magic' in futuro:
+        pool.extend(diff.futuromagic)
+    
+    if 'bow' in futuro:
+        pool.extend(diff.futurobows)
     else:
         if want_progressives():
             pool.extend(['Progressive Bow'] * 2)
@@ -889,7 +900,7 @@ def test():
                         for progressive in ['on', 'off']:
                             for shuffle in ['full', 'insanity_legacy']:
                                 for retro in [True, False]:
-                                    for futuro in [True, False]:
+                                    for futuro in [None,'bomb,magic,bow,portal']:
                                         for door_shuffle in ['basic', 'crossed', 'vanilla']:
                                             out = get_pool_core(progressive, shuffle, difficulty, timer, goal, mode, swords, retro, futuro, door_shuffle)
                                             count = len(out[0]) + len(out[1])
