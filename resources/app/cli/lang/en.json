@@ -262,15 +262,12 @@
       "Keys are universal, shooting arrows costs rupees,",
       "and a few other little things make this more like Zelda-1. (default: %(default)s)"
     ],
-    "futuro": [
-      "Combine any or all futuro settings. I.e 'bomb,magic,bow,portal' for all options (default: %(default)s)",
-      "bomb:         Start with 0 bomb capacity. Two capacity upgrades are added to the pool",
-      "magic:        Start without a magic meter. Two capacity upgrades are added to the pool",
-      "bow:          There are 2 non-progressive bows & 1 separate silver arrows.",
-                    "Extra bows turn into Arrow capacity upgrades after the first one.",
-      "portal:       The Agahnim1 dark-world portal is active from start (or after rescuing Zelda).",
-                    "Agahnim still needs to be defeated for goals and for LJ access."
-    ],
+    "futurobombs": ["Start with 0 bomb capacity. Two capacity upgrades (+10) are added to the pool (default: %(default)s)" ],
+    "futuromagic": ["Start without a magic meter. Two magic upgrades are added to the pool (default: %(default)s)" ],
+    "futurobows": ["There are 2 non-progressive bows & 1 separate silver arrows.",
+                   "Extra bows turn into Arrow capacity upgrades after the first one. (default: %(default)s)" ],
+    "futuroportal": ["The Agahnim1 dark-world portal is active from start (or after rescuing Zelda).",
+                     "Agahnim still needs to be defeated for goals and for LJ access. (default: %(default)s)" ],
     "startinventory": [ "Specifies a list of items that will be in your starting inventory (separated by commas). (default: %(default)s)" ],
     "usestartinventory": [ "Toggle usage of Starting Inventory." ],
     "custom": [ "Not supported." ],

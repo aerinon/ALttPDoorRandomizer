@@ -20,7 +20,7 @@ from RoomData import Room
 class World(object):
 
     def __init__(self, players, shuffle, doorShuffle, logic, mode, swords, difficulty, difficulty_adjustments,
-                 timer, progressive, goal, algorithm, accessibility, shuffle_ganon, retro, futuro, custom, customitemarray, hints):
+                 timer, progressive, goal, algorithm, accessibility, shuffle_ganon, retro, custom, customitemarray, hints):
         self.players = players
         self.teams = 1
         self.shuffle = shuffle.copy()
@@ -62,7 +62,6 @@ class World(object):
         self.shuffle_ganon = shuffle_ganon
         self.fix_gtower_exit = self.shuffle_ganon
         self.retro = retro.copy()
-        self.futuro = futuro.copy()
         self.custom = custom
         self.customitemarray = customitemarray
         self.can_take_damage = True
@@ -115,6 +114,10 @@ class World(object):
             set_player_attr('compassshuffle', False)
             set_player_attr('keyshuffle', False)
             set_player_attr('bigkeyshuffle', False)
+            set_player_attr('futurobombs', False)
+            set_player_attr('futuromagic', False)
+            set_player_attr('futurobows', False)
+            set_player_attr('futuroportal', False)            
             set_player_attr('difficulty_requirements', None)
             set_player_attr('boss_shuffle', 'none')
             set_player_attr('enemy_shuffle', 'none')
@@ -689,10 +692,10 @@ class CollectionState(object):
                 )
 
     def can_use_bombs(self, player):
-        return (self.has('Bomb Upgrade (+10)', player) or 'bomb' not in self.world.futuro[player])
+        return (self.has('Bomb Upgrade (+10)', player) or not self.world.futurobombs[player])
 
     def can_use_magic(self, player):
-        return 'magic' not in self.world.futuro[player] or self.prog_items['Magic Upgrade (1/2)', player] > 0 or self.prog_items['Magic Upgrade (1/4)', player] > 0
+        return not self.world.futuromagic[player] or self.prog_items['Magic Upgrade (1/2)', player] > 0 or self.prog_items['Magic Upgrade (1/4)', player] > 0
 
     def can_hit_crystal(self, player):
         return (self.can_use_bombs(player)
@@ -733,8 +736,8 @@ class CollectionState(object):
 
     def has_futuro_access(self, player):
         if self.world.mode[player] == 'standard':
-            return state.has('Zelda Delivered', player) and 'portal' in self.world.futuro[player]
-        return 'portal' in self.world.futuro[player]
+            return state.has('Zelda Delivered', player) and self.world.futuroportal[player]
+        return self.world.futuroportal[player]
 
     def has_sword(self, player):
         return self.has('Fighter Sword', player) or self.has('Master Sword', player) or self.has('Tempered Sword', player) or self.has('Golden Sword', player)
@@ -1997,7 +2000,10 @@ class Spoiler(object):
                          'logic': self.world.logic,
                          'mode': self.world.mode,
                          'retro': self.world.retro,
-                         'futuro': self.world.futuro,
+                         'futurobombs': self.world.futurobombs,
+                         'futuromagic': self.world.futuromagic,
+                         'futurobows': self.world.futurobows,
+                         'futuroportal': self.world.futuroportal,
                          'weapons': self.world.swords,
                          'goal': self.world.goal,
                          'shuffle': self.world.shuffle,
@@ -2066,7 +2072,6 @@ class Spoiler(object):
                 outfile.write('Logic:                           %s\n' % self.metadata['logic'][player])
                 outfile.write('Mode:                            %s\n' % self.metadata['mode'][player])
                 outfile.write('Retro:                           %s\n' % ('Yes' if self.metadata['retro'][player] else 'No'))
-                outfile.write('Futuro:                          %s\n' % self.metadata['futuro'][player])
                 outfile.write('Swords:                          %s\n' % self.metadata['weapons'][player])
                 outfile.write('Goal:                            %s\n' % self.metadata['goal'][player])
                 if self.metadata['goal'][player] == 'triforcehunt':
@@ -2095,6 +2100,10 @@ class Spoiler(object):
                 outfile.write('Experimental:                    %s\n' % ('Yes' if self.metadata['experimental'][player] else 'No'))
                 outfile.write('Key Drops shuffled:              %s\n' % ('Yes' if self.metadata['keydropshuffle'][player] else 'No'))
                 outfile.write(f"Shopsanity:                      {'Yes' if self.metadata['shopsanity'][player] else 'No'}\n")
+                outfile.write('Futurobombs:                     %s\n' % ('Yes' if self.metadata['futurobombs'][player] else 'No'))
+                outfile.write('Futuromagic:                     %s\n' % ('Yes' if self.metadata['futuromagic'][player] else 'No'))
+                outfile.write('Futurobows:                      %s\n' % ('Yes' if self.metadata['futurobows'][player] else 'No'))
+                outfile.write('Futuroportal:                    %s\n' % ('Yes' if self.metadata['futuroportal'][player] else 'No'))
             if self.doors:
                 outfile.write('\n\nDoors:\n\n')
                 outfile.write('\n'.join(
