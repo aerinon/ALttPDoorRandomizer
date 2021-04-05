@@ -48,9 +48,10 @@ def main(args, seed=None, fish=None):
         for player, code in args.code.items():
             if code:
                 Settings.adjust_args_from_code(code, player, args)
+                
     world = World(args.multi, args.shuffle, args.door_shuffle, args.logic, args.mode, args.swords,
                   args.difficulty, args.item_functionality, args.timer, args.progressive, args.goal, args.algorithm,
-                  args.accessibility, args.shuffleganon, args.retro, args.futuro, args.custom, args.customitemarray, args.hints)
+                  args.accessibility, args.shuffleganon, args.retro, args.custom, args.customitemarray, args.hints)
     logger = logging.getLogger('')
     if seed is None:
         random.seed(None)
@@ -62,11 +63,16 @@ def main(args, seed=None, fish=None):
     if args.securerandom:
         world.seed = None
 
+
     world.remote_items = args.remote_items.copy()
     world.mapshuffle = args.mapshuffle.copy()
     world.compassshuffle = args.compassshuffle.copy()
     world.keyshuffle = args.keyshuffle.copy()
     world.bigkeyshuffle = args.bigkeyshuffle.copy()
+    world.futurobombs = args.futurobombs.copy()
+    world.futuromagic = args.futuromagic.copy()
+    world.futurobows = args.futurobows.copy()
+    world.futuroportal = args.futuroportal.copy()
     world.crystals_needed_for_ganon = {player: random.randint(0, 7) if args.crystals_ganon[player] == 'random' else int(args.crystals_ganon[player]) for player in range(1, world.players + 1)}
     world.crystals_needed_for_gt = {player: random.randint(0, 7) if args.crystals_gt[player] == 'random' else int(args.crystals_gt[player]) for player in range(1, world.players + 1)}
     world.crystals_ganon_orig = args.crystals_ganon.copy()
@@ -338,7 +344,7 @@ def copy_world(world):
     # ToDo: Not good yet
     ret = World(world.players, world.shuffle, world.doorShuffle, world.logic, world.mode, world.swords,
                 world.difficulty, world.difficulty_adjustments, world.timer, world.progressive, world.goal, world.algorithm,
-                world.accessibility, world.shuffle_ganon, world.retro, world.futuro, world.custom, world.customitemarray, world.hints)
+                world.accessibility, world.shuffle_ganon, world.retro, world.custom, world.customitemarray, world.hints)
     ret.teams = world.teams
     ret.player_names = copy.deepcopy(world.player_names)
     ret.remote_items = world.remote_items.copy()
@@ -365,6 +371,10 @@ def copy_world(world):
     ret.compassshuffle = world.compassshuffle.copy()
     ret.keyshuffle = world.keyshuffle.copy()
     ret.bigkeyshuffle = world.bigkeyshuffle.copy()
+    ret.futurobombs = world.futurobombs.copy()
+    ret.futuromagic = world.futuromagic.copy()
+    ret.futurobows = world.futurobows.copy()
+    ret.futuroportal = world.futuroportal.copy()
     ret.crystals_needed_for_ganon = world.crystals_needed_for_ganon.copy()
     ret.crystals_needed_for_gt = world.crystals_needed_for_gt.copy()
     ret.crystals_ganon_orig = world.crystals_ganon_orig.copy()

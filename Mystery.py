@@ -169,7 +169,10 @@ def roll_settings(weights):
         ret.retro = True
     ret.retro = get_choice('retro') == 'on'  # this overrides world_state if used
 
-    ret.futuro = get_choice('futuro', weights)
+    ret.futurobombs = get_choice('futurobombs') == 'on'
+    ret.futuromagic = get_choice('futuromagic') == 'on'
+    ret.futurobows = get_choice('futurobows') == 'on'
+    ret.futuroportal = get_choice('futuroportal') == 'on'
 
     ret.hints = get_choice('hints') == 'on'
 
