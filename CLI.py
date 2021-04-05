@@ -83,9 +83,6 @@ def parse_cli(argv, no_defaults=False):
     if ret.keysanity:
         ret.mapshuffle, ret.compassshuffle, ret.keyshuffle, ret.bigkeyshuffle = [True] * 4
 
-    if ret.futuro:
-        ret.futurobombs, ret.futuromagic, ret.futurobows, ret.futuroportal = [True] * 4
-
     if multiargs.multi:
         defaults = copy.deepcopy(ret)
         for player in range(1, multiargs.multi + 1):
@@ -94,8 +91,7 @@ def parse_cli(argv, no_defaults=False):
             for name in ['logic', 'mode', 'swords', 'goal', 'difficulty', 'item_functionality',
                          'shuffle', 'door_shuffle', 'intensity', 'crystals_ganon', 'crystals_gt', 'openpyramid',
                          'mapshuffle', 'compassshuffle', 'keyshuffle', 'bigkeyshuffle', 'startinventory',
-                         'futurobombs', 'futuromagic', 'futurobows', 'futuroportal',
-                         'retro', 'accessibility', 'hints', 'beemizer', 'experimental', 'dungeon_counters',
+                         'retro', 'futuro', 'accessibility', 'hints', 'beemizer', 'experimental', 'dungeon_counters',
                          'triforce_pool_min', 'triforce_pool_max', 'triforce_goal_min', 'triforce_goal_max',
                          'triforce_min_difference', 'triforce_goal', 'triforce_pool',
                          'retro', 'accessibility', 'hints', 'beemizer', 'experimental', 'dungeon_counters',
@@ -117,10 +113,6 @@ def parse_settings():
         "lang": "en",
         "retro": False,
         "futuro": False,
-        "futurobombs": False,
-        "futuromagic": False,
-        "futurobows": False,
-        "futuroportal": False,
         "mode": "open",
         "logic": "noglitches",
         "goal": "ganon",

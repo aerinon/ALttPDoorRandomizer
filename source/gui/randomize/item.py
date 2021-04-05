@@ -1,4 +1,4 @@
-from tkinter import ttk, Frame, Label, E, W, LEFT, RIGHT
+from tkinter import ttk, Frame, E, W, LEFT, RIGHT
 import source.gui.widgets as widgets
 import json
 import os
@@ -12,24 +12,6 @@ def item_page(parent):
 
     # Item Randomizer option sections
     self.frames = {}
-    self.frames["futuro"] = Frame(self)
-    self.frames["futuro"].pack(anchor=W)
-
-    ## Dungeon Item Shuffle
-    mscbLabel = Label(self.frames["futuro"], text="Futuro: ")
-    mscbLabel.pack(side=LEFT)
-
-    # Load Dungeon Shuffle option widgets as defined by JSON file
-    # Defns include frame name, widget type, widget options, widget placement attributes
-    # This first set goes in the Keysanity frame
-    with open(os.path.join("resources","app","gui","randomize","item","futuro.json")) as futuroItems:
-        myDict = json.load(futuroItems)
-        myDict = myDict["futuro"]
-        dictWidgets = widgets.make_widgets_from_dict(self, myDict, self.frames["futuro"])
-        for key in dictWidgets:
-            self.widgets[key] = dictWidgets[key]
-            self.widgets[key].pack(side=LEFT)
-
 
     # Item Randomizer option frames
     self.frames["checkboxes"] = Frame(self)

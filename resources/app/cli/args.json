@@ -210,28 +210,11 @@
     "type": "bool",
     "help": "suppress"
   },
-  "futurobombs": {
-    "action": "store_true",
-    "type": "bool"
-  },
-  "futuromagic": {
-    "action": "store_true",
-    "type": "bool"
-  },
-  "futurobows": {
-    "action": "store_true",
-    "type": "bool"
-  },
-  "futuroportal": {
+  "retro": {
     "action": "store_true",
     "type": "bool"
   },
   "futuro": {
-    "action": "store_true",
-    "type": "bool",
-    "help": "suppress"
-  },
-  "retro": {
     "action": "store_true",
     "type": "bool"
   },

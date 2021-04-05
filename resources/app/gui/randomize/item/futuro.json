@@ -1,8 +1,0 @@
-{
-  "futuro": { 
-    "futurobombs":   { "type": "checkbox" },
-    "futuromagic":   { "type": "checkbox" },
-    "futurobows":    { "type": "checkbox" },
-    "futuroportal":  { "type": "checkbox" }
-  }
-}

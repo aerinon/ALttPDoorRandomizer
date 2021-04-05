@@ -56,10 +56,7 @@ SETTINGSTOPROCESS = {
   "randomizer": {
     "item": {
       "retro": "retro",
-      "futurobombs": "futurobombs",
-      "futuromagic": "futuromagic",
-      "futurobows": "futurobows",
-      "futuroportal": "futuroportal",
+      "futuro": "futuro",
       "shopsanity": "shopsanity",
       "worldstate": "mode",
       "logiclevel": "logic",
