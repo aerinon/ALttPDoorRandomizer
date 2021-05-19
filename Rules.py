@@ -605,7 +605,8 @@ def bomb_rules(world, player):
         add_rule(world.get_entrance('TR Lazy Eyes SE', player), lambda state: state.can_use_bombs(player)) # ToDo: Add always true for inverted, cross-entrance, and door-variants and so on.
         add_rule(world.get_entrance('Turtle Rock Ledge Exit (West)', player), lambda state: state.can_use_bombs(player)) # Is this the same as above?
 
-        dungeon_bonkable = ['PoD Warp Hint SE', 'PoD Jelly Hall NW', 'PoD Jelly Hall NE', 'PoD Mimics 1 SW',
+        dungeon_bonkable = ['Sewers Rat Path WS', 'Sewers Rat Path WN',
+                            'PoD Warp Hint SE', 'PoD Jelly Hall NW', 'PoD Jelly Hall NE', 'PoD Mimics 1 SW',
                             'Thieves Ambush E', 'Thieves Rail Ledge W',
                             'TR Dash Room NW', 'TR Crystaroller SW', 'TR Dash Room ES',
                             'GT Four Torches NW','GT Fairy Abyss SW'
