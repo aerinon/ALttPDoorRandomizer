@@ -736,7 +736,7 @@ class CollectionState(object):
 
     def has_futuro_access(self, player):
         if self.world.mode[player] == 'standard':
-            return self.has('Zelda Delivered', player) and self.world.futuroportal[player]
+            return state.has('Zelda Delivered', player) and self.world.futuroportal[player]
         return self.world.futuroportal[player]
 
     def has_sword(self, player):
