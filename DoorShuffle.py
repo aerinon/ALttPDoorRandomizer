@@ -2173,7 +2173,6 @@ logical_connections = [
 
     ('Ice Cross Bottom Push Block Left', 'Ice Floor Switch'),
     ('Ice Cross Right Push Block Top', 'Ice Bomb Drop'),
-    ('Ice Cross Top Push Block Bottom', 'Ice Compass Room'),
     ('Ice Conveyor to Crystal', 'Ice Conveyor - Crystal'),
     ('Ice Conveyor Crystal Exit', 'Ice Conveyor'),
     ('Ice Big Key Push Block', 'Ice Dead End'),
