@@ -972,7 +972,7 @@ def patch_rom(world, rom, player, team, enemized, is_mystery=False):
     #Work around for json patch ordering issues - write bow limit separately so that it is replaced in the patch
     rom.write_bytes(0x180098, [difficulty.progressive_bow_limit, overflow_replacement])
 
-    if difficulty.progressive_bow_limit < 2 and world.swords == 'swordless':
+    if difficulty.progressive_bow_limit < 2 and world.swords[player] == 'swordless':
         rom.write_bytes(0x180098, [2, overflow_replacement])
 
     # set up game internal RNG seed
