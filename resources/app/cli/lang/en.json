@@ -262,6 +262,7 @@
       "Keys are universal, shooting arrows costs rupees,",
       "and a few other little things make this more like Zelda-1. (default: %(default)s)"
     ],
+    "bomblogic": ["Start with 0 bomb capacity. Two capacity upgrades (+10) are added to the pool (default: %(default)s)" ],
     "startinventory": [ "Specifies a list of items that will be in your starting inventory (separated by commas). (default: %(default)s)" ],
     "usestartinventory": [ "Toggle usage of Starting Inventory." ],
     "custom": [ "Not supported." ],

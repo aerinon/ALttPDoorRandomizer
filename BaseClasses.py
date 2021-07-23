@@ -114,6 +114,7 @@ class World(object):
             set_player_attr('compassshuffle', False)
             set_player_attr('keyshuffle', False)
             set_player_attr('bigkeyshuffle', False)
+            set_player_attr('bomblogic', False)
             set_player_attr('difficulty_requirements', None)
             set_player_attr('boss_shuffle', 'none')
             set_player_attr('enemy_shuffle', 'none')
@@ -685,8 +686,7 @@ class CollectionState(object):
 
     # In the future, this can be used to check if the player starts without bombs
     def can_use_bombs(self, player):
-        StartingBombs = True
-        return StartingBombs or self.has('Bomb Upgrade (+10)', player)
+        return (not self.world.bomblogic[player] or self.has('Bomb Upgrade (+10)', player))
 
     def can_hit_crystal(self, player):
         return (self.can_use_bombs(player)
@@ -2011,6 +2011,7 @@ class Spoiler(object):
                          'logic': self.world.logic,
                          'mode': self.world.mode,
                          'retro': self.world.retro,
+                         'bomblogic': self.world.bomblogic,
                          'weapons': self.world.swords,
                          'goal': self.world.goal,
                          'shuffle': self.world.shuffle,
@@ -2107,6 +2108,7 @@ class Spoiler(object):
                 outfile.write('Experimental:                    %s\n' % ('Yes' if self.metadata['experimental'][player] else 'No'))
                 outfile.write('Key Drops shuffled:              %s\n' % ('Yes' if self.metadata['keydropshuffle'][player] else 'No'))
                 outfile.write(f"Shopsanity:                      {'Yes' if self.metadata['shopsanity'][player] else 'No'}\n")
+                outfile.write('Bomblogic:                       %s\n' % ('Yes' if self.metadata['bomblogic'][player] else 'No'))
             if self.doors:
                 outfile.write('\n\nDoors:\n\n')
                 outfile.write('\n'.join(

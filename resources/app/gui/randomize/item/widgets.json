@@ -1,5 +1,6 @@
 {
   "checkboxes": {
+    "bomblogic": { "type": "checkbox" },
     "retro": { "type": "checkbox" },
     "shopsanity": { "type": "checkbox" }
   },

@@ -211,6 +211,10 @@
     "type": "bool",
     "help": "suppress"
   },
+  "bomblogic": {
+    "action": "store_true",
+    "type": "bool"
+  },
   "retro": {
     "action": "store_true",
     "type": "bool"
