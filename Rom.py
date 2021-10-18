@@ -2275,6 +2275,12 @@ def set_inverted_mode(world, player, rom):
     write_int16(rom, snes_to_pc(0x02E8D5), 0x07C8)
     write_int16(rom, snes_to_pc(0x02E8F7), 0x01F8)
     rom.write_byte(snes_to_pc(0x08D40C), 0xD0)  # morph proof
+    rom.write_byte(snes_to_pc(0x1BC428), 0x00)  # remove diggable light world portals 
+    rom.write_byte(snes_to_pc(0x1BC42A), 0x00)
+    rom.write_byte(snes_to_pc(0x1BC590), 0x00)
+    rom.write_byte(snes_to_pc(0x1BC5A1), 0x00)
+    rom.write_byte(snes_to_pc(0x1BC5B1), 0x00)
+    rom.write_byte(snes_to_pc(0x1BC5C7), 0x00)
     # the following bytes should only be written in vanilla
     # or they'll overwrite the randomizer's shuffles
     if world.shuffle[player] == 'vanilla':
