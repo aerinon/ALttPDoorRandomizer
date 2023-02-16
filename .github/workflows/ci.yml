@@ -85,6 +85,18 @@ jobs:
     - name: Build DungeonRandomizer
       run: |
         python ./source/meta/build-dr.py
+    # run build-ms.py
+    - name: Build MultiServer
+      run: |
+        python ./source/meta/build-ms.py
+    # run build-mc.py
+    - name: Build MultiClient
+      run: |
+        python ./source/meta/build-mc.py
+    # run build-mystery.py
+    - name: Build Mystery
+      run: |
+        python ./source/meta/build-mystery.py
     # prepare binary artifacts for later step
     - name: Prepare Binary Artifacts
       env:

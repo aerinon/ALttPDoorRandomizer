@@ -1,7 +1,7 @@
 # pylint: disable=invalid-name
 # pylint: disable=subprocess-run-check
 """
-Build Gui.py into Gui.exe
+Build MultiClient.py into MultiClient.exe
 """
 import subprocess
 import os
@@ -9,7 +9,7 @@ import shutil
 import sys
 
 # Spec file
-SPEC_FILE = os.path.join(".", "source", "Gui.spec")
+SPEC_FILE = os.path.join(".", "source", "MultiClient.spec")
 
 # Destination is current dir
 DEST_DIRECTORY = '.'
@@ -23,7 +23,7 @@ else:
 if os.path.isdir("build") and not sys.platform.find("mac") and not sys.platform.find("osx"):
     shutil.rmtree("build")
 
-# Run pyinstaller for Gui
+# Run pyinstaller for MultiClient
 subprocess.run(" ".join([f"pyinstaller {SPEC_FILE} ",
                                       UPX_STRING,
                                       "-y ",
