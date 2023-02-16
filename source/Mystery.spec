@@ -1,5 +1,5 @@
 """
-PyInstaller spec file for DungeonRandomizer.py
+PyInstaller spec file for Mystery.py
 """
 # pyling: disable=invalid-name
 # pylint: disable=too-many-nested-blocks
@@ -11,9 +11,9 @@ BLOCK_CIPHER = None
 CONSOLE = True   #   <--- change this to True to enable command prompt when the app runs
 
 if sys.platform.find("mac") or sys.platform.find("osx"):
-    CONSOLE = False
+  CONSOLE = False
 
-BINARY_SLUG = "DungeonRandomizer"
+BINARY_SLUG = "Mystery"
 
 def recurse_for_py_files(names_so_far):
     """
