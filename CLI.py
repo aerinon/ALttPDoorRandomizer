@@ -345,7 +345,9 @@ def parse_settings():
         "outputpath": os.path.join("."),
         "saveonexit": "ask",
         "outputname": "",
-        "startinventoryarray": {}
+        "startinventoryarray": {},
+        "seed_name": "",
+        "seed_notes": ""
     }
 
     if sys.platform.lower().find("windows"):

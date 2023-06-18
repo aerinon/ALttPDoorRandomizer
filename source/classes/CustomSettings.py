@@ -62,6 +62,8 @@ class CustomSettings(object):
             args.suppress_rom = get_setting(meta['suppress_rom'], args.suppress_rom)
             args.names = get_setting(meta['names'], args.names)
             args.race = get_setting(meta['race'], args.race)
+            args.seed_notes = get_setting(meta['seed_notes'], args.seed_notes)
+            args.seed_name = get_setting(meta['seed_name'], args.seed_name)
         self.player_range = range(1, args.multi + 1)
         if 'settings' in self.file_source:
             for p in self.player_range:
@@ -215,6 +217,8 @@ class CustomSettings(object):
         meta_dict['algorithm'] = world.algorithm
         meta_dict['seed'] = world.seed
         meta_dict['race'] = race
+        meta_dict['seed_notes'] = world.seed_notes
+        meta_dict['seed_name'] = world.seed_name
         self.world_rep['settings'] = settings_dict
         for p in self.player_range:
             settings_dict[p] = {}

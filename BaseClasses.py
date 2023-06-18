@@ -22,7 +22,7 @@ from source.dungeon.RoomObject import RoomObject
 class World(object):
 
     def __init__(self, players, shuffle, doorShuffle, logic, mode, swords, difficulty, difficulty_adjustments,
-                 timer, progressive, goal, algorithm, accessibility, shuffle_ganon, custom, customitemarray, hints):
+                 timer, progressive, goal, algorithm, accessibility, shuffle_ganon, custom, customitemarray, hints, seed_name, seed_notes):
         self.players = players
         self.teams = 1
         self.shuffle = shuffle.copy()
@@ -90,6 +90,8 @@ class World(object):
         self.sanc_portal = {}
         self.fish = BabelFish()
         self.pot_contents = {}
+        self.seed_name = seed_name
+        self.seed_notes = seed_notes
 
         for player in range(1, players + 1):
             def set_player_attr(attr, val):
@@ -2502,6 +2504,11 @@ class Spoiler(object):
                          'race': self.world.settings.world_rep['meta']['race'],
                          'code': {p: Settings.make_code(self.world, p) for p in range(1, self.world.players + 1)}
                          }
+        
+        if self.world.seed_name:
+            self.metadata['seed_name'] = self.world.seed_name
+        if self.world.seed_notes:
+            self.metadata['seed_notes'] = self.world.seed_notes
 
         for p in range(1, self.world.players + 1):
             from ItemList import set_default_triforce
@@ -2641,6 +2648,8 @@ class Spoiler(object):
         self.parse_meta()
         with open(filename, 'w') as outfile:
             outfile.write('ALttP Dungeon Randomizer Version %s  -  Seed: %s\n\n' % (self.metadata['version'], self.world.seed))
+            if self.world.seed_name:
+                outfile.write('Seed Name:                       %s\n' % self.world.seed_name)
             outfile.write('Filling Algorithm:               %s\n' % self.world.algorithm)
             outfile.write('Players:                         %d\n' % self.world.players)
             outfile.write('Teams:                           %d\n' % self.world.teams)
@@ -2697,6 +2706,8 @@ class Spoiler(object):
                 outfile.write('Enemy damage:                    %s\n' % self.metadata['enemy_damage'][player])
                 outfile.write(f"Hints:                           {yn(self.metadata['hints'][player])}\n")
                 outfile.write('Race:                            %s\n' % ('Yes' if self.world.settings.world_rep['meta']['race'] else 'No'))
+                if self.world.seed_notes:
+                    outfile.write('Notes:                           %s\n' % self.world.seed_notes)
 
             if self.startinventory:
                 outfile.write('Starting Inventory:'.ljust(line_width))
