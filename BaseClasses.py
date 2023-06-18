@@ -2502,6 +2502,11 @@ class Spoiler(object):
                          'race': self.world.settings.world_rep['meta']['race'],
                          'code': {p: Settings.make_code(self.world, p) for p in range(1, self.world.players + 1)}
                          }
+        
+        if 'seed_notes' in self.world.settings.world_rep['meta']:
+            self.metadata['seed_notes'] = self.world.settings.world_rep['meta']['seed_notes']
+        if 'seed_name' in self.world.settings.world_rep['meta']:
+            self.metadata['seed_name'] = self.world.settings.world_rep['meta']['seed_name']
 
         for p in range(1, self.world.players + 1):
             from ItemList import set_default_triforce
@@ -2641,6 +2646,8 @@ class Spoiler(object):
         self.parse_meta()
         with open(filename, 'w') as outfile:
             outfile.write('ALttP Dungeon Randomizer Version %s  -  Seed: %s\n\n' % (self.metadata['version'], self.world.seed))
+            if 'seed_name' in self.world.settings.world_rep['meta']:
+                outfile.write('Seed Name:                       %s\n' % self.world.settings.world_rep['meta']['seed_name'])
             outfile.write('Filling Algorithm:               %s\n' % self.world.algorithm)
             outfile.write('Players:                         %d\n' % self.world.players)
             outfile.write('Teams:                           %d\n' % self.world.teams)
@@ -2697,6 +2704,8 @@ class Spoiler(object):
                 outfile.write('Enemy damage:                    %s\n' % self.metadata['enemy_damage'][player])
                 outfile.write(f"Hints:                           {yn(self.metadata['hints'][player])}\n")
                 outfile.write('Race:                            %s\n' % ('Yes' if self.world.settings.world_rep['meta']['race'] else 'No'))
+                if 'seed_notes' in self.world.settings.world_rep['meta']:
+                    outfile.write('Notes:                           %s\n' % self.world.settings.world_rep['meta']['seed_notes'])
 
             if self.startinventory:
                 outfile.write('Starting Inventory:'.ljust(line_width))
