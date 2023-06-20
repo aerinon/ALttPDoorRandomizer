@@ -109,6 +109,11 @@ These are now independent of retro mode and have three options: None, Random, an
 
 # Bug Fixes and Notes
 
+* 1.2.0.17u
+  * Fixed logic bug that allowed Pearl to be behind Graveyard Cave or King's Tomb entrances with only Mirror and West Dark World access (cross world shuffles only) 
+  * Removed backup locations for Dungeon Only and Major Only algorithms. If item cannot be placed in the appropriate location, the seed will fail to generate instead 
+  * Fix for Non-ER Inverted Experimental (Aga and GT weren't logically swapped)
+  * Fix for customizer setting crystals to 0 for either GT/Ganon
 * 1.2.0.16u
   * Fix for partial key logic on vanilla Mire
   * Fix for Kholdstare Shell collision when at Lanmo 2

@@ -34,7 +34,7 @@ from source.overworld.EntranceShuffle2 import link_entrances_new
 from source.tools.BPS import create_bps_from_data
 from source.classes.CustomSettings import CustomSettings
 
-version_number = '1.2.0.16'
+version_number = '1.2.0.17'
 version_branch = '-u'
 __version__ = f'{version_number}{version_branch}'
 

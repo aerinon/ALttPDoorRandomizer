@@ -279,6 +279,10 @@ def recovery_placement(item_to_place, locations, world, state, base_state, itemp
                 if spot_to_fill:
                     return spot_to_fill
             return None
+    # explicitly fail these cases
+    elif world.algorithm in ['dungeon_only', 'major_only']:
+        raise FillError(f'Rare placement for {world.algorithm} detected. {item_to_place} unable to be placed.'
+                        f' Try a different seed')
     else:
         other_locations = [x for x in locations if x not in attempted]
         for location in other_locations:
@@ -419,7 +423,7 @@ def distribute_items_restrictive(world, gftower_trash=False, fill_locations=None
         else:
             max_trash = gt_count
         scaled_trash = math.floor(max_trash * scale_factor)
-        if world.goal[player] in ['triforcehunt', 'trinity', 'ganonhunt']:
+        if world.goal[player] in ['triforcehunt', 'trinity', 'ganonhunt'] or world.algorithm == 'dungeon_only':
             gftower_trash_count = random.randint(scaled_trash, max_trash)
         else:
             gftower_trash_count = random.randint(0, scaled_trash)

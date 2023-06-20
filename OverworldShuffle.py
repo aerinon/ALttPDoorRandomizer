@@ -48,7 +48,7 @@ mirror_connections = {
     'East Dark Death Mountain (Bushes)': ['Fairy Ascension Plateau'],
     'East Dark Death Mountain (Bottom)': ['East Death Mountain (Bottom)'],
     
-    'West Dark World': ['Graveyard Ledge', 'Kings Grave Area'],
+    'Dark Graveyard North': ['Graveyard Ledge', 'Kings Grave Area'],
 
     'Bumper Cave Ledge': ['Death Mountain Return Ledge'],
     'Bumper Cave Entrance': ['Death Mountain Entrance'],

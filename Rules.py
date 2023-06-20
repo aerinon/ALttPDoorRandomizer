@@ -965,6 +965,8 @@ def ow_bunny_rules(world, player):
 
     add_bunny_rule(world.get_entrance('East Dark Death Mountain Bushes', player), player)
     add_bunny_rule(world.get_entrance('Bumper Cave Entrance Rock', player), player)
+    add_bunny_rule(world.get_entrance('Dark Graveyard Bush (South)', player), player)
+    add_bunny_rule(world.get_entrance('Dark Graveyard Bush (North)', player), player)
     add_bunny_rule(world.get_entrance('Dark Witch Rock (North)', player), player)
     add_bunny_rule(world.get_entrance('Dark Witch Rock (South)', player), player)
     add_bunny_rule(world.get_entrance('Grassy Lawn Pegs (Bottom)', player), player)

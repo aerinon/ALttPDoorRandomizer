@@ -2,6 +2,7 @@ import os
 import urllib.request
 import urllib.parse
 import yaml
+from typing import Any
 from yaml.representer import Representer
 from collections import defaultdict
 from pathlib import Path
@@ -46,8 +47,8 @@ class CustomSettings(object):
         return meta['players']
 
     def adjust_args(self, args):
-        def get_setting(value, default):
-            if value:
+        def get_setting(value: Any, default):
+            if value or value == 0:
                 if isinstance(value, dict):
                     return random.choices(list(value.keys()), list(value.values()), k=1)[0]
                 else:

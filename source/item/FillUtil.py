@@ -151,9 +151,6 @@ def create_item_pool_config(world):
             config.item_pool[player] = determine_major_items(world, player)
             config.location_groups[0].locations = set(groups.locations)
             config.reserved_locations[player].update(groups.locations)
-            backup = (mode_grouping['Heart Pieces'] + mode_grouping['Dungeon Trash'] + mode_grouping['Shops']
-                      + mode_grouping['Overworld Trash'] + mode_grouping['GT Trash'] + mode_grouping['RetroShops'])
-            config.location_groups[1].locations = set(backup)
     elif world.algorithm == 'dungeon_only':
         config.location_groups = [
             LocationGroup('Dungeons'),
@@ -171,9 +168,6 @@ def create_item_pool_config(world):
         for player in range(1, world.players + 1):
             config.item_pool[player] = determine_major_items(world, player)
             config.location_groups[0].locations = set(dungeon_set)
-            backup = (mode_grouping['Heart Pieces'] + mode_grouping['Overworld Major']
-                      + mode_grouping['Overworld Trash'] + mode_grouping['Shops'] + mode_grouping['RetroShops'])
-            config.location_groups[1].locations = set(backup)
 
 
 def district_item_pool_config(world):
@@ -419,11 +413,7 @@ def filter_locations(item_to_place, locations, world, vanilla_skip=False, potion
         if item_to_place.name in config.item_pool[item_to_place.player]:
             restricted = config.location_groups[0].locations
             filtered = [l for l in locations if l.name in restricted]
-            if len(filtered) == 0:
-                restricted = config.location_groups[1].locations
-                filtered = [l for l in locations if l.name in restricted]
-                # bias toward certain location in overflow? (thinking about this for major_bias)
-            return filtered if len(filtered) > 0 else locations
+            return filtered
     if world.algorithm == 'district':
         config = world.item_pool_config
         if ((isinstance(item_to_place,str) and item_to_place == 'Placeholder')

@@ -56,6 +56,8 @@ def link_entrances_new(world, player):
     one_way_map.update(drop_map)
     one_way_map.update(single_entrance_map)
     if avail_pool.inverted:
+        default_map['Ganons Tower'] = 'Agahnims Tower Exit'
+        default_map['Agahnims Tower'] = 'Ganons Tower Exit'
         default_map['Old Man Cave (West)'] = 'Bumper Cave Exit (Bottom)'
         default_map['Death Mountain Return Cave (West)'] = 'Bumper Cave Exit (Top)'
         default_map['Bumper Cave (Bottom)'] = 'Old Man Cave Exit (West)'
@@ -64,8 +66,6 @@ def link_entrances_new(world, player):
         default_map['Old Man Cave (East)'] = 'Death Mountain Return Cave Exit (West)'
         one_way_map['Bumper Cave (Top)'] = 'Dark Death Mountain Healer Fairy'
         del default_map['Bumper Cave (Top)']
-        del one_way_map['Big Bomb Shop']
-        one_way_map['Inverted Big Bomb Shop'] = 'Inverted Big Bomb Shop'
     avail_pool.default_map = default_map
     avail_pool.one_way_map = one_way_map
 
@@ -1962,6 +1962,8 @@ mandatory_connections = [('Links House S&Q', 'Links House'),
                          ('Grassy Lawn Pegs (Top)', 'West Dark World'),
                          ('Grassy Lawn Pegs (Bottom)', 'Dark Grassy Lawn'),
                          ('West Dark World Gap', 'West Dark World'),
+                         ('Dark Graveyard Bush (South)', 'Dark Graveyard North'),
+                         ('Dark Graveyard Bush (North)', 'West Dark World'),
                          ('Broken Bridge Pass (Top)', 'East Dark World'),
                          ('Broken Bridge Pass (Bottom)', 'Northeast Dark World'),
                          ('Peg Area Rocks (Left)', 'Hammer Peg Area'),
