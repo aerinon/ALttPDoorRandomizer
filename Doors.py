@@ -1544,6 +1544,14 @@ def create_doors(world, player):
 
     set_special_dungeon_links(world, player)
 
+    # "glitch" logical transitions
+    world.get_door('PoD Arena Right to Ranged Crystal', player).barred('CrystalSwitchTricks')
+    world.get_door('PoD Arena Ledge to Ranged Crystal', player).barred('CrystalSwitchTricks')
+    world.get_door('Mire Fishbone Blue Barrier Bypass', player).barred('CrystalSwitchTricks')
+    world.get_door('GT Double Switch Entry to Ranged Switches', player).barred('CrystalSwitchTricks')
+    world.get_door('GT Double Switch Left to Exit Bypass', player).barred('CrystalSwitchTricks')
+    world.get_door('GT Double Switch Pot Corners to Ranged Switches', player).barred('CrystalSwitchTricks')
+
 
 def create_portals(world, player):
     dungeon_portals = [
