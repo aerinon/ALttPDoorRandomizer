@@ -17,6 +17,7 @@ from RoomData import DoorKind
 
 from source.dungeon.DungeonStitcher import generate_dungeon_find_proposal
 from source.dungeon.DungeonStitcher import GenerationException as OtherGenException
+from source.dungeon.DungeonGen2 import SectorDescriptor
 
 
 class GraphPiece:
@@ -1342,6 +1343,11 @@ def create_dungeon_builders(all_sectors, connections_tuple, world, player, dunge
                     if not sector:
                         sector = find_sector(r_name, all_sectors)
                     reverse_d_map[sector] = key
+
+        descriptors = defaultdict(list)
+        for sector in candidate_sectors:
+            descript = SectorDescriptor(sector)
+            descriptors[descript.degree].append(descript)
 
         complete_dungeons = {x: y for x, y in dungeon_map.items() if sum(len(sector.outstanding_doors) for sector in y.sectors) <= 0}
         [dungeon_map.pop(key) for key in complete_dungeons.keys()]
