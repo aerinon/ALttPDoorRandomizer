@@ -1850,6 +1850,9 @@ class Door(object):
         self.dependents = []
         self.dead = False
 
+        # a list of glitches need to use the transition
+        self.glitches_needed = []
+
         self.entrance = entrance
         if entrance is not None and not entrance.door:
             entrance.door = self
@@ -1952,6 +1955,10 @@ class Door(object):
     def no_exit(self):
         self.blocked = self.blocked_orig = self.trapped = True
         return self
+
+    def barred(self, *glitches):
+        self.blocked = self.blocked_orig = True
+        self.glitches_needed.extend(glitches)
 
     def no_entrance(self):
         self.stonewall = True
