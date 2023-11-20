@@ -747,23 +747,32 @@ def load_cached_yaml(path_list):
             return data
 
 
+def append_to_yaml(path_list, data):
+    path = os.path.join(*path_list)
+    if not os.path.isfile(path):
+        with open(path, "a", encoding="utf-8") as f:
+            f.write('')
+    with open(path, "a", encoding='utf-8') as f:
+        f.write(yaml.safe_dump(data))
+
+
 class bidict(dict):
     def __init__(self, *args, **kwargs):
         super(bidict, self).__init__(*args, **kwargs)
         self.inverse = {}
         for key, value in self.items():
-            self.inverse.setdefault(value,[]).append(key) 
+            self.inverse.setdefault(value,[]).append(key)
 
     def __setitem__(self, key, value):
         if key in self:
-            self.inverse[self[key]].remove(key) 
+            self.inverse[self[key]].remove(key)
         super(bidict, self).__setitem__(key, value)
-        self.inverse.setdefault(value,[]).append(key)        
+        self.inverse.setdefault(value,[]).append(key)
 
     def __delitem__(self, key):
         value = self[key]
         self.inverse.setdefault(value,[]).remove(key)
-        if value in self.inverse and not self.inverse[value]: 
+        if value in self.inverse and not self.inverse[value]:
             del self.inverse[value]
         super(bidict, self).__delitem__(key)
 
