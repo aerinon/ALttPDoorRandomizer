@@ -13,6 +13,7 @@ from Dungeons import dungeon_regions, region_starts, standard_starts, split_regi
 from Dungeons import dungeon_bigs, dungeon_hints
 from Items import ItemFactory
 from RoomData import DoorKind, PairedDoor, reset_rooms
+from source.dungeon.DungeonGen2 import create_dungeon_builders_new
 from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
 from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
 from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths, drop_entrances
@@ -428,6 +429,7 @@ def connect_one_way(world, entrancename, exitname, player):
     if x.dependents:
         for dep in x.dependents:
             connect_simple_door_to_region(dep, ext.parent_region)
+
 
 def unmark_ugly_smalls(world, player):
     for d in ['Eastern Hint Tile Blocked Path SE', 'Eastern Darkness S', 'Thieves Hallway SE', 'Mire Left Bridge S',
@@ -895,8 +897,11 @@ def main_dungeon_pool(dungeon_pool, world, player):
             sector_pool = convert_to_sectors(region_list, world, player)
             merge_sectors(sector_pool, world, player)
             # todo: which dungeon to create
-            dungeon_builders.update(create_dungeon_builders(sector_pool, connections_tuple,
-                                                            world, player, pool, entrances, splits))
+            if world.experimental[player]:
+                builders = create_dungeon_builders_new(sector_pool, connections_tuple, world, player, pool, entrances, splits)
+            else:
+                builders = create_dungeon_builders(sector_pool, connections_tuple, world, player, pool, entrances, splits)
+            dungeon_builders.update(builders)
         door_type_pools.append((pool, DoorTypePool(pool, world, player)))
 
     update_forced_keys(dungeon_builders, entrances_map, world, player)
@@ -1281,127 +1286,6 @@ def treat_split_as_whole_dungeon(split_dungeon, name, origin_list, world, player
     return split_dungeon
 
 
-# goals:
-# 1. have enough chests to be interesting (2 more than dungeon items)
-# 2. have a balanced amount of regions added (check)
-# 3. prevent soft locks due to key usage (algorithm written)
-# 4. rules in place to affect item placement (lamp, keys, etc. -- in rules)
-# 5. to be complete -- all doors linked (check, somewhat)
-# 6. avoid deadlocks/dead end dungeon (check)
-# 7. certain paths through dungeon must be possible - be able to reach goals (check)
-
-
-def cross_dungeon(world, player):
-    add_inaccessible_doors(world, player)
-    entrances_map, potentials, connections = determine_entrance_list(world, player)
-    connections_tuple = (entrances_map, potentials, connections)
-
-    all_sectors, all_regions = [], []
-    for key in dungeon_regions.keys():
-        all_regions += dungeon_regions[key]
-    all_sectors.extend(convert_to_sectors(all_regions, world, player))
-    merge_sectors(all_sectors, world, player)
-    entrances, splits = create_dungeon_entrances(world, player)
-    dungeon_builders = create_dungeon_builders(all_sectors, connections_tuple, world, player, entrances, splits)
-    for builder in dungeon_builders.values():
-        builder.entrance_list = list(entrances_map[builder.name])
-        dungeon_obj = world.get_dungeon(builder.name, player)
-        for sector in builder.sectors:
-            for region in sector.regions:
-                region.dungeon = dungeon_obj
-                for loc in region.locations:
-                    if loc.forced_item:
-                        key_name = dungeon_keys[builder.name] if loc.name != 'Hyrule Castle - Big Key Drop' else dungeon_bigs[builder.name]
-                        loc.forced_item = loc.item = ItemFactory(key_name, player)
-    recombinant_builders = {}
-    builder_info = entrances, splits, connections_tuple, world, player
-    handle_split_dungeons(dungeon_builders, recombinant_builders, entrances_map, builder_info)
-
-    main_dungeon_generation(dungeon_builders, recombinant_builders, connections_tuple, world, player)
-
-    paths = determine_required_paths(world, player)
-    check_required_paths(paths, world, player)
-
-    hc_compass = ItemFactory('Compass (Escape)', player)
-    at_compass = ItemFactory('Compass (Agahnims Tower)', player)
-    at_map = ItemFactory('Map (Agahnims Tower)', player)
-    if world.restrict_boss_items[player] != 'none':
-        hc_compass.advancement = at_compass.advancement = at_map.advancement = True
-    hc = world.get_dungeon('Hyrule Castle', player)
-    if hc.dungeon_items.count(hc_compass) < 1:
-        hc.dungeon_items.append(hc_compass)
-    at = world.get_dungeon('Agahnims Tower', player)
-    if at.dungeon_items.count(at_compass) < 1:
-        at.dungeon_items.append(at_compass)
-    if at.dungeon_items.count(at_map) < 1:
-        at.dungeon_items.append(at_map)
-
-    setup_custom_door_types(world, player)
-    assign_cross_keys(dungeon_builders, world, player)
-    all_dungeon_items_cnt = len(list(y for x in world.dungeons if x.player == player for y in x.all_items))
-    target_items = 34
-    if world.keyshuffle[player] == 'universal':
-        target_items += 1 if world.dropshuffle[player] != 'none' else 0  # the hc big key
-    else:
-        target_items += 29  # small keys in chests
-        if world.dropshuffle[player] != 'none':
-            target_items += 14  # 13 dropped smalls + 1 big
-        if world.pottery[player] not in ['none', 'cave']:
-            target_items += 19  # 19 pot keys
-    d_items = target_items - all_dungeon_items_cnt
-    world.pool_adjustment[player] = d_items
-    if not world.decoupledoors[player]:
-        smooth_door_pairs(world, player)
-
-    # Re-assign dungeon bosses
-    gt = world.get_dungeon('Ganons Tower', player)
-    for name, builder in dungeon_builders.items():
-        reassign_boss('GT Ice Armos', 'bottom', builder, gt, world, player)
-        reassign_boss('GT Lanmolas 2', 'middle', builder, gt, world, player)
-        reassign_boss('GT Moldorm', 'top', builder, gt, world, player)
-
-    sanctuary = world.get_region('Sanctuary', player)
-    d_name = sanctuary.dungeon.name
-    if d_name != 'Hyrule Castle':
-        possible_portals = []
-        for portal_name in dungeon_portals[d_name]:
-            portal = world.get_portal(portal_name, player)
-            if portal.door.name == 'Sanctuary S':
-                possible_portals.clear()
-                possible_portals.append(portal)
-                break
-            if not portal.destination and not portal.deadEnd:
-                possible_portals.append(portal)
-        if len(possible_portals) == 1:
-            world.sanc_portal[player] = possible_portals[0]
-        else:
-            reachable_portals = []
-            for portal in possible_portals:
-                start_area = portal.door.entrance.parent_region
-                state = ExplorationState(dungeon=d_name)
-                state.visit_region(start_area)
-                state.add_all_doors_check_unattached(start_area, world, player)
-                explore_state(state, world, player)
-                if state.visited_at_all(sanctuary):
-                    reachable_portals.append(portal)
-            world.sanc_portal[player] = random.choice(reachable_portals)
-    if world.intensity[player] >= 3:
-        if player in world.sanc_portal:
-            portal = world.sanc_portal[player]
-        else:
-            portal = world.get_portal('Sanctuary', player)
-        target = portal.door.entrance.parent_region
-        connect_simple_door(world, 'Sanctuary Mirror Route', target, player)
-
-    check_entrance_fixes(world, player)
-
-    if world.standardize_palettes[player] == 'standardize':
-        palette_assignment(world, player)
-
-    refine_hints(dungeon_builders)
-    refine_boss_exits(world, player)
-
-
 def filter_key_door_pool(pool, selected_custom):
     new_pool = []
     for cand in pool:
@@ -1589,7 +1473,6 @@ def palette_assignment(world, player):
                 if ent.door and door.roomIndex:
                     room = world.get_room(door.roomIndex, player)
                     room.palette = tuple[1]
-
 
     rat_path = world.get_region('Sewers Rat Path', player)
     visited_rooms = set()
@@ -2624,7 +2507,7 @@ def reassign_big_key_doors(bk_map, used_doors, world, player):
                 if not d.entranceFlag and d not in used_doors and d.dest not in used_doors:
                     world.get_room(d.roomIndex, player).change(d.doorListPos, DoorKind.Normal)
                 d.bigKey = False
-            elif d.type is DoorType.Normal and d not in flat_proposal :
+            elif d.type is DoorType.Normal and d not in flat_proposal:
                 if not d.entranceFlag and d not in used_doors:
                     world.get_room(d.roomIndex, player).change(d.doorListPos, DoorKind.Normal)
                 d.bigKey = False
@@ -3901,7 +3784,7 @@ logical_connections = [
     ('GT Hookshot Platform Blue Barrier', 'GT Hookshot South Entry'),
     ('GT Hookshot Platform Barrier Bypass', 'GT Hookshot South Entry'),
     ('GT Hookshot Entry Blue Barrier', 'GT Hookshot South Platform'),
-    ('GT Hookshot South Entry to Ranged Crystal',  'GT Hookshot South Entry - Ranged Crystal'),
+    ('GT Hookshot South Entry to Ranged Crystal', 'GT Hookshot South Entry - Ranged Crystal'),
     ('GT HookShot South Entry Ranged Crystal Exit', 'GT Hookshot South Entry'),
     ('GT Double Switch Entry to Pot Corners Barrier - Orange', 'GT Double Switch Pot Corners'),
     ('GT Double Switch Entry to Left Barrier - Orange', 'GT Double Switch Left'),
@@ -4626,7 +4509,6 @@ palette_non_influencers = {
     'Hyrule Dungeon South Abyss Catwalk West Edge'
 }
 
-
 portal_map = {
     'Sanctuary': ('Sanctuary', 'Sanctuary Exit', 'Enter HC (Sanc)'),
     'Hyrule Castle West': ('Hyrule Castle Entrance (West)', 'Hyrule Castle Exit (West)', 'Enter HC (West)'),
@@ -4654,7 +4536,6 @@ portal_map = {
     'Turtle Rock Main': ('Turtle Rock', 'Turtle Rock Exit (Front)', 'Enter Turtle Rock (Main)'),
     'Ganons Tower': ('Ganons Tower', 'Ganons Tower Exit', 'Enter Ganons Tower'),
 }
-
 
 multiple_portal_map = {
     'Hyrule Castle': ['Sanctuary', 'Hyrule Castle West', 'Hyrule Castle South', 'Hyrule Castle East'],
@@ -4715,5 +4596,3 @@ door_type_counts = {
     'Turtle Rock': (6, 2, 2, 0, 2, 0, 1),  # 2 bombs kind of for entrances, but I put 0 here
     'Ganons Tower': (8, 2, 5, 2, 1, 0, 0)
 }
-
-

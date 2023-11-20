@@ -1,12 +1,43 @@
 from collections import defaultdict, deque
+import logging
 
-from BaseClasses import Direction, RegionType, CrystalBarrier, flooded_keys
+from BaseClasses import Direction, RegionType, CrystalBarrier, Hook, flooded_keys
+from Dungeons import split_region_starts
 from Regions import dungeon_events, flooded_keys_reverse
+from Utils import append_to_yaml, load_cached_yaml
+from source.dungeon.DungeonGenerationCommon import GlobalPolarity, GenerationException
+from source.dungeon.DungeonGenerationCommon import define_sector_features, default_dungeon_entrances, handle_special_sectors
+from source.dungeon.DungeonGenerationCommon import standard_stair_check, identify_destination_sectors, calc_allowance_and_dead_ends
+from source.dungeon.DungeonGenerationCommon import handle_non_crossworld_sanctuary, assign_non_hc_sectors
 from source.dungeon.DungeonStitcher import ExplorableDoor
+
+# ------------------------------ #
+#       Curated Constraints
+# ------------------------------ #
+stock_intensity_codes = {
+    1: 'npxx_xxxx_xx',
+    2: 'nptl_exxx_xx',
+    3: 'nptl_ebxx_xx'
+}
+
+
+def create_sector_descriptors(sector_list, world, player):
+    # custom intensity could be here
+    intensity_code = stock_intensity_codes[world.intensity[player]]
+    v_trap_flag = world.trap_door_mode[player] == 'vanilla'
+    intensity_code = intensity_code[:7] + ('v' if v_trap_flag else 'x') + intensity_code[8:]
+    yaml_file = intensity_code + '.yaml'
+    lookup = load_cached_yaml(['data', 'gen', yaml_file])
+    # this is the primary bypass mechanism for generation
+    if lookup is None:
+        raise GenerationException('No curated logic for given intensity yet')
+    for sector in sector_list:
+        descript = SectorDescriptor(sector, lookup, v_trap_flag)
+        sector.descriptor = descript
 
 
 class SectorDescriptor:
-    def __init__(self, sector):
+    def __init__(self, sector, lookup, v_trap_flag):
         self.sector = sector
         self.degree = len(sector.outstanding_doors)
         self.name = min(sector.region_set(), key=len)
@@ -22,9 +53,9 @@ class SectorDescriptor:
         self.reachability = defaultdict(list)
         self.constraints = []  # conjunction of constraints needed
         self.parity_id = ''
-        self.init_parity_id()
+        self.init_parity_id(lookup, v_trap_flag)
 
-    def init_parity_id(self):
+    def init_parity_id(self, lookup, v_trap_flag):
         dir_map = defaultdict(int)
         for door in self.sector.outstanding_doors:
             dir_map[door.direction] += 1
@@ -34,26 +65,27 @@ class SectorDescriptor:
             if amt:
                 self.parity_id += f'{ind}{amt}'
 
-        # constraints - could memoize likely key would be frozenset of door names?
-        # todo: vanilla traps
+        sector_key = self.sector.sector_key()
+        if lookup is not None and sector_key in lookup:
+            constraint_list = lookup[sector_key]
+            for constraint in constraint_list:
+                flag = constraint['flag'] if 'flag' in constraint else False
+                self.create_constraint([Hook[d] for d in constraint['doors']], flag)
+            return
+
+        # possible improvements - convert to Hooks for directionality
+
         # which outstanding doors are reachable from which outstanding doors
         for door in self.sector.outstanding_doors:
-            state = SimpleExplorationState()
+            state = SimpleExplorationState(v_trap_flag)
             state.extend_reachable_state(door)
             for explorable in state.unattached_doors:
                 restrict = "Blue" if explorable.crystal == CrystalBarrier.Blue else "None"
                 self.reachability[door.name].append((explorable.door.name, restrict))
-        # create constraints
-        reverse_reachability = defaultdict(list)
-        for door in self.sector.outstanding_doors:
-            for source, reachables in self.reachability.items():
-                for reachable, restriction in reachables:
-                    if reachable == door.name:
-                        reverse_reachability[door.name].append((source, restriction))
         complete_doors = {k: v for k, v in self.reachability.items() if len(v) == self.degree}
         if len(complete_doors) == self.degree:  # all doors reach
             unrestricted = [k for k, v in self.reachability.items() if all(x[1] == 'None' for x in v)]
-            if len(unrestricted) != self.degree: # otherwise, no constraint needed
+            if len(unrestricted) != self.degree:  # otherwise, no constraint needed
                 if len(unrestricted) > 0:  # not all doors reach without blue
                     self.create_constraint(unrestricted)
                 else:
@@ -65,7 +97,6 @@ class SectorDescriptor:
             else:  # they all require blue
                 self.create_constraint(complete_doors.keys(), True)
         else:
-            # todo: Ice Cross
             # the case where there's no door that reaches everything
             most_doors = sorted([(k, v) for k, v in self.reachability.items()], key=lambda x: len(x[1]))
             chosen_door_pair_list = [most_doors.pop()]
@@ -94,15 +125,25 @@ class SectorDescriptor:
                 chosen_door_pair_list.append(next)
                 chosen_set.update(choices[best_choice])
             for d, c in chosen_door_pair_list:
-                self.create_constraint(d, c != 'None')
+                self.create_constraint([d], any(x[1] != 'None' for x in c))
+        append_to_yaml(['data', 'gen', 'proposed.yaml'], self.to_yaml())
 
-    def create_constraint(self, door_crystal_pair_list, constrained=False):
+    def create_constraint(self, door_list, constrained=False):
         constraint = SectorConstraint(constrained)
-        constraint.doors.extend(x[0] for x in door_crystal_pair_list)
+        constraint.doors.extend(door_list)
         self.constraints.append(constraint)
 
     def __str__(self):
         return f'{self.name}:{self.parity_id}'
+
+    def to_yaml(self):
+        return {self.sector.sector_key(): [x.to_yaml() for x in self.constraints]}
+
+    def has_flagged_constraint(self):
+        return any(c.crystal_needed for c in self.constraints)
+
+    def is_constrained(self):
+        return len(self.constraints) > 0
 
 
 class SectorConstraint:
@@ -110,10 +151,15 @@ class SectorConstraint:
         self.doors = []  # disjunction of doors, any door will do
         self.crystal_needed = crystal_needed
 
+    def to_yaml(self):
+        return {'flag': self.crystal_needed,
+                'doors': self.doors}
 
 
 class SimpleExplorationState:
-    def __init__(self):
+    def __init__(self, respect_traps):
+        self.respect_traps = respect_traps
+
         self.avail_doors = []
         self.unattached_doors = []
         self.event_doors = []
@@ -169,7 +215,7 @@ class SimpleExplorationState:
         for ext in region.exits:
             door = ext.door
             if door is not None:
-                if self.can_traverse_ignore_traps(door):
+                if not door.blocked if self.respect_traps else self.can_traverse_ignore_traps(door):
                     if door.controller is not None:
                         door = door.controller
                     if door.dest is None:
@@ -247,3 +293,99 @@ class SimpleExplorationState:
             door_list.append(ExplorableDoor(door, self.crystal, flag))
         else:
             door_list.append(ExplorableDoor(door, door.crystal, flag))
+
+
+# ------------------------------ #
+#         Main Algorithm
+# ------------------------------ #
+def create_dungeon_builders_new(all_sectors, connections_tuple, world, player, dungeon_pool,
+                                dungeon_entrances=None, split_dungeon_entrances=None):
+    # define sector features
+    logger = logging.getLogger('')
+    logger.info('Shuffling Dungeon Sectors')
+
+    if dungeon_entrances is None:
+        dungeon_entrances = default_dungeon_entrances
+    if split_dungeon_entrances is None:
+        split_dungeon_entrances = split_region_starts
+    define_sector_features(all_sectors)
+    create_sector_descriptors(all_sectors, world, player)
+
+    # maybe here we could remove entrances from all sectors
+    for sector in all_sectors:
+        sector.outstanding_doors = [x for x in sector.outstanding_doors if not x.entranceFlag]
+
+    # main loop
+    candidate_sectors = dict.fromkeys(all_sectors)
+    global_pole = GlobalPolarity(candidate_sectors)
+
+    maps = handle_special_sectors(all_sectors, candidate_sectors, global_pole, dungeon_pool, connections_tuple,
+                                  dungeon_entrances, world, player)
+    dungeon_map, accessible_sectors, reverse_d_map = maps
+    unsatisfied_sectors = {sector.sector_key(): sector for sector in candidate_sectors if sector.descriptor.is_constrained()}
+
+    # constraints
+    # HC standard - standard stair check
+    if world.mode[player] == 'standard':
+        if 'Hyrule Castle' in dungeon_map:
+            current_dungeon = dungeon_map['Hyrule Castle']
+            standard_stair_check(dungeon_map, current_dungeon, candidate_sectors, global_pole)
+
+    # early exit for dungeons without outstanding doors
+    complete_dungeons = {x: y for x, y in dungeon_map.items() if sum(len(sector.outstanding_doors) for sector in y.sectors) <= 0}
+    [dungeon_map.pop(key) for key in complete_dungeons.keys()]
+
+    if not dungeon_map:
+        dungeon_map.update(complete_dungeons)
+        return dungeon_map
+
+    # categorize sectors
+    entrances_map, potentials, connections = connections_tuple
+    identify_destination_sectors(accessible_sectors, reverse_d_map, dungeon_map, connections,
+                                 dungeon_entrances, split_dungeon_entrances)
+    for name, builder in dungeon_map.items():
+        calc_allowance_and_dead_ends(builder, connections_tuple, world, player)
+
+    # sanctuary limited shuffle if not crossworld
+    handle_non_crossworld_sanctuary(candidate_sectors, dungeon_map, dungeon_pool, global_pole, world, player)
+
+    # retro bow logic + standard floodgate = non-hc sectors
+
+    retro_std_flag = world.bow_mode[player].startswith('retro') and world.mode[player] == 'standard'
+
+    non_hc_sectors, crystal_switches, crystal_barriers, other_sectors = {}, {}, {}, {}
+    for sector in candidate_sectors:
+        if retro_std_flag and 'Bow' in sector.item_logic:  # these need to be distributed outside of HC
+            non_hc_sectors[sector] = None
+        elif world.mode[player] == 'standard' and 'Open Floodgate' in sector.item_logic:
+            non_hc_sectors[sector] = None
+        elif sector.descriptor.has_flagged_constraint():
+            crystal_barriers[sector] = None
+        elif sector.c_switch:
+            crystal_switches[sector] = None
+        else:
+            other_sectors[sector] = None
+    if non_hc_sectors:
+        assign_non_hc_sectors(dungeon_map, non_hc_sectors, global_pole)
+
+    # crystal switch constraints
+
+    # other directional constraints
+
+    # minimal location sectors
+    # scatter the rest of location sectors (up to 50%)
+
+    # assign polarized sectors
+    # polarity connection issues
+    # dead end
+    # neutrality issues
+    # parity
+    # full neutralization
+    # skippable? neutralize the rest
+
+    # assign the rest
+
+
+def satisfy_crystal_switch_constraints(dungeon_map, crystal_switches, crystal_barriers, global_pole):
+     # thoughts
+    pass

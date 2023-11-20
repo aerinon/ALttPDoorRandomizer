@@ -2036,10 +2036,19 @@ class Sector(object):
         self.item_logic = set()
         self.chest_location_set = set()
 
+        self.sector_id = None  # a numeric identifier, not yet implemented
+        self.key = None  # a readable/hashable key - lazy init? todo not consistent for intensity 3
+        self.descriptor = None
+
     def region_set(self):
         if self.r_name_set is None:
             self.r_name_set = dict.fromkeys(map(lambda r: r.name, self.regions))
         return self.r_name_set.keys()
+
+    def sector_key(self):
+        if self.key is None:
+            self.key = sorted(self.outstanding_doors, key=lambda d: d.name)[0].name
+        return self.key
 
     def polarity(self):
         pol = Polarity()
@@ -2124,9 +2133,7 @@ class Sector(object):
         return str(self.__unicode__())
 
     def __unicode__(self):
-        if len(self.regions) > 0:
-            return f'{self.regions[0].name}'
-        return f'{next(iter(self.region_set()))}'
+        return self.sector_key()
 
 
 class Portal(object):
