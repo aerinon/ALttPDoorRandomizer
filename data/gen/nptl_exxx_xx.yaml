@@ -1,0 +1,282 @@
+GT Brightly Lit Hall Down Stairs: []
+GT Frozen Over ES: []
+GT Left Moldorm Ledge NW:
+  - doors:
+      - North
+    flag: false
+GT Crystal Circles SW:
+  - doors:
+      - South
+    flag: false
+GT Conveyor Bridge EN: []
+GT Wizzrobes 1 Down Stairs: []
+GT Beam Dash ES: []
+GT Gauntlet 4 NW: []
+GT Gauntlet 1 Down Stairs: []
+GT Cannonball Bridge Up Stairs: []
+GT Hidden Spikes EN: []
+GT Crystal Paths Down Stairs: []
+GT Randomizer Room ES: []
+GT Falling Bridge WN: []
+GT DMs Room SW: []
+GT Hidden Star ES:
+  - doors:
+      - East
+    flag: false
+GT Petting Zoo SE: []
+GT Double Switch NW:
+  - doors:
+      - North
+    flag: false
+GT Conveyor Cross EN: []
+GT Invisible Catwalk ES: []
+GT Conveyor Star Pits EN:
+  - doors:
+      - North
+    flag: false
+GT Speed Torch NE: []
+GT Bob's Room SE:
+  - doors:
+      - South
+    flag: false
+GT Big Chest SW: []
+TR Final Abyss NW: []
+TR Crystal Maze ES: []
+TR Dash Bridge NW: []
+TR Dark Ride SW: []
+TR Crystaroller Down Stairs: []
+TR Pokey 2 EN: []
+TR Lava Escape NW: []
+TR Lava Island ES: []
+TR Lava Dual Pipes EN: []
+TR Pipe Ledge WS:
+  - doors:
+      - West
+    flag: false
+TR Chain Chomps Down Stairs: []
+TR Tile Room SE: []
+TR Roller Room SW: []
+TR Torches NW: []
+TR Torches Ledge WS: []
+TR Hub EN: []
+TR Compass Room NW: []
+Mire Antechamber NW: []
+Mire Falling Foes ES: []
+Mire Crystal Left WS:
+  - doors: # this could have an optional west connection, with a true flag, hmm
+      - East
+    flag: false
+Mire Block X WS: []
+Mire BK Door Room EN: []
+Mire Neglected Room NE: []
+Mire Conveyor Crystal ES: []
+Mire Fishbone E:  # this could have an optional south connection, with a true flag, hmm
+  - doors:
+      - East
+    flag: false
+Mire Left Bridge Down Stairs: [] # seemed unnecessarily finicky
+Mire Over Bridge E: []
+Mire Bent Bridge SW: []
+Mire Ledgehop NW: []
+Mire Cross SW: []
+Mire Crystal Dead End NW:
+  - doors: # doesn't matter
+      - North
+      - West
+    flag: true
+Mire Hub E:
+  - doors:  # doesn't matter
+      - East
+      - West
+      - North
+      - South
+    flag: true
+Mire 2 NE: []
+Ice Refill WS: []
+Ice Many Pots SW: []
+Ice Catwalk NW: []
+Iced T EN: []
+Ice Lonely Freezor Down Stairs: []
+Ice Hookshot Ledge WN: []
+Ice Hammer Block Down Stairs: []
+Ice Spike Room Down Stairs: []
+Ice Anti-Fairy Up Stairs:
+  - doors:
+      - South
+      - East
+    flag: true
+Ice Pengator Trap NE: []
+Ice Bomb Jump NW: []
+Ice Conveyor SW:
+  - doors:
+      - East
+    flag: false
+  - doors:
+      - Stairs
+      - South
+    flag: false
+Ice Big Key Down Ladder:
+  - doors:
+      - South
+    flag: false
+Ice Compass Room NE: []
+Thieves Conveyor Bridge EN: []
+Thieves Cricket Hall Right Edge: []
+Thieves Attic Down Stairs:  # optional stair connection with a switch, hmm
+  - doors:
+      - East
+    flag: false
+Thieves Spike Switch SW: []
+Thieves Hellway NW:
+  - doors:  # any, really
+      - East
+      - North
+    flag: true
+Thieves Conveyor Maze Down Stairs: []
+Thieves Pot Alcove Bottom SW: []
+Thieves Big Chest Nook ES Edge: []
+Thieves Compass Room N Edge: []
+Thieves BK Corner NE:
+  - doors:
+      - West
+      - North
+    flag: false
+Thieves Ambush E: []
+Skull Star Pits SW: []
+Skull Pot Prison ES: []
+Swamp C Down Stairs: []
+Swamp Behind Waterfall Up Stairs: []
+Swamp Basement Shallows NW: []  # any really
+Swamp Left Elbow Down Stairs: []
+Swamp Attic Down Stairs: [] # any really
+Swamp Big Key Ledge WN: []
+Swamp Crystal Switch EN:
+  - doors:
+      - East
+    flag: false  # crystal not needed necessarily
+Swamp Donut Top N: []
+Swamp Hub ES: []
+Swamp Hub Dead Ledge EN: []
+Swamp Hammer Switch WN: []
+Swamp Map Ledge EN: []
+Swamp Pot Row Up Stairs: []
+PoD Dark Alley NE:  # both connections, north
+  - doors:
+      - North
+PoD Bow Statue Down Ladder: []
+PoD Compass Room E Down Stairs: []
+PoD Dark Basement E Up Stairs: []
+PoD Big Chest Balcony W: []
+PoD Dark Maze E: []
+PoD Conveyor North Stairs: []
+PoD Map Balcony South Stairs:
+  - doors:
+      - South
+      - West
+    flag: false
+PoD Arena Ledge ES: []
+PoD Arena Bridge SE: # optional stair connection with a switch, hmm
+  - doors:
+      - South
+      - North
+    flag: false
+PoD Basement Ledge Up Stairs:
+  - doors:
+      - North
+      - South
+    flag: false
+PoD Shooter Room Up Stairs: []
+Tower Altar NW: []
+Tower Catwalk North Stairs: []
+Tower Pacifist Run Up Stairs: []
+Tower Dark Archers Up Stairs: []
+Tower Dark Chargers Up Stairs: []
+Hera Tile Room Up Stairs: []
+Hera Basement Cage Up Stairs: []
+Desert Tiles 2 SE: []
+Desert Beamos Hall NE: []
+Desert Sandworm Corner E Edge: []
+Desert North Hall E Edge: []
+Desert Arrow Pot Corner S Edge: []
+Desert Cannonball S: []
+Desert Dead End Edge: []
+Eastern Duo Eyegores NE: []
+Eastern Cannonball Hell WS: []
+Eastern Attic Start Down Stairs: []
+Eastern Darkness S: []
+Eastern Big Key EN: []
+Eastern Dark Square Key Door WN: []
+Eastern Map Valley SW: []
+Eastern Courtyard EN: []
+Eastern Hint Tile Blocked Path SE:
+  - doors:
+      - South
+    flag: false
+Eastern East Wing W: []
+Eastern Courtyard Ledge E: []
+Eastern Cannonball Ledge Key Door EN: []
+Eastern Cannonball N: []
+Sewers Pull Switch Down Stairs: []
+Sewers Dark Aquabats ES: []
+Sewers Water S: []
+Sewers Dark Cross Key Door N: []
+Sewers Rope Room North Stairs: []
+Sewers Behind Tapestry Down Stairs: []
+Hyrule Dungeon Cellblock Up Stairs: []
+Hyrule Dungeon Staircase Down Stairs: []
+Hyrule Dungeon Armory Down Stairs: []
+Hyrule Dungeon Guardroom Abyss Edge: []
+Hyrule Dungeon South Abyss Catwalk North Edge: []
+Hyrule Dungeon South Abyss North Edge: []
+Hyrule Dungeon Map Room Up Stairs:
+  - doors:
+      - South
+    flag: false
+Hyrule Castle Throne Room N: []
+Hyrule Castle Back Hall Down Stairs: []
+Hyrule Castle West Hall E: []
+Hyrule Castle East Hall S: []
+# lobbies/bosses these don't matter much
+GT Lobby Left Down Stairs: []
+GT Agahnim 2 SW: []
+TR Eye Bridge NW: []
+TR Dodgers NE: []
+TR Lazy Eyes ES: []
+TR Lobby Ledge NE: []
+TR Boss SW: []
+Mire Post-Gap Down Stairs: []
+Mire Boss SW: []
+Ice Jelly Key Down Stairs: []
+Ice Antechamber NE: []
+Thieves Lobby E: []
+Thieves Basement Block Up Stairs: []
+Thieves Boss SE: []
+Skull 3 Lobby NW: []
+Skull 2 East Lobby WS: []
+Skull Spike Corner SW: []
+Skull Small Hall ES: []
+Skull Compass Room ES: []
+Skull Pinball NE: []
+Skull 1 Lobby WS: []
+Swamp Entrance Down Stairs: []
+Swamp Boss SW: []
+PoD Left Cage Down Stairs: []
+PoD Boss SE: []
+Tower Room 03 Up Stairs: []
+Tower Agahnim 1 SW: []
+Hera 4F Down Stairs: []
+Desert Tiles 1 Up Stairs: []
+Desert Compass NE: []
+Desert Main Lobby E Edge: []
+Desert West Wing N Edge: []
+Desert Boss SW: []
+Eastern Lobby Bridge N: []
+Eastern Boss SE: []
+Hyrule Castle East Lobby N: []
+Hyrule Castle Lobby E: []
+Hyrule Castle West Lobby E: []
+Sanctuary N: []
+Sewers Secret Room Key Door S:
+  - doors:
+      - South
+    flag: false
