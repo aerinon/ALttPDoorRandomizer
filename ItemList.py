@@ -291,6 +291,8 @@ def generate_itempool(world, player):
         # In HMG force swamp smalls in pots to allow getting out of swamp palace
         placed_items['Swamp Palace - Trench 1 Pot Key'] = 'Small Key (Swamp Palace)'
         placed_items['Swamp Palace - Pot Row Pot Key'] = 'Small Key (Swamp Palace)'
+        pool.remove('Small Key (Swamp Palace)')
+        pool.remove('Small Key (Swamp Palace)')
 
     start_inventory = list(world.precollected_items)
     for item in precollected_items:
