@@ -14,6 +14,7 @@ from Dungeons import dungeon_bigs, dungeon_hints
 from Items import ItemFactory
 from RoomData import DoorKind, PairedDoor, reset_rooms
 from source.dungeon.DungeonGen2 import create_dungeon_builders_new
+from source.dungeon.DungeonGen3 import create_dungeon_builders_prototype
 from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
 from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
 from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths, drop_entrances
@@ -4596,3 +4597,61 @@ door_type_counts = {
     'Turtle Rock': (6, 2, 2, 0, 2, 0, 1),  # 2 bombs kind of for entrances, but I put 0 here
     'Ganons Tower': (8, 2, 5, 2, 1, 0, 0)
 }
+
+
+def link_doors_prototype(world, player):
+    for exitName, regionName in logical_connections:
+        connect_simple_door(world, exitName, regionName, player)
+    # These should all be connected for now as normal connections
+    for edge_a, edge_b in interior_doors:
+        connect_interior_doors(edge_a, edge_b, world, player)
+
+    # These connections are here because they are currently unable to be shuffled
+    for exitName, regionName in falldown_pits:
+        connect_simple_door(world, exitName, regionName, player)
+    for exitName, regionName in dungeon_warps:
+        connect_simple_door(world, exitName, regionName, player)
+
+    create_dungeon_pool(world, player)
+
+    if not world.doorShuffle[player] == 'vanilla':
+        fix_big_key_doors_with_ugly_smalls(world, player)
+    else:
+        unmark_ugly_smalls(world, player)
+
+    pool = world.dungeon_pool[player]
+    if pool:
+        main_dungeon_pool_prototype(pool, world, player)
+
+
+def main_dungeon_pool_prototype(dungeon_pool, world, player):
+    dungeon_builders = {}
+    door_type_pools = []
+    for pool, region_list in dungeon_pool:
+        if len(pool) == 1:
+            dungeon_key = next(iter(pool))
+            sector_pool = convert_to_sectors(region_list, world, player)
+            merge_sectors(sector_pool, world, player)
+            dungeon_builders[dungeon_key] = simple_dungeon_builder(dungeon_key, sector_pool)
+            # todo: figure this out for basic I guess
+            # dungeon_builders[dungeon_key].entrance_list = list(entrances_map[dungeon_key])
+        else:
+            sectors = convert_to_sectors(region_list, world, player)
+            sector_pool, portal_pool = [], []
+            for sector in sectors:
+                (portal_pool if len(sector.outstanding_doors) == 0 else sector_pool).append(sector)
+            vanilla_connections = {
+                'interior': interior_doors,
+                'pit': falldown_pits,
+                'warp': dungeon_warps,
+                'edges': open_edges,
+                'straight': straight_staircases,
+                'ladder': ladders,
+                'spiral': spiral_staircases,
+                'normal': default_door_connections,
+                'trap': default_one_way_connections
+            }
+            # todo: portal pool
+            builders = create_dungeon_builders_prototype(sector_pool, world, player, pool, vanilla_connections)
+
+

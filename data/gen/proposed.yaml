@@ -1,1 +1,4206 @@
-
+GT Agahnim 2:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - GT Agahnim 2 SW
+  cost: South
+  crystal: false
+  reachable:
+  - GT Agahnim 2 SW
+GT Brightly Lit Hall:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - GT Brightly Lit Hall NW
+  cost: North
+  crystal: false
+  reachable:
+  - GT Brightly Lit Hall Down Stairs
+  - GT Brightly Lit Hall NW
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - GT Brightly Lit Hall Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - GT Brightly Lit Hall Down Stairs
+  - GT Brightly Lit Hall NW
+GT Frozen Over:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - GT Frozen Over Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - GT Frozen Over ES
+  - GT Frozen Over Up Stairs
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - GT Frozen Over ES
+  cost: East
+  crystal: false
+  reachable:
+  - GT Frozen Over ES
+  - GT Frozen Over Up Stairs
+GT Left Moldorm Ledge:
+- assumptions:
+    GT Moldorm Pit Up Stairs: GT Right Moldorm Ledge Down Stairs
+  benefits:
+    Stairs: 0
+    West: 1
+  candidates:
+  - GT Left Moldorm Ledge NW
+  cost: North
+  crystal: false
+  reachable:
+  - GT Moldorm Pit Up Stairs
+  - GT Right Moldorm Ledge Down Stairs
+  - GT Validation WS
+  - GT Left Moldorm Ledge NW
+GT Bomb Conveyor:
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 1
+    West: 1
+  candidates:
+  - GT Crystal Circles SW
+  - GT Falling Torches Down Ladder
+  cost: South
+  crystal: false
+  reachable:
+  - GT Torch Cross WN
+  - GT Staredown Up Ladder
+  - GT Crystal Circles SW
+  - GT Falling Torches Down Ladder
+GT Conveyor Bridge:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - GT Conveyor Bridge EN
+  cost: East
+  crystal: false
+  reachable:
+  - GT Conveyor Bridge SE
+  - GT Conveyor Bridge EN
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - GT Conveyor Bridge SE
+  cost: South
+  crystal: false
+  reachable:
+  - GT Conveyor Bridge SE
+  - GT Conveyor Bridge EN
+GT Dashing Bridge:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - GT Wizzrobes 2 NE
+  cost: North
+  crystal: false
+  reachable:
+  - GT Wizzrobes 1 Down Stairs
+  - GT Wizzrobes 2 NE
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - GT Wizzrobes 1 Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - GT Wizzrobes 1 Down Stairs
+  - GT Wizzrobes 2 NE
+GT Beam Dash:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - GT Quad Pot Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - GT Beam Dash ES
+  - GT Quad Pot Up Stairs
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - GT Beam Dash ES
+  cost: East
+  crystal: false
+  reachable:
+  - GT Quad Pot Up Stairs
+  - GT Beam Dash ES
+GT Gauntlet 4:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - GT Gauntlet 5 WS
+  cost: West
+  crystal: false
+  reachable:
+  - GT Gauntlet 4 NW
+  - GT Gauntlet 5 WS
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - GT Gauntlet 4 NW
+  cost: North
+  crystal: false
+  reachable:
+  - GT Gauntlet 4 NW
+  - GT Gauntlet 5 WS
+GT Gauntlet 1:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - GT Gauntlet 3 SW
+  cost: South
+  crystal: false
+  reachable:
+  - GT Gauntlet 1 Down Stairs
+  - GT Gauntlet 3 SW
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - GT Gauntlet 1 Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - GT Gauntlet 1 Down Stairs
+  - GT Gauntlet 3 SW
+GT Cannonball Bridge:
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - GT Cannonball Bridge Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - GT Cannonball Bridge Up Stairs
+  - GT Cannonball Bridge WN
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - GT Cannonball Bridge WN
+  cost: West
+  crystal: false
+  reachable:
+  - GT Cannonball Bridge Up Stairs
+  - GT Cannonball Bridge WN
+GT Hidden Spikes:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - GT Hidden Spikes EN
+  cost: East
+  crystal: false
+  reachable:
+  - GT Hidden Spikes EN
+  - GT Hidden Spikes SE
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - GT Hidden Spikes SE
+  cost: South
+  crystal: false
+  reachable:
+  - GT Hidden Spikes EN
+  - GT Hidden Spikes SE
+GT Crystal Paths:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - GT Dash Hall NE
+  cost: North
+  crystal: false
+  reachable:
+  - GT Dash Hall NE
+  - GT Crystal Paths Down Stairs
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - GT Crystal Paths Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - GT Dash Hall NE
+  - GT Crystal Paths Down Stairs
+GT Randomizer Room:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - GT Randomizer Room ES
+  cost: East
+  crystal: false
+  reachable:
+  - GT Randomizer Room ES
+GT Falling Bridge:
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - GT Falling Bridge WN
+  - GT Falling Bridge WS
+  cost: West
+  crystal: false
+  reachable:
+  - GT Falling Bridge WN
+  - GT Falling Bridge WS
+GT DMs Room:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - GT DMs Room SW
+  cost: South
+  crystal: false
+  reachable:
+  - GT DMs Room SW
+GT Hidden Star:
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - GT Hidden Star ES
+  cost: East
+  crystal: false
+  reachable:
+  - GT Hidden Star ES
+  - GT Invisible Bridges WS
+GT Petting Zoo:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - GT Petting Zoo SE
+  cost: South
+  crystal: false
+  reachable:
+  - GT Petting Zoo SE
+GT Double Switch Entry:
+- assumptions: {}
+  benefits:
+    East: 1
+    West: 1
+  candidates:
+  - GT Double Switch NW
+  cost: North
+  crystal: false
+  reachable:
+  - GT Warp Maze (Rails) WS
+  - GT Warp Maze (Pits) ES
+  - GT Double Switch NW
+GT Conveyor Cross:
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 1
+  candidates:
+  - GT Hookshot SW
+  cost: South
+  crystal: false
+  reachable:
+  - GT Conveyor Cross EN
+  - GT Hookshot SW
+  - GT Hookshot NW
+- assumptions: {}
+  benefits:
+    East: 1
+    South: 1
+  candidates:
+  - GT Hookshot NW
+  cost: North
+  crystal: false
+  reachable:
+  - GT Conveyor Cross EN
+  - GT Hookshot SW
+  - GT Hookshot NW
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 1
+  candidates:
+  - GT Conveyor Cross EN
+  cost: East
+  crystal: false
+  reachable:
+  - GT Hookshot SW
+  - GT Conveyor Cross EN
+  - GT Hookshot NW
+GT Invisible Catwalk:
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 1
+    West: 1
+  candidates:
+  - GT Invisible Catwalk NE
+  - GT Invisible Catwalk NW
+  cost: North
+  crystal: false
+  reachable:
+  - GT Invisible Catwalk NE
+  - GT Invisible Catwalk ES
+  - GT Invisible Catwalk WS
+  - GT Invisible Catwalk NW
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 2
+  candidates:
+  - GT Invisible Catwalk WS
+  cost: West
+  crystal: false
+  reachable:
+  - GT Invisible Catwalk NE
+  - GT Invisible Catwalk ES
+  - GT Invisible Catwalk WS
+  - GT Invisible Catwalk NW
+- assumptions: {}
+  benefits:
+    North: 2
+    West: 1
+  candidates:
+  - GT Invisible Catwalk ES
+  cost: East
+  crystal: false
+  reachable:
+  - GT Invisible Catwalk NE
+  - GT Invisible Catwalk ES
+  - GT Invisible Catwalk WS
+  - GT Invisible Catwalk NW
+GT Compass Room:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - GT Crystal Conveyor NE
+  cost: North
+  crystal: false
+  reachable:
+  - GT Crystal Conveyor NE
+  - GT Conveyor Star Pits EN
+GT Pots n Blocks:
+- assumptions: {}
+  benefits:
+    South: 1
+    West: 1
+  candidates:
+  - GT Speed Torch NE
+  cost: North
+  crystal: false
+  reachable:
+  - GT Speed Torch SE
+  - GT Speed Torch NE
+  - GT Tile Room WN
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 1
+  candidates:
+  - GT Tile Room WN
+  cost: West
+  crystal: false
+  reachable:
+  - GT Speed Torch SE
+  - GT Speed Torch NE
+  - GT Tile Room WN
+- assumptions: {}
+  benefits:
+    North: 1
+    West: 1
+  candidates:
+  - GT Speed Torch SE
+  cost: South
+  crystal: false
+  reachable:
+  - GT Speed Torch SE
+  - GT Speed Torch NE
+  - GT Tile Room WN
+GT Big Key Room:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - GT Bob's Room SE
+  cost: South
+  crystal: false
+  reachable:
+  - GT Four Torches Up Stairs
+  - GT Bob's Room SE
+GT Big Chest:
+- assumptions: {}
+  benefits:
+    East: 1
+    South: 1
+    Stairs: 2
+    West: 1
+  candidates:
+  - GT Blocked Stairs Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - GT Big Chest SW
+  - GT Hope Room Up Stairs
+  - GT Hope Room EN
+  - GT Blocked Stairs Down Stairs
+  - GT Torch WN
+  - GT Torch Up Stairs
+GT Lobby:
+- assumptions: {}
+  benefits:
+    Stairs: 3
+  candidates:
+  - GT Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - GT Lobby Left Down Stairs
+  - GT Lobby S
+  - GT Lobby Right Down Stairs
+  - GT Lobby Up Stairs
+- assumptions: {}
+  benefits:
+    South: 1
+    Stairs: 2
+  candidates:
+  - GT Lobby Left Down Stairs
+  - GT Lobby Right Down Stairs
+  - GT Lobby Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - GT Lobby Left Down Stairs
+  - GT Lobby S
+  - GT Lobby Right Down Stairs
+  - GT Lobby Up Stairs
+TR Boss:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - TR Boss SW
+  cost: South
+  crystal: false
+  reachable:
+  - TR Boss SW
+TR Final Abyss Balcony:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - TR Final Abyss South Stairs
+  cost: South
+  crystal: false
+  reachable:
+  - TR Final Abyss NW
+  - TR Final Abyss South Stairs
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - TR Final Abyss NW
+  cost: North
+  crystal: false
+  reachable:
+  - TR Final Abyss NW
+  - TR Final Abyss South Stairs
+TR Crystal Maze End:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - TR Crystal Maze ES
+  cost: East
+  crystal: false
+  reachable:
+  - TR Crystal Maze ES
+  - TR Crystal Maze North Stairs
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - TR Crystal Maze North Stairs
+  cost: North
+  crystal: false
+  reachable:
+  - TR Crystal Maze ES
+  - TR Crystal Maze North Stairs
+TR Eye Bridge:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - TR Eye Bridge NW
+  cost: North
+  crystal: false
+  reachable:
+  - TR Eye Bridge NW
+  - TR Eye Bridge SW
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - TR Eye Bridge SW
+  cost: South
+  crystal: false
+  reachable:
+  - TR Eye Bridge NW
+  - TR Eye Bridge SW
+TR Dash Bridge:
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 1
+  candidates:
+  - TR Dash Bridge WS
+  cost: West
+  crystal: false
+  reachable:
+  - TR Dash Bridge WS
+  - TR Dash Bridge NW
+  - TR Dash Bridge SW
+- assumptions: {}
+  benefits:
+    North: 1
+    West: 1
+  candidates:
+  - TR Dash Bridge SW
+  cost: South
+  crystal: false
+  reachable:
+  - TR Dash Bridge WS
+  - TR Dash Bridge NW
+  - TR Dash Bridge SW
+- assumptions: {}
+  benefits:
+    South: 1
+    West: 1
+  candidates:
+  - TR Dash Bridge NW
+  cost: North
+  crystal: false
+  reachable:
+  - TR Dash Bridge WS
+  - TR Dash Bridge NW
+  - TR Dash Bridge SW
+TR Dark Ride:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - TR Dark Ride SW
+  cost: South
+  crystal: false
+  reachable:
+  - TR Dark Ride Up Stairs
+  - TR Dark Ride SW
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - TR Dark Ride Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - TR Dark Ride Up Stairs
+  - TR Dark Ride SW
+TR Crystaroller Bottom:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - TR Dash Room SW
+  cost: South
+  crystal: false
+  reachable:
+  - TR Crystaroller Down Stairs
+  - TR Dash Room SW
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - TR Crystaroller Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - TR Crystaroller Down Stairs
+  - TR Dash Room SW
+TR Lazy Eyes:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - TR Lazy Eyes ES
+  cost: East
+  crystal: false
+  reachable:
+  - TR Lazy Eyes SE
+  - TR Lazy Eyes ES
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - TR Lazy Eyes SE
+  cost: South
+  crystal: false
+  reachable:
+  - TR Lazy Eyes SE
+  - TR Lazy Eyes ES
+TR Big Chest:
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 1
+    West: 1
+  candidates:
+  - TR Twin Pokeys NW
+  - TR Dodgers NE
+  cost: North
+  crystal: false
+  reachable:
+  - TR Hallway WS
+  - TR Twin Pokeys NW
+  - TR Dodgers NE
+  - TR Big Chest Entrance SE
+- assumptions: {}
+  benefits:
+    North: 2
+    South: 1
+  candidates:
+  - TR Hallway WS
+  cost: West
+  crystal: false
+  reachable:
+  - TR Twin Pokeys NW
+  - TR Big Chest Entrance SE
+  - TR Dodgers NE
+  - TR Hallway WS
+- assumptions: {}
+  benefits:
+    North: 2
+    West: 1
+  candidates:
+  - TR Big Chest Entrance SE
+  cost: South
+  crystal: false
+  reachable:
+  - TR Hallway WS
+  - TR Twin Pokeys NW
+  - TR Dodgers NE
+  - TR Big Chest Entrance SE
+TR Pokey 2 Bottom:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - TR Pokey 2 ES
+  - TR Pokey 2 EN
+  cost: East
+  crystal: false
+  reachable:
+  - TR Pokey 2 ES
+  - TR Pokey 2 EN
+TR Lava Escape:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - TR Lava Escape NW
+  cost: North
+  crystal: false
+  reachable:
+  - TR Lava Escape NW
+  - TR Lava Escape SE
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - TR Lava Escape SE
+  cost: South
+  crystal: false
+  reachable:
+  - TR Lava Escape NW
+  - TR Lava Escape SE
+TR Lava Island:
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - TR Lava Island ES
+  cost: East
+  crystal: false
+  reachable:
+  - TR Lava Island ES
+  - TR Lava Island WS
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - TR Lava Island WS
+  cost: West
+  crystal: false
+  reachable:
+  - TR Lava Island ES
+  - TR Lava Island WS
+TR Lava Dual Pipes:
+- assumptions: {}
+  benefits:
+    East: 1
+    West: 1
+  candidates:
+  - TR Lava Dual Pipes SW
+  cost: South
+  crystal: false
+  reachable:
+  - TR Lava Dual Pipes SW
+  - TR Lava Dual Pipes WN
+  - TR Lava Dual Pipes EN
+- assumptions: {}
+  benefits:
+    East: 1
+    South: 1
+  candidates:
+  - TR Lava Dual Pipes WN
+  cost: West
+  crystal: false
+  reachable:
+  - TR Lava Dual Pipes SW
+  - TR Lava Dual Pipes WN
+  - TR Lava Dual Pipes EN
+- assumptions: {}
+  benefits:
+    South: 1
+    West: 1
+  candidates:
+  - TR Lava Dual Pipes EN
+  cost: East
+  crystal: false
+  reachable:
+  - TR Lava Dual Pipes SW
+  - TR Lava Dual Pipes WN
+  - TR Lava Dual Pipes EN
+TR Pipe Ledge:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+    West: 1
+  candidates:
+  - TR Pipe Ledge WS
+  cost: West
+  crystal: false
+  reachable:
+  - TR Pipe Pit Up Stairs
+  - TR Pipe Pit WN
+  - TR Pipe Ledge WS
+TR Chain Chomps Bottom:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - TR Chain Chomps Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - TR Chain Chomps Down Stairs
+  - TR Pokey 1 SW
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - TR Pokey 1 SW
+  cost: South
+  crystal: false
+  reachable:
+  - TR Chain Chomps Down Stairs
+  - TR Pokey 1 SW
+TR Refill:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - TR Tile Room SE
+  cost: South
+  crystal: false
+  reachable:
+  - TR Tile Room SE
+TR Roller Room:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - TR Roller Room SW
+  cost: South
+  crystal: false
+  reachable:
+  - TR Roller Room SW
+TR Torches:
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - TR Torches NW
+  cost: North
+  crystal: false
+  reachable:
+  - TR Torches WN
+  - TR Torches NW
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - TR Torches WN
+  cost: West
+  crystal: false
+  reachable:
+  - TR Torches WN
+  - TR Torches NW
+TR Torches Ledge:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - TR Torches Ledge WS
+  cost: West
+  crystal: false
+  reachable:
+  - TR Torches Ledge WS
+TR Hub:
+- assumptions: {}
+  benefits:
+    East: 2
+    North: 1
+    South: 2
+  candidates:
+  - TR Hub NW
+  - TR Hub NE
+  cost: North
+  crystal: false
+  reachable:
+  - TR Hub SW
+  - TR Hub NW
+  - TR Hub NE
+  - TR Hub EN
+  - TR Hub ES
+  - TR Hub SE
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 2
+    South: 2
+  candidates:
+  - TR Hub EN
+  - TR Hub ES
+  cost: East
+  crystal: false
+  reachable:
+  - TR Hub SW
+  - TR Hub NW
+  - TR Hub NE
+  - TR Hub EN
+  - TR Hub ES
+  - TR Hub SE
+- assumptions: {}
+  benefits:
+    East: 2
+    North: 2
+    South: 1
+  candidates:
+  - TR Hub SW
+  - TR Hub SE
+  cost: South
+  crystal: false
+  reachable:
+  - TR Hub SW
+  - TR Hub NW
+  - TR Hub NE
+  - TR Hub EN
+  - TR Hub ES
+  - TR Hub SE
+TR Compass Room:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - TR Compass Room NW
+  cost: North
+  crystal: false
+  reachable:
+  - TR Compass Room NW
+TR Lobby Ledge:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - TR Main Lobby SE
+  cost: South
+  crystal: false
+  reachable:
+  - TR Main Lobby SE
+  - TR Lobby Ledge NE
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - TR Lobby Ledge NE
+  cost: North
+  crystal: false
+  reachable:
+  - TR Main Lobby SE
+  - TR Lobby Ledge NE
+Mire Boss:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Mire Boss SW
+  cost: South
+  crystal: false
+  reachable:
+  - Mire Boss SW
+Mire Antechamber:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Mire Antechamber NW
+  cost: North
+  crystal: false
+  reachable:
+  - Mire Antechamber NW
+  - Mire Firesnake Skip Down Stairs
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Mire Firesnake Skip Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Mire Antechamber NW
+  - Mire Firesnake Skip Down Stairs
+Mire Falling Foes:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Mire Falling Foes Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Mire Falling Foes Up Stairs
+  - Mire Falling Foes ES
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Mire Falling Foes ES
+  cost: East
+  crystal: false
+  reachable:
+  - Mire Falling Foes Up Stairs
+  - Mire Falling Foes ES
+Mire Crystal Left:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Mire Crystal Left WS
+  cost: West
+  crystal: false
+  reachable:
+  - Mire Tall Dark and Roomy ES
+  - Mire Crystal Left WS
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Mire Tall Dark and Roomy ES
+  cost: East
+  crystal: false
+  reachable:
+  - Mire Tall Dark and Roomy ES
+  - Mire Crystal Left WS
+Mire Block X:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Mire Block X WS
+  cost: West
+  crystal: false
+  reachable:
+  - Mire Dark Shooters Up Stairs
+  - Mire Block X WS
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Mire Dark Shooters Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Mire Dark Shooters Up Stairs
+  - Mire Block X WS
+Mire Attic Hint:
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 3
+    South: 1
+    Stairs: 1
+  candidates:
+  - Mire Torches Top Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Mire BK Door Room N
+  - Mire Spike Barrier SE
+  - Mire Spike Barrier NE
+  - Mire Torches Top Down Stairs
+  - Mire BK Door Room EN
+  - Mire Conveyor Barrier Up Stairs
+  - Mire Conveyor Barrier NW
+Mire Chest View:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Mire Neglected Room NE
+  cost: North
+  crystal: false
+  reachable:
+  - Mire Neglected Room NE
+Mire Compass Chest:
+- assumptions: {}
+  benefits:
+    East: 2
+    South: 2
+  candidates:
+  - Mire Wizzrobe Bypass NE
+  cost: North
+  crystal: true
+  reachable:
+  - Mire Wizzrobe Bypass NE
+  - Mire Conveyor Crystal SE
+  - Mire Wizzrobe Bypass EN
+  - Mire Tile Room SW
+  - Mire Conveyor Crystal ES
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 1
+    South: 2
+  candidates:
+  - Mire Conveyor Crystal ES
+  - Mire Wizzrobe Bypass EN
+  cost: East
+  crystal: true
+  reachable:
+  - Mire Wizzrobe Bypass NE
+  - Mire Conveyor Crystal SE
+  - Mire Wizzrobe Bypass EN
+  - Mire Tile Room SW
+  - Mire Conveyor Crystal ES
+- assumptions: {}
+  benefits:
+    East: 2
+    North: 1
+    South: 1
+  candidates:
+  - Mire Conveyor Crystal SE
+  - Mire Tile Room SW
+  cost: South
+  crystal: true
+  reachable:
+  - Mire Wizzrobe Bypass NE
+  - Mire Conveyor Crystal SE
+  - Mire Wizzrobe Bypass EN
+  - Mire Tile Room SW
+  - Mire Conveyor Crystal ES
+Mire Fishbone:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Mire Fishbone SE
+  cost: South
+  crystal: false
+  reachable:
+  - Mire Fishbone E
+  - Mire Fishbone SE
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Mire Fishbone E
+  cost: East
+  crystal: false
+  reachable:
+  - Mire Fishbone E
+  - Mire Fishbone SE
+Mire Left Bridge:
+- assumptions: {}
+  benefits:
+    South: 1
+    Stairs: 1
+  candidates:
+  - Mire Left Bridge S
+  cost: South
+  crystal: false
+  reachable:
+  - Mire Right Bridge SE
+  - Mire Left Bridge Down Stairs
+  - Mire Left Bridge S
+- assumptions: {}
+  benefits:
+    South: 2
+  candidates:
+  - Mire Left Bridge Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Mire Right Bridge SE
+  - Mire Left Bridge Down Stairs
+  - Mire Left Bridge S
+Mire Over Bridge:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Mire Over Bridge W
+  cost: West
+  crystal: false
+  reachable:
+  - Mire Over Bridge W
+  - Mire Over Bridge E
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Mire Over Bridge E
+  cost: East
+  crystal: false
+  reachable:
+  - Mire Over Bridge W
+  - Mire Over Bridge E
+Mire Bent Bridge:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Mire Bent Bridge W
+  cost: West
+  crystal: false
+  reachable:
+  - Mire Bent Bridge SW
+  - Mire Bent Bridge W
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Mire Bent Bridge SW
+  cost: South
+  crystal: false
+  reachable:
+  - Mire Bent Bridge SW
+  - Mire Bent Bridge W
+Mire Ledgehop:
+- assumptions: {}
+  benefits:
+    South: 1
+    West: 2
+  candidates:
+  - Mire Ledgehop NW
+  cost: North
+  crystal: false
+  reachable:
+  - Mire Ledgehop WN
+  - Mire Spikes SW
+  - Mire Spikes WS
+  - Mire Ledgehop NW
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 1
+    West: 1
+  candidates:
+  - Mire Ledgehop WN
+  - Mire Spikes WS
+  cost: West
+  crystal: false
+  reachable:
+  - Mire Ledgehop WN
+  - Mire Spikes SW
+  - Mire Spikes WS
+  - Mire Ledgehop NW
+- assumptions: {}
+  benefits:
+    North: 1
+    West: 2
+  candidates:
+  - Mire Spikes SW
+  cost: South
+  crystal: false
+  reachable:
+  - Mire Ledgehop WN
+  - Mire Spikes WS
+  - Mire Spikes SW
+  - Mire Ledgehop NW
+Mire Cross:
+- assumptions: {}
+  benefits:
+    East: 1
+    South: 2
+  candidates:
+  - Mire Minibridge NE
+  cost: North
+  crystal: false
+  reachable:
+  - Mire Hidden Shooters ES
+  - Mire Hidden Shooters SE
+  - Mire Cross SW
+  - Mire Minibridge NE
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 2
+  candidates:
+  - Mire Hidden Shooters ES
+  cost: East
+  crystal: false
+  reachable:
+  - Mire Hidden Shooters ES
+  - Mire Hidden Shooters SE
+  - Mire Cross SW
+  - Mire Minibridge NE
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 1
+    South: 1
+  candidates:
+  - Mire Hidden Shooters SE
+  - Mire Cross SW
+  cost: South
+  crystal: false
+  reachable:
+  - Mire Hidden Shooters ES
+  - Mire Hidden Shooters SE
+  - Mire Cross SW
+  - Mire Minibridge NE
+Mire Crystal Dead End:
+- assumptions: {}
+  benefits:
+    West: 3
+  candidates:
+  - Mire Crystal Dead End NW
+  cost: North
+  crystal: true
+  reachable:
+  - Mire Lone Shooter WS
+  - Mire Crystal Dead End NW
+  - Mire Failure Bridge W
+  - Mire Map Spot WN
+- assumptions: {}
+  benefits:
+    North: 1
+    West: 2
+  candidates:
+  - Mire Lone Shooter WS
+  - Mire Failure Bridge W
+  - Mire Map Spot WN
+  cost: West
+  crystal: true
+  reachable:
+  - Mire Lone Shooter WS
+  - Mire Crystal Dead End NW
+  - Mire Failure Bridge W
+  - Mire Map Spot WN
+Mire Hub:
+- assumptions: {}
+  benefits:
+    East: 2
+    North: 2
+    South: 1
+    West: 2
+  candidates:
+  - Mire Hub E
+  - Mire Hub Right EN
+  - Mire Hub ES
+  cost: East
+  crystal: true
+  reachable:
+  - Mire Hub WN
+  - Mire Hub NE
+  - Mire Hub SE
+  - Mire Hub E
+  - Mire Hub Top NW
+  - Mire Hub Right EN
+  - Mire Hub WS
+  - Mire Hub ES
+- assumptions: {}
+  benefits:
+    East: 3
+    North: 2
+    South: 1
+    West: 1
+  candidates:
+  - Mire Hub WN
+  - Mire Hub WS
+  cost: West
+  crystal: true
+  reachable:
+  - Mire Hub WN
+  - Mire Hub NE
+  - Mire Hub SE
+  - Mire Hub E
+  - Mire Hub Top NW
+  - Mire Hub Right EN
+  - Mire Hub WS
+  - Mire Hub ES
+- assumptions: {}
+  benefits:
+    East: 3
+    North: 1
+    South: 1
+    West: 2
+  candidates:
+  - Mire Hub Top NW
+  - Mire Hub NE
+  cost: North
+  crystal: true
+  reachable:
+  - Mire Hub WN
+  - Mire Hub NE
+  - Mire Hub SE
+  - Mire Hub E
+  - Mire Hub Top NW
+  - Mire Hub Right EN
+  - Mire Hub WS
+  - Mire Hub ES
+- assumptions: {}
+  benefits:
+    East: 3
+    North: 2
+    West: 2
+  candidates:
+  - Mire Hub SE
+  cost: South
+  crystal: true
+  reachable:
+  - Mire Hub WN
+  - Mire Hub NE
+  - Mire Hub SE
+  - Mire Hub E
+  - Mire Hub Top NW
+  - Mire Hub Right EN
+  - Mire Hub WS
+  - Mire Hub ES
+Mire 2:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Mire 2 NE
+  cost: North
+  crystal: false
+  reachable:
+  - Mire 2 Up Stairs
+  - Mire 2 NE
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Mire 2 Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Mire 2 Up Stairs
+  - Mire 2 NE
+Mire Lobby:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Mire Post-Gap Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Mire Post-Gap Down Stairs
+  - Mire Lobby S
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Mire Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - Mire Post-Gap Down Stairs
+  - Mire Lobby S
+Ice Antechamber:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Ice Antechamber NE
+  cost: North
+  crystal: false
+  reachable:
+  - Ice Antechamber NE
+Ice Refill:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Ice Refill WS
+  cost: West
+  crystal: false
+  reachable:
+  - Ice Refill WS
+Ice Many Pots:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Ice Many Pots WS
+  cost: West
+  crystal: false
+  reachable:
+  - Ice Many Pots SW
+  - Ice Many Pots WS
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Ice Many Pots SW
+  cost: South
+  crystal: false
+  reachable:
+  - Ice Many Pots SW
+  - Ice Many Pots WS
+Ice Catwalk:
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Ice Catwalk NW
+  cost: North
+  crystal: false
+  reachable:
+  - Ice Catwalk WN
+  - Ice Catwalk NW
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Ice Catwalk WN
+  cost: West
+  crystal: false
+  reachable:
+  - Ice Catwalk WN
+  - Ice Catwalk NW
+Iced T:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Iced T EN
+  cost: East
+  crystal: false
+  reachable:
+  - Iced T Up Stairs
+  - Iced T EN
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Iced T Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Iced T Up Stairs
+  - Iced T EN
+Ice Lonely Freezor:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Ice Lonely Freezor Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Ice Lonely Freezor Down Stairs
+  - Ice Lonely Freezor NE
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Ice Lonely Freezor NE
+  cost: North
+  crystal: false
+  reachable:
+  - Ice Lonely Freezor Down Stairs
+  - Ice Lonely Freezor NE
+Ice Hookshot Balcony:
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Ice Spikeball Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Ice Hookshot Ledge WN
+  - Ice Spikeball Up Stairs
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Ice Hookshot Ledge WN
+  cost: West
+  crystal: false
+  reachable:
+  - Ice Hookshot Ledge WN
+  - Ice Spikeball Up Stairs
+Ice Hammer Block:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Ice Hammer Block Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Ice Hammer Block Down Stairs
+  - Ice Tongue Pull Up Ladder
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Ice Tongue Pull Up Ladder
+  cost: North
+  crystal: false
+  reachable:
+  - Ice Hammer Block Down Stairs
+  - Ice Tongue Pull Up Ladder
+Ice Spike Room:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+    West: 1
+  candidates:
+  - Ice Spike Room Up Stairs
+  - Ice Spike Room Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Ice Spike Room Up Stairs
+  - Ice Spike Room WS
+  - Ice Spike Room Down Stairs
+- assumptions: {}
+  benefits:
+    Stairs: 2
+  candidates:
+  - Ice Spike Room WS
+  cost: West
+  crystal: false
+  reachable:
+  - Ice Spike Room Up Stairs
+  - Ice Spike Room WS
+  - Ice Spike Room Down Stairs
+Ice Anti-Fairy:
+- assumptions:
+    Ice Spike Cross SE: Ice Freezors Up Ladder
+  benefits:
+    East: 4
+    South: 2
+    Stairs: 2
+  candidates:
+  - Ice Spike Cross SE
+  - Ice Firebar Down Ladder
+  cost: South
+  crystal: true
+  reachable:
+  - Ice Crystal Right ES
+  - Ice Spike Cross SE
+  - Ice Spike Cross ES
+  - Ice Firebar Down Ladder
+  - Ice Switch Room ES
+  - Ice Anti-Fairy Up Stairs
+  - Ice Freezors Up Ladder
+  - Ice Tall Hint SE
+  - Ice Switch Room SE
+  - Ice Backwards Room Down Stairs
+  - Ice Tall Hint EN
+- assumptions:
+    Ice Spike Cross SE: Ice Freezors Up Ladder
+  benefits:
+    East: 3
+    South: 3
+    Stairs: 2
+  candidates:
+  - Ice Spike Cross ES
+  cost: East
+  crystal: true
+  reachable:
+  - Ice Crystal Right ES
+  - Ice Spike Cross SE
+  - Ice Spike Cross ES
+  - Ice Firebar Down Ladder
+  - Ice Switch Room ES
+  - Ice Anti-Fairy Up Stairs
+  - Ice Freezors Up Ladder
+  - Ice Tall Hint SE
+  - Ice Switch Room SE
+  - Ice Backwards Room Down Stairs
+  - Ice Tall Hint EN
+Ice Pengator Trap:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Ice Pengator Trap NE
+  cost: North
+  crystal: false
+  reachable:
+  - Ice Pengator Trap Up Stairs
+  - Ice Pengator Trap NE
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Ice Pengator Trap Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Ice Pengator Trap Up Stairs
+  - Ice Pengator Trap NE
+Ice Bomb Jump Catwalk:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Ice Narrow Corridor Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Ice Bomb Jump NW
+  - Ice Narrow Corridor Down Stairs
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Ice Bomb Jump NW
+  cost: North
+  crystal: false
+  reachable:
+  - Ice Bomb Jump NW
+  - Ice Narrow Corridor Down Stairs
+Ice Bomb Drop:
+- children:
+  - assumptions: {}
+    benefits:
+      East: 1
+      North: 0
+      Stairs: 1
+    candidates:
+    - Ice Cross Bottom SE
+    cost: South
+    crystal: false
+    reachable:
+    - Ice Floor Switch Up Stairs
+    - Ice Cross Right ES
+    - Ice Cross Bottom SE
+  - assumptions: {}
+    benefits:
+      South: 2
+      Stairs: 0
+    candidates:
+    - Ice Cross Right ES
+    cost: East
+    crystal: false
+    reachable:
+    - Ice Cross Right ES
+    - Ice Cross Bottom SE
+    - Ice Conveyor SW
+  join: and
+- children:
+  - assumptions: {}
+    benefits:
+      North: 0
+      South: 1
+      West: 0
+    candidates:
+    - Ice Floor Switch Up Stairs
+    cost: Stairs
+    crystal: false
+    reachable:
+    - Ice Floor Switch Up Stairs
+    - Ice Cross Bottom SE
+  - assumptions: {}
+    benefits:
+      South: 2
+      Stairs: 0
+    candidates:
+    - Ice Cross Right ES
+    cost: East
+    crystal: false
+    reachable:
+    - Ice Cross Right ES
+    - Ice Cross Bottom SE
+    - Ice Conveyor SW
+  join: and
+Ice Big Key:
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Ice Big Key Down Ladder
+  cost: South
+  crystal: false
+  reachable:
+  - Ice Pengator Switch WS
+  - Ice Big Key Down Ladder
+Ice Compass Room:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Ice Compass Room NE
+  cost: North
+  crystal: false
+  reachable:
+  - Ice Compass Room NE
+Ice Jelly Key:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Ice Jelly Key Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Ice Lobby SE
+  - Ice Jelly Key Down Stairs
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Ice Lobby SE
+  cost: South
+  crystal: false
+  reachable:
+  - Ice Lobby SE
+  - Ice Jelly Key Down Stairs
+Thieves Big Chest Room:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Thieves Conveyor Bridge EN
+  - Thieves Conveyor Bridge ES
+  cost: East
+  crystal: false
+  reachable:
+  - Thieves Conveyor Bridge EN
+  - Thieves Conveyor Bridge ES
+Thieves Basement Block:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+    West: 1
+  candidates:
+  - Thieves Basement Block WN
+  - Thieves Lonely Zazak WS
+  cost: West
+  crystal: false
+  reachable:
+  - Thieves Basement Block WN
+  - Thieves Lonely Zazak WS
+  - Thieves Basement Block Up Stairs
+- assumptions: {}
+  benefits:
+    West: 2
+  candidates:
+  - Thieves Basement Block Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Thieves Basement Block WN
+  - Thieves Lonely Zazak WS
+  - Thieves Basement Block Up Stairs
+Thieves Attic Window:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Thieves Cricket Hall Right Edge
+  cost: West
+  crystal: false
+  reachable:
+  - Thieves Cricket Hall Right Edge
+Thieves Attic:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Thieves Cricket Hall Left Edge
+  cost: East
+  crystal: false
+  reachable:
+  - Thieves Cricket Hall Left Edge
+  - Thieves Attic Down Stairs
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Thieves Attic Down Stairs
+  cost: Stairs
+  crystal: true
+  reachable:
+  - Thieves Cricket Hall Left Edge
+  - Thieves Attic Down Stairs
+Thieves Spike Switch:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Thieves Spike Switch Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Thieves Spike Switch SW
+  - Thieves Spike Switch Up Stairs
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Thieves Spike Switch SW
+  cost: South
+  crystal: false
+  reachable:
+  - Thieves Spike Switch SW
+  - Thieves Spike Switch Up Stairs
+Thieves Hellway:
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 1
+  candidates:
+  - Thieves Triple Bypass EN
+  - Thieves Spike Track ES
+  cost: East
+  crystal: true
+  reachable:
+  - Thieves Triple Bypass EN
+  - Thieves Spike Track ES
+  - Thieves Hellway NW
+- assumptions: {}
+  benefits:
+    East: 2
+  candidates:
+  - Thieves Hellway NW
+  cost: North
+  crystal: true
+  reachable:
+  - Thieves Triple Bypass EN
+  - Thieves Spike Track ES
+  - Thieves Hellway NW
+Thieves Conveyor Maze:
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 1
+    West: 2
+  candidates:
+  - Thieves Conveyor Maze Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Thieves Hallway NE
+  - Thieves Pot Alcove Mid WS
+  - Thieves Conveyor Maze WN
+  - Thieves Hallway SE
+  - Thieves Conveyor Maze Down Stairs
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 1
+    Stairs: 1
+    West: 1
+  candidates:
+  - Thieves Conveyor Maze WN
+  - Thieves Pot Alcove Mid WS
+  cost: West
+  crystal: false
+  reachable:
+  - Thieves Hallway NE
+  - Thieves Pot Alcove Mid WS
+  - Thieves Conveyor Maze WN
+  - Thieves Hallway SE
+  - Thieves Conveyor Maze Down Stairs
+- assumptions: {}
+  benefits:
+    South: 1
+    Stairs: 1
+    West: 2
+  candidates:
+  - Thieves Hallway NE
+  cost: North
+  crystal: false
+  reachable:
+  - Thieves Hallway NE
+  - Thieves Pot Alcove Mid WS
+  - Thieves Conveyor Maze WN
+  - Thieves Hallway SE
+  - Thieves Conveyor Maze Down Stairs
+- assumptions: {}
+  benefits:
+    North: 1
+    Stairs: 1
+    West: 2
+  candidates:
+  - Thieves Hallway SE
+  cost: South
+  crystal: false
+  reachable:
+  - Thieves Hallway NE
+  - Thieves Pot Alcove Mid WS
+  - Thieves Conveyor Maze WN
+  - Thieves Hallway SE
+  - Thieves Conveyor Maze Down Stairs
+Thieves Pot Alcove Bottom:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Thieves Pot Alcove Bottom SW
+  cost: South
+  crystal: false
+  reachable:
+  - Thieves Pot Alcove Bottom SW
+Thieves Boss:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Thieves Boss SE
+  cost: South
+  crystal: false
+  reachable:
+  - Thieves Boss SE
+Thieves Big Chest Nook:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Thieves Big Chest Nook ES Edge
+  cost: East
+  crystal: false
+  reachable:
+  - Thieves Big Chest Nook ES Edge
+Thieves Compass Room:
+- assumptions: {}
+  benefits:
+    North: 2
+    West: 1
+  candidates:
+  - Thieves Compass Room WS Edge
+  - Thieves Compass Room W
+  cost: West
+  crystal: false
+  reachable:
+  - Thieves Compass Room NW Edge
+  - Thieves Compass Room N Edge
+  - Thieves Compass Room WS Edge
+  - Thieves Compass Room W
+- assumptions: {}
+  benefits:
+    North: 1
+    West: 2
+  candidates:
+  - Thieves Compass Room NW Edge
+  - Thieves Compass Room N Edge
+  cost: North
+  crystal: false
+  reachable:
+  - Thieves Compass Room W
+  - Thieves Compass Room NW Edge
+  - Thieves Compass Room WS Edge
+  - Thieves Compass Room N Edge
+Thieves BK Corner:
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 2
+    West: 3
+  candidates:
+  - Thieves Rail Ledge NW
+  cost: North
+  crystal: false
+  reachable:
+  - Thieves BK Corner WN Edge
+  - Thieves BK Corner SW Edge
+  - Thieves Rail Ledge W
+  - Thieves BK Corner S Edge
+  - Thieves BK Corner NE
+  - Thieves Rail Ledge NW
+  - Thieves BK Corner WS Edge
+- assumptions: {}
+  benefits:
+    North: 2
+    South: 2
+    West: 2
+  candidates:
+  - Thieves Rail Ledge W
+  cost: West
+  crystal: false
+  reachable:
+  - Thieves BK Corner WN Edge
+  - Thieves BK Corner SW Edge
+  - Thieves Rail Ledge W
+  - Thieves BK Corner S Edge
+  - Thieves BK Corner NE
+  - Thieves Rail Ledge NW
+  - Thieves BK Corner WS Edge
+Thieves Ambush:
+- assumptions: {}
+  benefits:
+    East: 2
+    South: 2
+  candidates:
+  - Thieves Ambush E
+  - Thieves Ambush ES Edge
+  - Thieves Ambush EN Edge
+  cost: East
+  crystal: false
+  reachable:
+  - Thieves Ambush EN Edge
+  - Thieves Ambush E
+  - Thieves Ambush SE Edge
+  - Thieves Ambush S Edge
+  - Thieves Ambush ES Edge
+- assumptions: {}
+  benefits:
+    East: 3
+    South: 1
+  candidates:
+  - Thieves Ambush S Edge
+  - Thieves Ambush SE Edge
+  cost: South
+  crystal: false
+  reachable:
+  - Thieves Ambush EN Edge
+  - Thieves Ambush E
+  - Thieves Ambush SE Edge
+  - Thieves Ambush S Edge
+  - Thieves Ambush ES Edge
+Thieves Lobby:
+- assumptions: {}
+  benefits:
+    North: 2
+    South: 1
+  candidates:
+  - Thieves Lobby E
+  cost: East
+  crystal: false
+  reachable:
+  - Thieves Lobby N Edge
+  - Thieves Lobby E
+  - Thieves Lobby NE Edge
+  - Thieves Lobby S
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 1
+    South: 1
+  candidates:
+  - Thieves Lobby NE Edge
+  - Thieves Lobby N Edge
+  cost: North
+  crystal: false
+  reachable:
+  - Thieves Lobby NE Edge
+  - Thieves Lobby E
+  - Thieves Lobby S
+  - Thieves Lobby N Edge
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 2
+  candidates:
+  - Thieves Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - Thieves Lobby N Edge
+  - Thieves Lobby E
+  - Thieves Lobby NE Edge
+  - Thieves Lobby S
+Skull Boss:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Skull Spike Corner SW
+  cost: South
+  crystal: false
+  reachable:
+  - Skull Spike Corner SW
+Skull Star Pits:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Skull Vines NW
+  cost: North
+  crystal: false
+  reachable:
+  - Skull Vines NW
+  - Skull Star Pits SW
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Skull Star Pits SW
+  cost: South
+  crystal: false
+  reachable:
+  - Skull Vines NW
+  - Skull Star Pits SW
+Skull 3 Lobby:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Skull 3 Lobby SW
+  cost: South
+  crystal: false
+  reachable:
+  - Skull 3 Lobby NW
+  - Skull 3 Lobby SW
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Skull 3 Lobby NW
+  cost: North
+  crystal: false
+  reachable:
+  - Skull 3 Lobby NW
+  - Skull 3 Lobby SW
+Skull 2 West Lobby:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Skull 2 West Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - Skull Small Hall ES
+  - Skull 2 West Lobby S
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Skull Small Hall ES
+  cost: East
+  crystal: false
+  reachable:
+  - Skull Small Hall ES
+  - Skull 2 West Lobby S
+Skull 2 East Lobby:
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Skull 2 East Lobby SW
+  cost: South
+  crystal: false
+  reachable:
+  - Skull 2 East Lobby WS
+  - Skull 2 East Lobby SW
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Skull 2 East Lobby WS
+  cost: West
+  crystal: false
+  reachable:
+  - Skull 2 East Lobby WS
+  - Skull 2 East Lobby SW
+Skull Compass Room:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Skull Compass Room ES
+  cost: East
+  crystal: false
+  reachable:
+  - Skull Compass Room NE
+  - Skull Compass Room ES
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Skull Compass Room NE
+  cost: North
+  crystal: false
+  reachable:
+  - Skull Compass Room NE
+  - Skull Compass Room ES
+Skull Pot Prison:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Skull Pot Prison SE
+  cost: South
+  crystal: false
+  reachable:
+  - Skull Pot Prison SE
+  - Skull Pot Prison ES
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Skull Pot Prison ES
+  cost: East
+  crystal: false
+  reachable:
+  - Skull Pot Prison SE
+  - Skull Pot Prison ES
+Skull Pinball:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Skull Pinball WS
+  cost: West
+  crystal: false
+  reachable:
+  - Skull Pinball WS
+  - Skull Pinball NE
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Skull Pinball NE
+  cost: North
+  crystal: false
+  reachable:
+  - Skull Pinball NE
+  - Skull Pinball WS
+Skull 1 Lobby:
+- assumptions: {}
+  benefits:
+    South: 1
+    West: 1
+  candidates:
+  - Skull Map Room SE
+  - Skull 1 Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - Skull Map Room SE
+  - Skull 1 Lobby WS
+  - Skull 1 Lobby S
+- assumptions: {}
+  benefits:
+    South: 2
+  candidates:
+  - Skull 1 Lobby WS
+  cost: West
+  crystal: false
+  reachable:
+  - Skull Map Room SE
+  - Skull 1 Lobby WS
+  - Skull 1 Lobby S
+Swamp Boss:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Swamp Boss SW
+  cost: South
+  crystal: false
+  reachable:
+  - Swamp Boss SW
+Swamp C:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Swamp T NW
+  cost: North
+  crystal: false
+  reachable:
+  - Swamp T NW
+  - Swamp C Down Stairs
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Swamp C Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Swamp T NW
+  - Swamp C Down Stairs
+Swamp Behind Waterfall:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Swamp Behind Waterfall Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Swamp Waterfall Room SW
+  - Swamp Behind Waterfall Up Stairs
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Swamp Waterfall Room SW
+  cost: South
+  crystal: false
+  reachable:
+  - Swamp Waterfall Room SW
+  - Swamp Behind Waterfall Up Stairs
+Swamp Basement Shallows:
+- assumptions: {}
+  benefits:
+    North: 1
+    Stairs: 2
+  candidates:
+  - Swamp Drain Right Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Swamp Drain Right Up Stairs
+  - Swamp Drain Left Up Stairs
+  - Swamp Flooded Room Up Stairs
+  - Swamp Basement Shallows NW
+Swamp Left Elbow:
+- assumptions: {}
+  benefits:
+    South: 1
+    Stairs: 2
+  candidates:
+  - Swamp Right Elbow Down Stairs
+  - Swamp Left Elbow Down Stairs
+  - Swamp Push Statue Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Swamp Right Elbow Down Stairs
+  - Swamp Left Elbow Down Stairs
+  - Swamp Push Statue Down Stairs
+  - Swamp Push Statue S
+- assumptions: {}
+  benefits:
+    Stairs: 3
+  candidates:
+  - Swamp Push Statue S
+  cost: South
+  crystal: false
+  reachable:
+  - Swamp Right Elbow Down Stairs
+  - Swamp Left Elbow Down Stairs
+  - Swamp Push Statue Down Stairs
+  - Swamp Push Statue S
+Swamp Attic:
+- assumptions: {}
+  benefits:
+    East: 2
+    Stairs: 1
+  candidates:
+  - Swamp Attic Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Swamp Barrier EN
+  - Swamp West Shallows ES
+  - Swamp Attic Down Stairs
+  - Swamp West Block Path Up Stairs
+Swamp Big Key Ledge:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Swamp Big Key Ledge WN
+  cost: West
+  crystal: false
+  reachable:
+  - Swamp Big Key Ledge WN
+Swamp Crystal Switch Inner:
+- assumptions: {}
+  benefits:
+    East: 1
+    West: 1
+  candidates:
+  - Swamp Crystal Switch EN
+  cost: East
+  crystal: false
+  reachable:
+  - Swamp Trench 2 Departure WS
+  - Swamp Trench 2 Pots ES
+  - Swamp Crystal Switch EN
+Swamp Compass Donut:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Swamp Donut Top N
+  cost: North
+  crystal: false
+  reachable:
+  - Swamp Donut Top N
+Swamp Hub:
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 1
+    South: 1
+    West: 1
+  candidates:
+  - Swamp Hub WS
+  - Swamp Hub WN
+  cost: West
+  crystal: false
+  reachable:
+  - Swamp Hub S
+  - Swamp Hub North Ledge N
+  - Swamp Hub WS
+  - Swamp Hub WN
+  - Swamp Hub ES
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 1
+    West: 2
+  candidates:
+  - Swamp Hub S
+  cost: South
+  crystal: false
+  reachable:
+  - Swamp Hub S
+  - Swamp Hub North Ledge N
+  - Swamp Hub WS
+  - Swamp Hub WN
+  - Swamp Hub ES
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 1
+    West: 2
+  candidates:
+  - Swamp Hub ES
+  cost: East
+  crystal: false
+  reachable:
+  - Swamp Hub S
+  - Swamp Hub North Ledge N
+  - Swamp Hub WS
+  - Swamp Hub WN
+  - Swamp Hub ES
+- assumptions: {}
+  benefits:
+    East: 1
+    South: 1
+    West: 2
+  candidates:
+  - Swamp Hub North Ledge N
+  cost: North
+  crystal: false
+  reachable:
+  - Swamp Hub S
+  - Swamp Hub North Ledge N
+  - Swamp Hub WS
+  - Swamp Hub WN
+  - Swamp Hub ES
+Swamp Hub Dead Ledge:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Swamp Hub Dead Ledge EN
+  cost: East
+  crystal: false
+  reachable:
+  - Swamp Hub Dead Ledge EN
+Swamp Hammer Switch:
+- assumptions: {}
+  benefits:
+    East: 1
+    West: 1
+  candidates:
+  - Swamp Hammer Switch WN
+  - Swamp Trench 1 Departure WS
+  cost: West
+  crystal: false
+  reachable:
+  - Swamp Trench 1 Approach ES
+  - Swamp Hammer Switch WN
+  - Swamp Trench 1 Departure WS
+- assumptions: {}
+  benefits:
+    West: 2
+  candidates:
+  - Swamp Trench 1 Approach ES
+  cost: East
+  crystal: false
+  reachable:
+  - Swamp Trench 1 Approach ES
+  - Swamp Hammer Switch WN
+  - Swamp Trench 1 Departure WS
+Swamp Map Ledge:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Swamp Map Ledge EN
+  cost: East
+  crystal: false
+  reachable:
+  - Swamp Map Ledge EN
+Swamp Pot Row:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+    West: 1
+  candidates:
+  - Swamp Pot Row WS
+  - Swamp Pot Row WN
+  cost: West
+  crystal: false
+  reachable:
+  - Swamp Pot Row Up Stairs
+  - Swamp Pot Row WS
+  - Swamp Pot Row WN
+- assumptions: {}
+  benefits:
+    West: 2
+  candidates:
+  - Swamp Pot Row Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Swamp Pot Row Up Stairs
+  - Swamp Pot Row WS
+  - Swamp Pot Row WN
+Swamp Entrance:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Swamp Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - Swamp Entrance Down Stairs
+  - Swamp Lobby S
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Swamp Entrance Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Swamp Lobby S
+  - Swamp Entrance Down Stairs
+PoD Boss:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - PoD Boss SE
+  cost: South
+  crystal: false
+  reachable:
+  - PoD Boss SE
+PoD Callback:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - PoD Dark Pegs Up Ladder
+  cost: North
+  crystal: false
+  reachable:
+  - PoD Dark Pegs Up Ladder
+  - PoD Dark Alley NE
+PoD Bow Statue Left:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - PoD Bow Statue Down Ladder
+  - PoD Mimics 2 SW
+  cost: South
+  crystal: false
+  reachable:
+  - PoD Bow Statue Down Ladder
+  - PoD Mimics 2 SW
+PoD Compass Room:
+- assumptions: {}
+  benefits:
+    South: 1
+    Stairs: 2
+    West: 1
+  candidates:
+  - PoD Falling Bridge SW
+  - PoD Harmless Hellway SE
+  cost: South
+  crystal: false
+  reachable:
+  - PoD Falling Bridge WN
+  - PoD Harmless Hellway SE
+  - PoD Falling Bridge SW
+  - PoD Compass Room E Down Stairs
+  - PoD Compass Room W Down Stairs
+- assumptions: {}
+  benefits:
+    South: 2
+    Stairs: 1
+    West: 1
+  candidates:
+  - PoD Compass Room E Down Stairs
+  - PoD Compass Room W Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - PoD Falling Bridge WN
+  - PoD Harmless Hellway SE
+  - PoD Falling Bridge SW
+  - PoD Compass Room E Down Stairs
+  - PoD Compass Room W Down Stairs
+- assumptions: {}
+  benefits:
+    South: 2
+    Stairs: 2
+  candidates:
+  - PoD Falling Bridge WN
+  cost: West
+  crystal: false
+  reachable:
+  - PoD Falling Bridge WN
+  - PoD Harmless Hellway SE
+  - PoD Falling Bridge SW
+  - PoD Compass Room E Down Stairs
+  - PoD Compass Room W Down Stairs
+PoD Dark Basement:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - PoD Dark Basement W Up Stairs
+  - PoD Dark Basement E Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - PoD Dark Basement W Up Stairs
+  - PoD Dark Basement E Up Stairs
+PoD Big Chest Balcony:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - PoD Big Chest Balcony W
+  cost: West
+  crystal: false
+  reachable:
+  - PoD Big Chest Balcony W
+PoD Dark Maze:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - PoD Dark Maze E
+  - PoD Dark Maze EN
+  cost: East
+  crystal: false
+  reachable:
+  - PoD Dark Maze E
+  - PoD Dark Maze EN
+PoD Conveyor:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - PoD Conveyor SW
+  cost: South
+  crystal: false
+  reachable:
+  - PoD Conveyor SW
+  - PoD Conveyor North Stairs
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - PoD Conveyor North Stairs
+  cost: North
+  crystal: false
+  reachable:
+  - PoD Conveyor SW
+  - PoD Conveyor North Stairs
+PoD Fairy Pool:
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 1
+    West: 1
+  candidates:
+  - PoD Map Balcony WS
+  cost: West
+  crystal: false
+  reachable:
+  - PoD Map Balcony South Stairs
+  - PoD Map Balcony WS
+  - PoD Sexy Statue NW
+  - PoD Sexy Statue W
+- assumptions: {}
+  benefits:
+    North: 1
+    West: 2
+  candidates:
+  - PoD Map Balcony South Stairs
+  cost: South
+  crystal: false
+  reachable:
+  - PoD Map Balcony WS
+  - PoD Map Balcony South Stairs
+  - PoD Sexy Statue NW
+  - PoD Sexy Statue W
+PoD Arena Ledge:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - PoD Arena Ledge ES
+  cost: East
+  crystal: false
+  reachable:
+  - PoD Arena Ledge ES
+PoD Arena Bridge:
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 2
+    South: 1
+  candidates:
+  - PoD Arena Bridge SE
+  - PoD Arena Main SW
+  cost: South
+  crystal: false
+  reachable:
+  - PoD Arena Main NE
+  - PoD Arena Crystals E
+  - PoD Arena Main NW
+  - PoD Arena Main SW
+  - PoD Arena Bridge SE
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 1
+    South: 2
+  candidates:
+  - PoD Arena Main NW
+  - PoD Arena Main NE
+  cost: North
+  crystal: false
+  reachable:
+  - PoD Arena Main NE
+  - PoD Arena Crystals E
+  - PoD Arena Main NW
+  - PoD Arena Main SW
+  - PoD Arena Bridge SE
+- assumptions: {}
+  benefits:
+    North: 2
+    South: 2
+  candidates:
+  - PoD Arena Crystals E
+  cost: East
+  crystal: true
+  reachable:
+  - PoD Arena Main NE
+  - PoD Arena Crystals E
+  - PoD Arena Main NW
+  - PoD Arena Main SW
+  - PoD Arena Bridge SE
+PoD Basement Ledge:
+- assumptions:
+    PoD Warp Room Up Stairs: PoD Big Key Landing Down Stairs
+  benefits:
+    North: 2
+    South: 1
+    Stairs: 1
+  candidates:
+  - PoD Pit Room NW
+  - PoD Pit Room NE
+  cost: North
+  crystal: false
+  reachable:
+  - PoD Pit Room S
+  - PoD Pit Room NE
+  - PoD Warp Room Up Stairs
+  - PoD Mimics 1 NW
+  - PoD Pit Room NW
+  - PoD Big Key Landing Down Stairs
+  - PoD Basement Ledge Up Stairs
+- assumptions:
+    PoD Warp Room Up Stairs: PoD Big Key Landing Down Stairs
+  benefits:
+    North: 3
+    Stairs: 1
+  candidates:
+  - PoD Pit Room S
+  cost: South
+  crystal: false
+  reachable:
+  - PoD Pit Room S
+  - PoD Pit Room NE
+  - PoD Warp Room Up Stairs
+  - PoD Mimics 1 NW
+  - PoD Pit Room NW
+  - PoD Big Key Landing Down Stairs
+  - PoD Basement Ledge Up Stairs
+- assumptions:
+    PoD Mimics 1 NW: PoD Pit Room S
+  benefits:
+    North: 2
+    South: 0
+    Stairs: 2
+  candidates:
+  - PoD Big Key Landing Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - PoD Pit Room S
+  - PoD Pit Room NE
+  - PoD Warp Room Up Stairs
+  - PoD Mimics 1 NW
+  - PoD Pit Room NW
+  - PoD Big Key Landing Down Stairs
+  - PoD Basement Ledge Up Stairs
+PoD Shooter Room:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - PoD Shooter Room Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - PoD Shooter Room Up Stairs
+PoD Left Cage:
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 1
+    Stairs: 1
+  candidates:
+  - PoD Left Cage Down Stairs
+  - PoD Middle Cage Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - PoD Lobby S
+  - PoD Middle Cage N
+  - PoD Left Cage Down Stairs
+  - PoD Middle Cage Down Stairs
+- assumptions: {}
+  benefits:
+    South: 1
+    Stairs: 2
+  candidates:
+  - PoD Middle Cage N
+  cost: North
+  crystal: false
+  reachable:
+  - PoD Lobby S
+  - PoD Left Cage Down Stairs
+  - PoD Middle Cage Down Stairs
+  - PoD Middle Cage N
+- assumptions: {}
+  benefits:
+    North: 1
+    Stairs: 2
+  candidates:
+  - PoD Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - PoD Lobby S
+  - PoD Left Cage Down Stairs
+  - PoD Middle Cage Down Stairs
+  - PoD Middle Cage N
+Tower Agahnim 1:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Tower Agahnim 1 SW
+  cost: South
+  crystal: false
+  reachable:
+  - Tower Agahnim 1 SW
+Tower Altar:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Tower Altar NW
+  cost: North
+  crystal: false
+  reachable:
+  - Tower Altar NW
+  - Tower Antechamber South Stairs
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Tower Antechamber South Stairs
+  cost: South
+  crystal: false
+  reachable:
+  - Tower Antechamber South Stairs
+  - Tower Altar NW
+Tower Catwalk:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Tower Catwalk North Stairs
+  cost: North
+  crystal: false
+  reachable:
+  - Tower Catwalk North Stairs
+  - Tower Push Statue Down Stairs
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Tower Push Statue Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Tower Catwalk North Stairs
+  - Tower Push Statue Down Stairs
+Tower Circle of Pots:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Tower Red Spears Down Stairs
+  - Tower Pacifist Run Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Tower Red Spears Down Stairs
+  - Tower Pacifist Run Up Stairs
+Tower Dark Archers:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Tower Dark Archers Up Stairs
+  - Tower Dual Statues Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Tower Dark Archers Up Stairs
+  - Tower Dual Statues Down Stairs
+Tower Dark Chargers:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Tower Dark Chargers Up Stairs
+  - Tower Lone Statue Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Tower Dark Chargers Up Stairs
+  - Tower Lone Statue Down Stairs
+Tower Gold Knights:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Tower Room 03 Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Tower Lobby S
+  - Tower Room 03 Up Stairs
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Tower Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - Tower Lobby S
+  - Tower Room 03 Up Stairs
+Hera 4F:
+- assumptions: {}
+  benefits:
+    South: 1
+    Stairs: 9
+  candidates:
+  - Hera Boss Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Hera Lobby Down Stairs
+  - Hera Startile Wide Up Stairs
+  - Hera Lobby Up Stairs
+  - Hera 4F Down Stairs
+  - Hera Beetles Down Stairs
+  - Hera 4F Up Stairs
+  - Hera 5F Down Stairs
+  - Hera Boss Down Stairs
+  - Hera 5F Up Stairs
+  - Hera Lobby Key Stairs
+  - Hera Lobby S
+Hera Tile Room:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Hera Tile Room Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Hera Tile Room Up Stairs
+Hera Basement Cage:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Hera Basement Cage Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Hera Basement Cage Up Stairs
+Desert Boss:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Desert Boss SW
+  cost: South
+  crystal: false
+  reachable:
+  - Desert Boss SW
+Desert Tiles 2:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Desert Wall Slide NW
+  cost: North
+  crystal: false
+  reachable:
+  - Desert Tiles 2 SE
+  - Desert Wall Slide NW
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Desert Tiles 2 SE
+  cost: South
+  crystal: false
+  reachable:
+  - Desert Tiles 2 SE
+  - Desert Wall Slide NW
+Desert Beamos Hall:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Desert Beamos Hall NE
+  cost: North
+  crystal: false
+  reachable:
+  - Desert Beamos Hall NE
+  - Desert Bridge Down Stairs
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Desert Bridge Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Desert Beamos Hall NE
+  - Desert Bridge Down Stairs
+Desert Back Lobby:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Desert Tiles 1 Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Desert Back Lobby S
+  - Desert Tiles 1 Up Stairs
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Desert Back Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - Desert Tiles 1 Up Stairs
+  - Desert Back Lobby S
+Desert Fairy Fountain:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Desert West S
+  cost: South
+  crystal: false
+  reachable:
+  - Desert West S
+  - Desert West Wing N Edge
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Desert West Wing N Edge
+  cost: North
+  crystal: false
+  reachable:
+  - Desert West S
+  - Desert West Wing N Edge
+Desert Big Chest Room:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Desert Sandworm Corner E Edge
+  cost: East
+  crystal: false
+  reachable:
+  - Desert Sandworm Corner S Edge
+  - Desert Sandworm Corner E Edge
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Desert Sandworm Corner S Edge
+  cost: South
+  crystal: false
+  reachable:
+  - Desert Sandworm Corner S Edge
+  - Desert Sandworm Corner E Edge
+Desert Map Room:
+- assumptions: {}
+  benefits:
+    South: 2
+    West: 1
+  candidates:
+  - Desert North Hall E Edge
+  cost: East
+  crystal: false
+  reachable:
+  - Desert North Hall SW Edge
+  - Desert North Hall E Edge
+  - Desert North Hall W Edge
+  - Desert North Hall SE Edge
+- assumptions: {}
+  benefits:
+    East: 1
+    South: 2
+  candidates:
+  - Desert North Hall W Edge
+  cost: West
+  crystal: false
+  reachable:
+  - Desert North Hall SW Edge
+  - Desert North Hall E Edge
+  - Desert North Hall SE Edge
+  - Desert North Hall W Edge
+- assumptions: {}
+  benefits:
+    East: 1
+    South: 1
+    West: 1
+  candidates:
+  - Desert North Hall SW Edge
+  - Desert North Hall SE Edge
+  cost: South
+  crystal: false
+  reachable:
+  - Desert North Hall SW Edge
+  - Desert North Hall E Edge
+  - Desert North Hall SE Edge
+  - Desert North Hall W Edge
+Desert Arrow Pot Corner:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Desert Arrow Pot Corner W Edge
+  cost: West
+  crystal: false
+  reachable:
+  - Desert Arrow Pot Corner S Edge
+  - Desert Arrow Pot Corner W Edge
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Desert Arrow Pot Corner S Edge
+  cost: South
+  crystal: false
+  reachable:
+  - Desert Arrow Pot Corner S Edge
+  - Desert Arrow Pot Corner W Edge
+Desert Cannonball:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Desert Cannonball S
+  cost: South
+  crystal: false
+  reachable:
+  - Desert Cannonball S
+Desert Compass Room:
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 1
+    West: 1
+  candidates:
+  - Desert East Wing N Edge
+  - Desert Compass NE
+  cost: North
+  crystal: false
+  reachable:
+  - Desert East Lobby S
+  - Desert East Wing W Edge
+  - Desert East Wing N Edge
+  - Desert Compass NE
+- assumptions: {}
+  benefits:
+    North: 2
+    South: 1
+  candidates:
+  - Desert East Wing W Edge
+  cost: West
+  crystal: false
+  reachable:
+  - Desert Compass NE
+  - Desert East Wing W Edge
+  - Desert East Lobby S
+  - Desert East Wing N Edge
+- assumptions: {}
+  benefits:
+    North: 2
+    West: 1
+  candidates:
+  - Desert East Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - Desert East Lobby S
+  - Desert East Wing W Edge
+  - Desert Compass NE
+  - Desert East Wing N Edge
+Desert Dead End:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Desert Dead End Edge
+  cost: South
+  crystal: false
+  reachable:
+  - Desert Dead End Edge
+Desert Left Alcove:
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 2
+    South: 1
+  candidates:
+  - Desert Main Lobby N Edge
+  - Desert Main Lobby NE Edge
+  - Desert Main Lobby NW Edge
+  cost: North
+  crystal: false
+  reachable:
+  - Desert Main Lobby NW Edge
+  - Desert Main Lobby N Edge
+  - Desert Main Lobby NE Edge
+  - Desert Main Lobby S
+  - Desert Main Lobby E Edge
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 3
+  candidates:
+  - Desert Main Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - Desert Main Lobby NW Edge
+  - Desert Main Lobby N Edge
+  - Desert Main Lobby NE Edge
+  - Desert Main Lobby S
+  - Desert Main Lobby E Edge
+- assumptions: {}
+  benefits:
+    North: 3
+    South: 1
+  candidates:
+  - Desert Main Lobby E Edge
+  cost: East
+  crystal: false
+  reachable:
+  - Desert Main Lobby NW Edge
+  - Desert Main Lobby N Edge
+  - Desert Main Lobby NE Edge
+  - Desert Main Lobby S
+  - Desert Main Lobby E Edge
+Eastern Boss:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Eastern Boss SE
+  cost: South
+  crystal: false
+  reachable:
+  - Eastern Boss SE
+Eastern Duo Eyegores:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Eastern Duo Eyegores NE
+  cost: North
+  crystal: false
+  reachable:
+  - Eastern Duo Eyegores NE
+  - Eastern Single Eyegore ES
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Eastern Single Eyegore ES
+  cost: East
+  crystal: false
+  reachable:
+  - Eastern Duo Eyegores NE
+  - Eastern Single Eyegore ES
+Eastern Cannonball Hell:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Eastern Cannonball Hell WS
+  cost: West
+  crystal: false
+  reachable:
+  - Eastern Cannonball Hell WS
+  - Eastern False Switches ES
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Eastern False Switches ES
+  cost: East
+  crystal: false
+  reachable:
+  - Eastern Cannonball Hell WS
+  - Eastern False Switches ES
+Eastern Attic Start:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Eastern Attic Start WS
+  cost: West
+  crystal: false
+  reachable:
+  - Eastern Attic Start WS
+  - Eastern Attic Start Down Stairs
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Eastern Attic Start Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Eastern Attic Start WS
+  - Eastern Attic Start Down Stairs
+Eastern Darkness:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Eastern Darkness Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Eastern Darkness Up Stairs
+  - Eastern Darkness S
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Eastern Darkness S
+  cost: South
+  crystal: false
+  reachable:
+  - Eastern Darkness Up Stairs
+  - Eastern Darkness S
+Eastern Big Key:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Eastern Big Key NE
+  cost: North
+  crystal: false
+  reachable:
+  - Eastern Big Key NE
+  - Eastern Big Key EN
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Eastern Big Key EN
+  cost: East
+  crystal: false
+  reachable:
+  - Eastern Big Key NE
+  - Eastern Big Key EN
+Eastern Dark Pots:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Eastern Dark Square Key Door WN
+  cost: West
+  crystal: false
+  reachable:
+  - Eastern Dark Square NW
+  - Eastern Dark Square Key Door WN
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Eastern Dark Square NW
+  cost: North
+  crystal: false
+  reachable:
+  - Eastern Dark Square NW
+  - Eastern Dark Square Key Door WN
+Eastern Map Valley:
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Eastern Map Valley SW
+  cost: South
+  crystal: false
+  reachable:
+  - Eastern Map Valley WN
+  - Eastern Map Valley SW
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Eastern Map Valley WN
+  cost: West
+  crystal: false
+  reachable:
+  - Eastern Map Valley WN
+  - Eastern Map Valley SW
+Eastern Courtyard:
+- assumptions: {}
+  benefits:
+    East: 1
+    West: 1
+  candidates:
+  - Eastern Courtyard N
+  cost: North
+  crystal: false
+  reachable:
+  - Eastern Courtyard N
+  - Eastern Courtyard EN
+  - Eastern Courtyard WN
+- assumptions: {}
+  benefits:
+    North: 1
+    West: 1
+  candidates:
+  - Eastern Courtyard EN
+  cost: East
+  crystal: false
+  reachable:
+  - Eastern Courtyard N
+  - Eastern Courtyard EN
+  - Eastern Courtyard WN
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 1
+  candidates:
+  - Eastern Courtyard WN
+  cost: West
+  crystal: false
+  reachable:
+  - Eastern Courtyard N
+  - Eastern Courtyard EN
+  - Eastern Courtyard WN
+Eastern Compass Room:
+- assumptions: {}
+  benefits:
+    East: 2
+  candidates:
+  - Eastern Hint Tile Blocked Path SE
+  cost: South
+  crystal: false
+  reachable:
+  - Eastern Hint Tile EN
+  - Eastern Hint Tile Blocked Path SE
+  - Eastern West Wing E
+Eastern East Wing:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Eastern East Wing W
+  cost: West
+  crystal: false
+  reachable:
+  - Eastern East Wing W
+Eastern Courtyard Ledge:
+- assumptions: {}
+  benefits:
+    South: 1
+    West: 1
+  candidates:
+  - Eastern Courtyard Ledge E
+  cost: East
+  crystal: false
+  reachable:
+  - Eastern Courtyard Ledge E
+  - Eastern Courtyard Ledge W
+  - Eastern Courtyard Ledge S
+- assumptions: {}
+  benefits:
+    East: 1
+    South: 1
+  candidates:
+  - Eastern Courtyard Ledge W
+  cost: West
+  crystal: false
+  reachable:
+  - Eastern Courtyard Ledge E
+  - Eastern Courtyard Ledge W
+  - Eastern Courtyard Ledge S
+- assumptions: {}
+  benefits:
+    East: 1
+    West: 1
+  candidates:
+  - Eastern Courtyard Ledge S
+  cost: South
+  crystal: false
+  reachable:
+  - Eastern Courtyard Ledge E
+  - Eastern Courtyard Ledge W
+  - Eastern Courtyard Ledge S
+Eastern Cannonball Ledge:
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Eastern Cannonball Ledge Key Door EN
+  cost: East
+  crystal: false
+  reachable:
+  - Eastern Cannonball Ledge Key Door EN
+  - Eastern Cannonball Ledge WN
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Eastern Cannonball Ledge WN
+  cost: West
+  crystal: false
+  reachable:
+  - Eastern Cannonball Ledge Key Door EN
+  - Eastern Cannonball Ledge WN
+Eastern Cannonball:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Eastern Cannonball N
+  cost: North
+  crystal: false
+  reachable:
+  - Eastern Cannonball S
+  - Eastern Cannonball N
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Eastern Cannonball S
+  cost: South
+  crystal: false
+  reachable:
+  - Eastern Cannonball S
+  - Eastern Cannonball N
+Eastern Lobby:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Eastern Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - Eastern Lobby Bridge N
+  - Eastern Lobby S
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Eastern Lobby Bridge N
+  cost: North
+  crystal: false
+  reachable:
+  - Eastern Lobby Bridge N
+  - Eastern Lobby S
+Sanctuary:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Sanctuary S
+  cost: South
+  crystal: false
+  reachable:
+  - Sanctuary Mirror Route
+  - Sanctuary S
+Sewers Pull Switch:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Sewers Pull Switch S
+  cost: South
+  crystal: false
+  reachable:
+  - Sewers Pull Switch Down Stairs
+  - Sewers Pull Switch S
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Sewers Pull Switch Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Sewers Pull Switch Down Stairs
+  - Sewers Pull Switch S
+Sewers Rat Path:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Sewers Secret Room Key Door S
+  cost: South
+  crystal: false
+  reachable:
+  - Sewers Secret Room Up Stairs
+  - Sewers Secret Room Key Door S
+Sewers Dark Aquabats:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Sewers Key Rat NE
+  cost: North
+  crystal: false
+  reachable:
+  - Sewers Key Rat NE
+  - Sewers Dark Aquabats ES
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Sewers Dark Aquabats ES
+  cost: East
+  crystal: false
+  reachable:
+  - Sewers Dark Aquabats ES
+  - Sewers Key Rat NE
+Sewers Water:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Sewers Water W
+  cost: West
+  crystal: false
+  reachable:
+  - Sewers Water W
+  - Sewers Water S
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Sewers Water S
+  cost: South
+  crystal: false
+  reachable:
+  - Sewers Water W
+  - Sewers Water S
+Sewers Dark Cross:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Sewers Dark Cross South Stairs
+  cost: South
+  crystal: false
+  reachable:
+  - Sewers Dark Cross Key Door N
+  - Sewers Dark Cross South Stairs
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Sewers Dark Cross Key Door N
+  cost: North
+  crystal: false
+  reachable:
+  - Sewers Dark Cross Key Door N
+  - Sewers Dark Cross South Stairs
+Sewers Rope Room:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Sewers Rope Room North Stairs
+  cost: North
+  crystal: false
+  reachable:
+  - Sewers Rope Room North Stairs
+  - Sewers Rope Room Up Stairs
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Sewers Rope Room Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Sewers Rope Room North Stairs
+  - Sewers Rope Room Up Stairs
+Sewers Behind Tapestry:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Sewers Behind Tapestry Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Sewers Behind Tapestry Down Stairs
+  - Sewers Behind Tapestry S
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Sewers Behind Tapestry S
+  cost: South
+  crystal: false
+  reachable:
+  - Sewers Behind Tapestry Down Stairs
+  - Sewers Behind Tapestry S
+Hyrule Dungeon Cell:
+- assumptions: {}
+  benefits: {}
+  candidates:
+  - Hyrule Dungeon Cellblock Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Hyrule Dungeon Cellblock Up Stairs
+Hyrule Dungeon Staircase:
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Hyrule Dungeon Staircase Down Stairs
+  - Hyrule Dungeon Staircase Up Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Hyrule Dungeon Staircase Down Stairs
+  - Hyrule Dungeon Staircase Up Stairs
+Hyrule Dungeon Armory Boomerang:
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Hyrule Dungeon Armory Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Hyrule Dungeon Armory Down Stairs
+  - Hyrule Dungeon Armory S
+- assumptions: {}
+  benefits:
+    Stairs: 1
+  candidates:
+  - Hyrule Dungeon Armory S
+  cost: South
+  crystal: false
+  reachable:
+  - Hyrule Dungeon Armory Down Stairs
+  - Hyrule Dungeon Armory S
+Hyrule Dungeon Guardroom:
+- assumptions: {}
+  benefits:
+    East: 2
+  candidates:
+  - Hyrule Dungeon Guardroom N
+  cost: North
+  crystal: false
+  reachable:
+  - Hyrule Dungeon Guardroom N
+  - Hyrule Dungeon Guardroom Catwalk Edge
+  - Hyrule Dungeon Guardroom Abyss Edge
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 1
+  candidates:
+  - Hyrule Dungeon Guardroom Catwalk Edge
+  - Hyrule Dungeon Guardroom Abyss Edge
+  cost: East
+  crystal: false
+  reachable:
+  - Hyrule Dungeon Guardroom N
+  - Hyrule Dungeon Guardroom Catwalk Edge
+  - Hyrule Dungeon Guardroom Abyss Edge
+Hyrule Dungeon South Abyss Catwalk:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Hyrule Dungeon South Abyss Catwalk West Edge
+  cost: West
+  crystal: false
+  reachable:
+  - Hyrule Dungeon South Abyss Catwalk North Edge
+  - Hyrule Dungeon South Abyss Catwalk West Edge
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Hyrule Dungeon South Abyss Catwalk North Edge
+  cost: North
+  crystal: false
+  reachable:
+  - Hyrule Dungeon South Abyss Catwalk North Edge
+  - Hyrule Dungeon South Abyss Catwalk West Edge
+Hyrule Dungeon South Abyss:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Hyrule Dungeon South Abyss West Edge
+  cost: West
+  crystal: false
+  reachable:
+  - Hyrule Dungeon South Abyss West Edge
+  - Hyrule Dungeon South Abyss North Edge
+- assumptions: {}
+  benefits:
+    West: 1
+  candidates:
+  - Hyrule Dungeon South Abyss North Edge
+  cost: North
+  crystal: false
+  reachable:
+  - Hyrule Dungeon South Abyss West Edge
+  - Hyrule Dungeon South Abyss North Edge
+Hyrule Dungeon Map Room:
+- assumptions: {}
+  benefits:
+    South: 1
+    Stairs: 1
+  candidates:
+  - Hyrule Dungeon North Abyss Catwalk Edge
+  cost: South
+  crystal: false
+  reachable:
+  - Hyrule Dungeon North Abyss Catwalk Edge
+  - Hyrule Dungeon North Abyss South Edge
+  - Hyrule Dungeon Map Room Up Stairs
+Hyrule Castle Behind Tapestry:
+- assumptions: {}
+  benefits:
+    North: 1
+  candidates:
+  - Hyrule Castle Throne Room South Stairs
+  cost: South
+  crystal: false
+  reachable:
+  - Hyrule Castle Throne Room N
+  - Hyrule Castle Throne Room South Stairs
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Hyrule Castle Throne Room N
+  cost: North
+  crystal: false
+  reachable:
+  - Hyrule Castle Throne Room N
+  - Hyrule Castle Throne Room South Stairs
+Hyrule Castle Back Hall:
+- assumptions: {}
+  benefits:
+    East: 1
+    West: 1
+  candidates:
+  - Hyrule Castle Back Hall Down Stairs
+  cost: Stairs
+  crystal: false
+  reachable:
+  - Hyrule Castle Back Hall Down Stairs
+  - Hyrule Castle Back Hall W
+  - Hyrule Castle Back Hall E
+- assumptions: {}
+  benefits:
+    East: 1
+    Stairs: 1
+  candidates:
+  - Hyrule Castle Back Hall W
+  cost: West
+  crystal: false
+  reachable:
+  - Hyrule Castle Back Hall Down Stairs
+  - Hyrule Castle Back Hall W
+  - Hyrule Castle Back Hall E
+- assumptions: {}
+  benefits:
+    Stairs: 1
+    West: 1
+  candidates:
+  - Hyrule Castle Back Hall E
+  cost: East
+  crystal: false
+  reachable:
+  - Hyrule Castle Back Hall Down Stairs
+  - Hyrule Castle Back Hall W
+  - Hyrule Castle Back Hall E
+Hyrule Castle West Hall:
+- assumptions: {}
+  benefits:
+    East: 1
+  candidates:
+  - Hyrule Castle West Hall S
+  cost: South
+  crystal: false
+  reachable:
+  - Hyrule Castle West Hall S
+  - Hyrule Castle West Hall E
+- assumptions: {}
+  benefits:
+    South: 1
+  candidates:
+  - Hyrule Castle West Hall E
+  cost: East
+  crystal: false
+  reachable:
+  - Hyrule Castle West Hall E
+  - Hyrule Castle West Hall S
+Hyrule Castle East Hall:
+- assumptions: {}
+  benefits:
+    South: 1
+    West: 1
+  candidates:
+  - Hyrule Castle East Hall SW
+  - Hyrule Castle East Hall S
+  cost: South
+  crystal: false
+  reachable:
+  - Hyrule Castle East Hall SW
+  - Hyrule Castle East Hall S
+  - Hyrule Castle East Hall W
+- assumptions: {}
+  benefits:
+    South: 2
+  candidates:
+  - Hyrule Castle East Hall W
+  cost: West
+  crystal: false
+  reachable:
+  - Hyrule Castle East Hall S
+  - Hyrule Castle East Hall SW
+  - Hyrule Castle East Hall W
+Hyrule Castle East Lobby:
+- assumptions: {}
+  benefits:
+    North: 2
+    West: 1
+  candidates:
+  - Hyrule Castle East Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - Hyrule Castle East Lobby W
+  - Hyrule Castle East Lobby S
+  - Hyrule Castle East Lobby NW
+  - Hyrule Castle East Lobby N
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 1
+    West: 1
+  candidates:
+  - Hyrule Castle East Lobby NW
+  - Hyrule Castle East Lobby N
+  cost: North
+  crystal: false
+  reachable:
+  - Hyrule Castle East Lobby W
+  - Hyrule Castle East Lobby S
+  - Hyrule Castle East Lobby NW
+  - Hyrule Castle East Lobby N
+- assumptions: {}
+  benefits:
+    North: 2
+    South: 1
+  candidates:
+  - Hyrule Castle East Lobby W
+  cost: West
+  crystal: false
+  reachable:
+  - Hyrule Castle East Lobby W
+  - Hyrule Castle East Lobby S
+  - Hyrule Castle East Lobby NW
+  - Hyrule Castle East Lobby N
+Hyrule Castle West Lobby:
+- assumptions: {}
+  benefits:
+    East: 2
+    North: 1
+  candidates:
+  - Hyrule Castle West Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - Hyrule Castle West Lobby EN
+  - Hyrule Castle West Lobby S
+  - Hyrule Castle West Lobby N
+  - Hyrule Castle West Lobby E
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 1
+    South: 1
+  candidates:
+  - Hyrule Castle West Lobby EN
+  - Hyrule Castle West Lobby E
+  cost: East
+  crystal: false
+  reachable:
+  - Hyrule Castle West Lobby N
+  - Hyrule Castle West Lobby S
+  - Hyrule Castle West Lobby EN
+  - Hyrule Castle West Lobby E
+- assumptions: {}
+  benefits:
+    East: 2
+    South: 1
+  candidates:
+  - Hyrule Castle West Lobby N
+  cost: North
+  crystal: false
+  reachable:
+  - Hyrule Castle West Lobby EN
+  - Hyrule Castle West Lobby S
+  - Hyrule Castle West Lobby N
+  - Hyrule Castle West Lobby E
+Hyrule Castle Lobby:
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 1
+    West: 2
+  candidates:
+  - Hyrule Castle Lobby S
+  cost: South
+  crystal: false
+  reachable:
+  - Hyrule Castle Lobby E
+  - Hyrule Castle Lobby S
+  - Hyrule Castle Lobby WN
+  - Hyrule Castle Lobby North Stairs
+  - Hyrule Castle Lobby W
+- assumptions: {}
+  benefits:
+    East: 1
+    South: 1
+    West: 2
+  candidates:
+  - Hyrule Castle Lobby North Stairs
+  cost: North
+  crystal: false
+  reachable:
+  - Hyrule Castle Lobby E
+  - Hyrule Castle Lobby S
+  - Hyrule Castle Lobby North Stairs
+  - Hyrule Castle Lobby WN
+  - Hyrule Castle Lobby W
+- assumptions: {}
+  benefits:
+    East: 1
+    North: 1
+    South: 1
+    West: 1
+  candidates:
+  - Hyrule Castle Lobby WN
+  - Hyrule Castle Lobby W
+  cost: West
+  crystal: false
+  reachable:
+  - Hyrule Castle Lobby E
+  - Hyrule Castle Lobby S
+  - Hyrule Castle Lobby WN
+  - Hyrule Castle Lobby North Stairs
+  - Hyrule Castle Lobby W
+- assumptions: {}
+  benefits:
+    North: 1
+    South: 1
+    West: 2
+  candidates:
+  - Hyrule Castle Lobby E
+  cost: East
+  crystal: false
+  reachable:
+  - Hyrule Castle Lobby E
+  - Hyrule Castle Lobby S
+  - Hyrule Castle Lobby WN
+  - Hyrule Castle Lobby North Stairs
+  - Hyrule Castle Lobby W

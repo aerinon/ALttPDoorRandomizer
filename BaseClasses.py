@@ -1661,6 +1661,7 @@ class Hook(Enum):
     South = 2
     East = 3
     Stairs = 4
+    PitWarp = 5
 
 
 hook_dir_map = {
@@ -1674,8 +1675,10 @@ hook_dir_map = {
 def hook_from_door(door):
     if door.type == DoorType.SpiralStairs:
         return Hook.Stairs
-    if door.type in [DoorType.Normal, DoorType.Open, DoorType.StraightStairs, DoorType.Ladder]:
+    if door.type in [DoorType.Normal, DoorType.Open, DoorType.StraightStairs, DoorType.Ladder, DoorType.Interior]:
         return hook_dir_map[door.direction]
+    if door.type in [DoorType.Hole, DoorType.Warp]:
+        return Hook.PitWarp
     return None
 
 
@@ -2047,7 +2050,7 @@ class Sector(object):
 
     def sector_key(self):
         if self.key is None:
-            self.key = sorted(self.outstanding_doors, key=lambda d: d.name)[0].name
+            self.key = sorted(self.regions, key=lambda d: d.name)[0].name
         return self.key
 
     def polarity(self):

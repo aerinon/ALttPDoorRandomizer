@@ -19,7 +19,7 @@ from Regions import create_regions, create_shops, mark_light_dark_world_regions,
 from OverworldShuffle import link_overworld, create_dynamic_exits
 from Rom import patch_rom, patch_race_rom, apply_rom_settings, LocalRom, JsonRom, get_hash_string
 from Doors import create_doors
-from DoorShuffle import link_doors, connect_portal, link_doors_prep
+from DoorShuffle import link_doors, connect_portal, link_doors_prep, link_doors_prototype
 from RoomData import create_rooms
 from Rules import set_rules
 from Dungeons import create_dungeons
@@ -273,17 +273,22 @@ def main(args, seed=None, fish=None):
         link_entrances_new(world, player)
 
     logger.info(world.fish.translate("cli", "cli", "shuffling.prep"))
-    for player in range(1, world.players + 1):
-        link_doors_prep(world, player)
+    if not world.experimental[player]:
+        for player in range(1, world.players + 1):
+            link_doors_prep(world, player)
 
     if args.print_custom_yaml:
         world.settings.record_entrances(world)
+    # does this need inaccessible areas calculated?
     create_item_pool_config(world)
 
     logger.info(world.fish.translate("cli", "cli", "shuffling.dungeons"))
 
     for player in range(1, world.players + 1):
-        link_doors(world, player)
+        if world.experimental[player]:
+            link_doors_prototype(world, player)
+        else:
+            link_doors(world, player)
         mark_light_dark_world_regions(world, player)
     if args.print_custom_yaml:
         world.settings.record_doors(world)
