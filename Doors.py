@@ -1555,31 +1555,31 @@ def create_doors(world, player):
 
 def create_portals(world, player):
     dungeon_portals = [
-        create_portal(player, 'Sanctuary', world.get_door('Sanctuary S', player), 0x02, 0x02),
-        create_portal(player, 'Hyrule Castle West', world.get_door('Hyrule Castle West Lobby S', player), 0x03, 0x04),
-        create_portal(player, 'Hyrule Castle South', world.get_door('Hyrule Castle Lobby S', player), 0x04, 0x06),
-        create_portal(player, 'Hyrule Castle East', world.get_door('Hyrule Castle East Lobby S', player), 0x05, 0x08),
-        create_portal(player, 'Eastern', world.get_door('Eastern Lobby S', player), 0x08, 0x12, 0),
-        create_portal(player, 'Desert South', world.get_door('Desert Main Lobby S', player), 0x09, 0x14),
-        create_portal(player, 'Desert East', world.get_door('Desert East Lobby S', player), 0x0a, 0x16),
-        create_portal(player, 'Desert West', world.get_door('Desert West S', player), 0x0b, 0x18),
-        create_portal(player, 'Desert Back', world.get_door('Desert Back Lobby S', player), 0x0c, 0x1a, 1),
-        create_portal(player, 'Turtle Rock Lazy Eyes', world.get_door('TR Lazy Eyes SE', player), 0x15, 0x2c),
-        create_portal(player, 'Turtle Rock Eye Bridge', world.get_door('TR Eye Bridge SW', player), 0x18, 0x32),
-        create_portal(player, 'Turtle Rock Chest', world.get_door('TR Big Chest Entrance SE', player), 0x19, 0x34),
-        create_portal(player, 'Agahnims Tower', world.get_door('Tower Lobby S', player), 0x24, 0x4a),
-        create_portal(player, 'Swamp', world.get_door('Swamp Lobby S', player), 0x25, 0x4c, 4),
-        create_portal(player, 'Palace of Darkness', world.get_door('PoD Lobby S', player), 0x26, 0x4e, 5),
-        create_portal(player, 'Mire', world.get_door('Mire Lobby S', player), 0x27, 0x50, 7),
-        create_portal(player, 'Skull 2 West', world.get_door('Skull 2 West Lobby S', player), 0x28, 0x52),
-        create_portal(player, 'Skull 2 East', world.get_door('Skull 2 East Lobby SW', player), 0x29, 0x54),
-        create_portal(player, 'Skull 1', world.get_door('Skull 1 Lobby S', player), 0x2a, 0x56),
-        create_portal(player, 'Skull 3', world.get_door('Skull 3 Lobby SW', player), 0x2b, 0x58, 6),
-        create_portal(player, 'Ice', world.get_door('Ice Lobby SE', player), 0x2d, 0x5c, 8),
-        create_portal(player, 'Hera', world.get_door('Hera Lobby S', player), 0x33, 0x5a, 2),
-        create_portal(player, 'Thieves Town', world.get_door('Thieves Lobby S', player), 0x34, 0x6a, 10),
-        create_portal(player, 'Turtle Rock Main', world.get_door('TR Main Lobby SE', player), 0x35, 0x68, 9),
-        create_portal(player, 'Ganons Tower', world.get_door('GT Lobby S', player), 0x37, 0x70),
+        create_portal(world, player, 'Sanctuary', world.get_door('Sanctuary S', player), 0x02, 0x02),
+        create_portal(world, player, 'Hyrule Castle West', world.get_door('Hyrule Castle West Lobby S', player), 0x03, 0x04),
+        create_portal(world, player, 'Hyrule Castle South', world.get_door('Hyrule Castle Lobby S', player), 0x04, 0x06),
+        create_portal(world, player, 'Hyrule Castle East', world.get_door('Hyrule Castle East Lobby S', player), 0x05, 0x08),
+        create_portal(world, player, 'Eastern', world.get_door('Eastern Lobby S', player), 0x08, 0x12, 0),
+        create_portal(world, player, 'Desert South', world.get_door('Desert Main Lobby S', player), 0x09, 0x14),
+        create_portal(world, player, 'Desert East', world.get_door('Desert East Lobby S', player), 0x0a, 0x16),
+        create_portal(world, player, 'Desert West', world.get_door('Desert West S', player), 0x0b, 0x18),
+        create_portal(world, player, 'Desert Back', world.get_door('Desert Back Lobby S', player), 0x0c, 0x1a, 1),
+        create_portal(world, player, 'Turtle Rock Lazy Eyes', world.get_door('TR Lazy Eyes SE', player), 0x15, 0x2c),
+        create_portal(world, player, 'Turtle Rock Eye Bridge', world.get_door('TR Eye Bridge SW', player), 0x18, 0x32),
+        create_portal(world, player, 'Turtle Rock Chest', world.get_door('TR Big Chest Entrance SE', player), 0x19, 0x34),
+        create_portal(world, player, 'Agahnims Tower', world.get_door('Tower Lobby S', player), 0x24, 0x4a),
+        create_portal(world, player, 'Swamp', world.get_door('Swamp Lobby S', player), 0x25, 0x4c, 4),
+        create_portal(world, player, 'Palace of Darkness', world.get_door('PoD Lobby S', player), 0x26, 0x4e, 5),
+        create_portal(world, player, 'Mire', world.get_door('Mire Lobby S', player), 0x27, 0x50, 7),
+        create_portal(world, player, 'Skull 2 West', world.get_door('Skull 2 West Lobby S', player), 0x28, 0x52),
+        create_portal(world, player, 'Skull 2 East', world.get_door('Skull 2 East Lobby SW', player), 0x29, 0x54),
+        create_portal(world, player, 'Skull 1', world.get_door('Skull 1 Lobby S', player), 0x2a, 0x56),
+        create_portal(world, player, 'Skull 3', world.get_door('Skull 3 Lobby SW', player), 0x2b, 0x58, 6),
+        create_portal(world, player, 'Ice', world.get_door('Ice Lobby SE', player), 0x2d, 0x5c, 8),
+        create_portal(world, player, 'Hera', world.get_door('Hera Lobby S', player), 0x33, 0x5a, 2),
+        create_portal(world, player, 'Thieves Town', world.get_door('Thieves Lobby S', player), 0x34, 0x6a, 10),
+        create_portal(world, player, 'Turtle Rock Main', world.get_door('TR Main Lobby SE', player), 0x35, 0x68, 9),
+        create_portal(world, player, 'Ganons Tower', world.get_door('GT Lobby S', player), 0x37, 0x70),
     ]
     world.dungeon_portals[player] += dungeon_portals
 
@@ -1666,6 +1666,6 @@ def ugly_door(door):
     return door
 
 
-def create_portal(player, name, door, ent, ext, boss_exit_idx=-1):
-    door.entranceFlag = True
+def create_portal(world, player, name, door, ent, ext, boss_exit_idx=-1):
+    door.entranceFlag = not world.experimental[player]
     return Portal(player, name, door, ent, ext, boss_exit_idx)
