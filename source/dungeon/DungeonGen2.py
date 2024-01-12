@@ -29,8 +29,8 @@ def create_sector_descriptors(sector_list, world, player):
     yaml_file = intensity_code + '.yaml'
     lookup = load_cached_yaml(['data', 'gen', yaml_file])
     # this is the primary bypass mechanism for generation
-    if lookup is None:
-        raise GenerationException('No curated logic for given intensity yet')
+    # if lookup is None:
+    #     raise GenerationException('No curated logic for given intensity yet')
     for sector in sector_list:
         descript = SectorDescriptor(sector, lookup, v_trap_flag)
         sector.descriptor = descript
@@ -387,5 +387,5 @@ def create_dungeon_builders_new(all_sectors, connections_tuple, world, player, d
 
 
 def satisfy_crystal_switch_constraints(dungeon_map, crystal_switches, crystal_barriers, global_pole):
-     # thoughts
+    # thoughts
     pass
