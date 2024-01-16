@@ -6,7 +6,7 @@ from BaseClasses import Direction, RegionType, CrystalBarrier, DoorType, flooded
 from BaseClasses import hook_from_door
 from Regions import dungeon_events, flooded_keys_reverse
 from Utils import append_to_yaml
-from source.dungeon.DungeonGenerationCommon import define_sector_features, hanger_from_door
+from source.dungeon.DungeonGenerationCommon import DungeonBuilder, define_sector_features, hanger_from_door, dungeon_portals
 from source.dungeon.DungeonStitcher import ExplorableDoor
 
 
@@ -412,7 +412,22 @@ class SimpleExplorationState:
 #         Main Algorithm
 # ------------------------------ #
 
-def create_dungeon_builders_prototype(sector_pool, world, player, pool, vanilla_connections):
+def create_dungeon_builders_prototype(dungeon_pool, sector_pool, portal_pool, world, player):
+    portal_assignments = defaultdict(list)
+    # shuffle portals between dungeons at this point?
+    # each dungeon needs at least one portal, but no more than four
+
+    # vanilla assignment
+    for key in dungeon_pool:
+        portal_list = dungeon_portals[key]
+        for portal in portal_list:
+            portal_sector = next(p for p in portal_pool if portal in p.name)
+            portal_assignments[key].append(portal_sector)
+
+    # for
+
+
+
     define_sector_features(sector_pool)
     create_sector_descriptors(sector_pool, world, player)
     sector_map = {}
@@ -420,19 +435,33 @@ def create_dungeon_builders_prototype(sector_pool, world, player, pool, vanilla_
         for door in sector.outstanding_doors:
             sector_map[door.name] = sector
 
-    # merge_sectors_by_two_way_list(sector_pool, sector_map, vanilla_connections['interior'], world, player)
+    dungeon_map = {}
+    if 'Skull Woods' in dungeon_pool:
+        dungeon_pool.append('Skull Woods Back')
+        dungeon_pool.append('Skull Woods Front')
+        dungeon_pool.remove('Skull Woods')
+    if 'Desert Palace' in dungeon_pool:  # a strict split will prevent
+        dungeon_pool.append('Desert Palace Back')
+        dungeon_pool.append('Desert Palace Front')
+        dungeon_pool.remove('Desert Palace')
+    if 'Hyrule Castle' in dungeon_pool and world.mode[player] == 'standard':
+        dungeon_pool.append('Hyrule Castle Dungeon')
+        dungeon_pool.append('Hyrule Castle Sewers')
+        dungeon_pool.remove('Hyrule Castle')
+    for key in dungeon_pool:
+        current_dungeon = dungeon_map[key] = DungeonBuilder(key)
 
+    # add special portal sectors to sector pool
 
     for sector in sector_pool:
         append_to_yaml(['data', 'gen', 'proposed.yaml'], sector.descriptor.to_yaml())
-    # merge interior doors
 
     return {}
 
 
 def merge_sectors_by_two_way_list(sector_pool, sector_map, connection_list, world, player):
     for edge_a, edge_b in connection_list:
-        connect_two_way(world, edge_a, edge_b, player)
+        # connect_two_way(world, edge_a, edge_b, player)
         sector_a = sector_map[edge_a]
         sector_b = sector_map[edge_b]
         sector_pool.remove(sector_b)
@@ -468,15 +497,7 @@ def merge_sectors(sector_a, sector_b, connected_doors):
     sector_a.descriptor.init_parity_id()
     # for door, reached sector_a.descriptor.reachability
 
-    # merge_constraints
-    constraint_a = next(c for hanger, c  in sector_a.descriptor.constraints.items() if any(h in connected_doors for h in c.candidate_hangers))
-    constraint_b = next(c for hanger, c  in sector_b.descriptor.constraints.items() if any(h in connected_doors for h in c.candidate_hangers))
-    new_constraints = {}
-    for hanger, constraints in sector_a.descriptor.constraints.items():
-        pass
 
-    # merge_reachability?
-    sector_a.descriptor.reachability.clear()
 
 
 # ------------------------------ #
@@ -492,36 +513,4 @@ def merge_sectors(sector_a, sector_b, connected_doors):
 #     Hook.PitWarp : 'PitWarp',
 # }
 # def hook_to_string(hook):
-#     return hook_map[hook]
-
-
-def connect_two_way(world, entrancename, exitname, player):
-    entrance = world.get_entrance(entrancename, player)
-    ext = world.get_entrance(exitname, player)
-
-    # if these were already connected somewhere, remove the backreference
-    if entrance.connected_region is not None:
-        entrance.connected_region.entrances.remove(entrance)
-    if ext.connected_region is not None:
-        ext.connected_region.entrances.remove(ext)
-
-    entrance.connect(ext.parent_region)
-    ext.connect(entrance.parent_region)
-    if entrance.parent_region.dungeon:
-        ext.parent_region.dungeon = entrance.parent_region.dungeon
-    x = world.check_for_door(entrancename, player)
-    y = world.check_for_door(exitname, player)
-    if x is not None:
-        x.dest = y
-    if y is not None:
-        y.dest = x
-    if x.dependents:
-        for dep in x.dependents:
-            connect_simple_door_to_region(dep, ext.parent_region)
-    if y.dependents:
-        for dep in y.dependents:
-            connect_simple_door_to_region(dep, entrance.parent_region)
-
-def connect_simple_door_to_region(exit_door, region):
-    exit_door.entrance.connect(region)
-    exit_door.dest = region
+#     return hook_map[hook
