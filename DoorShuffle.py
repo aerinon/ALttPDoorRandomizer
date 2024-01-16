@@ -4640,18 +4640,7 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
             sector_pool, portal_pool = [], []
             for sector in sectors:
                 (portal_pool if len(sector.outstanding_doors) == 0 else sector_pool).append(sector)
-            vanilla_connections = {
-                'interior': interior_doors,
-                'pit': falldown_pits,
-                'warp': dungeon_warps,
-                'edges': open_edges,
-                'straight': straight_staircases,
-                'ladder': ladders,
-                'spiral': spiral_staircases,
-                'normal': default_door_connections,
-                'trap': default_one_way_connections
-            }
             # todo: portal pool
-            builders = create_dungeon_builders_prototype(sector_pool, world, player, pool, vanilla_connections)
+            builders = create_dungeon_builders_prototype(pool, sector_pool, portal_pool, world, player)
 
 
