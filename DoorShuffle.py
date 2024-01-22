@@ -736,7 +736,7 @@ def analyze_portals(world, player):
                 access_portal.destination = True
                 for other_portal in possible_portals:
                     if other_portal != dest_portal:
-                        world.get_portal(dest_portal, player).dependent = access_portal
+                        world.get_portal(other_portal, player).dependent = access_portal
 
 
 def connect_portal(portal, world, player):
@@ -4669,6 +4669,7 @@ def link_doors_prototype(world, player):
 
 
 def main_dungeon_pool_prototype(dungeon_pool, world, player):
+    find_inaccessible_regions(world, player)
     dungeon_builders = {}
     door_type_pools = []
     for pool, region_list in dungeon_pool:
@@ -4685,6 +4686,7 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
             for sector in sectors:
                 (portal_pool if len(sector.outstanding_doors) == 0 else sector_pool).append(sector)
             # todo: portal pool
+            analyze_portals(world, player)
             builders = create_dungeon_builders_prototype(pool, sector_pool, portal_pool, world, player)
 
 
