@@ -2042,6 +2042,7 @@ class Sector(object):
         self.sector_id = None  # a numeric identifier, not yet implemented
         self.key = None  # a readable/hashable key - lazy init? todo not consistent for intensity 3
         self.descriptor = None
+        self.portal = None
 
     def region_set(self):
         if self.r_name_set is None:
