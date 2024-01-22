@@ -1,12 +1,14 @@
 import logging
+import random
 import typing
 from collections import defaultdict, deque, Counter
 
-from BaseClasses import Direction, RegionType, CrystalBarrier, DoorType, flooded_keys
+from BaseClasses import Direction, RegionType, CrystalBarrier, DoorType, Door, flooded_keys
 from BaseClasses import hook_from_door
 from Regions import dungeon_events, flooded_keys_reverse
 from Utils import append_to_yaml
 from source.dungeon.DungeonGenerationCommon import DungeonBuilder, define_sector_features, hanger_from_door, dungeon_portals
+from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector
 from source.dungeon.DungeonStitcher import ExplorableDoor
 
 
@@ -38,6 +40,8 @@ class SectorDescriptor:
         self.init_parity_id()
         self.analyze_sector(v_trap_flag)
 
+        self.joined_constraints = [self.constraints]
+
     def init_parity_id(self):
         dir_map = defaultdict(int)
         for door in self.sector.outstanding_doors:
@@ -49,10 +53,16 @@ class SectorDescriptor:
                 self.parity_id += f'{ind}{amt}'
 
     def analyze_sector(self, v_trap_flag):
+        self.reachability.clear()
+        skip_door = None
+        if self.sector.portal and not self.sector.portal.destination:
+            self.reachability[None].append((self.sector.portal.door, False))
+            skip_door = self.sector.portal.door
+            # todo: dependent portals
         # which outstanding doors are reachable from which outstanding doors
         for door in self.sector.outstanding_doors:
             # these types you cannot enter from
-            if door.type in [DoorType.Warp, DoorType.Hole]:
+            if door.type in [DoorType.Warp, DoorType.Hole] or door == skip_door:
                 continue
             state = SimpleExplorationState(v_trap_flag)
             state.extend_reachable_state(door)
@@ -63,13 +73,13 @@ class SectorDescriptor:
                 self.reachability[door].append((explorable.door, restrict))
         for door_hanger, reached_list in self.reachability.items():
             crystal_needed = any(x[1] == 'Blue' for x in reached_list)
-            hanger_type = hook_from_door(door_hanger)
+            hanger_type = None if door_hanger is None else hook_from_door(door_hanger)
             constraint = SectorConstraint(hanger_type, crystal_needed)
             constraint.candidate_hangers.add(door_hanger)
             for door_hook, crystal in reached_list:
                 constraint.accessible_doors.add(door_hook)
                 # todo: in decoupled, you actually do get the benefit from the hooked door
-                if door_hook.name == door_hanger.name:
+                if door_hanger and door_hook.name == door_hanger.name:
                     continue
                 hook = hook_from_door(door_hook)
                 if hook is not None:
@@ -220,17 +230,13 @@ class SectorDescriptor:
         return f'{self.name}:{self.parity_id}'
 
     def to_yaml(self):
-        return {self.sector.sector_key(): [x.to_yaml() for x in self.constraints.values()]}
+        return {self.sector.sector_key(): [[c.to_yaml() for c in cm.values()] for cm in self.joined_constraints]}
 
 
 class SectorConstraint:
-    def __init__(self, hanger=None, crystal_needed=False, join_method='conjoint', children=None):
-        if hanger is None:
-            self.join_method = join_method  # either conjoint or disjoint
-            self.children = children
-        else:
-            self.join_method = None
-            self.children = None
+    def __init__(self, hanger=None, crystal_needed=False, join_method=None, children=None):
+        self.join_method = join_method  # either conjoint or disjoint or none
+        self.children = children
 
         self.hanger = hanger  # door Hook(s) consumed - could be a frozenset (hopefully we never need to move to Counter)
         self.candidate_hangers = set()  # door options
@@ -252,10 +258,10 @@ class SectorConstraint:
             return {'children': [x.to_yaml() for x in self.children],
                     'join': 'and' if self.join_method == 'conjoint' else 'or'}
         return {
-            'cost': self.hanger.name,
-            'candidates': [x.name for x in self.candidate_hangers],
+            'cost': self.hanger.name if self.hanger else 'None',
+            'candidates': [(x.name if x else 'Entrance') for x in self.candidate_hangers],
             'crystal': self.crystal_needed,
-            'benefits': {x.name: y for x, y in self.benefits.items()},
+            'benefits': {x.name: y for x, y in self.benefits.items() if y > 0},
             'reachable': [x.name for x in self.accessible_doors],
             'assumptions': {k.name: v.name for k, v in self.assumed_connections.items()}
         }
@@ -413,6 +419,19 @@ class SimpleExplorationState:
 # ------------------------------ #
 
 def create_dungeon_builders_prototype(dungeon_pool, sector_pool, portal_pool, world, player):
+    generation_log_name = ['data', 'gen', 'generation.yaml']
+    gen_log = []
+    try:
+        dungeons = main_dungeon_builders(dungeon_pool, sector_pool, portal_pool, gen_log, world, player)
+        append_to_yaml(generation_log_name, gen_log)
+        return dungeons
+    except Exception as e:
+        append_to_yaml(generation_log_name, gen_log)
+        raise e
+
+
+def main_dungeon_builders(dungeon_pool, sector_pool, portal_pool, gen_log, world, player):
+    flags = DoorFlags().from_world(world, player)
     portal_assignments = defaultdict(list)
     # shuffle portals between dungeons at this point?
     # each dungeon needs at least one portal, but no more than four
@@ -421,83 +440,183 @@ def create_dungeon_builders_prototype(dungeon_pool, sector_pool, portal_pool, wo
     for key in dungeon_pool:
         portal_list = dungeon_portals[key]
         for portal in portal_list:
-            portal_sector = next(p for p in portal_pool if portal in p.name)
+            region_name = portal + ' Portal'
+            portal_sector = next(p for p in portal_pool if region_name in p.region_set())
+            region = world.get_region(region_name, player)
+            door = create_portal_door(world, player, next(e.name for e in region.exits if e.name.startswith('Enter ')))
+            portal_sector.outstanding_doors.append(door)
+            portal_sector.portal = world.get_portal(portal, player)
+            portal_sector.portal.door = door  # assign placeholder door
             portal_assignments[key].append(portal_sector)
 
-    # for
-
-
-
     define_sector_features(sector_pool)
-    create_sector_descriptors(sector_pool, world, player)
-    sector_map = {}
-    for sector in sector_pool:
-        for door in sector.outstanding_doors:
-            sector_map[door.name] = sector
+    create_sector_descriptors(sector_pool + portal_pool, world, player)
 
+    # ??? do we want a sector map?
+    # sector_map = {}
+    # for sector in sector_pool:
+    #     for door in sector.outstanding_doors:
+    #         sector_map[door.name] = sector
+
+    # todo: distribute portals for split dungeons
     dungeon_map = {}
-    if 'Skull Woods' in dungeon_pool:
+    if 'Skull Woods' in dungeon_pool and len(portal_assignments['Skull Woods']) > 1:
         dungeon_pool.append('Skull Woods Back')
         dungeon_pool.append('Skull Woods Front')
         dungeon_pool.remove('Skull Woods')
-    if 'Desert Palace' in dungeon_pool:  # a strict split will prevent
+        assignments = portal_assignments['Skull Woods']
+        # get skull 3 portal assignment if present, else a random 1
+        # the rest go in front
+    if 'Desert Palace' in dungeon_pool:  # a strict split will prevent this from being a cross-world connector inadvertantly
         dungeon_pool.append('Desert Palace Back')
         dungeon_pool.append('Desert Palace Front')
         dungeon_pool.remove('Desert Palace')
     if 'Hyrule Castle' in dungeon_pool and world.mode[player] == 'standard':
+        # todo: special edits for throne room, sewer "portal" sector
         dungeon_pool.append('Hyrule Castle Dungeon')
         dungeon_pool.append('Hyrule Castle Sewers')
         dungeon_pool.remove('Hyrule Castle')
+
+    all_sectors = sector_pool + portal_pool
+    info = DungeonGenInfo(gen_log, all_sectors, flags)
+
     for key in dungeon_pool:
         current_dungeon = dungeon_map[key] = DungeonBuilder(key)
+        # handle special assignments
+        for sector in portal_assignments[key]:
+            assign_sector(current_dungeon, sector, info)
+        # handle special sectors:
+        if key == 'Hyrule Castle Dungeon':  # builder doesn't exist except in standard
+            for r_name in ['Hyrule Dungeon Cellblock', 'Hyrule Castle Throne Room']:  # need to deliver zelda
+                assign_sector(current_dungeon, find_sector(r_name, sector_pool), info)
+        elif key == 'Hyrule Castle Sewers':  # builder doesn't exist except in standard
+            assign_sector(current_dungeon, find_sector('Sanctuary', sector_pool), info)
+        elif key == 'Thieves Town' and world.get_dungeon("Thieves Town", player).boss.enemizer_name == 'Blind':
+            assign_sector(current_dungeon, find_sector("Thieves Blind's Cell", sector_pool), info)
 
-    # add special portal sectors to sector pool
+    # this handles boss sectors
+    for key, builder_list in dungeon_boss_regions.items():
+        boss_sector = find_sector(key, sector_pool)
+        if boss_sector:
+            candidate_builders = [d for d in dungeon_map if d in builder_list]
+            if len(candidate_builders) == 1:
+                chosen_builder = next(iter(candidate_builders))
+            else:
+                chosen_builder = random.choice(candidate_builders)
+            assign_sector(dungeon_map[chosen_builder], boss_sector, info)
 
-    for sector in sector_pool:
-        append_to_yaml(['data', 'gen', 'proposed.yaml'], sector.descriptor.to_yaml())
+    if not info.flags.lobbies:
+        # todo: lobbies for intensity 2 or less
+        pass
 
-    return {}
+    # next step, find sectors with crystal needed
+    # find sectors with crystal provided
+    # choose and join
+    handle_crystal_switch_constraints(dungeon_map, info)  # step 1
 
+    # find sectors without path from switch to crystal needed
+    # find possible transition sectors
+    # choose and join
 
-def merge_sectors_by_two_way_list(sector_pool, sector_map, connection_list, world, player):
-    for edge_a, edge_b in connection_list:
-        # connect_two_way(world, edge_a, edge_b, player)
-        sector_a = sector_map[edge_a]
-        sector_b = sector_map[edge_b]
-        sector_pool.remove(sector_b)
-        merge_sectors(sector_a, sector_b, {world.get_door(edge_a, player), world.get_door(edge_b, player)})
+    # find sectors with hardest requirements
+    #   dead ends (no benefits) - first - these must be connected to some branch)
+    #   connectors with specific transforms (one option, one
 
-
-def merge_sectors(sector_a, sector_b, connected_doors):
-    sector_a.regions.extend(sector_b.regions)
-    sector_a.outstanding_doors = [d for d in sector_a.outstanding_doors if d.name not in connected_doors]
-    sector_a.outstanding_doors.extend([d for d in sector_b.outstanding_doors if d.name not in connected_doors])
-    sector_a.name = None
-    sector_a.r_name_set = None
-    sector_a.chest_locations += sector_b.chest_locations
-    sector_a.key_only_locations += sector_b.key_only_locations
-    sector_a.c_switch |= sector_b.c_switch
-    sector_a.orange_barrier |= sector_b.orange_barrier
-    sector_a.blue_barrier |= sector_b.blue_barrier
-    sector_a.bk_required |= sector_b.bk_required
-
-    # not yet implemented, are they needed?
-    # self.conn_balance = None
-    # self.branch_factor = None
-    # self.dead_end_cnt = None
-    # self.entrance_sector = None
-    # self.destination_entrance = False
-
-    sector_a.item_logic |= sector_b.item_logic
-    sector_a.chest_location_set |= sector_b.chest_location_set
-    sector_a.key = None
-
-    sector_a.descriptor.degree = len(sector_a.outstanding_doors)
-    sector_a.descriptor.name = min(sector_a.region_set(), key=len)
-    sector_a.descriptor.init_parity_id()
-    # for door, reached sector_a.descriptor.reachability
+    return dungeon_map
 
 
+def create_portal_door(world, player, entName):
+    entrance = world.get_entrance(entName, player)
+    d = Door(player, entName, DoorType.Normal, entrance)
+    d.direction = Direction.North
+    world.doors.append(d)
+    return d
+
+
+# def merge_sectors_by_two_way_list(sector_pool, sector_map, connection_list, world, player):
+#     for edge_a, edge_b in connection_list:
+#         # connect_two_way(world, edge_a, edge_b, player)
+#         sector_a = sector_map[edge_a]
+#         sector_b = sector_map[edge_b]
+#         sector_pool.remove(sector_b)
+#         merge_sectors(sector_a, sector_b, {world.get_door(edge_a, player), world.get_door(edge_b, player)})
+
+
+def assign_sector(builder, new_sector, info):
+    info.global_pole.consume(new_sector)
+    del info.sector_pool[new_sector]
+    master = builder.master_sector
+    if master is None:
+        builder.master_sector = new_sector
+        return
+    merge_sectors(master, new_sector, info)
+
+
+def merge_sectors(master, new_sector, info):
+    # todo: investigate: can we verify global pol before this merge happens? do we need to?
+    if new_sector in info.sector_pool:
+        del info.sector_pool[new_sector]
+    master.regions.extend(new_sector.regions)
+    master.outstanding_doors.extend(new_sector.outstanding_doors)
+    master.name = None
+    master.r_name_set = None
+    master.chest_locations += new_sector.chest_locations
+    master.key_only_locations += new_sector.key_only_locations
+    master.c_switch |= new_sector.c_switch
+    master.orange_barrier |= new_sector.orange_barrier
+    master.blue_barrier |= new_sector.blue_barrier
+    master.bk_required |= new_sector.bk_required
+
+    master.item_logic |= new_sector.item_logic
+    master.chest_location_set |= new_sector.chest_location_set
+    master.key = None
+
+    master.descriptor.degree = len(master.outstanding_doors)
+    master.descriptor.name = min(master.region_set(), key=len)
+    master.descriptor.init_parity_id()
+    # master.descriptor.analyze_sector(info.flags.vanilla_traps)
+    master.descriptor.joined_constraints += new_sector.descriptor.joined_constraints
+    info.gen_log.append(master.descriptor.to_yaml())
+    return master
+
+
+def handle_crystal_switch_constraints(dungeon_map, info):
+    crystal_needed_sectors = find_crystal_constraints(dungeon_map, info)
+    c_switch_sectors = find_crystal_switches(dungeon_map, info)
+    for sector, limitation in crystal_needed_sectors.items():
+        if limitation:
+            candidates = [s for s, limit in c_switch_sectors.items() if limit is None]
+        else:
+            candidates = list(c_switch_sectors.keys())
+        chosen = random.choice(candidates)
+        if limitation:
+            assign_sector(limitation, chosen, info)
+            del c_switch_sectors[chosen]
+            c_switch_sectors[limitation.master_sector] = limitation
+        else:
+            if c_switch_sectors[chosen]:
+                assign_sector(c_switch_sectors[chosen], sector, info)
+            else:
+                merge_sectors(chosen, sector, info)
+
+
+def find_crystal_constraints(builders, info):
+    crystal_needed_sectors = {}
+    for b in builders.values():
+        if not b.master_sector.c_switch:
+            if any(all(c.crystal_needed for c in cl) for cl in b.master_sector.descriptor.joined_constraints):
+                crystal_needed_sectors[b.master_sector] = b
+    for s in info.sector_pool:
+        if not s.c_switch:
+            if any(all(c.crystal_needed for c in cl) for cl in s.descriptor.joined_constraints):
+                crystal_needed_sectors[s] = None  # free agent
+    return crystal_needed_sectors
+
+
+def find_crystal_switches(builders, info):
+    c_switch_sectors = {b.master_sector: b for b in builders.values() if b.master_sector.c_switch}
+    c_switch_sectors.update({s: None for s in info.sector_pool if s.c_switch})
+    return c_switch_sectors
 
 
 # ------------------------------ #
@@ -514,3 +633,78 @@ def merge_sectors(sector_a, sector_b, connected_doors):
 # }
 # def hook_to_string(hook):
 #     return hook_map[hook
+
+
+class DungeonGenInfo:
+
+    def __init__(self, gen_log, all_sectors, flags):
+        self.gen_log = gen_log
+        self.global_pole = GlobalPolarity(all_sectors)
+        self.sector_pool = dict.fromkeys(all_sectors)
+        self.flags = flags
+
+
+class DoorFlags:
+    def __init__(self):
+        self.normal = False
+        self.spiral = False
+        self.straight = False
+        self.ladder = False
+        self.edges = False
+        self.lobbies = False
+        self.vanilla_traps = False
+        self.warps_pits = False  # NotYetImplemented
+        self.cave_interiors = False  # NotYetImplemented
+        self.intratile = False   # NotYetImplemented
+
+    def from_world(self, world, player):
+        self.vanilla_traps = world.trap_door_mode[player] == 'vanilla'
+        if world.intensity[player] >= 1:
+            self.normal = True
+            self.spiral = True
+        if world.intensity[player] >= 2:
+            self.straight = True
+            self.ladder = True
+            self.edges = True
+        if world.intensity[player] >=3:
+            self.lobbies = True
+        return self
+
+
+# ------------------------------ #
+#         Data Section
+# ------------------------------ #
+
+dungeon_boss_regions = {
+    'Eastern Boss': ['Eastern Palace'],
+    'Desert Boss': ['Desert Palace', 'Desert Palace Back', 'Desert Palace Front'],
+    'Hera Boss': ['Tower of Hera'],
+    'Tower Agahnim 1': ['Agahnims Tower'],
+    'PoD Boss': ['Palace of Darkness'],
+    'Swamp Boss': ['Swamp Palace'],
+    'Skull Boss': ['Skull Woods', 'Skull Woods Back', 'Skull Woods Front'],
+    'Thieves Boss': ['Thieves Town'],
+    'Ice Boss': ['Ice Palace'],
+    'Mire Boss': ['Misery Mire'],
+    'TR Boss': ['Turtle Rock'],
+    'GT Agahnim 2': ['Ganons Tower'],
+}
+
+
+default_dungeon_entrances = {
+    'Hyrule Castle': ['Hyrule Castle Lobby', 'Hyrule Castle West Lobby', 'Hyrule Castle East Lobby', 'Sewers Rat Path',
+                      'Sanctuary'],
+    'Eastern Palace': ['Eastern Lobby'],
+    'Desert Palace': ['Desert Back Lobby', 'Desert Main Lobby', 'Desert West Lobby', 'Desert East Lobby'],
+    'Tower of Hera': ['Hera Lobby'],
+    'Agahnims Tower': ['Tower Lobby'],
+    'Palace of Darkness': ['PoD Lobby'],
+    'Swamp Palace': ['Swamp Lobby'],
+    'Skull Woods': ['Skull 1 Lobby', 'Skull Pinball', 'Skull Left Drop', 'Skull Pot Circle', 'Skull 2 East Lobby',
+                    'Skull 2 West Lobby', 'Skull Back Drop', 'Skull 3 Lobby'],
+    'Thieves Town': ['Thieves Lobby'],
+    'Ice Palace': ['Ice Lobby'],
+    'Misery Mire': ['Mire Lobby'],
+    'Turtle Rock': ['TR Main Lobby', 'TR Eye Bridge', 'TR Big Chest Entrance', 'TR Lazy Eyes'],
+    'Ganons Tower': ['GT Lobby']
+}
