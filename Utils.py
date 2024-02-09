@@ -747,12 +747,24 @@ def load_cached_yaml(path_list):
             return data
 
 
+def write_yaml_to_file(path_list, data):
+    path = os.path.join(*path_list)
+    with open(path, 'w', encoding='utf-8') as f:
+        yaml.safe_dump(data, f)
+
+
+def clear_file(path_list):
+    path = os.path.join(*path_list)
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write('')
+
+
 def append_to_yaml(path_list, data):
     path = os.path.join(*path_list)
     if not os.path.isfile(path):
-        with open(path, "a", encoding="utf-8") as f:
+        with open(path, 'a', encoding='utf-8') as f:
             f.write('')
-    with open(path, "a", encoding='utf-8') as f:
+    with open(path, 'a', encoding='utf-8') as f:
         f.write(yaml.safe_dump(data))
 
 
