@@ -6,23 +6,27 @@ from collections import defaultdict, deque, Counter
 from BaseClasses import Direction, RegionType, CrystalBarrier, DoorType, Door, flooded_keys
 from BaseClasses import hook_from_door
 from Regions import dungeon_events, flooded_keys_reverse
-from Utils import append_to_yaml
+from Utils import append_to_yaml, clear_file
 from source.dungeon.DungeonGenerationCommon import DungeonBuilder, define_sector_features, hanger_from_door, dungeon_portals
 from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector
 from source.dungeon.DungeonStitcher import ExplorableDoor
 
 
 def create_sector_descriptors(sector_list, world, player):
+    clear_file(['data', 'gen', 'proposed_test.yaml'])
     v_trap_flag = world.trap_door_mode[player] == 'vanilla'
     # custom intensity could be here
     for sector in sector_list:
         descript = SectorDescriptor(sector, v_trap_flag)
         sector.descriptor = descript
+        append_to_yaml(['data', 'gen', 'proposed_test.yaml'], descript.to_yaml())
+
 
 
 class SectorDescriptor:
     def __init__(self, sector, v_trap_flag):
         self.sector = sector
+        sector.sector_key()
         self.degree = len(sector.outstanding_doors)
         self.name = min(sector.region_set(), key=len)
 
@@ -69,22 +73,21 @@ class SectorDescriptor:
             for explorable in state.unattached_doors:
                 if explorable.door == DoorType.Logical:  # skip sanc mirror route in this calc
                     continue
-                restrict = 'Blue' if explorable.crystal == CrystalBarrier.Blue else 'None'
-                self.reachability[door].append((explorable.door, restrict))
+                crystal = self.resolve_crystal_prop(explorable.crystal, state.visited_map[explorable.door.entrance.parent_region])
+                self.reachability[door].append((explorable.door, crystal))
         for door_hanger, reached_list in self.reachability.items():
-            crystal_needed = any(x[1] == 'Blue' for x in reached_list)
+            crystal_needed = any(x[1] in {CrystalBarrier.Blue, CrystalBarrier.Both} for x in reached_list)
             hanger_type = None if door_hanger is None else hook_from_door(door_hanger)
             constraint = SectorConstraint(hanger_type, crystal_needed)
             constraint.candidate_hangers.add(door_hanger)
             for door_hook, crystal in reached_list:
-                constraint.accessible_doors.add(door_hook)
+                constraint.accessible_doors[door_hook] = crystal
                 # todo: in decoupled, you actually do get the benefit from the hooked door
                 if door_hanger and door_hook.name == door_hanger.name:
                     continue
                 hook = hook_from_door(door_hook)
                 if hook is not None:
                     constraint.benefits[hook] += 1
-
             # is this constraint helpful?
             bene_count = constraint.benefit_count()
             if hanger_type not in self.constraints:
@@ -101,7 +104,6 @@ class SectorDescriptor:
                             self.constraints[hanger_type] = constraint  # replace, no crystal requirement is better
                         elif competitor.crystal_needed or not constraint.crystal_needed:
                             self.constraints[hanger_type].candidate_hangers.add(door_hanger)  # new option, cool
-
                     else:
                         logging.getLogger('').warning(f'You should check {door_hanger.name}, same hook, different access')
                         # probably means we need a slightly different data structure
@@ -142,10 +144,16 @@ class SectorDescriptor:
         # if combined_constraint is not None:
         #     self.constraints[combined_constraint.combined_key()] = combined_constraint
 
+    # assumptions, state_crystal can't be null and represents the last barrier passed over
+    def resolve_crystal_prop(self, state_crystal, region_crystal):
+        if state_crystal != CrystalBarrier.Null:
+            return state_crystal
+        return region_crystal
+
     def reduce_constraints(self):
         def fewest_remaining(item):
             constr, door = item
-            return len(lacking_doors - constr.accessible_doors)
+            return len(lacking_doors - set(constr.accessible_doors.keys()))
 
         constraint_options = []
         fully_satisfied = False
@@ -159,7 +167,7 @@ class SectorDescriptor:
             current_constraint = constraint
             while not done:
                 # figure out what is missing
-                lacking_doors = total_set - current_constraint.accessible_doors
+                lacking_doors = total_set - set(current_constraint.accessible_doors.keys())
                 # can I hook into any of these?
                 connectable = [d for d in lacking_doors if current_constraint.benefits[hanger_from_door(d)] > 0]
                 connectable_constraints = []
@@ -177,7 +185,7 @@ class SectorDescriptor:
                     new_constraint.accessible_doors.update(current_constraint.accessible_doors)
                     used_door = next(d for d in new_constraint.accessible_doors if hook_from_door(d) == hanger_from_door(door))
                     new_constraint.assumed_connections[used_door] = door
-                    new_access_doors = lacking_doors.intersection(combined_c.accessible_doors)
+                    new_access_doors = {d: combined_c.accessible_doors[d] for d in lacking_doors if d in combined_c.accessible_doors}
                     for new_door in new_access_doors:
                         hook = hook_from_door(new_door)
                         # todo: in decoupled, you actually do get the benefit from the hooked door
@@ -199,16 +207,16 @@ class SectorDescriptor:
                         continue
                     # combine with other constraints with and until satisfied_by_multiples?
                     priority = sorted([(k, v) for k, v in self.constraints.items()],
-                                      key=lambda x: len(lacking_doors-constraint.accessible_doors))
-                    chosen_set = set(constraint.accessible_doors)
+                                      key=lambda x: len(lacking_doors-set(constraint.accessible_doors.keys())))
+                    chosen_set = set(constraint.accessible_doors.keys())
                     combined_constraint = SectorConstraint(None, False, 'conjoint', [constraint])
                     while len(chosen_set) < len(total_set):
                         if len(priority) == 0:
                             sector_doors = ', '.join([x.name for x in self.sector.outstanding_doors])
                             raise Exception(f'Problem with determining constraints for a sector: {sector_doors}')
                         k, next_constraint = priority.pop()
-                        if len(lacking_doors.intersection(next_constraint.accessible_doors)) > 0:
-                            chosen_set.update(next_constraint.accessible_doors)
+                        if len(lacking_doors.intersection(set(next_constraint.accessible_doors.keys()))) > 0:
+                            chosen_set.update(set(next_constraint.accessible_doors.keys()))
                             combined_constraint.children.append(next_constraint)
                         if len(combined_constraint.children) > best_length:  # early exit
                             break
@@ -242,7 +250,7 @@ class SectorConstraint:
         self.candidate_hangers = set()  # door options
         self.crystal_needed = crystal_needed  # is a crystal needed or not
         self.benefits = defaultdict(int)  # Hook -> number of type reached
-        self.accessible_doors = set()
+        self.accessible_doors = {}  # dict of doors to crystal state
         self.assumed_connections = {} # dict of paired doors, key leads to value (reverse is true in non-decoupled)
 
     def benefit_count(self):
@@ -262,7 +270,7 @@ class SectorConstraint:
             'candidates': [(x.name if x else 'Entrance') for x in self.candidate_hangers],
             'crystal': self.crystal_needed,
             'benefits': {x.name: y for x, y in self.benefits.items() if y > 0},
-            'reachable': [x.name for x in self.accessible_doors],
+            'reachable': {d.name: crystal_map[c] for d, c in self.accessible_doors.items()},
             'assumptions': {k.name: v.name for k, v in self.assumed_connections.items()}
         }
 
@@ -275,6 +283,15 @@ class SectorConstraint:
             return self.hanger
 
 
+crystal_map = {
+    CrystalBarrier.Null: 'None',
+    CrystalBarrier.Orange: 'Orange',
+    CrystalBarrier.Blue: 'Blue',
+    CrystalBarrier.Either: 'Switch',
+    CrystalBarrier.Both: 'Both'
+}
+
+
 class SimpleExplorationState:
     def __init__(self, respect_traps):
         self.respect_traps = respect_traps
@@ -283,9 +300,7 @@ class SimpleExplorationState:
         self.unattached_doors = []
         self.event_doors = []
 
-        self.visited_orange = []
-        self.visited_blue = []
-        self.visited_doors = set()
+        self.visited_map = {}
         self.events = set()
         self.crystal = CrystalBarrier.Null
 
@@ -298,6 +313,7 @@ class SimpleExplorationState:
         while len(self.avail_doors) > 0:
             explorable_door = self.next_avail_door()
             connect_region = explorable_door.door.entrance.connected_region
+            self.crystal = explorable_door.crystal
             if connect_region is not None and not self.visited(connect_region):
                 self.visit_region(connect_region)
 
@@ -309,15 +325,14 @@ class SimpleExplorationState:
     def visit_region(self, region):
         if region.crystal_switch:
             self.crystal = CrystalBarrier.Either
-        if self.crystal == CrystalBarrier.Either:
-            if region not in self.visited_blue:
-                self.visited_blue.append(region)
-            if region not in self.visited_orange:
-                self.visited_orange.append(region)
-        elif self.crystal in [CrystalBarrier.Orange, CrystalBarrier.Null]:
-            self.visited_orange.append(region)
-        elif self.crystal == CrystalBarrier.Blue:
-            self.visited_blue.append(region)
+        if region not in self.visited_map or self.crystal == CrystalBarrier.Either:
+            self.visited_map[region] = self.crystal
+        elif self.crystal == CrystalBarrier.Null or self.visited_map[region] == CrystalBarrier.Null:
+            self.visited_map[region] = CrystalBarrier.Null
+        elif self.crystal != self.visited_map[region]:
+            self.visited_map[region] = CrystalBarrier.Both   # both blue and orange visited
+        else:
+            self.visited_map[region] = self.crystal  # we're visiting as a specific color, not sure this is reachable
         if region.type == RegionType.Dungeon:
             for location in region.locations:
                 if location not in self.found_locations:
@@ -328,8 +343,6 @@ class SimpleExplorationState:
                 if location.name in flooded_keys_reverse.keys() and self.location_found(
                         flooded_keys_reverse[location.name]):
                     self.perform_event(flooded_keys_reverse[location.name])
-                # if '- Prize' in location.name:
-                #     self.prize_received = True
         for ext in region.exits:
             door = ext.door
             if door is not None:
@@ -337,22 +350,36 @@ class SimpleExplorationState:
                     if door.controller is not None:
                         door = door.controller
                     if door.dest is None:
-                        if not self.in_door_list_ic(door, self.unattached_doors):
-                            self.append_door_to_list(door, self.unattached_doors)
-                    elif (door.req_event is not None and door.req_event not in self.events
-                          and not self.in_door_list(door, self.event_doors)):
+                        self.append_door_to_list(door, self.unattached_doors)
+                    elif door.req_event is not None and door.req_event not in self.events:
                         self.append_door_to_list(door, self.event_doors)
-                    elif not self.in_door_list(door, self.avail_doors):
+                    else:
                         self.append_door_to_list(door, self.avail_doors)
 
+    # Visited Truth Table
+    # Note: self.crystal or state.crystal should never be "Both", this indicates a forcing thing
+    # Prev/State Null    Blue    Orange  Both   Either
+    # Null       T       T       T       ?      f
+    # Blue       T       T       f       ?      f
+    # Orange     T       f       T       ?      f
+    # Both       T       T       T       ?      f
+    # Either     T       T       T       ?      T
+
     def visited(self, region):
+        if region not in self.visited_map:
+            return False
+        prev_visit = self.visited_map[region]
+        if prev_visit == CrystalBarrier.Either:
+            return True
+        if prev_visit == self.crystal:
+            return True
+        if self.crystal == CrystalBarrier.Null:
+            return True
         if self.crystal == CrystalBarrier.Either:
-            return region in self.visited_blue and region in self.visited_orange
-        elif self.crystal in [CrystalBarrier.Orange, CrystalBarrier.Null]:
-            return region in self.visited_orange
-        elif self.crystal == CrystalBarrier.Blue:
-            return region in self.visited_blue
-        return False
+            return False
+        if prev_visit == CrystalBarrier.Both:
+            return True
+        return prev_visit == CrystalBarrier.Null
 
     def flooded_key_check(self, location):
         if location.name not in flooded_keys.keys():
@@ -405,13 +432,23 @@ class SimpleExplorationState:
         return None
 
     def append_door_to_list(self, door, door_list, flag=False):
-        if door.crystal in [CrystalBarrier.Null, CrystalBarrier.Either]:
-            door_list.append(ExplorableDoor(door, self.crystal, flag))
-        elif self.crystal == CrystalBarrier.Either:  # if we found a crystal switch, continue
-            door_list.append(ExplorableDoor(door, self.crystal, flag))
-        elif self.crystal == CrystalBarrier.Null or self.crystal == door.crystal:
-            door_list.append(ExplorableDoor(door, door.crystal, flag))
-        # otherwise we can't go through this door this way
+        existing_exp_door = self.find_door_in_list(door, door_list)
+        if existing_exp_door is None:
+            if door.crystal != CrystalBarrier.Null:
+                if door.crystal == CrystalBarrier.Either or self.crystal in {CrystalBarrier.Null, CrystalBarrier.Either} or self.crystal == door.crystal:
+                    door_list.append(ExplorableDoor(door, door.crystal, flag))
+                # otherwise we can't go through this door this way
+            else:  # nothing forcing
+                door_list.append(ExplorableDoor(door, self.crystal, flag))
+        else:
+            # door must not specify and the crystal must be different
+            if door.crystal == CrystalBarrier.Null and existing_exp_door.crystal != self.crystal:
+                crystal_adj = CrystalBarrier.Null
+                if self.crystal == CrystalBarrier.Either:
+                    crystal_adj = CrystalBarrier.Either
+                elif existing_exp_door.crystal != CrystalBarrier.Null and self.crystal != CrystalBarrier.Null:
+                    crystal_adj = CrystalBarrier.Both
+                existing_exp_door.crystal = crystal_adj
 
 
 # ------------------------------ #
@@ -517,6 +554,7 @@ def main_dungeon_builders(dungeon_pool, sector_pool, portal_pool, gen_log, world
     # find sectors without path from switch to crystal needed
     # find possible transition sectors
     # choose and join
+    handle_crystal_switch_paths(dungeon_map, info)
 
     # find sectors with hardest requirements
     #   dead ends (no benefits) - first - these must be connected to some branch)
@@ -589,6 +627,7 @@ def handle_crystal_switch_constraints(dungeon_map, info):
         else:
             candidates = list(c_switch_sectors.keys())
         chosen = random.choice(candidates)
+        # todo: probably need to handle connectability and check global pol before assignment and merge
         if limitation:
             assign_sector(limitation, chosen, info)
             del c_switch_sectors[chosen]
@@ -600,15 +639,27 @@ def handle_crystal_switch_constraints(dungeon_map, info):
                 merge_sectors(chosen, sector, info)
 
 
+def find_crystal_switch_connectivity(needy_sector, switch_sector):
+    door_options = {door for cl in needy_sector.descriptor.joined_constraints for cons in cl.values()
+                    for door in cons.candidate_hangers if cons.crystal_needed}
+    provided_doors = {door for cl in switch_sector.descriptor.joined_constraints for cons in cl.values()
+                      for door, provided in cons.accessible_doors.items() if provided == CrystalBarrier.Either}
+    # find matches
+    # if no matches, find a connecting sector from dungeon_map/info
+    # the candidates may need a branching factor and the doors be accessible
+    #     if the switch_sector is dumb like GT Compass and the switch door needs to be hooked anyway
+    # pick a match, set up the assumed connections? validate the choice, if bad alert upper loop that they need a new switch sector
+
+
 def find_crystal_constraints(builders, info):
     crystal_needed_sectors = {}
     for b in builders.values():
         if not b.master_sector.c_switch:
-            if any(all(c.crystal_needed for c in cl) for cl in b.master_sector.descriptor.joined_constraints):
+            if any(all(c.crystal_needed for c in cl.values()) for cl in b.master_sector.descriptor.joined_constraints):
                 crystal_needed_sectors[b.master_sector] = b
     for s in info.sector_pool:
         if not s.c_switch:
-            if any(all(c.crystal_needed for c in cl) for cl in s.descriptor.joined_constraints):
+            if any(all(c.crystal_needed for c in cl.values()) for cl in s.descriptor.joined_constraints):
                 crystal_needed_sectors[s] = None  # free agent
     return crystal_needed_sectors
 
@@ -617,6 +668,23 @@ def find_crystal_switches(builders, info):
     c_switch_sectors = {b.master_sector: b for b in builders.values() if b.master_sector.c_switch}
     c_switch_sectors.update({s: None for s in info.sector_pool if s.c_switch})
     return c_switch_sectors
+
+
+def handle_crystal_switch_paths(dungeon_map, info):
+    crystal_needed_sectors = find_crystal_path_constraints(dungeon_map, info)
+    for sector, limitation in crystal_needed_sectors.items():
+        pass
+
+
+def find_crystal_path_constraints(builders, info):
+    crystal_needed_sectors = {}
+    for b in builders.values():
+        if any(all(c.crystal_needed for c in cl.values()) for cl in b.master_sector.descriptor.joined_constraints):
+            crystal_needed_sectors[b.master_sector] = b
+    for s in info.sector_pool:
+        if any(all(c.crystal_needed for c in cl.values()) for cl in s.descriptor.joined_constraints):
+            crystal_needed_sectors[s] = None  # free agent
+    return crystal_needed_sectors
 
 
 # ------------------------------ #

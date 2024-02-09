@@ -1784,6 +1784,7 @@ class CrystalBarrier(FastEnum):
     Blue = 1  # blue must be down and explore state set to Blue
     Orange = 2  # orange must be down and explore state set to Orange
     Either = 3  # you choose to leave this room in Either state
+    Both = 4  # only for propagation, different in that you can use either state, but there's no switch
 
 
 class Door(object):
