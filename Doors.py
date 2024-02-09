@@ -1107,9 +1107,8 @@ def create_doors(world, player):
         create_door(player, 'GT Crystal Conveyor NE', Nrml).dir(No, 0x9d, Right, High).pos(0).kill(),
         create_door(player, 'GT Crystal Conveyor to Corner Barrier - Blue', Lgcl),
         create_door(player, 'GT Crystal Conveyor to Ranged Crystal', Lgcl),
-        create_door(player, 'GT Crystal Conveyor Corner to Left Bypass', Lgcl),
+        create_door(player, 'GT Crystal Conveyor Corner to Left', Lgcl),
         create_door(player, 'GT Crystal Conveyor Corner to Barrier - Blue', Lgcl),
-        create_door(player, 'GT Crystal Conveyor Corner to Barrier - Orange', Lgcl),
         create_door(player, 'GT Crystal Conveyor Corner to Ranged Crystal', Lgcl),
         create_door(player, 'GT Crystal Conveyor Left to Corner Barrier - Orange', Lgcl),
         create_door(player, 'GT Crystal Conveyor Ranged Crystal Exit', Lgcl),
@@ -1149,9 +1148,8 @@ def create_doors(world, player):
         create_door(player, 'GT Double Switch Entry Ranged Switches Exit', Lgcl).no_exit(),  # blocked here for reasons
         create_door(player, 'GT Double Switch Left to Crystal', Lgcl),
         create_door(player, 'GT Double Switch Left Crystal Exit', Lgcl),
-        create_door(player, 'GT Double Switch Left to Entry Barrier - Orange', Lgcl),
+        create_door(player, 'GT Double Switch Left to Entry', Lgcl),
         create_door(player, 'GT Double Switch Left to Pot Corners Bypass', Lgcl),
-        create_door(player, 'GT Double Switch Left to Entry Bypass', Lgcl),
         create_door(player, 'GT Double Switch Left to Exit Bypass', Lgcl).no_exit(),  # considered out of logic
         create_door(player, 'GT Double Switch Pot Corners to Entry Barrier - Orange', Lgcl),
         create_door(player, 'GT Double Switch Pot Corners to Exit Barrier - Blue', Lgcl),
@@ -1448,11 +1446,10 @@ def create_doors(world, player):
 
     world.get_door('GT Crystal Conveyor to Corner Barrier - Blue', player).barrier(CrystalBarrier.Blue)
     world.get_door('GT Crystal Conveyor Corner to Barrier - Blue', player).barrier(CrystalBarrier.Blue)
-    world.get_door('GT Crystal Conveyor Corner to Barrier - Orange', player).barrier(CrystalBarrier.Orange)
     world.get_door('GT Crystal Conveyor Left to Corner Barrier - Orange', player).barrier(CrystalBarrier.Orange)
     world.get_door('GT Crystal Conveyor Ranged Crystal Exit', player).c_switch()
     world.get_door('GT Crystal Conveyor Corner Ranged Crystal Exit', player).c_switch()
-    world.get_door('GT Crystal Conveyor Corner to Left Bypass', player).barrier(CrystalBarrier.Blue)
+    world.get_door('GT Crystal Conveyor Corner to Left', player).c_switch()  # subtle, but relevant to cswitch propagation
     world.get_door('GT Hookshot South-Mid Path', player).c_switch()
     world.get_door('GT Hookshot ES', player).c_switch()
     world.get_door('GT Hookshot Platform Barrier Bypass', player).barrier(CrystalBarrier.Orange)
@@ -1472,8 +1469,7 @@ def create_doors(world, player):
     world.get_door('GT Double Switch Entry to Left Barrier - Orange', player).barrier(CrystalBarrier.Orange)
     world.get_door('GT Double Switch Entry Ranged Switches Exit', player).c_switch()
     world.get_door('GT Double Switch Left Crystal Exit', player).c_switch()
-    world.get_door('GT Double Switch Left to Entry Barrier - Orange', player).barrier(CrystalBarrier.Orange)
-    world.get_door('GT Double Switch Left to Entry Bypass', player).barrier(CrystalBarrier.Blue)
+    world.get_door('GT Double Switch Left to Entry', player).c_switch()  # subtle, but relevant to cswitch propagation
     world.get_door('GT Double Switch Left to Pot Corners Bypass', player).barrier(CrystalBarrier.Blue)
     world.get_door('GT Double Switch Left to Exit Bypass', player).barrier(CrystalBarrier.Orange)
     world.get_door('GT Double Switch Pot Corners to Entry Barrier - Orange', player).barrier(CrystalBarrier.Orange)

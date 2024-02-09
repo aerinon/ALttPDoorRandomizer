@@ -917,7 +917,7 @@ def create_dungeon_regions(world, player):
         create_dungeon_region(player, 'GT Speed Torch Upper', 'Ganon\'s Tower', None, ['GT Speed Torch WN', 'GT Speed Torch NE', 'GT Speed Torch South Path']),
         create_dungeon_region(player, 'GT Pots n Blocks', 'Ganon\'s Tower', None, ['GT Pots n Blocks ES']),
         create_dungeon_region(player, 'GT Crystal Conveyor', 'Ganon\'s Tower', None, ['GT Crystal Conveyor NE', 'GT Crystal Conveyor to Corner Barrier - Blue', 'GT Crystal Conveyor to Ranged Crystal']),
-        create_dungeon_region(player, 'GT Crystal Conveyor Corner', 'Ganon\'s Tower', None, ['GT Crystal Conveyor Corner to Barrier - Blue', 'GT Crystal Conveyor Corner to Barrier - Orange', 'GT Crystal Conveyor Corner to Ranged Crystal', 'GT Crystal Conveyor Corner to Left Bypass']),
+        create_dungeon_region(player, 'GT Crystal Conveyor Corner', 'Ganon\'s Tower', None, ['GT Crystal Conveyor Corner to Barrier - Blue', 'GT Crystal Conveyor Corner to Ranged Crystal', 'GT Crystal Conveyor Corner to Left']),
         create_dungeon_region(player, 'GT Crystal Conveyor Left', 'Ganon\'s Tower', None, ['GT Crystal Conveyor WN', 'GT Crystal Conveyor Left to Corner Barrier - Orange']),
         create_dungeon_region(player, 'GT Crystal Conveyor - Ranged Crystal', 'Ganon\'s Tower', None, ['GT Crystal Conveyor Ranged Crystal Exit']),
         create_dungeon_region(player, 'GT Crystal Conveyor Corner - Ranged Crystal', 'Ganon\'s Tower', None, ['GT Crystal Conveyor Corner Ranged Crystal Exit']),
@@ -938,7 +938,7 @@ def create_dungeon_regions(world, player):
 
         create_dungeon_region(player, 'GT Double Switch Entry', 'Ganon\'s Tower', None, ['GT Double Switch NW', 'GT Double Switch Entry to Left Barrier - Orange', 'GT Double Switch Entry to Pot Corners Barrier - Orange', 'GT Double Switch Entry to Ranged Switches']),
         create_dungeon_region(player, 'GT Double Switch Entry - Ranged Switches', 'Ganon\'s Tower', None, ['GT Double Switch Entry Ranged Switches Exit']),
-        create_dungeon_region(player, 'GT Double Switch Left', 'Ganon\'s Tower', None, ['GT Double Switch Left to Crystal', 'GT Double Switch Left to Entry Barrier - Orange', 'GT Double Switch Left to Entry Bypass', 'GT Double Switch Left to Pot Corners Bypass', 'GT Double Switch Left to Exit Bypass']),
+        create_dungeon_region(player, 'GT Double Switch Left', 'Ganon\'s Tower', None, ['GT Double Switch Left to Crystal', 'GT Double Switch Left to Entry', 'GT Double Switch Left to Pot Corners Bypass', 'GT Double Switch Left to Exit Bypass']),
         create_dungeon_region(player, 'GT Double Switch Left - Crystal', 'Ganon\'s Tower', None, ['GT Double Switch Left Crystal Exit']),
         create_dungeon_region(player, 'GT Double Switch Pot Corners', 'Ganon\'s Tower', ['Ganons Tower - Double Switch Pot Key'], ['GT Double Switch Pot Corners to Entry Barrier - Orange', 'GT Double Switch Pot Corners to Exit Barrier - Blue', 'GT Double Switch Pot Corners to Ranged Switches']),
         create_dungeon_region(player, 'GT Double Switch Pot Corners - Ranged Switches', 'Ganon\'s Tower', None, ['GT Double Switch Pot Corners Ranged Switches Exit']),
