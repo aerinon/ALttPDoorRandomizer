@@ -14,7 +14,8 @@ from Dungeons import dungeon_bigs, dungeon_hints
 from Items import ItemFactory
 from RoomData import DoorKind, PairedDoor, reset_rooms
 from source.dungeon.DungeonGen2 import create_dungeon_builders_new
-from source.dungeon.DungeonGen3 import create_dungeon_builders_prototype
+# from source.dungeon.DungeonGen3 import create_dungeon_builders_prototype
+from source.dungeon.DungeonGenLocalSearch import create_dungeon_builders_prototype
 from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
 from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
 from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths, drop_entrances

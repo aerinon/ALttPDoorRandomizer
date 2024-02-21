@@ -1,6 +1,5 @@
 import logging
-import random
-import typing
+import RaceRandom as random
 from collections import defaultdict, deque, Counter
 
 from BaseClasses import Direction, RegionType, CrystalBarrier, DoorType, Door, flooded_keys
@@ -551,10 +550,11 @@ def main_dungeon_builders(dungeon_pool, sector_pool, portal_pool, gen_log, world
     # choose and join
     handle_crystal_switch_constraints(dungeon_map, info)  # step 1
 
+    # todo: how necessary is this
     # find sectors without path from switch to crystal needed
     # find possible transition sectors
     # choose and join
-    handle_crystal_switch_paths(dungeon_map, info)
+    handle_crystal_switch_paths(dungeon_map, info)  # todo: ???
 
     # find sectors with hardest requirements
     #   dead ends (no benefits) - first - these must be connected to some branch)
@@ -627,7 +627,11 @@ def handle_crystal_switch_constraints(dungeon_map, info):
         else:
             candidates = list(c_switch_sectors.keys())
         chosen = random.choice(candidates)
+        assumptions, extra_sectors = find_crystal_switch_connectivity(sector, chosen)
+
         # todo: probably need to handle connectability and check global pol before assignment and merge
+
+
         if limitation:
             assign_sector(limitation, chosen, info)
             del c_switch_sectors[chosen]
@@ -638,16 +642,28 @@ def handle_crystal_switch_constraints(dungeon_map, info):
             else:
                 merge_sectors(chosen, sector, info)
 
-
+# returns a couple things:
+# first: it returns a dict of assumed connections door leads to doors (e.g. crys -> needy)
+# second: additional sectors to merge
 def find_crystal_switch_connectivity(needy_sector, switch_sector):
     door_options = {door for cl in needy_sector.descriptor.joined_constraints for cons in cl.values()
                     for door in cons.candidate_hangers if cons.crystal_needed}
     provided_doors = {door for cl in switch_sector.descriptor.joined_constraints for cons in cl.values()
                       for door, provided in cons.accessible_doors.items() if provided == CrystalBarrier.Either}
     # find matches
-    # if no matches, find a connecting sector from dungeon_map/info
-    # the candidates may need a branching factor and the doors be accessible
-    #     if the switch_sector is dumb like GT Compass and the switch door needs to be hooked anyway
+    matches = [{p: d} for d in door_options for p in provided_doors if hanger_from_door(d)==hook_from_door(p)]
+    extra_sectors = []
+    if len(matches) <= 0:
+        pass
+        # todo: if no matches, find a connecting sector from dungeon_map/info
+        # the candidates may need a branching factor and the doors be accessible
+        #     if the switch_sector is dumb like GT Compass and the switch door needs to be hooked anyway
+    if len(matches) == 1:
+        return next(iter(matches)), extra_sectors
+    elif len(matches) > 1:
+        assumptions = random.choice(matches)
+        # todo: figure out associated extra sectors?
+        return assumptions, extra_sectors
     # pick a match, set up the assumed connections? validate the choice, if bad alert upper loop that they need a new switch sector
 
 
@@ -685,6 +701,25 @@ def find_crystal_path_constraints(builders, info):
         if any(all(c.crystal_needed for c in cl.values()) for cl in s.descriptor.joined_constraints):
             crystal_needed_sectors[s] = None  # free agent
     return crystal_needed_sectors
+
+
+def handle_directional_constraints(builders, info):
+    # todo: master sector issues? exclude bosses?
+    # problems is a list of pairs of restricted constraint list to the sector they belong to
+    # need limitation thing?
+    problems = [(cl, b.master_sector) for b in builders.values() for cl in b.master_sector.descriptor.joined_constraints
+                if len(cl) == 1 and next(iter(cl.keys())) is not None]
+    problems.extend([(cl, s) for s in info.sector_pool for cl in s.descriptor.joined_constraints if len(cl) == 1])
+    sorted(problems, key=lambda prob: sum(next(iter(prob[0].items()))[1].benefits.values()))
+
+    for constraint, sector in problems.items():
+        if sum(constraint.benefits.values()) == 0:
+            # dead end and needs a branching sector unless boss room?
+            pass
+
+
+
+
 
 
 # ------------------------------ #
