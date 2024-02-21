@@ -2045,6 +2045,9 @@ class Sector(object):
         self.descriptor = None
         self.portal = None
 
+        self.locked = False
+        self.pol = None
+
     def region_set(self):
         if self.r_name_set is None:
             self.r_name_set = dict.fromkeys(map(lambda r: r.name, self.regions))
