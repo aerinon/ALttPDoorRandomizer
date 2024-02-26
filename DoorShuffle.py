@@ -912,7 +912,10 @@ def main_dungeon_pool(dungeon_pool, world, player):
     handle_split_dungeons(dungeon_builders, recombinant_builders, entrances_map, builder_info)
 
     main_dungeon_generation(dungeon_builders, recombinant_builders, connections_tuple, world, player)
+    finish_dungeon_setup(door_type_pools, world, player)
 
+
+def finish_dungeon_setup(door_type_pools, world, player):
     setup_custom_door_types(world, player)
     paths = determine_required_paths(world, player)
     shuffle_door_types(door_type_pools, paths, world, player)
@@ -4625,6 +4628,7 @@ def link_doors_prototype(world, player):
 
 def main_dungeon_pool_prototype(dungeon_pool, world, player):
     find_inaccessible_regions(world, player)
+    entrances_map, potentials, connections = determine_entrance_list(world, player)
     dungeon_builders = {}
     door_type_pools = []
     for pool, region_list in dungeon_pool:
@@ -4642,6 +4646,13 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
                 (portal_pool if len(sector.outstanding_doors) == 0 else sector_pool).append(sector)
             # todo: portal pool
             analyze_portals(world, player)
-            builders = create_dungeon_builders_prototype(pool, sector_pool, portal_pool, world, player)
+            dungeon_builders = create_dungeon_builders_prototype(pool, sector_pool, portal_pool, world, player)
+        door_type_pools.append((pool, DoorTypePool(pool, world, player)))
+
+    update_forced_keys(dungeon_builders, entrances_map, world, player)
+
+    main_dungeon_generation(dungeon_builders, recombinant_builders, connections_tuple, world, player)
+
+
 
 

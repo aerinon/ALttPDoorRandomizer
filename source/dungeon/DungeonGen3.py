@@ -72,8 +72,8 @@ class SectorDescriptor:
             for explorable in state.unattached_doors:
                 if explorable.door == DoorType.Logical:  # skip sanc mirror route in this calc
                     continue
-                crystal = self.resolve_crystal_prop(explorable.crystal, state.visited_map[explorable.door.entrance.parent_region])
-                self.reachability[door].append((explorable.door, crystal))
+                # crystal = self.resolve_crystal_prop(explorable.crystal, state.visited_map[explorable.door.entrance.parent_region])
+                self.reachability[door].append((explorable.door, explorable.crystal))
         for door_hanger, reached_list in self.reachability.items():
             crystal_needed = any(x[1] in {CrystalBarrier.Blue, CrystalBarrier.Both} for x in reached_list)
             hanger_type = None if door_hanger is None else hook_from_door(door_hanger)
