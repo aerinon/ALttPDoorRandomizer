@@ -6,8 +6,9 @@ import time
 from BaseClasses import CrystalBarrier, DoorType, Hook, RegionType, Sector
 from BaseClasses import hook_from_door, flooded_keys
 from Regions import dungeon_events, flooded_keys_reverse
+from source.dungeon.DungeonGenerationCommon import dungeon_portals
 
-def create_dungeon(builder, world, player):
+def create_dungeon(builder, entrances_map, world, player):
     # proposed_map = generate_dungeon_find_proposal(builder, entrance_region_names, split_dungeon, world, player)
     proposed_map = generate_dungeon_find_proposal(builder, world, player)
     builder.valid_proposal = proposed_map
@@ -30,38 +31,86 @@ def create_dungeon(builder, world, player):
     return master_sector
 
 
+def determine_entrance_regions(builder, world, player):
+    d_name = next((key for key in dungeon_portals if builder.name.startswith(key)), None)
+    builder_portals = [world.get_portal(p, player) for p in dungeon_portals[d_name]]
+    builder_portals = [p for p in builder_portals if any(s.portal == p for s in builder.sectors)]
+    # todo: FIX BUG builder portals too much for split dungeons
+
+    # todo: customized portals
+    # todo: already fixed portals i.e. intensity 2
+    entrance_regions = []
+
+    # todo: standard and rupee_bow flags
+    destination_portals = [p for p in builder_portals if p.destination]
+    non_destination_portals = [p for p in builder_portals if not p.destination]
+
+    master_door_list = []
+    for sector in builder.sectors:
+        for d in sector.outstanding_doors:
+            if d.portalAble:
+                master_door_list.append(d)
+    for portal in destination_portals:
+        candidates = find_portal_candidates(master_door_list, True)
+        assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, False)
+    if len(non_destination_portals) > 1:
+        primary_portal = random.choice(non_destination_portals)
+    else:
+        primary_portal = non_destination_portals[0]
+    non_destination_portals.remove(primary_portal)
+    candidates = find_portal_candidates(master_door_list)
+    assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, primary_portal)
+    for portal in non_destination_portals:
+        candidates = find_portal_candidates(master_door_list, False, True)
+        candidate = assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal)
+        if candidate.deadEnd:
+            if candidate.passage:
+                portal.destination = True
+            else:
+                portal.deadEnd = True
+    # todo: drop downs
+    return entrance_regions
+
+
+def assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, record_entrance=True):
+    logger = logging.getLogger('')
+    candidate = random.choice(candidates)
+    master_door_list.remove(candidate)
+    logger.debug(f' Portal Link {portal.name} <-> {candidate.name}')
+    connect_doors(portal.door, candidate)
+    if record_entrance:
+        entrance_regions.append(candidate.entrance.parent_region)
+    clean_up_outstanding_doors(builder, portal.door)
+    clean_up_outstanding_doors(builder, candidate)
+    portal.door = candidate
+    return candidate
+
+
+def clean_up_outstanding_doors(builder, door):
+    for sector in builder.sectors:
+        if door in sector.outstanding_doors:
+            sector.outstanding_doors = [d for d in sector.outstanding_doors if d != door]
+
+
+def find_portal_candidates(door_list, need_passage=False, dead_end_allowed=False, standard=False, rupee_bow=False):
+    ret = door_list
+    # todo: bk_shuffle for desert tiles 2
+    if need_passage:
+        ret = [x for x in ret if x.passage]
+    if not dead_end_allowed:
+        ret = [x for x in ret if not x.deadEnd]
+    if standard:
+        ret = [x for x in ret if not x.standard_restricted]
+    if rupee_bow:
+        ret = [x for x in ret if not x.rupee_bow_restricted]
+    return ret
+
+
 def generate_dungeon_find_proposal(builder, world, player):
     logger = logging.getLogger('')
     name = builder.name
     logger.debug(f'Generating Dungeon: {name}')
-    # entrance_regions = convert_regions(entrance_region_names, world, player)
-    # excluded = {}
-    # for region in entrance_regions:
-    #     portal = next((x for x in world.dungeon_portals[player] if x.door.entrance.parent_region == region), None)
-    #     if portal:
-    #         if portal.destination:
-    #             excluded[region] = None
-    #         elif len(entrance_regions) > 1:
-    #             p_region = portal.door.entrance.connected_region
-    #             access_region = next(x.parent_region for x in p_region.entrances
-    #                                  if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld])
-    #             if (access_region.name in world.inaccessible_regions[player] and
-    #                     region.name not in world.enabled_entrances[player]):
-    #                 excluded[region] = None
-    #     elif split_dungeon and builder.sewers_access and builder.sewers_access.entrance.parent_region == region:
-    #         continue
-    #     drop_region = next((x.parent_region for x in region.entrances
-    #                         if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]
-    #                         or x.parent_region.name == 'Sewer Drop'), None)
-    #     if drop_region:  # for holes
-    #         if drop_region.name == 'Sewer Drop':
-    #             drop_region = next(x.parent_region for x in drop_region.entrances)
-    #         if (drop_region.name in world.inaccessible_regions[player] and
-    #                 region.name not in world.enabled_entrances[player]):
-    #             excluded[region] = None
-    #         elif region in excluded:
-    #             del excluded[region]
-    # entrance_regions = [x for x in entrance_regions if x not in excluded.keys()]
+    entrance_regions = determine_entrance_regions(builder, world, player)
     doors_to_connect, idx = {}, 0
     all_regions = set()
     bk_special = False
@@ -158,7 +207,7 @@ def modify_proposal(proposed_map, explored_state, doors_to_connect, hash_code_se
     logger = logging.getLogger('')
     hash_code, itr = None, 0
     while hash_code is None or hash_code in hash_code_set:
-        if itr > 10:
+        if itr > 1000:
             proposed_map = create_random_proposal(doors_to_connect, world, player)
             hash_code = proposal_hash(doors_to_connect, proposed_map)
             return proposed_map, hash_code

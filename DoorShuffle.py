@@ -18,6 +18,7 @@ from source.dungeon.DungeonGen2 import create_dungeon_builders_new
 from source.dungeon.DungeonGenLocalSearch import create_dungeon_builders_prototype
 from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
 from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
+from source.dungeon.DungeonStitcherV2 import create_dungeon
 from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths, drop_entrances
 from DungeonGenerator import create_dungeon_builders, split_dungeon_builder, simple_dungeon_builder, default_dungeon_entrances
 from DungeonGenerator import dungeon_portals, dungeon_drops, connect_doors, count_reserved_locations
@@ -1004,15 +1005,16 @@ def cross_dungeon_clean_up(world, player):
 
 def update_forced_keys(dungeon_builders, entrances_map, world, player):
     for builder in dungeon_builders.values():
-        builder.entrance_list = list(entrances_map[builder.name])
-        dungeon_obj = world.get_dungeon(builder.name, player)
+        dungeon_name = next((key for key in entrances_map if builder.name.startswith(key)), None)
+        builder.entrance_list = list(entrances_map[dungeon_name])
+        dungeon_obj = world.get_dungeon(dungeon_name, player)
         for sector in builder.sectors:
             for region in sector.regions:
                 region.dungeon = dungeon_obj
                 for loc in region.locations:
                     if loc.forced_item:
-                        key_name = (dungeon_keys[builder.name] if loc.name != 'Hyrule Castle - Big Key Drop'
-                                    else dungeon_bigs[builder.name])
+                        key_name = (dungeon_keys[dungeon_name] if loc.name != 'Hyrule Castle - Big Key Drop'
+                                    else dungeon_bigs[dungeon_name])
                         loc.forced_item = loc.item = ItemFactory(key_name, player)
 
 
@@ -4644,14 +4646,27 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
             sector_pool, portal_pool = [], []
             for sector in sectors:
                 (portal_pool if len(sector.outstanding_doors) == 0 else sector_pool).append(sector)
-            # todo: portal pool
+            # todo: analyze not based on inaccessible regions
+            # todo: deactivate some portals - because they are on the same supertile
             analyze_portals(world, player)
             dungeon_builders = create_dungeon_builders_prototype(pool, sector_pool, portal_pool, world, player)
         door_type_pools.append((pool, DoorTypePool(pool, world, player)))
 
     update_forced_keys(dungeon_builders, entrances_map, world, player)
 
-    main_dungeon_generation(dungeon_builders, recombinant_builders, connections_tuple, world, player)
+    main_dungeon_generation_prototype(dungeon_builders, entrances_map, world, player)
+
+    finish_dungeon_setup(door_type_pools, world, player)
+
+
+def main_dungeon_generation_prototype(dungeon_builders, entrances_map, world, player):
+
+    for name, builder in dungeon_builders.items():
+        # choose_portals_prototype(builder, entrances_map, world, player)
+        create_dungeon(builder, entrances_map, world, player)
+        # todo: assign portals properly
+
+
 
 
 

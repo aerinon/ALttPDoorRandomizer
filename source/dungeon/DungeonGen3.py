@@ -43,7 +43,8 @@ class SectorDescriptor:
         self.init_parity_id()
         self.analyze_sector(v_trap_flag)
 
-        self.joined_constraints = [self.constraints]
+        self.joined_constraints = []
+        # self.joined_constraints = [self.constraints]
 
     def init_parity_id(self):
         dir_map = defaultdict(int)
@@ -74,74 +75,47 @@ class SectorDescriptor:
                     continue
                 # crystal = self.resolve_crystal_prop(explorable.crystal, state.visited_map[explorable.door.entrance.parent_region])
                 self.reachability[door].append((explorable.door, explorable.crystal))
-        for door_hanger, reached_list in self.reachability.items():
-            crystal_needed = any(x[1] in {CrystalBarrier.Blue, CrystalBarrier.Both} for x in reached_list)
-            hanger_type = None if door_hanger is None else hook_from_door(door_hanger)
-            constraint = SectorConstraint(hanger_type, crystal_needed)
-            constraint.candidate_hangers.add(door_hanger)
-            for door_hook, crystal in reached_list:
-                constraint.accessible_doors[door_hook] = crystal
-                # todo: in decoupled, you actually do get the benefit from the hooked door
-                if door_hanger and door_hook.name == door_hanger.name:
-                    continue
-                hook = hook_from_door(door_hook)
-                if hook is not None:
-                    constraint.benefits[hook] += 1
-            # is this constraint helpful?
-            bene_count = constraint.benefit_count()
-            if hanger_type not in self.constraints:
-                self.constraints[hanger_type] = constraint
-            else:
-                competitor = self.constraints[hanger_type]
-                comp_count = competitor.benefit_count()
-                if comp_count < bene_count:
-                    # replace with the new guy, he's just better
-                    self.constraints[hanger_type] = constraint
-                elif comp_count == bene_count:
-                    if competitor.accessible_doors == constraint.accessible_doors:
-                        if competitor.crystal_needed and not constraint.crystal_needed:
-                            self.constraints[hanger_type] = constraint  # replace, no crystal requirement is better
-                        elif competitor.crystal_needed or not constraint.crystal_needed:
-                            self.constraints[hanger_type].candidate_hangers.add(door_hanger)  # new option, cool
-                    else:
-                        logging.getLogger('').warning(f'You should check {door_hanger.name}, same hook, different access')
-                        # probably means we need a slightly different data structure
-                # else, this constraint is worse than the previous one
 
-        complete_constraints = {k: c for k, c in self.constraints.items() if len(c.accessible_doors) == self.degree}
-        if len(complete_constraints) > 0:
-            self.constraints = complete_constraints  # done, let's just use the complete ones
-        else:
-            self.reduce_constraints()  # if possible
-
-        # check if each constraint satisfies completely the sector, or if a combination is needed
-        # priority = sorted([(k, v) for k, v in self.constraints.items()], key=lambda x: x[1].benefit_count(), reverse=True)
-        # total_set = {x.name for x in self.sector.outstanding_doors}
-        # satisfaction_flag = False
-        # chosen_set = set()
-        # combined_constraint = None
-        # for hanger_type, constraint in priority:
-        #     is_complete = len(constraint.accessible_doors) == self.degree
-        #     if is_complete:
-        #         satisfaction_flag = True
-        #     elif satisfaction_flag:  # we're satisfied, we don't need this
-        #         del self.constraints[hanger_type]
-        #     elif combined_constraint is None:
-        #         combined_constraint = SectorConstraint(None, False, 'conjoint', [constraint])
-        #         chosen_set.update(x.name for x in constraint.accessible_doors)
-        #         del self.constraints[hanger_type]
+        return
+        # for door_hanger, reached_list in self.reachability.items():
+        #     crystal_needed = any(x[1] in {CrystalBarrier.Blue, CrystalBarrier.Both} for x in reached_list)
+        #     hanger_type = None if door_hanger is None else hook_from_door(door_hanger)
+        #     constraint = SectorConstraint(hanger_type, crystal_needed)
+        #     constraint.candidate_hangers.add(door_hanger)
+        #     for door_hook, crystal in reached_list:
+        #         constraint.accessible_doors[door_hook] = crystal
+        #         # todo: in decoupled, you actually do get the benefit from the hooked door
+        #         if door_hanger and door_hook.name == door_hanger.name:
+        #             continue
+        #         hook = hook_from_door(door_hook)
+        #         if hook is not None:
+        #             constraint.benefits[hook] += 1
+        #     # is this constraint helpful?
+        #     bene_count = constraint.benefit_count()
+        #     if hanger_type not in self.constraints:
+        #         self.constraints[hanger_type] = constraint
         #     else:
-        #         lacking_set = total_set.difference(chosen_set)
-        #         candidate_set = {x.name for x in constraint.accessible_doors}
-        #         reduction = len(lacking_set.intersection(candidate_set))
-        #         if reduction > 0:
-        #             combined_constraint.children.append(constraint)
-        #             if reduction == len(lacking_set):
-        #                 satisfaction_flag = True
-        #         # else, what's the point?
-        #         del self.constraints[hanger_type]
-        # if combined_constraint is not None:
-        #     self.constraints[combined_constraint.combined_key()] = combined_constraint
+        #         competitor = self.constraints[hanger_type]
+        #         comp_count = competitor.benefit_count()
+        #         if comp_count < bene_count:
+        #             # replace with the new guy, he's just better
+        #             self.constraints[hanger_type] = constraint
+        #         elif comp_count == bene_count:
+        #             if competitor.accessible_doors == constraint.accessible_doors:
+        #                 if competitor.crystal_needed and not constraint.crystal_needed:
+        #                     self.constraints[hanger_type] = constraint  # replace, no crystal requirement is better
+        #                 elif competitor.crystal_needed or not constraint.crystal_needed:
+        #                     self.constraints[hanger_type].candidate_hangers.add(door_hanger)  # new option, cool
+        #             else:
+        #                 logging.getLogger('').warning(f'You should check {door_hanger.name}, same hook, different access')
+        #                 # probably means we need a slightly different data structure
+        #         # else, this constraint is worse than the previous one
+        #
+        # complete_constraints = {k: c for k, c in self.constraints.items() if len(c.accessible_doors) == self.degree}
+        # if len(complete_constraints) > 0:
+        #     self.constraints = complete_constraints  # done, let's just use the complete ones
+        # else:
+        #     self.reduce_constraints()  # if possible
 
     # assumptions, state_crystal can't be null and represents the last barrier passed over
     def resolve_crystal_prop(self, state_crystal, region_crystal):
