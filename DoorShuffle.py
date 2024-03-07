@@ -759,28 +759,32 @@ def assign_portal(candidates, possible_portals, custom, world, player):
         candidates.remove(candidate)
         candidate = random.choice(candidates)
     if candidate != portal.door:
-        if candidate.entranceFlag:
-            for other_portal in world.dungeon_portals[player]:
-                if other_portal.door == candidate:
-                    other_portal.door = None
-                    break
-        old_door = portal.door
-        if old_door:
-            old_door.entranceFlag = False
-            if old_door.name not in ['Hyrule Castle Lobby S', 'Sanctuary S', 'Hera Lobby S']:
-                old_door_kind = DoorKind.NormalLow if old_door.layer or old_door.pseudo_bg else DoorKind.Normal
-                world.get_room(old_door.roomIndex, player).change(old_door.doorListPos, old_door_kind)
-        portal.change_door(candidate)
-        if candidate.name not in ['Hyrule Castle Lobby S', 'Sanctuary S']:
-            if candidate.name == 'Swamp Hub S':
-                new_door_kind = DoorKind.CaveEntranceLow
-            elif candidate.layer or candidate.pseudo_bg:
-                new_door_kind = DoorKind.DungeonEntranceLow
-            else:
-                new_door_kind = DoorKind.DungeonEntrance
-            world.get_room(candidate.roomIndex, player).change(candidate.doorListPos, new_door_kind)
-        candidate.entranceFlag = True
+        assign_portal_helper(candidate, portal, world, player)
     return candidate, portal
+
+
+def assign_portal_helper(candidate, portal, world, player):
+    if candidate.entranceFlag:
+        for other_portal in world.dungeon_portals[player]:
+            if other_portal.door == candidate:
+                other_portal.door = None
+                break
+    old_door = portal.door
+    if old_door:
+        old_door.entranceFlag = False
+        if old_door.name not in ['Hyrule Castle Lobby S', 'Sanctuary S', 'Hera Lobby S']:
+            old_door_kind = DoorKind.NormalLow if old_door.layer or old_door.pseudo_bg else DoorKind.Normal
+            world.get_room(old_door.roomIndex, player).change(old_door.doorListPos, old_door_kind)
+    portal.change_door(candidate)
+    if candidate.name not in ['Hyrule Castle Lobby S', 'Sanctuary S']:
+        if candidate.name == 'Swamp Hub S':
+            new_door_kind = DoorKind.CaveEntranceLow
+        elif candidate.layer or candidate.pseudo_bg:
+            new_door_kind = DoorKind.DungeonEntranceLow
+        else:
+            new_door_kind = DoorKind.DungeonEntrance
+        world.get_room(candidate.roomIndex, player).change(candidate.doorListPos, new_door_kind)
+    candidate.entranceFlag = True
 
 
 def clean_up_portal_assignment(portal_assignment, dungeon, portal, master_door_list, outstanding_portals):
@@ -4630,6 +4634,7 @@ def link_doors_prototype(world, player):
 
 def main_dungeon_pool_prototype(dungeon_pool, world, player):
     find_inaccessible_regions(world, player)
+    add_inaccessible_doors(world, player)
     entrances_map, potentials, connections = determine_entrance_list(world, player)
     dungeon_builders = {}
     door_type_pools = []
@@ -4660,11 +4665,27 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
 
 
 def main_dungeon_generation_prototype(dungeon_builders, entrances_map, world, player):
-
     for name, builder in dungeon_builders.items():
         # choose_portals_prototype(builder, entrances_map, world, player)
         create_dungeon(builder, entrances_map, world, player)
-        # todo: assign portals properly
+    # assign portals properly
+    for portal in world.dungeon_portals[player]:
+        if portal.default_door != portal.door:
+            assign_portal_helper(portal.door, portal, world, player)
+    # combine builders
+    if 'Skull Woods Front' in dungeon_builders:
+        b1 = dungeon_builders.pop('Skull Woods Front')
+        b2 = dungeon_builders.pop('Skull Woods Back')
+        b1.master_sector.regions.extend(b2.master_sector.regions)
+        dungeon_builders['Skull Woods'] = b1
+    if 'Desert Palace Front' in dungeon_builders:
+        b1 = dungeon_builders.pop('Desert Palace Front')
+        b2 = dungeon_builders.pop('Desert Palace Back')
+        b1.master_sector.regions.extend(b2.master_sector.regions)
+        dungeon_builders['Desert Palace'] = b1
+    # todo: standard recombination
+    world.dungeon_layouts[player] = dungeon_builders
+
 
 
 
