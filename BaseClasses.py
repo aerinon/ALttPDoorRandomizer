@@ -1672,6 +1672,7 @@ class Hook(Enum):
     East = 3
     Stairs = 4
     PitWarp = 5
+    NormalPortal = 6
 
 
 hook_dir_map = {
@@ -2056,7 +2057,6 @@ class Sector(object):
         self.portal = None
 
         self.locked = False
-        self.pol = None
 
     def region_set(self):
         if self.r_name_set is None:
@@ -2160,6 +2160,7 @@ class Portal(object):
         self.player = player
         self.name = name
         self.door = door
+        self.default_door = door
         self.ent_offset = entrance_offset
         self.exit_offset = exit_offset
         self.boss_exit_idx = boss_exit_idx
