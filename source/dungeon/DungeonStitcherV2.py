@@ -7,6 +7,7 @@ from BaseClasses import CrystalBarrier, DoorType, Hook, RegionType, Sector
 from BaseClasses import hook_from_door, flooded_keys
 from Regions import dungeon_events, flooded_keys_reverse
 from source.dungeon.DungeonGenerationCommon import dungeon_portals
+from source.dungeon.DungeonGenLocalSearch import default_lobby_drops
 
 def create_dungeon(builder, entrances_map, world, player):
     # proposed_map = generate_dungeon_find_proposal(builder, entrance_region_names, split_dungeon, world, player)
@@ -35,7 +36,6 @@ def determine_entrance_regions(builder, world, player):
     d_name = next((key for key in dungeon_portals if builder.name.startswith(key)), None)
     builder_portals = [world.get_portal(p, player) for p in dungeon_portals[d_name]]
     builder_portals = [p for p in builder_portals if any(s.portal == p for s in builder.sectors)]
-    # todo: FIX BUG builder portals too much for split dungeons
 
     # todo: customized portals
     # todo: already fixed portals i.e. intensity 2
@@ -68,7 +68,19 @@ def determine_entrance_regions(builder, world, player):
                 portal.destination = True
             else:
                 portal.deadEnd = True
-    # todo: drop downs
+    for drop_region in default_lobby_drops:
+        if any(drop_region in s.region_set() for s in builder.sectors):
+            region = world.get_region(drop_region, player)
+            parent_region = next((x.parent_region for x in region.entrances
+                                if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]
+                                or x.parent_region.name == 'Sewer Drop'), None)
+            if parent_region.name == 'Sewer Drop':
+                parent_region = next(x.parent_region for x in parent_region.entrances)
+            # access to the parent_region may be gated by this dungeon, don't depend on it
+            # possible exception? drop down like skull back in insanity entrance modes? Do I need to detect that?
+            if parent_region.name not in world.inaccessible_regions[player]:
+                entrance_regions.append(region)
+
     return entrance_regions
 
 
