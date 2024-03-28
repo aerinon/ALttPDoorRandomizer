@@ -897,6 +897,16 @@ def cnt_non_bk_locations(sector):
     return count
 
 
+def score_door(item):
+    door, sector = item
+    score = 0
+    longest = max(len(l) for d, l in sector.descriptor.reachability.items())
+    score = len(sector.descriptor.reachability[door])
+    if score == longest:
+        score += 100
+    return score
+
+
 class Balance:
     def __init__(self, name, info, sector=None):
         self.name = name
