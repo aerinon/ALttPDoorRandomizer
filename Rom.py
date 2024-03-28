@@ -655,9 +655,10 @@ def patch_rom(world, rom, player, team, is_mystery=False):
     if world.doorShuffle[player] == 'basic':
         rom.write_byte(0x138002, 1)
     for door in world.doors:
-        if door.dest is not None and isinstance(door.dest, Door) and \
-                door.player == player and door.type in [DoorType.Normal, DoorType.SpiralStairs,
-                                                        DoorType.Open, DoorType.StraightStairs, DoorType.Ladder]:
+        if door.dest is not None and isinstance(door.dest, Door) and\
+             not door.entranceFlag and not door.traversal_only and\
+             door.player == player and door.type in [DoorType.Normal, DoorType.SpiralStairs,
+                                                     DoorType.Open, DoorType.StraightStairs, DoorType.Ladder]:
             rom.write_bytes(door.getAddress(), door.dest.getTarget(door))
     for paired_door in world.paired_doors[player]:
         rom.write_bytes(paired_door.address_a(world, player), paired_door.rom_data_a(world, player))
