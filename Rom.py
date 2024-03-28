@@ -650,6 +650,7 @@ def patch_rom(world, rom, player, team, is_mystery=False):
         rom.write_byte(0x138002, 1)
     for door in world.doors:
         if door.dest is not None and isinstance(door.dest, Door) and\
+             not door.entranceFlag and not door.traversal_only and\
              door.player == player and door.type in [DoorType.Normal, DoorType.SpiralStairs,
                                                      DoorType.Open, DoorType.StraightStairs, DoorType.Ladder]:
             rom.write_bytes(door.getAddress(), door.dest.getTarget(door))

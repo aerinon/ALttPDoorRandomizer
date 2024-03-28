@@ -7,7 +7,7 @@ from BaseClasses import CrystalBarrier, DoorType, Hook, RegionType, Sector
 from BaseClasses import hook_from_door, flooded_keys
 from Regions import dungeon_events, flooded_keys_reverse
 from source.dungeon.DungeonGenerationCommon import dungeon_portals
-from source.dungeon.DungeonGenLocalSearch import default_lobby_drops
+from source.dungeon.DungeonGenLocalSearch import default_lobby_drops, do_transitivity_check
 
 def create_dungeon(builder, entrances_map, world, player):
     # proposed_map = generate_dungeon_find_proposal(builder, entrance_region_names, split_dungeon, world, player)
@@ -42,8 +42,11 @@ def determine_entrance_regions(builder, world, player):
     entrance_regions = []
 
     # todo: standard and rupee_bow flags
-    destination_portals = [p for p in builder_portals if p.destination]
-    non_destination_portals = [p for p in builder_portals if not p.destination]
+    if len(builder_portals) == 1:  # only one access
+        destination_portals, non_destination_portals = [], builder_portals
+    else:
+        destination_portals = [p for p in builder_portals if p.destination]
+        non_destination_portals = [p for p in builder_portals if not p.destination]
 
     master_door_list = []
     for sector in builder.sectors:
@@ -59,6 +62,7 @@ def determine_entrance_regions(builder, world, player):
         primary_portal = non_destination_portals[0]
     non_destination_portals.remove(primary_portal)
     candidates = find_portal_candidates(master_door_list)
+    candidates = [c for c in candidates if do_transitivity_check(builder.sectors, [c])]
     assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, primary_portal)
     for portal in non_destination_portals:
         candidates = find_portal_candidates(master_door_list, False, True)
@@ -105,7 +109,7 @@ def clean_up_outstanding_doors(builder, door):
 
 
 def find_portal_candidates(door_list, need_passage=False, dead_end_allowed=False, standard=False, rupee_bow=False):
-    ret = door_list
+    ret = [x for x in door_list if not x.blocked]
     # todo: bk_shuffle for desert tiles 2
     if need_passage:
         ret = [x for x in ret if x.passage]

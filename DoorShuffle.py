@@ -885,22 +885,7 @@ def main_dungeon_pool(dungeon_pool, world, player):
             dungeon_builders[dungeon_key] = simple_dungeon_builder(dungeon_key, sector_pool)
             dungeon_builders[dungeon_key].entrance_list = list(entrances_map[dungeon_key])
         else:
-            if 'Hyrule Castle' in pool:
-                hc = world.get_dungeon('Hyrule Castle', player)
-                hc_compass = ItemFactory('Compass (Escape)', player)
-                hc_compass.advancement = world.restrict_boss_items[player] != 'none'
-                if hc.dungeon_items.count(hc_compass) < 1:
-                    hc.dungeon_items.append(hc_compass)
-            if 'Agahnims Tower' in pool:
-                at = world.get_dungeon('Agahnims Tower', player)
-                at_compass = ItemFactory('Compass (Agahnims Tower)', player)
-                at_compass.advancement = world.restrict_boss_items[player] != 'none'
-                if at.dungeon_items.count(at_compass) < 1:
-                    at.dungeon_items.append(at_compass)
-                at_map = ItemFactory('Map (Agahnims Tower)', player)
-                at_map.advancement = world.restrict_boss_items[player] != 'none'
-                if at.dungeon_items.count(at_map) < 1:
-                    at.dungeon_items.append(at_map)
+            extra_dungeon_items(pool, world, player)
             sector_pool = convert_to_sectors(region_list, world, player)
             merge_sectors(sector_pool, world, player)
             # todo: which dungeon to create
@@ -920,6 +905,24 @@ def main_dungeon_pool(dungeon_pool, world, player):
     finish_dungeon_setup(door_type_pools, world, player)
 
 
+def extra_dungeon_items(pool, world, player):
+    if 'Hyrule Castle' in pool:
+        hc = world.get_dungeon('Hyrule Castle', player)
+        hc_compass = ItemFactory('Compass (Escape)', player)
+        hc_compass.advancement = world.restrict_boss_items[player] != 'none'
+        if hc.dungeon_items.count(hc_compass) < 1:
+            hc.dungeon_items.append(hc_compass)
+    if 'Agahnims Tower' in pool:
+        at = world.get_dungeon('Agahnims Tower', player)
+        at_compass = ItemFactory('Compass (Agahnims Tower)', player)
+        at_compass.advancement = world.restrict_boss_items[player] != 'none'
+        if at.dungeon_items.count(at_compass) < 1:
+            at.dungeon_items.append(at_compass)
+        at_map = ItemFactory('Map (Agahnims Tower)', player)
+        at_map.advancement = world.restrict_boss_items[player] != 'none'
+        if at.dungeon_items.count(at_map) < 1:
+            at.dungeon_items.append(at_map)
+
 def finish_dungeon_setup(door_type_pools, world, player):
     setup_custom_door_types(world, player)
     paths = determine_required_paths(world, player)
@@ -938,6 +941,29 @@ def finish_dungeon_setup(door_type_pools, world, player):
                 dungeon.big_key = None
             elif builder.bk_required and not builder.bk_provided:
                 dungeon.big_key = ItemFactory(dungeon_bigs[name], player)
+        if len(pool) > 1:
+            extra_dungeon_items(pool, world, player)
+        for name in pool:
+            builder = world.dungeon_layouts[player][name]
+            dungeon = world.get_dungeon(name, player)
+            inside_items = [i for i in dungeon.all_items if i.is_inside_dungeon_item(world)]
+            inside_item_count = len(inside_items)
+            while inside_item_count > builder.location_cnt:
+                compass_item = next((i for i in inside_items if i.compass), None)
+                if compass_item:
+                    dungeon.dungeon_items.remove(compass_item)
+                    inside_item_count -= 1
+                    continue
+                map_item = next((i for i in inside_items if i.map), None)
+                if map_item:
+                    dungeon.dungeon_items.remove(map_item)
+                    # would be nice to get this in inventory for now
+                    world.push_precollected(map_item)
+                    inside_item_count -= 1
+                    continue
+                else:
+                    # this probably will need a constraint during Generation, at least one location for potential BK?
+                    raise GenerationException(f'Not enough locations for all dungeon items: {name}')
 
     all_dungeon_items_cnt = len(list(y for x in world.dungeons if x.player == player for y in x.all_items))
     target_items = 34
@@ -4667,23 +4693,31 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
 def main_dungeon_generation_prototype(dungeon_builders, entrances_map, world, player):
     for name, builder in dungeon_builders.items():
         # choose_portals_prototype(builder, entrances_map, world, player)
-        create_dungeon(builder, entrances_map, world, player)
+        master_sector = create_dungeon(builder, entrances_map, world, player)
+        builder.master_sector = master_sector
     # assign portals properly
     for portal in world.dungeon_portals[player]:
         if portal.default_door != portal.door:
             assign_portal_helper(portal.door, portal, world, player)
+        else:
+            portal.door.entranceFlag = True
     # combine builders
     if 'Skull Woods Front' in dungeon_builders:
         b1 = dungeon_builders.pop('Skull Woods Front')
         b2 = dungeon_builders.pop('Skull Woods Back')
         b1.master_sector.regions.extend(b2.master_sector.regions)
+        b1.name = 'Skull Woods'
         dungeon_builders['Skull Woods'] = b1
     if 'Desert Palace Front' in dungeon_builders:
         b1 = dungeon_builders.pop('Desert Palace Front')
         b2 = dungeon_builders.pop('Desert Palace Back')
         b1.master_sector.regions.extend(b2.master_sector.regions)
+        b1.name = 'Desert Palace'
         dungeon_builders['Desert Palace'] = b1
     # todo: standard recombination
+    for builder in dungeon_builders.values():
+        builder.entrance_list = builder.layout_starts = builder.path_entrances = find_accessible_entrances(world, player, builder)
+        builder.master_sector.name = builder.name
     world.dungeon_layouts[player] = dungeon_builders
 
 

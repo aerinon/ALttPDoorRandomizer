@@ -11,12 +11,12 @@ from DungeonGenerator import reserved_location, blind_boss_unavail
 
 class KeyLayout(object):
 
-    def __init__(self, sector, starts, proposal):
+    def __init__(self, name, sector, starts, proposal):
         self.sector = sector
         self.start_regions = starts
         self.event_starts = []
         self.proposal = proposal
-        self.key_logic = KeyLogic(sector.name)
+        self.key_logic = KeyLogic(name)
 
         self.key_counters = None
         self.flat_prop = None
@@ -231,7 +231,7 @@ class KeyCounter(object):
 
 
 def build_key_layout(builder, start_regions, proposal, event_starts, world, player):
-    key_layout = KeyLayout(builder.master_sector, start_regions, proposal)
+    key_layout = KeyLayout(builder.name, builder.master_sector, start_regions, proposal)
     key_layout.flat_prop = flatten_pair_list(key_layout.proposal)
     key_layout.max_drops = count_key_drops(key_layout.sector)
     key_layout.max_chests = calc_max_chests(builder, key_layout, world, player)

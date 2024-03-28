@@ -1844,6 +1844,7 @@ class Door(object):
         self.controller = None
         self.dependents = []
         self.dead = False
+        self.traversal_only = False
 
         # a list of glitches need to use the transition
         self.glitches_needed = []

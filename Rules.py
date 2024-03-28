@@ -2189,9 +2189,10 @@ def set_bunny_rules(world, player, inverted):
     doors_to_check = [x for x in world.doors if x.player == player and x not in bunny_impassible_doors]
     doors_to_check = [x for x in doors_to_check if x.type in [DoorType.Normal, DoorType.Interior] and not x.blocked]
     for door in doors_to_check:
-        room = world.get_room(door.roomIndex, player)
-        if is_bunny(door.entrance.parent_region) and room.kind(door) in [DoorKind.Dashable, DoorKind.Bombable, DoorKind.Hidden]:
-            add_rule(door.entrance, get_rule_to_add(door.entrance.parent_region))
+        if door.roomIndex >= 0:
+            room = world.get_room(door.roomIndex, player)
+            if is_bunny(door.entrance.parent_region) and room.kind(door) in [DoorKind.Dashable, DoorKind.Bombable, DoorKind.Hidden]:
+                add_rule(door.entrance, get_rule_to_add(door.entrance.parent_region))
 
     for region in world.get_regions():
         if region.player == player and is_bunny(region):
