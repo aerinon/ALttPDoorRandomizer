@@ -1664,6 +1664,9 @@ class Hook(Enum):
     PitWarp = 5
     NormalPortal = 6
 
+    def __lt__(self, other):
+        return self.value < other.value
+
 
 hook_dir_map = {
     Direction.North: Hook.North,

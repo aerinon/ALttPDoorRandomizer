@@ -42,8 +42,10 @@ def determine_entrance_regions(builder, world, player):
     entrance_regions = []
 
     # todo: standard and rupee_bow flags
+    single_entrance_flag = False
     if len(builder_portals) == 1:  # only one access
         destination_portals, non_destination_portals = [], builder_portals
+        single_entrance_flag = True
     else:
         destination_portals = [p for p in builder_portals if p.destination]
         non_destination_portals = [p for p in builder_portals if not p.destination]
@@ -53,17 +55,25 @@ def determine_entrance_regions(builder, world, player):
         for d in sector.outstanding_doors:
             if d.portalAble:
                 master_door_list.append(d)
-    for portal in destination_portals:
-        candidates = find_portal_candidates(master_door_list, True)
-        assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, False)
-    if len(non_destination_portals) > 1:
-        primary_portal = random.choice(non_destination_portals)
+
+    # primary portal
+    primary_candidates = [p for p in non_destination_portals if p.dependent is None]
+    if len(primary_candidates) == 0 and len(non_destination_portals) == 1:
+        primary_candidates = non_destination_portals
+    if len(primary_candidates) > 1:
+        primary_portal = random.choice(primary_candidates)
     else:
-        primary_portal = non_destination_portals[0]
+        primary_portal = primary_candidates[0]
     non_destination_portals.remove(primary_portal)
     candidates = find_portal_candidates(master_door_list)
     candidates = [c for c in candidates if do_transitivity_check(builder.sectors, [c])]
     assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, primary_portal)
+
+    # destination portals
+    for portal in destination_portals:
+        candidates = find_portal_candidates(master_door_list, True)
+        assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, False)
+    # dead-end-able portals
     for portal in non_destination_portals:
         candidates = find_portal_candidates(master_door_list, False, True)
         candidate = assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal)
@@ -72,6 +82,8 @@ def determine_entrance_regions(builder, world, player):
                 portal.destination = True
             else:
                 portal.deadEnd = True
+
+    # drop entrances
     for drop_region in default_lobby_drops:
         if any(drop_region in s.region_set() for s in builder.sectors):
             region = world.get_region(drop_region, player)
@@ -82,23 +94,26 @@ def determine_entrance_regions(builder, world, player):
                 parent_region = next(x.parent_region for x in parent_region.entrances)
             # access to the parent_region may be gated by this dungeon, don't depend on it
             # possible exception? drop down like skull back in insanity entrance modes? Do I need to detect that?
-            if parent_region.name not in world.inaccessible_regions[player]:
+            if parent_region.name not in world.inaccessible_regions[player] or single_entrance_flag:
                 entrance_regions.append(region)
 
     return entrance_regions
 
 
-def assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, record_entrance=True):
+def assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, record_portal=True):
     logger = logging.getLogger('')
     candidate = random.choice(candidates)
     master_door_list.remove(candidate)
+    master_door_list[:] = [x for x in master_door_list if x.roomIndex != candidate.roomIndex]
     logger.debug(f' Portal Link {portal.name} <-> {candidate.name}')
     connect_doors(portal.door, candidate)
-    if record_entrance:
+    if record_portal and portal.dependent is None:
         entrance_regions.append(candidate.entrance.parent_region)
     clean_up_outstanding_doors(builder, portal.door)
     clean_up_outstanding_doors(builder, candidate)
     portal.door = candidate
+    if portal.door.blocked:
+        portal.door.blocked = False
     return candidate
 
 
@@ -109,7 +124,7 @@ def clean_up_outstanding_doors(builder, door):
 
 
 def find_portal_candidates(door_list, need_passage=False, dead_end_allowed=False, standard=False, rupee_bow=False):
-    ret = [x for x in door_list if not x.blocked]
+    ret = [x for x in door_list if not x.blocked or is_boss_trap(x)]
     # todo: bk_shuffle for desert tiles 2
     if need_passage:
         ret = [x for x in ret if x.passage]
@@ -121,6 +136,10 @@ def find_portal_candidates(door_list, need_passage=False, dead_end_allowed=False
         ret = [x for x in ret if not x.rupee_bow_restricted]
     return ret
 
+
+# this is currently okay for now
+def is_boss_trap(d):
+    return ' Boss ' in d.name or ' Agahnim ' in d.name or d.name in ['Skull Spike Corner SW']
 
 def generate_dungeon_find_proposal(builder, world, player):
     logger = logging.getLogger('')
