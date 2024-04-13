@@ -7,6 +7,7 @@ import RaceRandom as random
 import string
 import time
 import zlib
+import base64
 
 from BaseClasses import World, CollectionState, Item, Region, Location, Shop, Entrance, Settings
 from Bosses import place_bosses
@@ -369,6 +370,10 @@ def main(args, seed=None, fish=None):
 
                 if args.jsonout:
                     jsonout[f'patch_t{team}_p{player}'] = rom.patches
+                    if args.bps:
+                        localRom = LocalRom.fromJsonRom(rom, args.rom)
+                        patch = create_bps_from_data(LocalRom(args.rom, patch=False).buffer, localRom.buffer)
+                        jsonout[f'bps_t{team}_p{player}'] = base64.b64encode(patch.binary_ba).decode()
                 else:
                     outfilepname = f'_T{team+1}' if world.teams > 1 else ''
                     if world.players > 1:
