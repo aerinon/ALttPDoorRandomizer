@@ -84,7 +84,7 @@ def run_build(slug):
     # print collected errors
     if len(errs) > 0:
       print("=" * 10)
-      print("| 🔴ERRORS |")
+      print("| ERRORS |")
       print("=" * 10)
       print("\n".join(errs))
     else:
