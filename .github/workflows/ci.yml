@@ -245,7 +245,6 @@ jobs:
         run: |
           GITHUB_TAG="$(head -n 1 ../build/app_version.txt)"
           echo "github_tag=$GITHUB_TAG" >> $GITHUB_OUTPUT
-          GITHUB_TAG="v${GITHUB_TAG}"
           RELEASE_NAME="ALttPDoorRandomizer ${GITHUB_TAG}"
           echo "Release Name: ${RELEASE_NAME}"
           echo "Git Tag:      ${GITHUB_TAG}"
@@ -257,8 +256,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ steps.debug_info.outputs.github_tag }}
-          release_name: ALttPDoorRandomizer v${{ steps.debug_info.outputs.github_tag }}
+          tag_name: ${{ steps.debug_info.outputs.github_tag }}
+          release_name: ALttPDoorRandomizer ${{ steps.debug_info.outputs.github_tag }}
           body_path: RELEASENOTES.md
           # draft: true
         if: contains(github.ref, 'master')

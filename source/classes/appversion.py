@@ -4,7 +4,7 @@ from Main import __version__
 DR_VERSION = __version__
 
 def write_appversion():
-  APP_VERSION = f"{DR_VERSION}"
+  APP_VERSION = f"v{DR_VERSION}"
   APP_VERSION_FILE = os.path.join(".","resources","app","meta","manifests","app_version.txt")
   with open(APP_VERSION_FILE,"w") as f:
     f.seek(0)
