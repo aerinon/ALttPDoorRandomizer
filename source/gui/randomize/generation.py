@@ -154,7 +154,7 @@ def generation_page(parent,settings):
         diag.geometry(str(dims["window"]["width"]) + 'x' + str(dims["window"]["height"]))
         text = Text(diag, width=dims["textarea.characters"]["width"], height=dims["textarea.characters"]["height"])
         text.pack()
-        text.insert(INSERT,"\n".join(diagnostics.output(__version__)))
+        text.insert(INSERT,"\n".join(diagnostics.output()))
     # dialog button
     self.widgets[widget].pieces["button"] = Button(self.widgets[widget].pieces["frame"], text='Run Diagnostics', command=partial(diags))
 

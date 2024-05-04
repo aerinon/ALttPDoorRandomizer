@@ -1,0 +1,48 @@
+name: 💿Install
+description: Install app
+inputs:
+  calling-job:
+    required: true
+    description: Job that's calling this one
+  os-name:
+    required: true
+    description: OS to run on
+  python-version:
+    required: true
+    description: Python version to install
+
+#########
+# actions
+#########
+# actions/checkout@v4.1.4
+# actions/setup-python@v5.1.0
+# actions/upload-artifact@v4.3.3
+
+runs:
+  using: "composite"
+  steps:
+    # install python
+    - name: 💿Install Python
+      uses: actions/setup-python@v5.1.0
+      with:
+        python-version: ${{ inputs.python-version }}
+    # install modules via pip
+    - name: 💿Install Modules
+      shell: bash
+      env:
+        OS_NAME: ${{ inputs.os-name }}
+      run: |
+        echo "Install Modules"
+        python ./resources/ci/common/get_pipline.py
+    # print pipline
+    - name: PipLine
+      shell: bash
+      run: |
+        echo "PipLine"
+        cat ./resources/user/meta/manifests/pipline.txt
+    # upload pipline
+    - name: 🔼Upload PipLine
+      uses: actions/upload-artifact@v4.3.3
+      with:
+        name: pipline-${{ inputs.calling-job }}-${{ inputs.os-name }}-py${{ inputs.python-version }}
+        path: ./resources/user/meta/manifests
