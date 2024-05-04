@@ -124,13 +124,13 @@ for BUILD_FILENAME in BUILD_FILENAMES:
     print("Build Filename: " + BUILD_FILENAME)
     print("Build Filesize: " + common.file_size(BUILD_FILENAME))
   else:
-    print("No Build to prepare: " + BUILD_FILENAME)
+    print("🟡No Build to prepare: " + BUILD_FILENAME)
 
 if not ZIP_FILENAME == "":
   print("Zip Filename:   " + ZIP_FILENAME)
   print("Zip Filesize:   " + common.file_size(ZIP_FILENAME))
 else:
-  print("No Zip to prepare: " + ZIP_FILENAME)
+  print("🟡No Zip to prepare: " + ZIP_FILENAME)
 
 print("App Version:    " + env["GITHUB_TAG"])
 

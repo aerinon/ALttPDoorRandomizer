@@ -10,7 +10,7 @@ def get_get_pip(PY_VERSION):
   try:
     import pip
   except ImportError:
-    print("Getting pip getter!")
+    print("🟡Getting pip getter!")
     #make the request!
     url = "https://bootstrap.pypa.io/get-pip.py"
     context = ssl._create_unverified_context()
@@ -40,7 +40,7 @@ def get_get_pip(PY_VERSION):
     if float(PY_VERSION) > 0:
       PYTHON_EXECUTABLE = "py"
 
-    print("Getting pip!")
+    print("🟡Getting pip!")
     args = [
       env["PYTHON_EXE_PATH"] + PYTHON_EXECUTABLE,
       '-' + str(PY_VERSION),
@@ -58,6 +58,6 @@ if __name__ == "__main__":
 
   try:
     import pip
-    print("pip is installed")
+    print("🟢pip is installed")
   except ImportError:
     get_get_pip(PY_VERSION)
