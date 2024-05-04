@@ -76,9 +76,11 @@ def run_build(slug):
             print(line)
           # try to get DLL filename
           elif "NotCompressibleException" in line.strip():
-            strAdd = re.search(r'api-ms-win-(?:[^-]*)-([^-]*)', line.strip()).group(1)
-            strs.append(strAdd)
-            errs.append(line.strip())
+            matches = re.search(r'api-ms-win-(?:[^-]*)-([^-]*)', line.strip())
+            if matches:
+                strAdd = matches.group(1)
+                strs.append(strAdd)
+                errs.append(line.strip())
     # print collected errors
     if len(errs) > 0:
       print("=" * 10)
