@@ -53,11 +53,6 @@ def prepare_env():
 
   # get app version
   APP_VERSION = ""
-  APP_VERSION_FILE = os.path.join(".","resources","app","meta","manifests","app_version.txt")
-  if os.path.isfile(APP_VERSION_FILE):
-    with open(APP_VERSION_FILE,"r") as f:
-      lines = f.readlines()
-      if len(lines) > 0:
   APP_VERSION_FILES = [
     os.path.join(".","resources","app","meta","manifests","app_version.txt"),
     os.path.join("..","build","app_version.txt")
