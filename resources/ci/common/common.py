@@ -23,7 +23,13 @@ UBUNTU_VERSIONS = {
 }
 DEFAULT_EVENT = "event"
 DEFAULT_REPO_SLUG = "miketrethewey/ALttPDoorRandomizer"
-FILENAME_CHECKS = [ "Gui", "DungeonRandomizer" ]
+FILENAME_CHECKS = [
+  "DungeonRandomizer",
+  "Gui",
+  "MultiClient",
+  "MultiServer",
+  "Mystery"
+]
 FILESIZE_CHECK = (6 * 1024 * 1024) # 6MB
 
 # take number of bytes and convert to string with units measure
