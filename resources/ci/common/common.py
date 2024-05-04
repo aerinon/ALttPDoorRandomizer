@@ -58,6 +58,15 @@ def prepare_env():
     with open(APP_VERSION_FILE,"r") as f:
       lines = f.readlines()
       if len(lines) > 0:
+  APP_VERSION_FILES = [
+    os.path.join(".","resources","app","meta","manifests","app_version.txt"),
+    os.path.join("..","build","app_version.txt")
+  ]
+  for app_version_file in APP_VERSION_FILES:
+    if os.path.isfile(app_version_file):
+      with open(app_version_file,"r") as f:
+        lines = f.readlines()
+        if len(lines) > 0:
           APP_VERSION = lines[0].strip()
 
   # ci data

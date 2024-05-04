@@ -132,7 +132,7 @@ if not ZIP_FILENAME == "":
 else:
   print("No Zip to prepare: " + ZIP_FILENAME)
 
-print("Git tag:        " + env["GITHUB_TAG"])
+print("App Version:    " + env["GITHUB_TAG"])
 
 if (len(BUILD_FILENAMES) == 0) or (ZIP_FILENAME == ""):
   exit(1)
