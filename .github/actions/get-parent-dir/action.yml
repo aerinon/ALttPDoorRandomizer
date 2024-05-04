@@ -1,0 +1,41 @@
+name: 📁Get Parent Directory
+description: Get Parent Directory
+
+outputs:
+  parentDirNotWin:
+    description: "Parent Directory (!Windows)"
+    value: ${{ steps.parentDirNotWin.outputs.value }}
+  parentDir:
+    description: "Parent Directory (Windows)"
+    value: ${{ steps.parentDir.outputs.value }}
+
+#########
+# actions
+#########
+# mad9000/actions-find-and-replace-string@5
+
+runs:
+  using: "composite"
+  steps:
+    # get parent directory
+    - name: Get Repo Name
+      uses: mad9000/actions-find-and-replace-string@5
+      id: repoName
+      with:
+        source: ${{ github.repository }}
+        find: "${{ github.repository_owner }}/"
+        replace: ""
+    - name: 📁Get Parent Directory Path (!Windows)
+      uses: mad9000/actions-find-and-replace-string@5
+      id: parentDirNotWin
+      with:
+        source: ${{ github.workspace }}
+        find: "${{ steps.repoName.outputs.value }}/${{ steps.repoName.outputs.value }}"
+        replace: ${{ steps.repoName.outputs.value }}
+    - name: 📁Get Parent Directory Path (Windows)
+      uses: mad9000/actions-find-and-replace-string@5
+      id: parentDir
+      with:
+        source: ${{ steps.parentDirNotWin.outputs.value }}
+        find: '${{ steps.repoName.outputs.value }}\${{ steps.repoName.outputs.value }}'
+        replace: ${{ steps.repoName.outputs.value }}

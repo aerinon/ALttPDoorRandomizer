@@ -1,0 +1,77 @@
+name: 📀->📦Prepare Release
+description: Prepare Release for Deployment
+inputs:
+  os-name:
+    required: true
+    description: OS to run on
+  python-version:
+    required: true
+    description: Python version to install
+
+#########
+# actions
+#########
+# Artheau/SpriteSomething/get-parent-dir
+# actions/checkout@v4.1.4
+# actions/download-artifact@v4.1.7
+
+runs:
+  using: "composite"
+  steps:
+    # checkout commit
+    - name: ✔️Checkout commit
+      shell: bash
+      run: |
+        echo "✔️Checkout commit"
+    - name: ✔️Checkout commit
+      uses: actions/checkout@v4.1.4
+
+    # get parent dir
+    - name: 📁Get Parent Directory
+      shell: bash
+      run: |
+        echo "📁Get Parent Directory"
+    - name: 📁Get Parent Directory
+      id: parentDir
+      uses: ./.github/actions/get-parent-dir
+
+    # download binary artifact
+    - name: 🔽Download Binary Artifact
+      shell: bash
+      run: |
+        echo "🔽Download Binary Artifact"
+    - name: 🔽Download Binary Artifact
+      uses: actions/download-artifact@v4.1.7
+      with:
+        name: binary-${{ inputs.os-name }}-py${{ inputs.python-version }}
+        path: ./
+
+    # download appversion artifact
+    - name: 🔽Download AppVersion Artifact
+      uses: actions/download-artifact@v4.1.7
+      with:
+        name: appversion-build-${{ matrix.os-name }}-py${{ inputs.python-version }}
+        path: ${{ steps.parentDir.outputs.parentDir }}/build
+
+    # Prepare Release
+    - name: 💬Prepare Release
+      shell: bash
+      run: |
+        echo "💬Prepare Release"
+    - name: Prepare Release
+      shell: bash
+      env:
+        OS_NAME: ${{ inputs.os-name }}
+      run: |
+        python ./resources/ci/common/prepare_release.py
+
+    # upload archive artifact for later step
+    - name: 🔼Upload Archive Artifact
+      shell: bash
+      run: |
+        echo "🔼Upload Archive Artifact"
+    - name: 🔼Upload Archive Artifact
+      uses: actions/upload-artifact@v4.3.3
+      with:
+        name: archive-${{ inputs.os-name }}-py${{ inputs.python-version }}
+        path: ${{ steps.parentDir.outputs.parentDir }}/deploy

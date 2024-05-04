@@ -23,7 +23,7 @@ def start():
     # print diagnostics
     # usage: py DungeonRandomizer.py --diags
     if args.diags:
-        diags = diagnostics.output(__version__)
+        diags = diagnostics.output()
         print("\n".join(diags))
         sys.exit(0)
 
