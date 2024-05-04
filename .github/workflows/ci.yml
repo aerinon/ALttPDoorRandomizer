@@ -246,7 +246,7 @@ jobs:
           GITHUB_TAG="$(head -n 1 ../build/app_version.txt)"
           echo "github_tag=$GITHUB_TAG" >> $GITHUB_OUTPUT
           GITHUB_TAG="v${GITHUB_TAG}"
-          RELEASE_NAME="ALttPOverworldRandomizer ${GITHUB_TAG}"
+          RELEASE_NAME="ALttPDoorRandomizer ${GITHUB_TAG}"
           echo "Release Name: ${RELEASE_NAME}"
           echo "Git Tag:      ${GITHUB_TAG}"
 
@@ -258,7 +258,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ steps.debug_info.outputs.github_tag }}
-          release_name: ALttPOverworldRandomizer v${{ steps.debug_info.outputs.github_tag }}
+          release_name: ALttPDoorRandomizer v${{ steps.debug_info.outputs.github_tag }}
           body_path: RELEASENOTES.md
           # draft: true
         if: contains(github.ref, 'master')
@@ -280,7 +280,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.parentDir.outputs.parentDir }}/deploy/linux/${{ steps.identify-linux-asset.outputs.asset_linux }}
-          asset_name: ALttPOverworldRandomizer-${{ steps.debug_info.outputs.github_tag }}-linux-focal.tar.gz
+          asset_name: ALttPDoorRandomizer-${{ steps.debug_info.outputs.github_tag }}-linux-focal.tar.gz
           asset_content_type: application/gzip
         if: contains(github.ref, 'master')
 
@@ -301,7 +301,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.parentDir.outputs.parentDir }}/deploy/macos/${{ steps.identify-macos-asset.outputs.asset_macos }}
-          asset_name: ALttPOverworldRandomizer-${{ steps.debug_info.outputs.github_tag }}-osx.tar.gz
+          asset_name: ALttPDoorRandomizer-${{ steps.debug_info.outputs.github_tag }}-osx.tar.gz
           asset_content_type: application/gzip
         if: contains(github.ref, 'master')
 
@@ -322,6 +322,6 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.parentDir.outputs.parentDir }}/deploy/windows/${{ steps.identify-windows-asset.outputs.asset_windows }}
-          asset_name: ALttPOverworldRandomizer-${{ steps.debug_info.outputs.github_tag }}-windows.zip
+          asset_name: ALttPDoorRandomizer-${{ steps.debug_info.outputs.github_tag }}-windows.zip
           asset_content_type: application/zip
         if: contains(github.ref, 'master')
