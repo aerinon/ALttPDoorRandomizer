@@ -32,7 +32,7 @@ def process_module_output(lines):
         # if there's an error, print it and bail
         if "status 'error'" in line.strip():
             print(
-                "[%s] %s"
+                "🔴[%s] %s"
                 %
                 (
                     "_",
