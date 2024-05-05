@@ -181,10 +181,35 @@ jobs:
           os-name: ${{ matrix.os-name }}
           python-version: ${{ matrix.python-version }}
 
-# create release
-#  call checkout
-#  install extra python modules
-#  get artifacts
-#  build release info
-#  create release
-#  upload artifacts
+  install-release-deploy:
+    # create release
+    #  call checkout
+    #  install extra python modules
+    #  call deploy release
+    name: 📀->🚀
+    runs-on: ${{ matrix.os-name }}
+    needs: [install-release-prepare]
+    continue-on-error: False
+
+    strategy:
+      matrix:
+        os-name: [
+          # ubuntu-latest,  # ubuntu-22.04
+          ubuntu-22.04
+        ]
+        python-version: [ "3.12" ]
+    steps:
+      # call checkout
+      - name: ✔️Checkout commit
+        uses: actions/checkout@v4.1.4
+      # install extra python modules
+      - name: 💿Install extra Python Modules
+        shell: bash
+        run: |
+          python -m pip install pytz requests
+      # call deploy release
+      - name: 📀->🚀Deploy Release
+        uses: ./.github/actions/release-deploy
+        with:
+          os-name: ${{ matrix.os-name }}
+          python-version: ${{ matrix.python-version }}
