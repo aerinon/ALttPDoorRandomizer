@@ -113,8 +113,11 @@ def prepare_env():
     OS_VERSION = OS_NAME[OS_NAME.find('-')+1:]
     OS_NAME = OS_NAME[:OS_NAME.find('-')]
     if OS_NAME == "linux" or OS_NAME == "ubuntu":
-      if distro.codename() != "":
-        OS_DIST = distro.codename()
+      try:
+        if distro.codename() != "":
+          OS_DIST = distro.codename()
+      except NameError as e:
+        pass
 
   if OS_VERSION == "" and not OS_DIST == "" and not OS_DIST == "notset":
     OS_VERSION = OS_DIST
