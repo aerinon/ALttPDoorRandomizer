@@ -1,11 +1,25 @@
 # workflow name
-name: Build
+name: ⏱️Test, 🔨Build & 🚀Deploy
 
 # fire on
 on: [
   push,
   pull_request
 ]
+
+# on:
+#   push:
+#     branches:
+#       - DoorDevUnstable
+#       - DoorDev
+#       - OverworldShuffleDev
+#       - OverworldShuffle
+#   pull_request:
+#     branches:
+#       - DoorDevUnstable
+#       - DoorDev
+#       - OverworldShuffleDev
+#       - OverworldShuffle
 
 # stuff to do
 jobs:
@@ -24,6 +38,7 @@ jobs:
 
     strategy:
       matrix:
+        # CHECKME: OS List to run on
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
@@ -31,6 +46,7 @@ jobs:
           macos-latest,  # macos-12
           windows-latest # windows-2022
         ]
+        # CHECKME: Python Version to run on
         python-version: [ "3.12" ]
     steps:
       # call checkout
@@ -54,7 +70,7 @@ jobs:
           os-name: ${{ matrix.os-name }}
           python-version: ${{ matrix.python-version }}
       # call analyze github actions
-      - name: Analyze used GitHub Actions
+      - name: ⚙️Analyze used GitHub Actions
         shell: bash
         run: |
           python ./resources/ci/common/list_actions.py
@@ -80,6 +96,7 @@ jobs:
 
     strategy:
       matrix:
+        # CHECKME: OS List to run on
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
@@ -87,6 +104,7 @@ jobs:
           macos-latest,  # macos-12
           windows-latest # windows-2022
         ]
+        # CHECKME: Python Version to run on
         python-version: [ "3.12" ]
     steps:
       # call checkout
@@ -118,6 +136,7 @@ jobs:
 
     strategy:
       matrix:
+        # CHECKME: OS List to run on
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
@@ -125,6 +144,7 @@ jobs:
           macos-latest,  # macos-12
           windows-latest # windows-2022
         ]
+        # CHECKME: Python Version to run on
         python-version: [ "3.12" ]
     steps:
       # call checkout
@@ -145,7 +165,7 @@ jobs:
           os-name: ${{ matrix.os-name }}
           python-version: ${{ matrix.python-version }}
 
-  install-release-prepare:
+  release-prepare:
     # prepare release
     #  call checkout
     #  install extra python modules
@@ -157,6 +177,7 @@ jobs:
 
     strategy:
       matrix:
+        # CHECKME: OS List to run on
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
@@ -181,35 +202,173 @@ jobs:
           os-name: ${{ matrix.os-name }}
           python-version: ${{ matrix.python-version }}
 
-  install-release-deploy:
-    # create release
-    #  call checkout
-    #  install extra python modules
-    #  call deploy release
+  # Deploy Release
+  # Needs to be top-level for SECRET to work easily
+  release-deploy:
     name: 📀->🚀
     runs-on: ${{ matrix.os-name }}
-    needs: [install-release-prepare]
-    continue-on-error: False
+    needs: [release-prepare]
 
     strategy:
       matrix:
+        # CHECKME: OS List to run on
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
-          ubuntu-22.04
+          ubuntu-22.04,
         ]
+        # CHECKME: Python Version to run on
         python-version: [ "3.12" ]
+
     steps:
-      # call checkout
+      # checkout commit
       - name: ✔️Checkout commit
         uses: actions/checkout@v4.1.4
+
       # install extra python modules
       - name: 💿Install extra Python Modules
         shell: bash
         run: |
           python -m pip install pytz requests
-      # call deploy release
-      - name: 📀->🚀Deploy Release
-        uses: ./.github/actions/release-deploy
+
+      # get parent dir
+      - name: 📁Get Parent Directory
+        id: parentDir
+        uses: ./.github/actions/get-parent-dir
+
+      # download appversion artifact
+      - name: 🔽Download AppVersion Artifact
+        uses: actions/download-artifact@v4.1.7
         with:
-          os-name: ${{ matrix.os-name }}
-          python-version: ${{ matrix.python-version }}
+          name: appversion-build-${{ matrix.os-name }}-py${{ matrix.python-version }}
+          path: ${{ steps.parentDir.outputs.parentDir }}/build
+
+      # download ubuntu archive artifact
+      - name: 🔽Download Ubuntu Archive Artifact
+        uses: actions/download-artifact@v4.1.7
+        with:
+          # should run on latest explicit ubuntu version
+          name: archive-ubuntu-22.04-py${{ matrix.python-version }}
+          path: ${{ steps.parentDir.outputs.parentDir }}/deploy/linux
+
+      # download macos archive artifact
+      - name: 🔽Download MacOS Archive Artifact
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: archive-macos-latest-py${{ matrix.python-version }}
+          path: ${{ steps.parentDir.outputs.parentDir }}/deploy/macos
+
+      # download windows archive artifact
+      - name: 🔽Download Windows Archive Artifact
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: archive-windows-latest-py${{ matrix.python-version }}
+          path: ${{ steps.parentDir.outputs.parentDir }}/deploy/windows
+
+      # archive listing
+      # - name: Archive Listing
+      #   shell: bash
+      #   run: |
+      #     ls -R ${{ steps.parentDir.outputs.parentDir }}/deploy/
+
+      # debug info
+      # CHECKME: Project Name
+      - name: 📝Debug Info
+        id: debug_info
+        run: |
+          PROJECT_NAME="ALttPDoorRandomizer"
+          echo "project_name=$PROJECT_NAME" >> $GITHUB_OUTPUT
+
+          GITHUB_TAG="$(head -n 1 ../build/app_version.txt)"
+          echo "github_tag=$GITHUB_TAG" >> $GITHUB_OUTPUT
+
+          RELEASE_NAME="${PROJECT_NAME} ${GITHUB_TAG}"
+          echo "release_name=$RELEASE_NAME" >> $GITHUB_OUTPUT
+
+          ASSET_PREFIX="${PROJECT_NAME}-${GITHUB_TAG}"
+          echo "asset_prefix=$ASSET_PREFIX" >> $GITHUB_OUTPUT
+
+          echo "Project Name: ${PROJECT_NAME}"
+          echo "Release Name: ${RELEASE_NAME}"
+          echo "Asset Prefix: ${ASSET_PREFIX}"
+          echo "Git Tag:      ${GITHUB_TAG}"
+
+      # create a release (MASTER)
+      # CHECKME: Make sure we updated RELEASENOTES.md
+      # CHECKME: Make sure we're firing on the proper branches
+      - name: 📀->🚀Create a Release (MASTER)
+        id: create_release
+        uses: actions/create-release@v1.1.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.debug_info.outputs.github_tag }}
+          release_name: ${{ steps.debug_info.outputs.release_name }}
+          body_path: RELEASENOTES.md
+          # draft: true
+        if: contains(github.ref, 'master')
+
+      # determine linux archive asset
+      - name: ❔Identify Linux Archive Asset
+        id: identify-linux-asset
+        shell: bash
+        run: |
+          ASSET_LINUX="$(ls ${{ steps.parentDir.outputs.parentDir }}/deploy/linux)"
+          echo "asset_linux=$ASSET_LINUX" >> $GITHUB_OUTPUT
+
+      # upload linux archive asset (MASTER)
+      # CHECKME: Make sure we're firing on the proper branches
+      - name: 🔼Upload Linux Archive Asset (MASTER)
+        id: upload-linux-asset
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.parentDir.outputs.parentDir }}/deploy/linux/${{ steps.identify-linux-asset.outputs.asset_linux }}
+          asset_name: ${{ steps.debug_info.outputs.asset_prefix }}-linux-focal.tar.gz
+          asset_content_type: application/gzip
+        if: contains(github.ref, 'master')
+
+      # determine macos archive asset
+      - name: ❔Identify MacOS Archive Asset
+        id: identify-macos-asset
+        shell: bash
+        run: |
+          ASSET_MACOS="$(ls ${{ steps.parentDir.outputs.parentDir }}/deploy/macos)"
+          echo "asset_macos=$ASSET_MACOS" >> $GITHUB_OUTPUT
+
+      # upload macos archive asset (MASTER)
+      # CHECKME: Make sure we're firing on the proper branches
+      - name: 🔼Upload MacOS Archive Asset (MASTER)
+        id: upload-macos-asset
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.parentDir.outputs.parentDir }}/deploy/macos/${{ steps.identify-macos-asset.outputs.asset_macos }}
+          asset_name: ${{ steps.debug_info.outputs.asset_prefix }}-osx.tar.gz
+          asset_content_type: application/gzip
+        if: contains(github.ref, 'master')
+
+      # determine windows archive asset
+      - name: ❔Identify Windows Archive Asset
+        id: identify-windows-asset
+        shell: bash
+        run: |
+          ASSET_WIN="$(ls ${{ steps.parentDir.outputs.parentDir }}/deploy/windows)"
+          echo "asset_windows=$ASSET_WIN" >> $GITHUB_OUTPUT
+
+      # upload windows archive asset (MASTER)
+      # CHECKME: Make sure we're firing on the proper branches
+      - name: 🔼Upload Windows Archive Asset (MASTER)
+        id: upload-windows-asset
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.parentDir.outputs.parentDir }}/deploy/windows/${{ steps.identify-windows-asset.outputs.asset_windows }}
+          asset_name: ${{ steps.debug_info.outputs.asset_prefix }}-windows.zip
+          asset_content_type: application/zip
+        if: contains(github.ref, 'master')
