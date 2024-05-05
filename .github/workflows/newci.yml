@@ -72,6 +72,9 @@ jobs:
               if [[ $ID = ubuntu ]]; then
                   read _ UBUNTU_VERSION_NAME <<< "$VERSION"
                   echo "Ubuntu: $UBUNTU_VERSION_NAME"
+                  if [[ "$UBUNTU_VERSION_NAME" =~ [^\(]+\(([^\s]+) ]]; then
+                    echo "Ubuntu Adjective: $BASH_REMATCH[1]"
+                  fi
               else
                   echo "Not Ubuntu: ID=$ID, VERSION=$VERSION"
               fi
