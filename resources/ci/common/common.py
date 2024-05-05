@@ -1,7 +1,11 @@
 import os   # for env vars
 import stat # file statistics
 import sys  # default system info
-import distro
+try:
+    import distro
+except ModuleNotFoundError as e:
+    pass
+
 from my_path import get_py_path
 
 global UBUNTU_VERSIONS
