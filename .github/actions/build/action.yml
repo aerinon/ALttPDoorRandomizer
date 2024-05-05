@@ -11,14 +11,6 @@ inputs:
     required: true
     description: Python version to install
 
-outputs:
-  dr-error-dlls:
-    description: "DR Error DLLs"
-    value: ${{ steps.build-dr.outputs.error_dlls }}
-  gui-error-dlls:
-    description: "GUI Error DLLs"
-    value: ${{ steps.build-gui.outputs.error_dlls }}
-
 runs:
   using: "composite"
   steps:
@@ -35,17 +27,6 @@ runs:
       id: parentDir
       uses: ./.github/actions/get-parent-dir
 
-    # download pipline
-    # - name: Download PipLine
-    #   shell: bash
-    #   run: |
-    #     echo "Download PipLine"
-    # - name: Download PipLine
-    #   uses: actions/download-artifact@v4.1.7
-    #   with:
-    #     name: pipline-build-${{ inputs.os-name }}-py{{ inputs.python-version }}
-    #     path: ./resources/user/meta/manifests
-
     # try to get UPX
     - name: Get UPX
       shell: bash
@@ -58,43 +39,6 @@ runs:
         UPX_VERSION: "4.2.3"
       run: |
         python ./resources/ci/common/get_upx.py
-
-    # Set Run Number
-    - name: Set Run Number
-      shell: bash
-      run: |
-        echo "Set Run Number"
-    - name: Set Run Number
-      id: set_run_number
-      shell: bash
-      run: |
-        GITHUB_RUN_NUMBER="${{ github.run_number }}a${{ github.run_attempt }}"
-        echo "github_run_number=$GITHUB_RUN_NUMBER" >> $GITHUB_OUTPUT
-
-    # Prepare AppVersion
-    - name: 💬Prepare AppVersion
-      shell: bash
-      run: |
-        echo "💬Prepare AppVersion"
-    - name: Prepare AppVersion
-      shell: bash
-      env:
-        OS_NAME: ${{ inputs.os-name }}
-        GITHUB_RUN_NUMBER: ${{ steps.set_run_number.outputs.github_run_number }}
-      run: |
-        python -m source.classes.appversion
-        python ./resources/ci/common/prepare_appversion.py
-
-    # upload appversion artifact for later step
-    - name: 🔼Upload AppVersion Artifact
-      shell: bash
-      run: |
-        echo "🔼Upload AppVersion Artifact"
-    - name: 🔼Upload AppVersion Artifact
-      uses: actions/upload-artifact@v4.3.3
-      with:
-        name: appversion-${{ inputs.calling-job }}-${{ inputs.os-name }}-py${{ inputs.python-version }}
-        path: ./resources/app/meta/manifests/app_version.txt
 
     # run build.py
     - name: 💬Build Binaries

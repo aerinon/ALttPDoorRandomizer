@@ -50,7 +50,7 @@ runs:
     - name: 🔽Download AppVersion Artifact
       uses: actions/download-artifact@v4.1.7
       with:
-        name: appversion-build-${{ matrix.os-name }}-py${{ inputs.python-version }}
+        name: appversion
         path: ${{ steps.parentDir.outputs.parentDir }}/build
 
     # Prepare Release
