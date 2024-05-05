@@ -72,6 +72,7 @@ jobs:
   install-test:
     # test
     #  call checkout
+    #  call install
     #  run tests
     name: 💿/⏱️
     runs-on: ${{ matrix.os-name }}
@@ -91,6 +92,13 @@ jobs:
       # call checkout
       - name: ✔️Checkout commit
         uses: actions/checkout@v4.1.4
+      # call install
+      - name: 💿Call Install
+        uses: ./.github/actions/install
+        with:
+          calling-job: test
+          os-name: ${{ matrix.os-name }}
+          python-version: ${{ matrix.python-version }}
       # call test
       - name: ⏱️Call Test
         uses: ./.github/actions/test
