@@ -119,7 +119,7 @@ def prepare_env():
       except NameError as e:
         pass
 
-  if OS_VERSION == "" and not OS_DIST == "" and not OS_DIST == "notset":
+  if not OS_DIST == "" and not OS_DIST == "notset":
     OS_VERSION = OS_DIST
 
 	# if no tag
