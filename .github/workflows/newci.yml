@@ -106,14 +106,37 @@ jobs:
           os-name: ${{ matrix.os-name }}
           python-version: ${{ matrix.python-version }}
 
-# build
-#  call checkout
-#  call install
-#  run build
+  install-build:
+    # build
+    #  call checkout
+    #  call build
+    name: 💿/🔨
+    runs-on: ${{ matrix.os-name }}
+    continue-on-error: False
+
+    strategy:
+      matrix:
+        os-name: [
+          # ubuntu-latest,  # ubuntu-22.04
+          ubuntu-22.04,
+          ubuntu-20.04,
+          macos-latest,  # macos-12
+          windows-latest # windows-2022
+        ]
+        python-version: [ "3.12" ]
+    steps:
+      # call checkout
+      - name: ✔️Checkout commit
+        uses: actions/checkout@v4.1.4
+      # call build
+      - name: 🔨Call Build
+        uses: ./.github/actions/build
+        with:
+          os-name: ${{ matrix.os-name }}
+          python-version: ${{ matrix.python-version }}
 
 # prepare release
 #  call checkout
-#  call install
 #  install extra python modules
 #  run prepare release
 
