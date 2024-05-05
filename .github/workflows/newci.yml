@@ -113,6 +113,7 @@ jobs:
     #  call build
     name: 💿/🔨
     runs-on: ${{ matrix.os-name }}
+    needs: [install-test]
     continue-on-error: False
 
     strategy:
@@ -143,10 +144,41 @@ jobs:
           os-name: ${{ matrix.os-name }}
           python-version: ${{ matrix.python-version }}
 
-# prepare release
-#  call checkout
-#  install extra python modules
-#  run prepare release
+  install-release-prepare:
+    # prepare release
+    #  call checkout
+    #  install extra python modules
+    #  call prepare release
+    name: 💿/📀->📦
+    runs-on: ${{ matrix.os-name }}
+    needs: [install-build]
+    continue-on-error: False
+
+    strategy:
+      matrix:
+        os-name: [
+          # ubuntu-latest,  # ubuntu-22.04
+          ubuntu-22.04,
+          ubuntu-20.04,
+          macos-latest,  # macos-12
+          windows-latest # windows-2022
+        ]
+        python-version: [ "3.12" ]
+    steps:
+      # call checkout
+      - name: ✔️Checkout commit
+        uses: actions/checkout@v4.1.4
+      # install extra python modules
+      - name: 💿Install extra Python Modules
+        shell: bash
+        run: |
+          python -m pip install setuptools
+      # call prepare release
+      - name: 📀->📦Prepare Release
+        uses: ./.github/actions/release-prepare
+        with:
+          os-name: ${{ matrix.os-name }}
+          python-version: ${{ matrix.python-version }}
 
 # create release
 #  call checkout
