@@ -6,7 +6,7 @@ DR_VERSION = __version__
 def write_appversion():
   APP_VERSION = DR_VERSION
   if "-" in APP_VERSION:
-    APP_VERSION = APP_VERSION[:APP_VERSION.find("-")-1]
+    APP_VERSION = APP_VERSION[:APP_VERSION.find("-")]
   APP_VERSION_FILE = os.path.join(".","resources","app","meta","manifests","app_version.txt")
   with open(APP_VERSION_FILE,"w") as f:
     f.seek(0)
