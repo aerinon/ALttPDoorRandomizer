@@ -32,6 +32,15 @@ def run_build(slug):
 
     print(f"Building '{slug}' via Python {platform.python_version()}")
 
+    # get template, mod to do the thing
+    specTemplateFile = open(os.path.join(".","source","Template.spec"))
+    specTemplate = specTemplateFile.read()
+    specTemplateFile.close()
+    with(open(os.path.join(".","source",f"{slug}.spec"), "w")) as specFile:
+        print(f"Writing '{slug}' PyInstaller spec file")
+        thisTemplate = specTemplate.replace("<BINARY_SLUG>", slug)
+        specFile.write(thisTemplate)
+
     PYINST_EXECUTABLE = "pyinstaller"
     args = [
         os.path.join("source", f"{slug}.spec").replace(os.sep, os.sep * 2),
@@ -139,11 +148,14 @@ def go_build(slug):
             GO = False
 
 if __name__ == "__main__":
-    go_build("DungeonRandomizer")
-    go_build("Gui")
-    go_build("MultiClient")
-    go_build("MultiServer")
-    go_build("Mystery")
+    for file_slug in [
+        "DungeonRandomizer",
+        "Gui",
+        "MultiClient",
+        "MultiServer",
+        "Mystery"
+    ]:
+        go_build(file_slug)
     if DIFF_DLLS:
         print("🔴Had to update Error DLLs list!")
         exit(1)
