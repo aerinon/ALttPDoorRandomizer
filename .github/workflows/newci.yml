@@ -1,0 +1,94 @@
+# workflow name
+name: Build
+
+# fire on
+on: [
+  push,
+  pull_request
+]
+
+# stuff to do
+jobs:
+  diags:
+    # diagnostics
+    #  call checkout
+    #  call install python
+    #  print python version
+    #  call install
+    #  call analyze github actions
+    #  install extra python modules
+    #  run diagnostics
+    name: 🧮Diagnostics
+    runs-on: ${{ matrix.os-name }}
+    continue-on-error: True
+
+    strategy:
+      matrix:
+        os-name: [
+          # ubuntu-latest,  # ubuntu-22.04
+          ubuntu-22.04,
+          ubuntu-20.04,
+          macos-latest,  # macos-12
+          windows-latest # windows-2022
+        ]
+        python-version: [ "3.12" ]
+    steps:
+      # call checkout
+      - name: ✔️Checkout commit
+        uses: actions/checkout@v4.1.4
+      # call install python
+      - name: 💿Install Python
+        uses: actions/setup-python@v5.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      # print python version
+      - name: 🐍Python Version
+        shell: bash
+        run: |
+          python --version
+      # call install
+      - name: 💿Call Install
+        uses: ./.github/actions/install
+        with:
+          calling-job: diags
+          os-name: ${{ matrix.os-name }}
+          python-version: ${{ matrix.python-version }}
+      # call analyze github actions
+      - name: Analyze used GitHub Actions
+        shell: bash
+        run: |
+          python ./resources/ci/common/list_actions.py
+      # install extra python modules
+      - name: 💿Install extra Python Modules
+        shell: bash
+        run: |
+          python -m pip install setuptools
+      # run diagnostics
+      - name: 🧮Print Diagnostics
+        shell: bash
+        run: |
+          python -m source.meta.run_diags
+
+# test
+#  call checkout
+#  call install
+#  run tests
+
+# build
+#  call checkout
+#  call install
+#  run build
+
+# prepare release
+#  call checkout
+#  call install
+#  install extra python modules
+#  run prepare release
+
+# create release
+#  call checkout
+#  install extra python modules
+#  get artifacts
+#  build release info
+#  create release
+#  upload artifacts
