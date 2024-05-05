@@ -26,16 +26,17 @@ if isinstance(BUILD_FILENAME,str):
 
 BUILD_FILENAMES = BUILD_FILENAME
 
-print("OS Name:        " + env["OS_NAME"])
-print("OS Version:     " + env["OS_VERSION"])
+print("OS Name:         " + env["OS_NAME"])
+print("OS Version:      " + env["OS_VERSION"])
+print("OS Distribution: " + env["OS_DIST"])
 print("")
 for BUILD_FILENAME in BUILD_FILENAMES:
     DEST_FILENAME = common.prepare_filename(BUILD_FILENAME)
 
-    print("Build Filename: " + BUILD_FILENAME)
-    print("Dest Filename:  " + DEST_FILENAME)
+    print("Build Filename:  " + BUILD_FILENAME)
+    print("Dest Filename:   " + DEST_FILENAME)
     if not BUILD_FILENAME == "":
-        print("Build Filesize: " + common.file_size(BUILD_FILENAME))
+        print("Build Filesize:  " + common.file_size(BUILD_FILENAME))
     else:
         exit(1)
 
