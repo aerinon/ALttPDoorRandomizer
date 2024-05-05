@@ -109,6 +109,7 @@ jobs:
   install-build:
     # build
     #  call checkout
+    #  call install
     #  call build
     name: 💿/🔨
     runs-on: ${{ matrix.os-name }}
@@ -128,6 +129,13 @@ jobs:
       # call checkout
       - name: ✔️Checkout commit
         uses: actions/checkout@v4.1.4
+      # call install
+      - name: 💿Call Install
+        uses: ./.github/actions/install
+        with:
+          calling-job: build
+          os-name: ${{ matrix.os-name }}
+          python-version: ${{ matrix.python-version }}
       # call build
       - name: 🔨Call Build
         uses: ./.github/actions/build
