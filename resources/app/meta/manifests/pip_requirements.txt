@@ -1,7 +1,8 @@
 aenum
+aioconsole
+colorama
+distro
 fast-enum
 python-bps-continued
-colorama
-aioconsole
-websockets
 pyyaml
+websockets

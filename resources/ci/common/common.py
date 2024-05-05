@@ -1,6 +1,7 @@
 import os   # for env vars
 import stat # file statistics
 import sys  # default system info
+import distro
 from my_path import get_py_path
 
 global UBUNTU_VERSIONS
@@ -13,14 +14,6 @@ global FILESIZE_CHECK
 #  ubuntu:   22.04, 20.04
 #  windows:  2022, 2019
 #  macos:    14, 13, 12, 11
-UBUNTU_VERSIONS = {
-  "latest": "jammy",
-  "24.04": "noble",
-  "22.04": "jammy",
-  "20.04": "focal",
-  "18.04": "bionic",
-  "16.04": "xenial"
-}
 DEFAULT_EVENT = "event"
 DEFAULT_REPO_SLUG = "miketrethewey/ALttPDoorRandomizer"
 FILENAME_CHECKS = [
@@ -116,9 +109,8 @@ def prepare_env():
     OS_VERSION = OS_NAME[OS_NAME.find('-')+1:]
     OS_NAME = OS_NAME[:OS_NAME.find('-')]
     if OS_NAME == "linux" or OS_NAME == "ubuntu":
-      if OS_VERSION in UBUNTU_VERSIONS:
-        OS_VERSION = UBUNTU_VERSIONS[OS_VERSION]
-      OS_DIST = OS_VERSION
+      if distro.codename() != "":
+        OS_DIST = distro.codename()
 
   if OS_VERSION == "" and not OS_DIST == "" and not OS_DIST == "notset":
     OS_VERSION = OS_DIST
