@@ -46,3 +46,4 @@ runs:
       with:
         name: pipline-${{ inputs.calling-job }}-${{ inputs.os-name }}-py${{ inputs.python-version }}
         path: ./resources/user/meta/manifests
+      if: contains(${{ inputs.calling-job }}, 'test')

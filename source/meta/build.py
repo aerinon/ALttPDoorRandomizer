@@ -123,10 +123,6 @@ def run_build(slug):
         # if the lists differ, we've gotta update the included list
         diffDLLs = newDLLs != oldDLLs
 
-        # set a global var for Actions to try to read
-        if diffDLLs:
-            set_output("error_dlls","Failed to compress DLLs!")
-
         if diffDLLs:
             DIFF_DLLS = True
             dllsManifest.seek(0)

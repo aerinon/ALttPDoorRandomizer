@@ -126,6 +126,41 @@ jobs:
           os-name: ${{ matrix.os-name }}
           python-version: ${{ matrix.python-version }}
 
+  # Prepare AppVersion
+  appversion-prepare:
+    # prepare appversion
+    #  call checkout
+    #  call install
+    #  call appversion-prepare
+    name: 💿/🔨
+    runs-on: ${{ matrix.os-name }}
+    needs: [install-test]
+    continue-on-error: False
+
+    strategy:
+      matrix:
+        # CHECKME: OS List to run on
+        os-name: [
+          # ubuntu-latest,  # ubuntu-22.04
+          ubuntu-22.04,
+        ]
+        # CHECKME: Python Version to run on
+        python-version: [ "3.12" ]
+    steps:
+      # call checkout
+      - name: ✔️Checkout commit
+        uses: actions/checkout@v4.1.4
+      # call install
+      - name: 💿Call Install
+        uses: ./.github/actions/install
+        with:
+          calling-job: appversion-prepare
+          os-name: ${{ matrix.os-name }}
+          python-version: ${{ matrix.python-version }}
+      # call appversion-prepare
+      - name: 🔨Call Prepare AppVersion
+        uses: ./.github/actions/appversion-prepare
+
   # Build
   install-build:
     # build
@@ -134,7 +169,7 @@ jobs:
     #  call build
     name: 💿/🔨
     runs-on: ${{ matrix.os-name }}
-    needs: [install-test]
+    needs: [appversion-prepare]
     continue-on-error: False
 
     strategy:
@@ -243,7 +278,7 @@ jobs:
       - name: 🔽Download AppVersion Artifact
         uses: actions/download-artifact@v4.1.7
         with:
-          name: appversion-build-${{ matrix.os-name }}-py${{ matrix.python-version }}
+          name: appversion
           path: ${{ steps.parentDir.outputs.parentDir }}/build
 
       # download ubuntu archive artifact
@@ -299,6 +334,7 @@ jobs:
       # create a release (MASTER)
       # CHECKME: Make sure we updated RELEASENOTES.md
       # CHECKME: Make sure we're firing on the proper branches
+      # if: contains(github.event.head_commit.message, 'Version bump')
       - name: 📀->🚀Create a Release (MASTER)
         id: create_release
         uses: actions/create-release@v1.1.4

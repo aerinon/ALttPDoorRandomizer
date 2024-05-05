@@ -1,0 +1,50 @@
+name: Prepare AppVersion
+description: Prepare AppVersion document for later use
+
+runs:
+  using: "composite"
+  steps:
+    # checkout commit
+    - name: Checkout commit
+      shell: bash
+      run: |
+        echo "Checkout commit"
+    - name: Checkout commit
+      uses: actions/checkout@v4.1.4
+
+    # Set Run Number
+    - name: Set Run Number
+      shell: bash
+      run: |
+        echo "Set Run Number"
+    - name: Set Run Number
+      id: set_run_number
+      shell: bash
+      run: |
+        GITHUB_RUN_NUMBER="${{ github.run_number }}a${{ github.run_attempt }}"
+        echo "github_run_number=$GITHUB_RUN_NUMBER" >> $GITHUB_OUTPUT
+
+    # Prepare AppVersion
+    - name: 💬Prepare AppVersion
+      shell: bash
+      run: |
+        echo "💬Prepare AppVersion"
+    - name: Prepare AppVersion
+      shell: bash
+      env:
+        OS_NAME: ${{ inputs.os-name }}
+        GITHUB_RUN_NUMBER: ${{ steps.set_run_number.outputs.github_run_number }}
+      run: |
+        python -m source.classes.appversion
+        python ./resources/ci/common/prepare_appversion.py
+
+    # upload appversion artifact for later step
+    - name: 🔼Upload AppVersion Artifact
+      shell: bash
+      run: |
+        echo "🔼Upload AppVersion Artifact"
+    - name: 🔼Upload AppVersion Artifact
+      uses: actions/upload-artifact@v4.3.3
+      with:
+        name: appversion
+        path: ./resources/app/meta/manifests/app_version.txt
