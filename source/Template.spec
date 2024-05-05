@@ -12,7 +12,7 @@ console = False  # <--- change this to True to enable command prompt when the ap
 if sys.platform.find("mac") or sys.platform.find("osx"):
     console = True
 
-BINARY_SLUG = "MultiServer"
+BINARY_SLUG = "<BINARY_SLUG>"
 
 
 def recurse_for_py_files(names_so_far):
