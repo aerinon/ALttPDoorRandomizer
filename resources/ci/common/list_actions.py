@@ -12,6 +12,9 @@ from json.decoder import JSONDecodeError
 allACTIONS = {}
 listACTIONS = []
 
+VER_WIDTH = 10
+NAME_WIDTH = 40
+LINE_WIDTH = 1 + NAME_WIDTH + 5 + VER_WIDTH + 5 + VER_WIDTH + 1
 
 def process_walk(key, node):
     '''
@@ -54,20 +57,26 @@ def walk(key, node):
 for r, d, f in os.walk(os.path.join(".", ".github")):
     if "actions" in r or "workflows" in r:
         for filename in f:
+            # if it's not a YAML or it's turned off, skip it
             if (".yml" not in filename and ".yaml" not in filename) or (".off" in filename):
                 continue
             listACTIONS = []
+            # print filename
+            filename_line = "─" * (len(os.path.join(r, filename)) + 2)
             print(
-                " " +
-                ("-" * (len(os.path.join(r, filename)) + 2)) +
-                " "
+                "┌" +
+                filename_line +
+                "┐"
             )
             print("| " + os.path.join(r, filename) + " |")
+            # read the file
             with(open(os.path.join(r, filename), "r", encoding="utf-8")) as yamlFile:
                 print(
-                    " " +
-                    ("-" * (40 + 5 + 10 + 2)) +
-                    " "
+                    "├" +
+                    filename_line +
+                    "┴" +
+                    ("─" * (LINE_WIDTH - len(filename_line) + 1)) +
+                    "┐"
                 )
                 yml = yaml.safe_load(yamlFile)
                 walk("uses", yml)
@@ -76,6 +85,7 @@ for r, d, f in os.walk(os.path.join(".", ".github")):
                     action = k.split('@')[0]
                     version = k.split('@')[1] if '@' in k else ""
                     latest = ""
+                    # if it's not a location action, get the latest version number
                     if "./." not in action:
                         apiURL = f"https://api.github.com/repos/{action}/releases/latest"
                         if True:
@@ -100,39 +110,46 @@ for r, d, f in os.walk(os.path.join(".", ".github")):
                                     if latest != "":
                                         allACTIONS[action]["latest"] = latest
                     dictACTIONS[action] = version
+                # print action name and version info
                 for action, version in dictACTIONS.items():
                     print(
                         "| " + \
-                        f"{action.ljust(40)}" + \
-                        "\t " + \
-                        f"{(version or 'N/A').ljust(10)}" + \
+                        f"{action.ljust(NAME_WIDTH)}" + \
                         "\t" + \
-                        f"{allACTIONS[action]['latest']}" + \
+                        f"{(version or 'N/A').ljust(VER_WIDTH)}" + \
+                        "\t" + \
+                        f"{(allACTIONS[action]['latest'] or 'N/A').ljust(VER_WIDTH)}" + \
                         " |"
                     )
                 print(
-                    " " +
-                    ("-" * (40 + 5 + 10 + 2)) +
-                    " "
+                    "└" +
+                    ("─" * (LINE_WIDTH + 2)) +
+                    "┘"
                 )
             print("")
 
-print(
-    " " +
-    ("-" * (len("| Outdated |") - 2)) +
-    " "
-)
+# print outdated versions summary
 first = True
+outdated = False
 for action, actionData in allACTIONS.items():
     if len(actionData["versions"]) > 0:
         if actionData["latest"] != "" and actionData["versions"][0] != actionData["latest"]:
+            outdated = True
             if first:
                 first = False
+                filename_line = "─" * (len("| Outdated |"))
+                print(
+                    "┌" +
+                    filename_line +
+                    "┐"
+                )
                 print("| 🔴Outdated |")
                 print(
-                    " " +
-                    ("-" * (len("| Outdated |") - 2)) +
-                    " "
+                    "├" +
+                    filename_line +
+                    "┴" +
+                    ("─" * (LINE_WIDTH - len(filename_line) + 1)) +
+                    "┐"
                 )
             print(
                 "| " + \
@@ -143,3 +160,9 @@ for action, actionData in allACTIONS.items():
                 f"{actionData['latest'].ljust(10)}" + \
                 " |"
             )
+if outdated:
+    print(
+        "└" +
+        ("─" * (LINE_WIDTH + 2)) +
+        "┘"
+    )

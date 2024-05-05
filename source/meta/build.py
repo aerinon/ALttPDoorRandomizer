@@ -144,13 +144,10 @@ def go_build(slug):
             GO = False
 
 if __name__ == "__main__":
-    for file_slug in [
-        "DungeonRandomizer",
-        "Gui",
-        "MultiClient",
-        "MultiServer",
-        "Mystery"
-    ]:
+    binary_slugs = []
+    with open(os.path.join(".","resources","app","meta","manifests","binaries.json")) as binariesFile:
+        binary_slugs = json.load(binariesFile)
+    for file_slug in binary_slugs:
         go_build(file_slug)
     if DIFF_DLLS:
         print("🔴Had to update Error DLLs list!")

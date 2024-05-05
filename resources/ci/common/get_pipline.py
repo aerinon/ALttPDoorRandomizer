@@ -1,32 +1,45 @@
-import common                     # app common functions
+# import modules
+import common       # app common functions
 
-import json                       # json manipulation
-import os                         # for os data, filesystem manipulation
-import subprocess                 # for running shell commands
-import sys                        # for system commands
-import traceback                  # for errors
+import json         # json manipulation
+import os           # for os data, filesystem manipulation
+import subprocess   # for running shell commands
+import sys          # for system commands
+import traceback    # for errors
 
+# get env
 env = common.prepare_env()  # get environment variables
 
-WIDTH = 70  # width for labels
+# width for labels
+WIDTH = 70
 
+# bucket for cli args
 args = []
 
+# pip exe path
 PIPEXE = ""
 
+# py exe path
+# py version
+# py minor version
 PYTHON_EXECUTABLE = os.path.splitext(sys.executable.split(os.path.sep).pop())[0]  # get command to run python
-# get python version
 PYTHON_VERSION = sys.version.split(" ")[0]
-# get python major.minor version
 PYTHON_MINOR_VERSION = '.'.join(PYTHON_VERSION.split(".")[:2])
 
+# pip string version
+# pip float version
 PIP_VERSION = ""
 PIP_FLOAT_VERSION = 0
 
+# success
 SUCCESS = False
+# bucket for versions
 VERSIONS = {}
 
-
+# process module output
+#  read output from installing
+#  print relevant info
+#  print unknown stuff
 def process_module_output(lines):
     for line in lines:
         # if there's an error, print it and bail
@@ -86,23 +99,30 @@ def process_module_output(lines):
             print(line.strip())
     print("")
 
-
+# print module line
+#  name, installed version, latest version
 def print_module_line(line):
     global VERSIONS
+    # is it already installed?
     satisfied = line.strip().split(" in ")
+    # get the installed version
     sver = ((len(satisfied) > 1) and satisfied[1].split("(").pop().replace(")", "")) or ""
 
+    # if we're making a wheel
     if "Created wheel" in line:
         line = line.strip().split(':')
         satisfied = [line[0]]
         sver = line[1].split('-')[1]
 
+    # get module name
     modulename = satisfied[0].replace("Requirement already satisfied: ", "")
+    # save info for later use
     VERSIONS[modulename] = {
         "installed": sver,
         "latest": (sver and get_module_version(satisfied[0].split(" ")[-1])).strip() or ""
     }
 
+    # print what we found
     print(
         (
             "[%s] %s\t%s\t%s"
@@ -115,9 +135,11 @@ def print_module_line(line):
             )
         )
     )
+    # return the name of this module
     return modulename
 
-
+# get module version
+#  get installed version
 def get_module_version(module):
     # pip index versions [module]                             // >= 21.2
     # pip install [module]==                                  // >= 21.1
@@ -130,6 +152,7 @@ def get_module_version(module):
     ret = ""
     ver = ""
 
+    # based on version of pip, get the installation status of a module
     if float(PIP_FLOAT_VERSION) >= 21.2:
         ret = subprocess.run(
             [
@@ -201,9 +224,10 @@ def get_module_version(module):
     # if ver == "" and ret.stderr.strip():
     #     ver = (ret.stderr.strip().split("\n")[0].split(",")[-1].replace(')', '')).strip()
 
+    # return what we found
     return ver
 
-
+# get python info
 def python_info():
     global args
     global PYTHON_VERSION
@@ -225,7 +249,7 @@ def python_info():
         print(PY_STRING)
         print('.' * WIDTH)
 
-
+# get pip info
 def pip_info():
     global args
     global PIPEXE
@@ -280,7 +304,7 @@ def pip_info():
                 print(PIP_STRING)
                 print('.' * WIDTH)
 
-
+# upgrade pip
 def pip_upgrade():
     global args
     global PIPEXE
@@ -304,7 +328,7 @@ def pip_upgrade():
             print(ret.stdout.strip())
             pip_info()
 
-
+# install modules
 def install_modules():
     global args
     global PIPEXE
@@ -401,7 +425,7 @@ def main():
         try:
             python_info()
 
-            # foreach py executable
+            # foreach pip executable
             for PIPEXE in ["pip3", "pip"]:
                 pip_info()
                 pip_upgrade()

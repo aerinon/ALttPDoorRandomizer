@@ -25,6 +25,7 @@ runs:
         echo "github_run_number=$GITHUB_RUN_NUMBER" >> $GITHUB_OUTPUT
 
     # Prepare AppVersion
+    # CHECKME: source/classes/appversion.py writes the tag format
     - name: 💬Prepare AppVersion
       shell: bash
       run: |

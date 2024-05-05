@@ -334,7 +334,8 @@ jobs:
       # create a release (MASTER)
       # CHECKME: Make sure we updated RELEASENOTES.md
       # CHECKME: Make sure we're firing on the proper branches
-      # if: contains(github.event.head_commit.message, 'Version bump')
+      # if: contains(github.ref, 'master') # branch or tag name
+      # if: contains(github.event.head_commit.message, 'Version bump') # commit message
       - name: 📀->🚀Create a Release (MASTER)
         id: create_release
         uses: actions/create-release@v1.1.4
