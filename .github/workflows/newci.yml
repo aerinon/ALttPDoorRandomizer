@@ -23,6 +23,7 @@ on: [
 
 # stuff to do
 jobs:
+  # Diagnostics
   diags:
     # diagnostics
     #  call checkout
@@ -62,6 +63,21 @@ jobs:
         shell: bash
         run: |
           python --version
+      # print os distribution
+      - name: OS distribution
+        shell: bash
+        run: |
+          if [[ -r /etc/os-release ]]; then
+              . /etc/os-release
+              if [[ $ID = ubuntu ]]; then
+                  read _ UBUNTU_VERSION_NAME <<< "$VERSION"
+                  echo "Ubuntu: $UBUNTU_VERSION_NAME"
+              else
+                  echo "Not Ubuntu: ID=$ID, VERSION=$VERSION"
+              fi
+          else
+              echo "Command not available"
+          fi
       # call install
       - name: 💿Call Install
         uses: ./.github/actions/install
@@ -85,6 +101,7 @@ jobs:
         run: |
           python -m source.meta.run_diags
 
+  # Test
   install-test:
     # test
     #  call checkout
@@ -124,6 +141,7 @@ jobs:
           os-name: ${{ matrix.os-name }}
           python-version: ${{ matrix.python-version }}
 
+  # Build
   install-build:
     # build
     #  call checkout
@@ -165,6 +183,7 @@ jobs:
           os-name: ${{ matrix.os-name }}
           python-version: ${{ matrix.python-version }}
 
+  # Prepare Release
   release-prepare:
     # prepare release
     #  call checkout

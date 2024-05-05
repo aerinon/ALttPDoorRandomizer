@@ -131,7 +131,7 @@ def prepare_env():
       # if the app version didn't have the build number, add it
       # set to <app_version>.<build_number>
       if env["BUILD_NUMBER"] not in GITHUB_TAG:
-        GITHUB_TAG += '.' + env["BUILD_NUMBER"]
+        GITHUB_TAG += ".r" + env["BUILD_NUMBER"]
 
   env["GITHUB_TAG"] = GITHUB_TAG
   env["OS_NAME"] = OS_NAME
