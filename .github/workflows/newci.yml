@@ -132,7 +132,7 @@ jobs:
     #  call checkout
     #  call install
     #  call appversion-prepare
-    name: 💿/🔨
+    name: 💬
     runs-on: ${{ matrix.os-name }}
     needs: [install-test]
     continue-on-error: False
