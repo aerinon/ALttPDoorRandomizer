@@ -19,6 +19,10 @@ on:
         description: "Reference to tag with"
         type: string
         required: true
+      debug:
+        description: "Debug Mode, won't set tag"
+        type: boolean
+        required: false
     secrets:
       PAT:
         description: "Personal Access Token"
@@ -43,6 +47,7 @@ jobs:
         with:
           github-token: ${{ secrets.PAT }}
           script: |
+            const debug = ${{ inputs.debug }};
             // get git tag
             const gitTag = '${{ inputs.github-tag }}TAG';
             console.log('Repo Data: ', '${{ inputs.repo-owner }}/${{ inputs.repo-name }}@${{ inputs.ref-name }}')
@@ -74,15 +79,17 @@ jobs:
             }
             console.log('Latest tag:', latestTag)
             if(latestTag != gitTag) {
-              console.log(`Result:    🟢Creating '${gitTag}' tag`)
-              /*
-              github.rest.git.createRef({
-                owner: context.repo.owner,
-                repo: repo,
-                ref: `refs/tags/${gitTag}`,
-                sha: latestCommit.data.object.sha
-              })
-              */
+              if(debug) {
+                console.log(`DEBUG:     🟢Creating '${gitTag}' tag`)
+              } else {
+                console.log(`Result:    🟢Creating '${gitTag}' tag`)
+                github.rest.git.createRef({
+                  owner: context.repo.owner,
+                  repo: repo,
+                  ref: `refs/tags/${gitTag}`,
+                  sha: latestCommit.data.object.sha
+                })
+              }
             } else {
               console.log('Result:    🟡Not creating release tag')
             }
