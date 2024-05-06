@@ -31,7 +31,7 @@ jobs:
 
     strategy:
       matrix:
-        # CHECKME: OS List to run on
+        #TODO: OS List to run on
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
