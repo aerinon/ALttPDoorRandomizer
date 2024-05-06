@@ -40,7 +40,6 @@ jobs:
     steps:
       - name: 🏷️Tag Repository
         uses: actions/github-script@v7.0.1
-        continue-on-error: true
         with:
           github-token: ${{ secrets.PAT }}
           script: |
@@ -52,7 +51,7 @@ jobs:
               let msg = 'Result:    🔴No Git Tag sent, aborting!';
               console.log(msg)
               core.setFailed(msg)
-              return 1
+              return
             }
             // get latest commit
             const latestCommit = await github.rest.git.getRef({
