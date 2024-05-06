@@ -8,47 +8,38 @@ on: [
 ]
 
 jobs:
-  tag-repos:
-    name: 🏷️Tag Repositories
-    runs-on: ${{ matrix.os-name }}
+  # Tag Baserom
+  tag-baserom:
+    name: 🖳Tag Baserom
+    uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable/repo-tag.yml@doors-actions-update
+    with:
+      repo-owner: miketrethewey
+      repo-name:  z3randomizer
+      ref-name:   heads/OWMain
+      github-tag: TAG
+    secrets:
+      PAT: ${{ secrets.ALTTPER_TAGGER }}
 
-    strategy:
-      matrix:
-        # CHECKME: OS List to run on
-        os-name: [
-          # ubuntu-latest,  # ubuntu-22.04
-          ubuntu-22.04
-        ]
-    steps:
-      # Tag baserom
-      - name: 🖳Tag baserom
-        uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable/repo-tag.yml@doors-actions-update
-        with:
-          repo-owner: miketrethewey
-          repo-name:  z3randomizer
-          ref-name:   heads/OWMain
-          github-tag: TAG
-        secrets:
-          PAT: ${{ secrets.ALTTPER_TAGGER }}
+  # Tag Unstable
+  tag-unstable:
+    name: 🛠️Tag Unstable
+    uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable/repo-tag.yml@doors-actions-update
+    with:
+      repo-owner: miketrethewey
+      repo-name:  ALttPDoorRandomizer
+      ref-name:   heads/OverworldShuffleDev
+      github-tag: TAG
+    secrets:
+      PAT: ${{ secrets.ALTTPER_TAGGER }}
 
-      # Tag Unstable
-      - name: 🛠️Tag Unstable
-        uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable/repo-tag.yml@doors-actions-update
-        with:
-          repo-owner: miketrethewey
-          repo-name:  ALttPDoorRandomizer
-          ref-name:   heads/OverworldShuffleDev
-          github-tag: TAG
-        secrets:
-          PAT: ${{ secrets.ALTTPER_TAGGER }}
-
-      # Tag Stable
-      - name: ✅Tag Stable
-        uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable/repo-tag.yml@doors-actions-update
-        with:
-          repo-owner: miketrethewey
-          repo-name:  z3randomizer
-          ref-name:   heads/OverworldShuffle
-          github-tag: TAG
-        secrets:
-          PAT: ${{ secrets.ALTTPER_TAGGER }}
+  # Tag Stable
+  tag-stable:
+    name: ✅Tag Stable
+    uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable/repo-tag.yml@doors-actions-update
+    with:
+      repo-owner: miketrethewey
+      repo-name:  z3randomizer
+      ref-name:   heads/OverworldShuffle
+      github-tag: TAG
+    secrets:
+      PAT: ${{ secrets.ALTTPER_TAGGER }}
