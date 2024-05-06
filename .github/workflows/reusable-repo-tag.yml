@@ -1,4 +1,4 @@
-name: Tag Repository
+name: 🏷️Tag Repository
 
 on:
   workflow_call:
@@ -38,10 +38,6 @@ jobs:
         ]
 
     steps:
-      - name: 🏷️Tag Repository
-        shell: bash
-        run: |
-          echo "🏷️Tag Repository: ${{ inputs.repo-owner }}/${{ inputs.repo-name }}@${{ inputs.ref-name }}"
       - name: 🏷️Tag Repository
         uses: actions/github-script@v7.0.1
         with:
