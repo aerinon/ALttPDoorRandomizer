@@ -3,12 +3,8 @@ name: 🏷️Tag Repository
 on:
   workflow_call:
     inputs:
-      repo-owner:
-        description: "Repository Owner"
-        type: string
-        required: true
-      repo-name:
-        description: "Repository Name"
+      repository:
+        description: "Repository Owner/Name; octocat/Hello-World"
         type: string
         required: true
       ref-name:
@@ -48,6 +44,9 @@ jobs:
           github-token: ${{ secrets.PAT }}
           script: |
             const debug = ${{ inputs.debug }};
+            const repository = ${{ inputs.repository }};
+            const owner = repository.substring(0,repository.indexOf('/'));
+            const repo = repository.substring(repository.indexOf('/')+1);
             // get git tag
             const gitTag = '${{ inputs.github-tag }}';
             console.log('Repo Data: ', '${{ inputs.repo-owner }}/${{ inputs.repo-name }}@${{ inputs.ref-name }}')
@@ -60,14 +59,14 @@ jobs:
             }
             // get latest commit
             const latestCommit = await github.rest.git.getRef({
-              owner: '${{ inputs.repo-owner }}',
-              repo: '${{ inputs.repo-name }}',
+              owner: owner,
+              repo: repo,
               ref: '${{ inputs.ref-name }}'
             })
             // get latest refs
             const latestRefs = await github.rest.git.listMatchingRefs({
-              owner: '${{ inputs.repo-owner }}',
-              repo: '${{ inputs.repo-name }}'
+              owner: owner,
+              repo: repo
             })
             let latestTag = ''; // bucket for latest tag
             // get last tag in data
@@ -84,8 +83,8 @@ jobs:
               } else {
                 console.log(`Result:    🟢Creating '${gitTag}' tag`)
                 github.rest.git.createRef({
-                  owner: '${{ inputs.repo-owner }}',
-                  repo: '${{ inputs.repo-name }}',
+                  owner: owner,
+                  repo: repo,
                   ref: `refs/tags/${gitTag}`,
                   sha: latestCommit.data.object.sha
                 })
