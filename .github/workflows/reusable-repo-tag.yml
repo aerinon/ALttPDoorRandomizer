@@ -44,7 +44,7 @@ jobs:
           github-token: ${{ secrets.PAT }}
           script: |
             // get git tag
-            const gitTag = '${{ inputs.github-tag }}';
+            const gitTag = '${{ inputs.github-tag }}TAG';
             console.log('Repo Data: ', '${{ inputs.repo-owner }}/${{ inputs.repo-name }}@${{ inputs.ref-name }}')
             console.log('Git tag:   ', gitTag)
             if(gitTag == '') {
