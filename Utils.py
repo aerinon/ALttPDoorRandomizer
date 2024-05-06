@@ -755,8 +755,9 @@ def write_yaml_to_file(path_list, data):
 
 def clear_file(path_list):
     path = os.path.join(*path_list)
-    with open(path, 'w', encoding='utf-8') as f:
-        f.write('')
+    if os.path.isfile(path):
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write('')
 
 
 def append_to_yaml(path_list, data):

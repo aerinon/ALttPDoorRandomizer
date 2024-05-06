@@ -7,7 +7,7 @@ from BaseClasses import hook_from_door
 from Regions import dungeon_events, flooded_keys_reverse
 from Utils import append_to_yaml, clear_file
 from source.dungeon.DungeonGenerationCommon import DungeonBuilder, define_sector_features, hanger_from_door, dungeon_portals
-from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector
+from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector, GenerationException
 from source.dungeon.DungeonStitcher import ExplorableDoor
 
 
@@ -41,6 +41,13 @@ class SectorDescriptor:
         self.constraints = {}  # disjunction of optional constraints, indexed by Hooks consumed
         self.parity_id = ''
         self.init_parity_id()
+
+        self.dead_end = False
+        self.must_enter_reqs = []
+        self.special_reqs = []
+        self.crystal_reqs = None
+        self.is_neutral = False
+
         self.analyze_sector(v_trap_flag)
 
         self.joined_constraints = []
@@ -76,7 +83,7 @@ class SectorDescriptor:
                 # crystal = self.resolve_crystal_prop(explorable.crystal, state.visited_map[explorable.door.entrance.parent_region])
                 self.reachability[door].append((explorable.door, explorable.crystal))
 
-        return
+        self.classify()
         # for door_hanger, reached_list in self.reachability.items():
         #     crystal_needed = any(x[1] in {CrystalBarrier.Blue, CrystalBarrier.Both} for x in reached_list)
         #     hanger_type = None if door_hanger is None else hook_from_door(door_hanger)
@@ -116,6 +123,58 @@ class SectorDescriptor:
         #     self.constraints = complete_constraints  # done, let's just use the complete ones
         # else:
         #     self.reduce_constraints()  # if possible
+
+    def classify(self):
+        total_needed = len(self.sector.outstanding_doors)
+        unreached = set(self.sector.outstanding_doors)
+        if total_needed == 1:
+            self.dead_end = True
+        else:
+            if 'Ice Cross Left' in self.sector.r_name_set:
+                specials = []
+                for source, dest_list in self.reachability.items():
+                    if any('Ice Cross ' in d.name for d, c in dest_list):
+                        specials.append(source)
+                self.special_reqs.append(tuple(specials))
+            elif any(len(reach_list) < total_needed for source, reach_list in self.reachability.items()):
+                # there is no full access
+                reversed_reachability = defaultdict(list)
+                for source, reach_list in self.reachability.items():
+                    for reach in reach_list:
+                        reversed_reachability[reach[0]].append(source)
+                must_access = [dest for dest, source_list in reversed_reachability.items() if len(source_list) == 1]
+                reached = set()
+                for dest in must_access:
+                    self.must_enter_reqs.append(dest)
+                    reached.update([d for d, c in self.reachability[dest]])
+                unreached.difference_update(reached)
+                if len(unreached) > 0:
+                    covers_all = []
+                    for source, dest_list in self.reachability.items():
+                        door_set = set(d for d, c in dest_list if d in unreached)
+                        if len(door_set) == len(unreached):
+                            covers_all.append(source)
+                    if not covers_all:
+                        raise GenerationException("Some edge case where you need to separate door to cover all: " + self.sector)
+                    if len(covers_all) == 1:
+                        d = next(iter(covers_all))
+                        self.must_enter_reqs.insert(0, d)
+                    else:
+                        self.must_enter_reqs.insert(0, tuple(covers_all))
+            # todo: check for crystal options
+        if all(len(reach_list) == total_needed for source, reach_list in self.reachability.items()):
+            if self.is_sector_neutral():
+                self.is_neutral = True
+
+    def is_sector_neutral(self):
+        if len(self.sector.outstanding_doors) == 2:
+            d1, d2 = self.sector.outstanding_doors[0], self.sector.outstanding_doors[1]
+            if hanger_from_door(d1) == hook_from_door(d2):
+                reachability = self.reachability
+                if len(reachability[d1]) == 2 and len(reachability[d2]) == 2:
+                    return (all(access[1] == CrystalBarrier.Null for access in reachability[d1]) and
+                            all(access[1] == CrystalBarrier.Null for access in reachability[d2]))
+        return False
 
     # assumptions, state_crystal can't be null and represents the last barrier passed over
     def resolve_crystal_prop(self, state_crystal, region_crystal):

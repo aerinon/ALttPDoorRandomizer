@@ -4634,6 +4634,14 @@ door_type_counts = {
 
 
 def link_doors_prototype(world, player):
+    prep_world_for_doors_prototype(world, player)
+
+    pool = world.dungeon_pool[player]
+    if pool:
+        main_dungeon_pool_prototype(pool, world, player)
+
+
+def prep_world_for_doors_prototype(world, player):
     for exitName, regionName in logical_connections:
         connect_simple_door(world, exitName, regionName, player)
     # These should all be connected for now as normal connections
@@ -4653,10 +4661,6 @@ def link_doors_prototype(world, player):
     else:
         unmark_ugly_smalls(world, player)
 
-    pool = world.dungeon_pool[player]
-    if pool:
-        main_dungeon_pool_prototype(pool, world, player)
-
 
 def main_dungeon_pool_prototype(dungeon_pool, world, player):
     find_inaccessible_regions(world, player)
@@ -4674,6 +4678,7 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
             # dungeon_builders[dungeon_key].entrance_list = list(entrances_map[dungeon_key])
         else:
             sectors = convert_to_sectors(region_list, world, player)
+            merge_sectors(sectors, world, player)
             sector_pool, portal_pool = [], []
             for sector in sectors:
                 (portal_pool if len(sector.outstanding_doors) == 0 else sector_pool).append(sector)
