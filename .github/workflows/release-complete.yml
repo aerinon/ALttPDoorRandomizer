@@ -11,7 +11,7 @@ jobs:
   # Tag Baserom
   tag-baserom:
     name: 🖳Tag Baserom
-    uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable/repo-tag.yml@doors-actions-update
+    uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable-repo-tag.yml@doors-actions-update
     with:
       repo-owner: miketrethewey
       repo-name:  z3randomizer
@@ -23,7 +23,7 @@ jobs:
   # Tag Unstable
   tag-unstable:
     name: 🛠️Tag Unstable
-    uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable/repo-tag.yml@doors-actions-update
+    uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable-repo-tag.yml@doors-actions-update
     with:
       repo-owner: miketrethewey
       repo-name:  ALttPDoorRandomizer
@@ -35,7 +35,7 @@ jobs:
   # Tag Stable
   tag-stable:
     name: ✅Tag Stable
-    uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable/repo-tag.yml@doors-actions-update
+    uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable-repo-tag.yml@doors-actions-update
     with:
       repo-owner: miketrethewey
       repo-name:  z3randomizer
