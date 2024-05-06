@@ -32,25 +32,3 @@ jobs:
       github-tag: ${{ github.event.release.tag_name }}
     secrets:
       PAT: ${{ secrets.ALTTPER_TAGGER }}
-
-  # Tag Unstable
-  tag-unstable:
-    name: 🛠️Tag Unstable
-    uses: ./.github/workflows/reusable-repo-tag.yml
-    with:
-      repository: ${{ github.repository }}
-      ref-name:   heads/OverworldShuffleDev
-      github-tag: ${{ github.event.release.tag_name }}-dev
-    secrets:
-      PAT: ${{ secrets.ALTTPER_TAGGER }}
-
-  # Tag Stable
-  tag-stable:
-    name: ✅Tag Stable
-    uses: ./.github/workflows/reusable-repo-tag.yml
-    with:
-      repository: ${{ github.repository }}
-      ref-name:   heads/OverworldShuffle
-      github-tag: ${{ github.event.release.tag_name }}-stable
-    secrets:
-      PAT: ${{ secrets.ALTTPER_TAGGER }}
