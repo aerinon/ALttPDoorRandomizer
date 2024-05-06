@@ -43,6 +43,14 @@ jobs:
         with:
           github-token: ${{ secrets.PAT }}
           script: |
+            // get git tag
+            const gitTag = '${{ inputs.github-tag }}';
+            console.log('Repo Data: ', '${{ inputs.repo-owner }}/${{ inputs.repo-name }}@${{ inputs.ref-name }}')
+            console.log('Git tag:   ', gitTag)
+            if(gitTag == '') {
+              console.log('Result:    🔴No Git Tag sent, aborting!')
+              return
+            }
             // get latest commit
             const latestCommit = await github.rest.git.getRef({
               owner: '${{ inputs.repo-owner }}',
@@ -62,10 +70,8 @@ jobs:
                 latestTag = refParts[-1];
               }
             }
-            console.log('Repo Data: ', '${{ inputs.repo-owner }}/${{ inputs.repo-name }}@${{ inputs.ref-name }}')
-            console.log('Git tag:   ', '${{ inputs.github-tag }}')
             console.log('Latest tag:', latestTag)
-            if(latestTag != '${{ inputs.github-tag }}') {
+            if(latestTag != gitTag) {
               console.log(`Result:    🟢Creating '${{ inputs.github-tag }}' tag`)
               /*
               github.rest.git.createRef({
