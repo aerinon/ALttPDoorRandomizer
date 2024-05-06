@@ -54,7 +54,7 @@ jobs:
             console.log('Git tag:   ', inboundTag)
             console.log('Latest tag:', latestTag)
             if(latestTag != inboundTag) {
-              console.log('Result:    🟢Creating release tag')
+              console.log('Result:    🟢Creating \'{inboundTag}\' tag')
               /*
               github.rest.git.createRef({
                 owner: context.repo.owner,
