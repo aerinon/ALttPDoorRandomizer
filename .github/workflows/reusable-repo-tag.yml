@@ -44,7 +44,7 @@ jobs:
           github-token: ${{ secrets.PAT }}
           script: |
             const debug = ${{ inputs.debug }};
-            const repository = ${{ inputs.repository }};
+            const repository = '${{ inputs.repository }}';
             const owner = repository.substring(0,repository.indexOf('/'));
             const repo = repository.substring(repository.indexOf('/')+1);
             // get git tag
