@@ -80,7 +80,7 @@ jobs:
             console.log('Latest tag:', latestTag)
             if(latestTag != gitTag) {
               if(debug) {
-                console.log(`DEBUG:     🟢Creating '${gitTag}' tag`)
+                console.log(`DEBUG:     🔵Creating '${gitTag}' tag`)
               } else {
                 console.log(`Result:    🟢Creating '${gitTag}' tag`)
                 github.rest.git.createRef({
