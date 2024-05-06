@@ -1,9 +1,22 @@
 # workflow name
 name: 🏷️Tag Repositories
 
+# Fine-grained personal access token
+#  https://github.com/settings/tokens?type=beta
+#  token needs perms:
+#   actions:         read/write
+#   commit statuses: read/write
+#   contents:        read/write
+#   workflows:       read/write
+#  copy token
+# Actions secrets and variables
+# github.com/<owner>/<repo>/settings/secrets/actions
+#  repository secret
+#   name a new secret "ALTTPER_TAGGER"
+#   value set to copied token
+
 # fire on
 on:
-  push:
   release:
     types:
       - released
@@ -12,10 +25,9 @@ jobs:
   # Tag Baserom
   tag-baserom:
     name: 🖳Tag Baserom
-    uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable-repo-tag.yml@doors-actions-update
+    uses: ./.github/workflows/reusable-repo-tag.yml
     with:
-      repo-owner: miketrethewey
-      repo-name:  z3randomizer
+      repository: ${{ github.repository_owner }}/z3randomizer
       ref-name:   heads/OWMain
       github-tag: ${{ github.event.release.tag_name }}
     secrets:
@@ -24,10 +36,9 @@ jobs:
   # Tag Unstable
   tag-unstable:
     name: 🛠️Tag Unstable
-    uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable-repo-tag.yml@doors-actions-update
+    uses: ./.github/workflows/reusable-repo-tag.yml
     with:
-      repo-owner: miketrethewey
-      repo-name:  ALttPDoorRandomizer
+      repository: ${{ github.repository }}
       ref-name:   heads/OverworldShuffleDev
       github-tag: ${{ github.event.release.tag_name }}
     secrets:
@@ -36,10 +47,9 @@ jobs:
   # Tag Stable
   tag-stable:
     name: ✅Tag Stable
-    uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable-repo-tag.yml@doors-actions-update
+    uses: ./.github/workflows/reusable-repo-tag.yml
     with:
-      repo-owner: miketrethewey
-      repo-name:  ALttPDoorRandomizer
+      repository: ${{ github.repository }}
       ref-name:   heads/OverworldShuffle
       github-tag: ${{ github.event.release.tag_name }}
     secrets:
