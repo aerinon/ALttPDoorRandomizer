@@ -22,141 +22,33 @@ jobs:
     steps:
       # Tag baserom
       - name: 🖳Tag baserom
-        uses: actions/github-script@v7.0.1
+        uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable/repo-tag.yml@doors-actions-update
         with:
-          github-token: ${{ secrets.ALTTPER_TAGGER }}
-          script: |
-            const inboundTag = 'TAG';
-            const repo = 'z3randomizer';  // repo to tag
-            const ref = 'heads/OWMain';   // ref to tag
-
-            // get latest commit
-            const latestCommit = await github.rest.git.getRef({
-              owner: context.repo.owner,
-              repo: repo,
-              ref: ref
-            })
-            // get latest refs
-            const latestRefs = await github.rest.git.listMatchingRefs({
-              owner: context.repo.owner,
-              repo: repo
-            })
-            let latestTag = ''; // bucket for latest tag
-            // get last tag in data
-            for(let thisRef of latestRefs.data) {
-              if(thisRef['ref'].indexOf('tags') > -1) {
-                let refParts = thisRef['ref'].split('/');
-                latestTag = refParts[-1];
-              }
-            }
-            console.log('Repo:      ', repo)
-            console.log('Ref:       ', ref)
-            console.log('Git tag:   ', inboundTag)
-            console.log('Latest tag:', latestTag)
-            if(latestTag != inboundTag) {
-              console.log(`Result:    🟢Creating '${inboundTag}' tag`)
-              /*
-              github.rest.git.createRef({
-                owner: context.repo.owner,
-                repo: repo,
-                ref: 'refs/tags/' + inboundTag,
-                sha: latestCommit.data.object.sha
-              })
-              */
-            } else {
-              console.log('Result:    🟡Not creating release tag')
-            }
+          repo-owner: miketrethewey
+          repo-name:  z3randomizer
+          ref-name:   heads/OWMain
+          github-tag: TAG
+        secrets:
+          PAT: ${{ secrets.ALTTPER_TAGGER }}
 
       # Tag Unstable
       - name: 🛠️Tag Unstable
-        uses: actions/github-script@v7.0.1
+        uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable/repo-tag.yml@doors-actions-update
         with:
-          github-token: ${{ secrets.ALTTPER_TAGGER }}
-          script: |
-            const inboundTag = 'TAG';
-            const repo = 'ALttPDoorRandomizer';       // repo to tag
-            const ref = 'heads/OverworldShuffleDev';  // ref to tag
-
-            // get latest commit
-            const latestCommit = await github.rest.git.getRef({
-              owner: context.repo.owner,
-              repo: repo,
-              ref: ref
-            })
-            // get latest refs
-            const latestRefs = await github.rest.git.listMatchingRefs({
-              owner: context.repo.owner,
-              repo: repo
-            })
-            let latestTag = ''; // bucket for latest tag
-            // get last tag in data
-            for(let thisRef of latestRefs.data) {
-              if(thisRef['ref'].indexOf('tags') > -1) {
-                let refParts = thisRef['ref'].split('/');
-                latestTag = refParts[-1];
-              }
-            }
-            console.log('Repo:      ', repo)
-            console.log('Ref:       ', ref)
-            console.log('Git tag:   ', inboundTag)
-            console.log('Latest tag:', latestTag)
-            if(latestTag != inboundTag) {
-              console.log(`Result:    🟢Creating '${inboundTag}' tag`)
-              /*
-              github.rest.git.createRef({
-                owner: context.repo.owner,
-                repo: repo,
-                ref: 'refs/tags/' + inboundTag,
-                sha: latestCommit.data.object.sha
-              })
-              */
-            } else {
-              console.log('Result:    🟡Not creating release tag')
-            }
+          repo-owner: miketrethewey
+          repo-name:  ALttPDoorRandomizer
+          ref-name:   heads/OverworldShuffleDev
+          github-tag: TAG
+        secrets:
+          PAT: ${{ secrets.ALTTPER_TAGGER }}
 
       # Tag Stable
       - name: ✅Tag Stable
-        uses: actions/github-script@v7.0.1
+        uses: miketrethewey/ALttPDoorRandomizer/.github/workflows/reusable/repo-tag.yml@doors-actions-update
         with:
-          github-token: ${{ secrets.ALTTPER_TAGGER }}
-          script: |
-            const inboundTag = 'TAG';
-            const repo = 'ALttPDoorRandomizer';   // repo to tag
-            const ref = 'heads/OverworldShuffle'; // ref to tag
-
-            // get latest commit
-            const latestCommit = await github.rest.git.getRef({
-              owner: context.repo.owner,
-              repo: repo,
-              ref: ref
-            })
-            // get latest refs
-            const latestRefs = await github.rest.git.listMatchingRefs({
-              owner: context.repo.owner,
-              repo: repo
-            })
-            let latestTag = ''; // bucket for latest tag
-            // get last tag in data
-            for(let thisRef of latestRefs.data) {
-              if(thisRef['ref'].indexOf('tags') > -1) {
-                let refParts = thisRef['ref'].split('/');
-                latestTag = refParts[-1];
-              }
-            }
-            console.log('Repo:      ', repo)
-            console.log('Ref:       ', ref)
-            console.log('Git tag:   ', inboundTag)
-            console.log('Latest tag:', latestTag)
-            if(latestTag != inboundTag) {
-              console.log(`Result:    🟢Creating '${inboundTag}' tag`)
-              /*
-              github.rest.git.createRef({
-                owner: context.repo.owner,
-                repo: repo,
-                ref: 'refs/tags/' + inboundTag,
-                sha: latestCommit.data.object.sha
-              })
-              */
-            } else {
-              console.log('Result:    🟡Not creating release tag')
-            }
+          repo-owner: miketrethewey
+          repo-name:  z3randomizer
+          ref-name:   heads/OverworldShuffle
+          github-tag: TAG
+        secrets:
+          PAT: ${{ secrets.ALTTPER_TAGGER }}
