@@ -84,8 +84,8 @@ jobs:
               } else {
                 console.log(`Result:    🟢Creating '${gitTag}' tag`)
                 github.rest.git.createRef({
-                  owner: context.repo.owner,
-                  repo: repo,
+                  owner: '${{ inputs.repo-owner }}',
+                  repo: '${{ inputs.repo-name }}',
                   ref: `refs/tags/${gitTag}`,
                   sha: latestCommit.data.object.sha
                 })
