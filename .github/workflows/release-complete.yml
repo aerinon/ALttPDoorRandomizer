@@ -30,7 +30,6 @@ jobs:
       repo-name:  ALttPDoorRandomizer
       ref-name:   heads/OverworldShuffleDev
       github-tag: ${{ github.event.release.tag_name }}
-      debug: true
     secrets:
       PAT: ${{ secrets.ALTTPER_TAGGER }}
 
@@ -43,6 +42,5 @@ jobs:
       repo-name:  ALttPDoorRandomizer
       ref-name:   heads/OverworldShuffle
       github-tag: ${{ github.event.release.tag_name }}
-      debug: true
     secrets:
       PAT: ${{ secrets.ALTTPER_TAGGER }}

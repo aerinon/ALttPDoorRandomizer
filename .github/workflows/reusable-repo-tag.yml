@@ -49,7 +49,7 @@ jobs:
           script: |
             const debug = ${{ inputs.debug }};
             // get git tag
-            const gitTag = '${{ inputs.github-tag }}TAG';
+            const gitTag = '${{ inputs.github-tag }}';
             console.log('Repo Data: ', '${{ inputs.repo-owner }}/${{ inputs.repo-name }}@${{ inputs.ref-name }}')
             console.log('Git tag:   ', gitTag)
             if(gitTag == '') {
