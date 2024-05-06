@@ -330,7 +330,7 @@ jobs:
           echo "Release Name: ${RELEASE_NAME}"
           echo "Asset Prefix: ${ASSET_PREFIX}"
           echo "Git Tag:      ${GITHUB_TAG}"
-        if: contains(github.event.head_commit.message, 'Magic Words Test')
+        if: contains(github.event.head_commit.message, 'Magic Words')
 
       # create a release (MASTER)
       # CHECKME: Make sure we updated RELEASENOTES.md
