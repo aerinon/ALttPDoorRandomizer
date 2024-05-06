@@ -62,21 +62,21 @@ for r, d, f in os.walk(os.path.join(".", ".github")):
                 continue
             listACTIONS = []
             # print filename
-            filename_line = "─" * (len(os.path.join(r, filename)) + 2)
+            filename_line = "-" * (len(os.path.join(r, filename)) + 2)
             print(
-                "┌" +
+                " " +
                 filename_line +
-                "┐"
+                " "
             )
             print("| " + os.path.join(r, filename) + " |")
             # read the file
             with(open(os.path.join(r, filename), "r", encoding="utf-8")) as yamlFile:
                 print(
-                    "├" +
+                    "|" +
                     filename_line +
-                    "┴" +
-                    ("─" * (LINE_WIDTH - len(filename_line) + 1)) +
-                    "┐"
+                    "-" +
+                    ("-" * (LINE_WIDTH - len(filename_line) + 1)) +
+                    " "
                 )
                 yml = yaml.safe_load(yamlFile)
                 walk("uses", yml)
@@ -122,9 +122,9 @@ for r, d, f in os.walk(os.path.join(".", ".github")):
                         " |"
                     )
                 print(
-                    "└" +
-                    ("─" * (LINE_WIDTH + 2)) +
-                    "┘"
+                    " " +
+                    ("-" * (LINE_WIDTH + 2)) +
+                    " "
                 )
             print("")
 
@@ -137,19 +137,19 @@ for action, actionData in allACTIONS.items():
             outdated = True
             if first:
                 first = False
-                filename_line = "─" * (len("| Outdated |"))
+                filename_line = "-" * (len("| Outdated |"))
                 print(
-                    "┌" +
+                    " " +
                     filename_line +
-                    "┐"
+                    " "
                 )
                 print("| 🔴Outdated |")
                 print(
-                    "├" +
+                    "|" +
                     filename_line +
-                    "┴" +
-                    ("─" * (LINE_WIDTH - len(filename_line) + 1)) +
-                    "┐"
+                    "-" +
+                    ("-" * (LINE_WIDTH - len(filename_line) + 1)) +
+                    " "
                 )
             print(
                 "| " + \
@@ -162,7 +162,7 @@ for action, actionData in allACTIONS.items():
             )
 if outdated:
     print(
-        "└" +
-        ("─" * (LINE_WIDTH + 2)) +
-        "┘"
+        " " +
+        ("-" * (LINE_WIDTH + 2)) +
+        " "
     )
