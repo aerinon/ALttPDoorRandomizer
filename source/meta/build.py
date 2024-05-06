@@ -145,6 +145,7 @@ def go_build(slug):
 
 if __name__ == "__main__":
     binary_slugs = []
+    #TODO: Make sure we've got the proper binaries that we need
     with open(os.path.join(".","resources","app","meta","manifests","binaries.json")) as binariesFile:
         binary_slugs = json.load(binariesFile)
     for file_slug in binary_slugs:

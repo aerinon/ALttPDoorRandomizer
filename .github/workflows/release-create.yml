@@ -39,7 +39,7 @@ jobs:
 
     strategy:
       matrix:
-        # CHECKME: OS List to run on
+        #TODO: OS List to run on
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
@@ -47,7 +47,7 @@ jobs:
           macos-latest,  # macos-12
           windows-latest # windows-2022
         ]
-        # CHECKME: Python Version to run on
+        #TODO: Python Version to run on
         python-version: [ "3.12" ]
     steps:
       # call checkout
@@ -98,7 +98,7 @@ jobs:
 
     strategy:
       matrix:
-        # CHECKME: OS List to run on
+        #TODO: OS List to run on
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
@@ -106,7 +106,7 @@ jobs:
           macos-latest,  # macos-12
           windows-latest # windows-2022
         ]
-        # CHECKME: Python Version to run on
+        #TODO: Python Version to run on
         python-version: [ "3.12" ]
     steps:
       # call checkout
@@ -139,12 +139,12 @@ jobs:
 
     strategy:
       matrix:
-        # CHECKME: OS List to run on
+        #TODO: OS List to run on
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
         ]
-        # CHECKME: Python Version to run on
+        #TODO: Python Version to run on
         python-version: [ "3.12" ]
     steps:
       # call checkout
@@ -174,7 +174,7 @@ jobs:
 
     strategy:
       matrix:
-        # CHECKME: OS List to run on
+        #TODO: OS List to run on
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
@@ -182,7 +182,7 @@ jobs:
           macos-latest,  # macos-12
           windows-latest # windows-2022
         ]
-        # CHECKME: Python Version to run on
+        #TODO: Python Version to run on
         python-version: [ "3.12" ]
     steps:
       # call checkout
@@ -216,7 +216,7 @@ jobs:
 
     strategy:
       matrix:
-        # CHECKME: OS List to run on
+        #TODO: OS List to run on
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
@@ -250,12 +250,12 @@ jobs:
 
     strategy:
       matrix:
-        # CHECKME: OS List to run on
+        #TODO: OS List to run on
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
         ]
-        # CHECKME: Python Version to run on
+        #TODO: Python Version to run on
         python-version: [ "3.12" ]
 
     steps:
@@ -310,7 +310,7 @@ jobs:
       #     ls -R ${{ steps.parentDir.outputs.parentDir }}/deploy/
 
       # debug info
-      # CHECKME: Project Name
+      #TODO: Project Name
       - name: 📝Debug Info
         id: debug_info
         run: |
@@ -332,8 +332,8 @@ jobs:
           echo "Git Tag:      ${GITHUB_TAG}"
 
       # create a release (MASTER)
-      # CHECKME: Make sure we updated RELEASENOTES.md
-      # CHECKME: Make sure we're firing on the proper branches
+      #TODO: Make sure we updated RELEASENOTES.md
+      #TODO: Make sure we're firing on the proper branches
       # if: contains(github.ref, 'master') # branch or tag name
       # if: contains(github.event.head_commit.message, 'Version bump') # commit message
       - name: 📀->🚀Create a Release (MASTER)
@@ -357,7 +357,7 @@ jobs:
           echo "asset_linux=$ASSET_LINUX" >> $GITHUB_OUTPUT
 
       # upload linux archive asset (MASTER)
-      # CHECKME: Make sure we're firing on the proper branches
+      #TODO: Make sure we're firing on the proper branches
       - name: 🔼Upload Linux Archive Asset (MASTER)
         id: upload-linux-asset
         uses: actions/upload-release-asset@v1.0.2
@@ -379,7 +379,7 @@ jobs:
           echo "asset_macos=$ASSET_MACOS" >> $GITHUB_OUTPUT
 
       # upload macos archive asset (MASTER)
-      # CHECKME: Make sure we're firing on the proper branches
+      #TODO: Make sure we're firing on the proper branches
       - name: 🔼Upload MacOS Archive Asset (MASTER)
         id: upload-macos-asset
         uses: actions/upload-release-asset@v1.0.2
@@ -401,7 +401,7 @@ jobs:
           echo "asset_windows=$ASSET_WIN" >> $GITHUB_OUTPUT
 
       # upload windows archive asset (MASTER)
-      # CHECKME: Make sure we're firing on the proper branches
+      #TODO: Make sure we're firing on the proper branches
       - name: 🔼Upload Windows Archive Asset (MASTER)
         id: upload-windows-asset
         uses: actions/upload-release-asset@v1.0.2
