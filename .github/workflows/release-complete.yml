@@ -40,7 +40,7 @@ jobs:
     with:
       repository: ${{ github.repository }}
       ref-name:   heads/OverworldShuffleDev
-      github-tag: ${{ github.event.release.tag_name }}
+      github-tag: ${{ github.event.release.tag_name }}-dev
     secrets:
       PAT: ${{ secrets.ALTTPER_TAGGER }}
 
@@ -51,6 +51,6 @@ jobs:
     with:
       repository: ${{ github.repository }}
       ref-name:   heads/OverworldShuffle
-      github-tag: ${{ github.event.release.tag_name }}
+      github-tag: ${{ github.event.release.tag_name }}-stable
     secrets:
       PAT: ${{ secrets.ALTTPER_TAGGER }}
