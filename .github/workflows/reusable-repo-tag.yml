@@ -47,9 +47,10 @@ jobs:
             const repository = '${{ inputs.repository }}';
             const owner = repository.substring(0,repository.indexOf('/'));
             const repo = repository.substring(repository.indexOf('/')+1);
+            const ref = '${{ inputs.ref-name }}';
             // get git tag
             const gitTag = '${{ inputs.github-tag }}';
-            console.log('Repo Data: ', '${{ inputs.repo-owner }}/${{ inputs.repo-name }}@${{ inputs.ref-name }}')
+            console.log('Repo Data: ', '${owner}/${repo}@${ref}')
             console.log('Git tag:   ', gitTag)
             if(gitTag == '') {
               let msg = 'Result:    🔴No Git Tag sent, aborting!';
@@ -61,7 +62,7 @@ jobs:
             const latestCommit = await github.rest.git.getRef({
               owner: owner,
               repo: repo,
-              ref: '${{ inputs.ref-name }}'
+              ref: ref
             })
             // get latest refs
             const latestRefs = await github.rest.git.listMatchingRefs({
