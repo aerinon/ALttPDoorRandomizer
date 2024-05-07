@@ -129,7 +129,7 @@ if __name__ == "__main__":
                 stream.write(error[0] + "\n")
                 stream.write(error[1] + "\n")
                 stream.write(error[2] + "\n\n")
-                results["errors"].push(error)
+                results["errors"].append(error)
 
     with open("new-test-suite-success.txt", "w") as stream:
         stream.write(str.join("\n", successes))
