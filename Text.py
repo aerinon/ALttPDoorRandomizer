@@ -3,7 +3,7 @@ from collections import OrderedDict
 import logging
 import re
 import warnings
-warnings.filterwarnings("error")
+warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 text_addresses = {'Pedestal': (0x180300, 256),
                   'Triforce': (0x180400, 256),
@@ -646,10 +646,7 @@ class MultiByteCoreTextMapper(object):
             linespace = wrap
             line = lines.pop(0)
 
-            try:
-                match = re.search('^\{[A-Z0-9_:]+\}$', line)
-            except SyntaxWarning as w:
-                pass
+            match = re.search('^\{[A-Z0-9_:]+\}$', line)
             if match:
                 if line == '{PAGEBREAK}':
                     if lineindex % 3 != 0:
@@ -668,19 +665,13 @@ class MultiByteCoreTextMapper(object):
             while words:
                 word = words.pop(0)
 
-                try:
-                    match = re.search('^(\{[A-Z0-9_:]+\}).*', word)
-                except SyntaxWarning as w:
-                    pass
+                match = re.search('^(\{[A-Z0-9_:]+\}).*', word)
                 if match:
                     start_command = match.group(1)
                     outbuf.extend(cls.special_commands[start_command])
                     word = word.replace(start_command, '')
 
-                try:
-                    match = re.search('(\{[A-Z0-9_:]+\})\.?$', word)
-                except SyntaxWarning as w:
-                    pass
+                match = re.search('(\{[A-Z0-9_:]+\})\.?$', word)
                 if match:
                     end_command = match.group(1)
                     word = word.replace(end_command, '')

@@ -17,7 +17,7 @@ def output():
   lines = [
     f"{PROJECT_NAME} Diagnostics",
     "=================================",
-    diagpad("UTC Time") + str(datetime.utcnow())[:19],
+    diagpad("UTC Time") + str(datetime.now(datetime.UTC))[:19],
     diagpad(f"{PROJECT_NAME} Version") + DR_VERSION,
     diagpad("Python Version") + platform.python_version()
   ]
