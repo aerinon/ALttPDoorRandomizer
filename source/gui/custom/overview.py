@@ -1,4 +1,4 @@
-from tkinter import ttk, Frame, N, E, W, LEFT, X, VERTICAL, Y
+from tkinter import ttk, Frame, N, E, W, LEFT, TOP, X, VERTICAL, Y
 import source.gui.widgets as widgets
 import json
 import os
@@ -11,10 +11,10 @@ def custom_page(top,parent):
 
     # Create uniform list columns
     def create_list_frame(parent, framename):
-        parent.frames[framename] = Frame(parent)
-        parent.frames[framename].pack(side=LEFT, padx=(0,0), anchor=N)
-        parent.frames[framename].thisRow = 0
-        parent.frames[framename].thisCol = 0
+        self.frames[framename] = Frame(parent)
+        self.frames[framename].pack(side=LEFT, padx=(0,0), anchor=N)
+        self.frames[framename].thisRow = 0
+        self.frames[framename].thisCol = 0
 
     # Create a vertical rule to help with splitting columns visually
     def create_vertical_rule(num=1):
@@ -34,6 +34,8 @@ def custom_page(top,parent):
 
     # Custom Item Pool option sections
     self.frames = {}
+    self.frames["customHeader"] = Frame(self)
+    self.frames["customHeader"].pack(side=TOP, anchor=W)
     # Create 5 columns with 2 vertical rules in between each
     create_list_frame(self, "itemList1")
     create_vertical_rule(2)
@@ -50,9 +52,14 @@ def custom_page(top,parent):
     with open(os.path.join("resources", "app", "gui", "custom", "overview", "widgets.json")) as widgetDefns:
         myDict = json.load(widgetDefns)
         for framename,theseWidgets in myDict.items():
-            dictWidgets = widgets.make_widgets_from_dict(self, theseWidgets, self.frames[framename])
-            for key in dictWidgets:
-                self.customWidgets[key] = dictWidgets[key]
+            if framename in self.frames:
+                dictWidgets = widgets.make_widgets_from_dict(self, theseWidgets, self.frames[framename])
+                for key in dictWidgets:
+                    self.customWidgets[key] = dictWidgets[key]
+                    if framename == "customHeader":
+                        packAttrs = {"anchor":W}
+                        packAttrs = widgets.add_padding_from_config(packAttrs, theseWidgets[key])
+                        self.customWidgets[key].pack(packAttrs)
 
     # Load Custom Item Pool settings from settings file
     for key in CONST.CUSTOMITEMS:

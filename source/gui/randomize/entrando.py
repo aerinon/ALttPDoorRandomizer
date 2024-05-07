@@ -26,9 +26,8 @@ def entrando_page(parent):
             dictWidgets = widgets.make_widgets_from_dict(self, theseWidgets, self.frames[framename])
             for key in dictWidgets:
                 self.widgets[key] = dictWidgets[key]
-                packAttrs = {"anchor":E}
-                if self.widgets[key].type == "checkbox":
-                    packAttrs["anchor"] = W
+                packAttrs = {"anchor":W}
+                packAttrs = widgets.add_padding_from_config(packAttrs, theseWidgets[key])
                 self.widgets[key].pack(packAttrs)
 
     return self

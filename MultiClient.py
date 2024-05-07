@@ -8,10 +8,12 @@ import shlex
 import urllib.parse
 import websockets
 
-from BaseClasses import PotItem, PotFlags
+from BaseClasses import PotItem, PotFlags, LocationType
 import Items
 import Regions
 import PotShuffle
+import source.dungeon.EnemyList as EnemyList
+import source.rom.DataTables as DataTables
 
 
 class ReceivedItem:
@@ -66,6 +68,9 @@ class Context:
         self.lookup_name_to_id = {}
         self.lookup_id_to_name = {}
 
+        self.pottery_locations_enabled = None
+        self.uw_sprite_locations_enabled = None
+
 def color_code(*args):
     codes = {'reset': 0, 'bold': 1, 'underline': 4, 'black': 30, 'red': 31, 'green': 32, 'yellow': 33, 'blue': 34,
              'magenta': 35, 'cyan': 36, 'white': 37 , 'black_bg': 40, 'red_bg': 41, 'green_bg': 42, 'yellow_bg': 43,
@@ -95,6 +100,9 @@ SPRITE_ITEMS_SRAM_START = WRAM_START + 0x016268     # 2 bytes per room
 SHOP_SRAM_START = WRAM_START + 0x0164B8             # 2 bytes?
 ITEM_SRAM_SIZE = 0x250
 SHOP_SRAM_LEN = 0x29  # 41 tracked items
+
+POT_LOCATION_TABLE = 0x142A60
+UW_SPRITE_LOCATION_TABLE = 0x142CB0
 
 RECV_PROGRESS_ADDR = SAVEDATA_START + 0x4D0         # 2 bytes
 RECV_ITEM_ADDR = SAVEDATA_START + 0x4D2             # 1 byte
@@ -826,12 +834,16 @@ def get_location_name_from_address(ctx, address):
 
 
 def filter_location(ctx, location):
-    if (not ctx.key_drop_mode and location in PotShuffle.key_drop_data
-         and PotShuffle.key_drop_data[location][0] == 'Drop'):
-        return True
-    if (not ctx.pottery_mode and location in PotShuffle.key_drop_data
-         and PotShuffle.key_drop_data[location][0] == 'Pot'):
-        return True
+    if location in location_table_pot_items:
+        tile_idx, mask = location_table_pot_items[location]
+        tracking_data = ctx.pottery_locations_enabled
+        tile_pots = tracking_data[tile_idx] | (tracking_data[tile_idx+1] << 8)
+        return (mask & tile_pots) == 0
+    if location in location_table_sprite_items:
+        tile_idx, mask = location_table_sprite_items[location]
+        tracking_data = ctx.uw_sprite_locations_enabled
+        tile_sprites = tracking_data[tile_idx] | (tracking_data[tile_idx+1] << 8)
+        return (mask & tile_sprites) == 0
     if not ctx.shop_mode and location in Regions.flat_normal_shops:
         return True
     if not ctx.retro_mode and location in Regions.flat_retro_shops:
@@ -842,13 +854,6 @@ def filter_location(ctx, location):
 def init_lookups(ctx):
     ctx.lookup_id_to_name = {x: y for x, y in Regions.lookup_id_to_name.items()}
     ctx.lookup_name_to_id = {x: y for x, y in Regions.lookup_name_to_id.items()}
-    for location, datum in PotShuffle.key_drop_data.items():
-        type = datum[0]
-        if type == 'Drop':
-            location_id, super_tile, sprite_index = datum[1]
-            location_table_sprite_items[location] = (2 * super_tile, 0x8000 >> sprite_index)
-            ctx.lookup_name_to_id[location] = location_id
-            ctx.lookup_id_to_name[location_id] = location
     for super_tile, pot_list in PotShuffle.vanilla_pots.items():
         for pot_index, pot in enumerate(pot_list):
             if pot.item != PotItem.Hole:
@@ -862,6 +867,25 @@ def init_lookups(ctx):
                 location_id = Regions.pot_address(pot_index, super_tile)
                 ctx.lookup_name_to_id[loc_name] = location_id
                 ctx.lookup_id_to_name[location_id] = loc_name
+    uw_table = DataTables.get_uw_enemy_table()
+    key_drop_data = {(v[1][1], v[1][2]): k for k, v in PotShuffle.key_drop_data.items() if v[0] == 'Drop'}
+    for super_tile, enemy_list in uw_table.room_map.items():
+        index_adj = 0
+        for index, sprite in enumerate(enemy_list):
+            if sprite.sub_type == 0x07:  # overlord
+                index_adj += 1
+                continue
+            if (super_tile, index) in key_drop_data:
+                loc_name = key_drop_data[(super_tile, index)]
+                location_id = PotShuffle.key_drop_data[loc_name][1][0]
+            else:
+                loc_name = f'{sprite.region} Enemy #{index+1}'
+                location_id = EnemyList.drop_address(index, super_tile)
+            if index < index_adj:
+                logging.info(f'Problem at {hex(super_tile)} {loc_name}')
+            location_table_sprite_items[loc_name] = (2 * super_tile, 0x8000 >> (index-index_adj))
+            ctx.lookup_name_to_id[loc_name] = location_id
+            ctx.lookup_id_to_name[location_id] = loc_name
 
 
 async def track_locations(ctx : Context, roomid, roomdata):
@@ -983,6 +1007,7 @@ async def game_watcher(ctx : Context):
 
         if not ctx.rom:
             rom = await snes_read(ctx, ROMNAME_START, ROMNAME_SIZE)
+            logging.info(f'Rom name: {rom} @ {hex(ROMNAME_START)}')
             if rom is None or rom == bytes([0] * ROMNAME_SIZE):
                 continue
 
@@ -995,6 +1020,12 @@ async def game_watcher(ctx : Context):
         if ctx.auth and ctx.auth != ctx.rom:
             logging.warning("ROM change detected, please reconnect to the multiworld server")
             await disconnect(ctx)
+
+        if ctx.pottery_locations_enabled is None:
+            ctx.pottery_locations_enabled = await snes_read(ctx, POT_LOCATION_TABLE, 0x250)
+
+        if ctx.uw_sprite_locations_enabled is None:
+            ctx.uw_sprite_locations_enabled = await snes_read(ctx, UW_SPRITE_LOCATION_TABLE, 0x250)
 
         gamemode = await snes_read(ctx, WRAM_START + 0x10, 1)
         if gamemode is None or gamemode[0] not in INGAME_MODES:

@@ -1,0 +1,44 @@
+# Possible improvements: account for items that are possibly in logic
+# Example: Mire Big Key in harmless means all 6 mire smalls required for fire-locked side,
+#         if you have access to harmless via:
+#         2 pod smalls + bow, hammer or 3 pod small
+meta:
+  players: 1
+settings:
+  1:
+    key_logic_algorithm: default
+    keysanity: True
+    crystals_needed_for_gt: 0  # to skip trash fill
+placements:
+  1:
+    Hobo: Big Key (Misery Mire)
+    Waterfall Fairy - Left: Small Key (Misery Mire)
+    Waterfall Fairy - Right: Small Key (Misery Mire)
+    Palace of Darkness - Big Chest: Hammer
+advanced_placements:
+  1:
+    # Contrast with partial_2
+    - type: Verification
+      item: Flippers
+      locations:
+        Misery Mire - Map Chest: True
+        Misery Mire - Main Lobby: True
+        Misery Mire - Bridge Chest: True
+        Misery Mire - Spike Chest: True
+        Misery Mire - Compass Chest: False
+        Misery Mire - Big Key Chest: False
+        Misery Mire - Boss: False
+    # Contrast with partial_3
+    - type: Verification
+      item: Big Key (Ganons Tower)
+      locations:
+        Ganons Tower - Big Key Chest: True
+        Ganons Tower - Big Key Room - Left: True
+        Ganons Tower - Big Key Room - Right: True
+        Ganons Tower - Bob's Chest: True
+    # Normal logic doesn't allow this placement
+    # unless hammer is placed before it - no algorithm does this in non-keysanity, but possible in keysanity
+    - type: Verification
+      item: Small Key (Palace of Darkness)
+      locations:
+        Palace of Darkness - Dark Maze - Bottom: True

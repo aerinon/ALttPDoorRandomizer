@@ -1,0 +1,43 @@
+meta:
+  players: 1
+settings:
+  1:
+    logic: hybridglitches
+start_inventory:
+  1:
+    - Flippers
+    - Moon Pearl
+    - Progressive Sword
+    - Lamp
+    - Magic Mirror
+    - Ether
+    - Quake
+    - Bombos
+advanced_placements:
+  1:
+    - type: Verification
+      item: Small Key (Swamp Palace)
+      locations:
+        Swamp Palace - Entrance: True
+        Swamp Palace - Map Chest: True
+        Swamp Palace - Big Chest: True
+        Swamp Palace - Compass Chest: True
+        Swamp Palace - West Chest: True
+        Swamp Palace - Big Key Chest: True
+        Swamp Palace - Flooded Room - Left: True
+        Swamp Palace - Flooded Room - Right: True
+        Swamp Palace - Waterfall Room: True
+        Swamp Palace - Boss: True
+    - type: Verification
+      item: Big Key (Swamp Palace)
+      locations:
+        Swamp Palace - Entrance: True
+        Swamp Palace - Map Chest: True
+        Swamp Palace - Big Chest: True
+        Swamp Palace - Compass Chest: True
+        Swamp Palace - West Chest: True
+        Swamp Palace - Big Key Chest: True
+        Swamp Palace - Flooded Room - Left: True
+        Swamp Palace - Flooded Room - Right: True
+        Swamp Palace - Waterfall Room: True
+        Swamp Palace - Boss: True

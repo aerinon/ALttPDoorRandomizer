@@ -1,0 +1,26 @@
+# For contrast with default logic
+# This logic is not yet smart enough to allow the crystal blocked chests with two keys (Spike Pot and one other)
+meta:
+  players: 1
+settings:
+  1:
+    key_logic_algorithm: partial
+    keysanity: True
+placements:
+  1:
+    Hobo: Lamp
+    Waterfall Fairy - Left: Small Key (Misery Mire)
+    Waterfall Fairy - Right: Small Key (Misery Mire)
+    Swamp Palace - Entrance: Big Key (Misery Mire)
+advanced_placements:
+  1:
+    - type: Verification
+      item: Flippers
+      locations:
+        Misery Mire - Map Chest: False
+        Misery Mire - Main Lobby: False
+        Misery Mire - Bridge Chest: True
+        Misery Mire - Spike Chest: True
+        Misery Mire - Compass Chest: False
+        Misery Mire - Big Key Chest: False
+        Misery Mire - Boss: False

@@ -188,7 +188,7 @@ Dark World Shop: The hammer sealed building
 Red Shield Shop: The fenced in building
 Mire Shed: The western hut in the mire
 East Dark World Hint: The dark cave near the eastmost portal
-Dark Desert Hint: The cave east of the mire
+Mire Hint: The cave east of the mire
 Spike Cave: The ledge cave on west dark DM
 Palace of Darkness Hint: The building south of Kiki
 Dark Lake Hylia Ledge Spike Cave: The rock SE dark Lake Hylia
@@ -200,7 +200,7 @@ Hype Cave: The cave south of the old bomb shop
 Brewery: The Village of Outcasts building with no door
 Dark Lake Hylia Ledge Hint: The open cave SE dark Lake Hylia
 Chest Game: The westmost building in the Village of Outcasts
-Dark Desert Fairy: The eastern hut in the mire
+Mire Fairy: The eastern hut in the mire
 Dark Lake Hylia Ledge Fairy: The sealed cave SE dark Lake Hylia
 Fortune Teller (Dark): The building NE the Village of Outcasts
 Sanctuary: Sanctuary

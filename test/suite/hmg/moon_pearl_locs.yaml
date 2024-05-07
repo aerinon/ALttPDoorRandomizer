@@ -1,0 +1,48 @@
+meta:
+  players: 1
+settings:
+  1:
+    logic: hybridglitches
+start_inventory:
+  1:
+    - Pegasus Boots
+    - Flippers
+    - Fire Rod
+    - Book of Mudora
+    - Progressive Sword
+    - Progressive Sword
+    - Lamp
+    - Magic Mirror
+    - Ether
+    - Quake
+    - Bombos
+advanced_placements:
+  1:
+    - type: Verification
+      item: Moon Pearl
+      locations:
+        Skull Woods - Compass Chest: True
+        Skull Woods - Bridge Room: True
+        Palace of Darkness - Shooter Room: True
+        Palace of Darkness - The Arena - Bridge: True
+        Palace of Darkness - Stalfos Basement: True
+        Palace of Darkness - Big Key Chest: True
+        Palace of Darkness - The Arena - Ledge: True
+        Palace of Darkness - Map Chest: True
+        Palace of Darkness - Compass Chest: True
+        Palace of Darkness - Dark Basement - Left: True
+        Palace of Darkness - Dark Basement - Right: True
+        Palace of Darkness - Dark Maze - Top: True
+        Palace of Darkness - Dark Maze - Bottom: True
+        Palace of Darkness - Big Chest: True
+        Palace of Darkness - Harmless Hellway: True
+        Palace of Darkness - Boss: True
+        Bombos Tablet: True
+        C-Shaped House: True
+        Pyramid Fairy - Left: True
+        Swamp Palace - Entrance: False
+        Thieves' Town - Map Chest: False
+                
+        
+        
+      

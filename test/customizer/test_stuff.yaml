@@ -1,28 +1,46 @@
 meta:
   players: 1
-  race: true
+  algorithm: dungeon_only
 settings:
   1:
-    shopsanity: true
+    goal: dungeons
     pseudoboots: true
-    goal: crystals
-    crystals_gt: random
-    keysanity: true
     door_shuffle: crossed
+    decoupledoors: true
     intensity: 3
-    door_type_mode: big
-    pottery: keys
-    dropshuffle: true
+    door_type_mode: all
     experimental: true
     dungeon_counters: 'on'
-    hints: true
-    msu_resume: true
-    collection_rate: true
-    quickswap: true
-start_inventory:
+    compassshuffle: true
+    mapshuffle: true
+    keydropshuffle: true
+doors:
   1:
-    - Pegasus Boots
-    - Ocarina (Activated)
-    - Magic Mirror
-    - Boss Heart Container
-    - Blue Mail
+    lobbies:
+      Hyrule Castle South: Thieves Lobby S
+    doors:
+      Thieves Lobby NE Edge:
+        dest: Hyrule Castle Throne Room South Stairs
+        one-way: True
+      Hyrule Castle Throne Room South Stairs:
+        dest: Desert Beamos Hall NE
+        one-way: True
+      Desert Beamos Hall NE:
+        dest: Ice Spike Cross SE
+        type: Key Door
+        one-way: True
+      Ice Spike Cross SE:
+        dest: Thieves Lobby NE Edge
+        one-way: True
+      Hyrule Castle Throne Room N:
+        dest: Ice Firebar Down Ladder
+        type: Key Door
+      Swamp Lobby S:
+        dest: Thieves Lobby N Edge
+        type: Bomb Door
+      Thieves Lobby E: Thieves Compass Room W
+      Thieves Compass Room NW Edge: Ice Tall Hint SE
+      Thieves Compass Room N Edge: PoD Bow Statue Down Ladder
+
+
+

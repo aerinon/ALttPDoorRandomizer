@@ -1,0 +1,25 @@
+meta:
+  players: 1
+
+settings:
+  1:
+    logic: hybridglitches
+start_inventory:
+  1:
+    - Flippers
+    - Pegasus Boots
+    - Progressive Sword
+    - Hammer
+    - Progressive Glove
+    - Progressive Glove
+    - Fire Rod
+    - Book of Mudora
+    - Bottle
+    - Magic Mirror
+    - Lamp
+advanced_placements:
+  1:
+    - type: Verification
+      item: Moon Pearl
+      locations:
+        Skull Woods - Bridge Room: True

@@ -1,0 +1,125 @@
+meta:
+  players: 1
+settings:
+  1:
+    door_shuffle: basic
+    intensity: 3
+    door_type_mode: all
+doors:
+  1:
+    doors:
+      PoD Mimics 2 SW:
+        type: Trap Door
+#      TR Twin Pokeys NW:  # not possible due to trap flags
+#        type: Trap Door
+      Thieves Blocked Entry SW:
+        type: Trap Door
+      Hyrule Dungeon Armory Interior Key Door N:
+        type: Trap Door
+      Desert Compass Key Door WN:
+        type: Trap Door
+      TR Tile Room SE:
+        type: Trap Door
+#      Mire Cross SW:  # not possible due to trap flags
+#        type: Trap Door
+      Tower Circle of Pots ES:
+        type: Trap Door
+      Eastern Single Eyegore ES:
+        type: Trap Door
+      Eastern Duo Eyegores SE:
+        type: Trap Door
+      Swamp Push Statue S:
+        type: Trap Door
+#      Skull 2 East Lobby WS:  # currently not possible due to trap flags
+#        type: Trap Door
+      GT Hope Room WN :
+        type: Trap Door
+
+#      Eastern Courtyard Ledge S:  # currently not possible due to trap flags
+#        type: Trap Door
+      Ice Switch Room ES :
+        type: Trap Door
+      Ice Switch Room NE :
+        type: Trap Door
+      Skull Torch Room WS :
+        type: Trap Door
+      GT Speed Torch NE :
+        type: Trap Door
+      GT Speed Torch WS :
+        type: Trap Door
+      GT Torch Cross WN :
+        type: Trap Door
+      Mire Tile Room SW :
+        type: Trap Door
+      Mire Tile Room ES :
+        type: Trap Door
+      TR Torches WN :
+        type: Trap Door
+      PoD Lobby N:
+        type: Trap Door
+      PoD Middle Cage S:
+        type: Trap Door
+      Ice Bomb Jump NW:
+        type: Trap Door
+      GT Hidden Spikes SE:
+        type: Trap Door
+      Ice Tall Hint EN:
+        type: Trap Door
+      GT Conveyor Cross EN:
+        type: Trap Door
+      Eastern Pot Switch WN:
+        type: Trap Door
+      Thieves Conveyor Maze WN:
+        type: Trap Door
+#      Thieves Conveyor Maze SW:  #not possible due to 4 door limit
+#        type: Trap Door
+      Eastern Dark Square Key Door WN:
+        type: Trap Door
+      Eastern Lobby NW:
+        type: Trap Door
+      Eastern Lobby NE:
+        type: Trap Door
+#      Ice Cross Bottom SE:  # not possible due to trap flags
+#        type: Trap Door
+      Desert Back Lobby S:
+        type: Trap Door
+#      Desert West S: need enough lobbies for basic, should otherwise work
+#        type: Trap Door
+      Desert West Lobby ES:
+        type: Trap Door
+#      Mire Hidden Shooters SE:  # not possible due to trap flags
+#        type: Trap Door
+#      Mire Hidden Shooters ES: # not possible due to trap flags
+#        type: Trap Door
+      Mire Hidden Shooters WS:
+        type: Trap Door
+      Tower Dark Pits EN:
+        type: Trap Door
+      Tower Dark Maze ES:
+        type: Trap Door
+      TR Tongue Pull WS:
+        type: Trap Door
+
+# Lower layer: not valid
+      #      Sewers Pull Switch N:
+      #        type: Trap Door
+      #      PoD Sexy Statue W:  # not possible due to trap flags and low layer too, so likely not an exception
+      #        type: Trap Door
+
+# Not valid due to disappearing somaria block
+#      Mire Dark Shooters SE:
+#        type: Trap Door
+
+      # These triggers don't open doors
+#      Ice Compass Room NE:
+#        type: Trap Door
+#      Hera Torches NE:
+#        type: Trap Door
+#      Mire Spikes WS:
+#        type: Trap Door
+#      Mire Spikes SW:
+#        type: Trap Door
+#      Mire Spikes NW:
+#        type: Trap Door
+#      Tower Room 03 WN:
+#        type: Trap Door

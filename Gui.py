@@ -137,13 +137,13 @@ def guiMain(args=None):
     self.pages["randomizer"].pages["entrance"] = entrando_page(self.pages["randomizer"].notebook)
     self.pages["randomizer"].notebook.add(self.pages["randomizer"].pages["entrance"], text="Entrances")
 
+    # Dungeons
+    self.pages["randomizer"].pages["dungeon"] = dungeon_page(self.pages["randomizer"].notebook)
+    self.pages["randomizer"].notebook.add(self.pages["randomizer"].pages["dungeon"], text="Dungeons")
+
     # Enemizer
     self.pages["randomizer"].pages["enemizer"],self.settings = enemizer_page(self.pages["randomizer"].notebook,self.settings)
     self.pages["randomizer"].notebook.add(self.pages["randomizer"].pages["enemizer"], text="Enemizer")
-
-    # Dungeon Shuffle
-    self.pages["randomizer"].pages["dungeon"] = dungeon_page(self.pages["randomizer"].notebook)
-    self.pages["randomizer"].notebook.add(self.pages["randomizer"].pages["dungeon"], text="Dungeon Shuffle")
 
     # Multiworld
 #    self.pages["randomizer"].pages["multiworld"],self.settings = multiworld_page(self.pages["randomizer"].notebook,self.settings)

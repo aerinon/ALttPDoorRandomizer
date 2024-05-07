@@ -1,12 +1,13 @@
 meta:
   algorithm: balanced
   players: 1
-  seed: 42
+  seed: 41  # note to self: seed 42 had an interesting Swamp Palace problem
   names: Lonk
+  notes: "Some notes specified by the user"
 settings:
   1:
     door_shuffle: basic
-    dropshuffle: true
+    dropshuffle: keys
     experimental: true
     goal: ganon
     hints: true
@@ -56,6 +57,9 @@ item_pool:
     Sanctuary Heart Container: 3
     Shovel: 3
     Single Arrow: 1
+    Green Potion: 1
+    Blue Potion: 1
+    Red Potion: 1
 placements:
   1:
     Palace of Darkness - Big Chest: Hammer

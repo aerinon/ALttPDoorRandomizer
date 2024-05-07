@@ -2,13 +2,15 @@ import logging
 import RaceRandom as random
 
 from BaseClasses import Boss, FillError
+from source.enemizer.Bossmizer import boss_adjust
 
 
-def BossFactory(boss, player):
+def BossFactory(boss, player, on_ice=False):
     if boss is None:
         return None
     if boss in boss_table:
-        enemizer_name, defeat_rule = boss_table[boss]
+        enemizer_name, normal_defeat_rule, ice_defeat_rule = boss_table[boss]
+        defeat_rule = ice_defeat_rule if on_ice else normal_defeat_rule
         return Boss(boss, enemizer_name, defeat_rule, player)
 
     logging.getLogger('').error('Unknown Boss: %s', boss)
@@ -41,16 +43,21 @@ def MoldormDefeatRule(state, player):
 def HelmasaurKingDefeatRule(state, player):
     return (state.has('Hammer', player) or state.can_use_bombs(player)) and (state.has_sword(player) or state.can_shoot_arrows(player))
 
+
+def IceHelmasaurKingDefeatRule(state, player):
+    return state.can_use_bombs(player) and (state.has_sword(player) or state.can_shoot_arrows(player))
+
+
 def ArrghusDefeatRule(state, player):
     if not state.has('Hookshot', player):
         return False
-    # TODO: ideally we would have a check for bow and silvers, which combined with the
-    # hookshot is enough. This is not coded yet because the silvers that only work in pyramid feature
-    # makes this complicated
     if state.has_blunt_weapon(player):
         return True
 
-    return ((state.has('Fire Rod', player) and (state.can_shoot_arrows(player) or state.can_extend_magic(player, 12))) or #assuming mostly gitting two puff with one shot
+    if state.can_shoot_arrows(player) and state.has('Silver Arrows', player) and state.world.difficulty_adjustments[player] not in ['hard', 'expert']:
+        return True
+
+    return ((state.has('Fire Rod', player) and (state.can_shoot_arrows(player) or state.can_extend_magic(player, 12))) or  # assuming mostly getting two puffs with one shot
             (state.has('Ice Rod', player) and state.can_use_bombs(player) and (state.can_shoot_arrows(player) or state.can_extend_magic(player, 16))))
 
 
@@ -64,8 +71,26 @@ def MothulaDefeatRule(state, player):
         (state.has('Cane of Byrna', player) and state.can_extend_magic(player, 16))
     )
 
+
 def BlindDefeatRule(state, player):
     return state.has_blunt_weapon(player) or state.has('Cane of Somaria', player) or state.has('Cane of Byrna', player)
+
+
+def IceBlindDefeatRule(state, player):
+    return (
+            (
+                # weapon
+                state.has_beam_sword(player) or
+                state.has('Cane of Somaria', player) or
+                (state.has('Cane of Byrna', player) and state.can_extend_magic(player, 16))
+            ) and
+            (
+                # protection
+                state.has('Red Shield', player) or
+                (state.has('Cane of Byrna', player) and state.world.difficulty_adjustments[player] not in ['hard', 'expert'])
+            )
+    )
+
 
 def KholdstareDefeatRule(state, player):
     return (
@@ -90,8 +115,38 @@ def KholdstareDefeatRule(state, player):
         )
     )
 
+
+def IceKholdstareDefeatRule(state, player):
+    return (
+        (
+            state.has('Fire Rod', player) or
+            (
+                state.has('Bombos', player) and
+                # FIXME: the following only actually works for the vanilla location for swordless
+                (state.has_sword(player) or state.world.swords[player] == 'swordless')
+            )
+        ) and
+        (
+            state.has_beam_sword(player) or
+            (state.has('Fire Rod', player) and state.can_extend_magic(player, 20)) or
+            # FIXME: this actually only works for the vanilla location for swordless
+            (
+                state.has('Fire Rod', player) and
+                state.has('Bombos', player) and
+                (state.has_sword(player) or state.world.swords[player] == 'swordless') and
+                state.can_extend_magic(player, 16)
+            )
+        )
+    )
+
+
 def VitreousDefeatRule(state, player):
     return (state.can_shoot_arrows(player) and state.can_use_bombs(player)) or state.has_blunt_weapon(player)
+
+
+def IceVitreousDefeatRule(state, player):
+    return (state.can_shoot_arrows(player) and state.can_use_bombs(player)) or state.has_beam_sword(player)
+
 
 def TrinexxDefeatRule(state, player):
     if not (state.has('Fire Rod', player) and state.has('Ice Rod', player)):
@@ -102,23 +157,35 @@ def TrinexxDefeatRule(state, player):
             (state.has('Master Sword', player) and state.can_extend_magic(player, 16)) or
             (state.has_sword(player) and state.can_extend_magic(player, 32)))
 
+
+def IceTrinexxDefeatRule(state, player):
+    if not (state.has('Fire Rod', player) and state.has('Ice Rod', player) and state.has_Boots(player)):
+        return False
+    return (state.has('Golden Sword', player) or
+            (state.has('Tempered Sword', player) and state.can_extend_magic(player, 16)) or
+            ((state.has('Hammer', player) or
+              state.has('Master Sword', player)) and state.can_extend_magic(player, 32)))  # rod spam rule
+
+
 def AgahnimDefeatRule(state, player):
     return state.has_sword(player) or state.has('Hammer', player) or state.has('Bug Catching Net', player)
 
+
 boss_table = {
-    'Armos Knights': ('Armos', ArmosKnightsDefeatRule),
-    'Lanmolas': ('Lanmola', LanmolasDefeatRule),
-    'Moldorm': ('Moldorm', MoldormDefeatRule),
-    'Helmasaur King': ('Helmasaur', HelmasaurKingDefeatRule),
-    'Arrghus': ('Arrghus', ArrghusDefeatRule),
-    'Mothula': ('Mothula', MothulaDefeatRule),
-    'Blind': ('Blind', BlindDefeatRule),
-    'Kholdstare': ('Kholdstare', KholdstareDefeatRule),
-    'Vitreous': ('Vitreous', VitreousDefeatRule),
-    'Trinexx': ('Trinexx', TrinexxDefeatRule),
-    'Agahnim': ('Agahnim', AgahnimDefeatRule),
-    'Agahnim2': ('Agahnim2', AgahnimDefeatRule)
+    'Armos Knights': ('Armos', ArmosKnightsDefeatRule, ArmosKnightsDefeatRule),
+    'Lanmolas': ('Lanmola', LanmolasDefeatRule, LanmolasDefeatRule),
+    'Moldorm': ('Moldorm', MoldormDefeatRule, MoldormDefeatRule),
+    'Helmasaur King': ('Helmasaur', HelmasaurKingDefeatRule, IceHelmasaurKingDefeatRule),
+    'Arrghus': ('Arrghus', ArrghusDefeatRule, ArrghusDefeatRule),
+    'Mothula': ('Mothula', MothulaDefeatRule, MothulaDefeatRule),
+    'Blind': ('Blind', BlindDefeatRule, IceBlindDefeatRule),
+    'Kholdstare': ('Kholdstare', KholdstareDefeatRule, IceKholdstareDefeatRule),
+    'Vitreous': ('Vitreous', VitreousDefeatRule, IceVitreousDefeatRule),
+    'Trinexx': ('Trinexx', TrinexxDefeatRule, IceTrinexxDefeatRule),
+    'Agahnim': ('Agahnim', AgahnimDefeatRule, AgahnimDefeatRule),
+    'Agahnim2': ('Agahnim2', AgahnimDefeatRule, AgahnimDefeatRule)
 }
+
 
 def can_place_boss(world, player, boss, dungeon_name, level=None):
     if world.swords[player] in ['swordless'] and boss == 'Kholdstare' and dungeon_name != 'Ice Palace':
@@ -130,6 +197,11 @@ def can_place_boss(world, player, boss, dungeon_name, level=None):
 
     if dungeon_name == 'Ganons Tower' and level == 'middle':
         if boss in ["Blind"]:
+            return False
+
+    # no Trinexx on Ice in doors without doing some health modelling
+    if world.doorShuffle[player] != 'vanilla' and boss == 'Trinexx':
+        if dungeon_name == 'Ganons Tower' and level == 'bottom':
             return False
 
     if dungeon_name == 'Tower of Hera' and boss in ["Armos Knights", "Arrghus",	"Blind", "Trinexx", "Lanmolas"]:
@@ -151,6 +223,7 @@ def place_bosses(world, player):
         ['Tower of Hera', None],
         ['Skull Woods', None],
         ['Ganons Tower', 'middle'],
+        ['Ganons Tower', 'bottom'],
         ['Eastern Palace', None],
         ['Desert Palace', None],
         ['Palace of Darkness', None],
@@ -159,7 +232,6 @@ def place_bosses(world, player):
         ['Ice Palace', None],
         ['Misery Mire', None],
         ['Turtle Rock', None],
-        ['Ganons Tower', 'bottom'],
     ]
 
     all_bosses = sorted(boss_table.keys()) #s orted to be deterministic on older pythons
@@ -238,6 +310,7 @@ def place_bosses(world, player):
                 raise FillError('Could not place boss for location %s' % loc_text)
 
             place_boss(boss, level, loc, loc_text, world, player)
+    boss_adjust(world, player)
 
 
 def place_boss(boss, level, loc, loc_text, world, player):
@@ -246,4 +319,4 @@ def place_boss(boss, level, loc, loc_text, world, player):
         loc = [x.name for x in world.dungeons if x.player == player and level in x.bosses.keys()][0]
         loc_text = loc + ' (' + level + ')'
     logging.getLogger('').debug('Placing boss %s at %s', boss, loc_text)
-    world.get_dungeon(loc, player).bosses[level] = BossFactory(boss, player)
+    world.get_dungeon(loc, player).bosses[level] = BossFactory(boss, player, level == 'bottom')

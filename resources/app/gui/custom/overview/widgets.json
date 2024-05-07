@@ -1,4 +1,22 @@
 {
+  "startHeader": {
+    "usestartinventory": {
+      "type": "checkbox",
+      "config": {
+        "padx": [10,0],
+        "pady": [10,10]
+      }
+    }
+  },
+  "customHeader": {
+    "usecustompool": {
+      "type": "checkbox",
+      "config": {
+        "padx": [10,0],
+        "pady": [10,10]
+      }
+    }
+  },
   "itemList1": {
     "bow": {
       "type": "textbox",

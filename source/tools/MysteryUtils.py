@@ -33,6 +33,39 @@ def roll_settings(weights):
             return default
         return choice
 
+    def get_choice_bool(option, root=weights):
+        choice = get_choice(option, root)
+        if choice is True or choice == 'on':
+            return True
+        if choice is False or choice == 'off':
+            return False
+        if choice is None:
+            return choice
+        raise Exception("This fields needs to be true/false or off/on")
+
+    def get_choice_non_bool(option, root=weights):
+        choice = get_choice(option, root)
+        if choice is True or choice == 'on':
+            return 'on'
+        if choice is False or choice == 'off':
+            return 'off'
+        return choice
+
+    def get_choice_yn(option, root=weights):
+        choice = get_choice(option, root)
+        if choice is True or choice == 'yes':
+            return 'yes'
+        if choice is False or choice == 'no':
+            return 'no'
+        return choice
+
+
+    def get_choice_bool_default(option, root=weights, default=None):
+        choice = get_choice_bool(option, root)
+        if choice is None and default is not None:
+            return default
+        return choice
+
     while True:
         subweights = weights.get('subweights', {})
         if len(subweights) == 0:
@@ -47,7 +80,8 @@ def roll_settings(weights):
 
     ret.algorithm = get_choice('algorithm')
 
-    glitch_map = {'none': 'noglitches', 'no_logic': 'nologic', 'owglitches': 'owglitches',
+    glitch_map = {'none': 'noglitches', 'no_logic': 'nologic', 'hybridglitches': 'hybridglitches',
+                  'hmg': 'hybridglitches', 'owglitches': 'owglitches',
                   'owg': 'owglitches', 'minorglitches': 'minorglitches'}
     glitches_required = get_choice('glitches_required')
     if glitches_required is not None:
@@ -62,8 +96,8 @@ def roll_settings(weights):
     dungeon_items = get_choice('dungeon_items')
     dungeon_items = '' if dungeon_items == 'standard' or dungeon_items is None else dungeon_items
     dungeon_items = 'mcsb' if dungeon_items == 'full' else dungeon_items
-    ret.mapshuffle = get_choice('map_shuffle') == 'on' if 'map_shuffle' in weights else 'm' in dungeon_items
-    ret.compassshuffle = get_choice('compass_shuffle') == 'on' if 'compass_shuffle' in weights else 'c' in dungeon_items
+    ret.mapshuffle = get_choice_bool('map_shuffle') if 'map_shuffle' in weights else 'm' in dungeon_items
+    ret.compassshuffle = get_choice_bool('compass_shuffle') if 'compass_shuffle' in weights else 'c' in dungeon_items
     if 'smallkey_shuffle' in weights:
         ret.keyshuffle = get_choice('smallkey_shuffle')
     else:
@@ -71,7 +105,7 @@ def roll_settings(weights):
             ret.keyshuffle = 'wild'
         if 'u' in dungeon_items:
             ret.keyshuffle = 'universal'
-    ret.bigkeyshuffle = get_choice('bigkey_shuffle') == 'on' if 'bigkey_shuffle' in weights else 'b' in dungeon_items
+    ret.bigkeyshuffle = get_choice_bool('bigkey_shuffle') if 'bigkey_shuffle' in weights else 'b' in dungeon_items
 
     ret.accessibility = get_choice('accessibility')
     ret.restrict_boss_items = get_choice('restrict_boss_items')
@@ -84,29 +118,34 @@ def roll_settings(weights):
     ret.door_shuffle = door_shuffle if door_shuffle != 'none' else 'vanilla'
     ret.intensity = get_choice('intensity')
     ret.door_type_mode = get_choice('door_type_mode')
-    ret.decoupledoors = get_choice('decoupledoors') == 'on'
-    ret.experimental = get_choice('experimental') == 'on'
-    ret.collection_rate = get_choice('collection_rate') == 'on'
+    ret.trap_door_mode = get_choice('trap_door_mode')
+    ret.key_logic_algorithm = get_choice('key_logic_algorithm')
+    ret.decoupledoors = get_choice_bool('decoupledoors')
+    ret.door_self_loops = get_choice_bool('door_self_loops')
+    ret.experimental = get_choice_bool('experimental')
+    ret.collection_rate = get_choice_bool('collection_rate')
 
-    ret.dungeon_counters = get_choice('dungeon_counters') if 'dungeon_counters' in weights else 'default'
+    ret.dungeon_counters = get_choice_non_bool('dungeon_counters') if 'dungeon_counters' in weights else 'default'
     if ret.dungeon_counters == 'default':
         ret.dungeon_counters = 'pickup' if ret.door_shuffle != 'vanilla' or ret.compassshuffle == 'on' else 'off'
 
-    ret.shufflelinks = get_choice('shufflelinks') == 'on'
-    ret.shuffletavern = get_choice('shuffletavern') == 'on'
-    ret.pseudoboots = get_choice('pseudoboots') == 'on'
-    ret.shopsanity = get_choice('shopsanity') == 'on'
-    keydropshuffle = get_choice('keydropshuffle') == 'on'
-    ret.dropshuffle = get_choice('dropshuffle') == 'on' or keydropshuffle
+    ret.shufflelinks = get_choice_bool('shufflelinks')
+    ret.shuffletavern = get_choice_bool('shuffletavern')
+    ret.pseudoboots = get_choice_bool('pseudoboots')
+    ret.shopsanity = get_choice_bool('shopsanity')
+    keydropshuffle = get_choice_bool('keydropshuffle')
+    ret.dropshuffle = get_choice('dropshuffle') if 'dropshuffle' in weights else 'none'
+    ret.dropshuffle = 'keys' if ret.dropshuffle == 'none' and keydropshuffle else ret.dropshuffle
     ret.pottery = get_choice('pottery') if 'pottery' in weights else 'none'
     ret.pottery = 'keys' if ret.pottery == 'none' and keydropshuffle else ret.pottery
-    ret.colorizepots = get_choice('colorizepots') == 'on'
-    ret.shufflepots = get_choice('pot_shuffle') == 'on'
+    ret.colorizepots = get_choice_bool_default('colorizepots', default=True)
+    ret.shufflepots = get_choice_bool('pot_shuffle')
+    ret.aga_randomness = get_choice_bool('aga_randomness')
     ret.mixed_travel = get_choice('mixed_travel') if 'mixed_travel' in weights else 'prevent'
     ret.standardize_palettes = (get_choice('standardize_palettes') if 'standardize_palettes' in weights
                                 else 'standardize')
 
-    goal = get_choice('goals')
+    goal = get_choice_default('goals', default='ganon')
     if goal is not None:
         ret.goal = {'ganon': 'ganon',
                     'fast_ganon': 'crystals',
@@ -117,32 +156,31 @@ def roll_settings(weights):
                     'ganonhunt': 'ganonhunt',
                     'completionist': 'completionist'
                     }[goal]
-    ret.openpyramid = goal in ['fast_ganon', 'trinity'] if ret.shuffle in ['vanilla', 'dungeonsfull', 'dungeonssimple'] else False
+    ret.openpyramid = get_choice_yn('open_pyramid') if 'open_pyramid' in weights else 'auto'
 
     ret.crystals_gt = get_choice('tower_open')
 
     ret.crystals_ganon = get_choice('ganon_open')
 
-    from ItemList import set_default_triforce
-    default_tf_goal, default_tf_pool = set_default_triforce(ret.goal, 0, 0)
-    goal_min = get_choice_default('triforce_goal_min', default=default_tf_goal)
-    goal_max = get_choice_default('triforce_goal_max', default=default_tf_goal)
-    pool_min = get_choice_default('triforce_pool_min', default=default_tf_pool)
-    pool_max = get_choice_default('triforce_pool_max', default=default_tf_pool)
-    ret.triforce_goal = random.randint(int(goal_min), int(goal_max))
-    min_diff = get_choice_default('triforce_min_difference', default=default_tf_pool-default_tf_goal)
-    ret.triforce_pool = random.randint(max(int(pool_min), ret.triforce_goal + int(min_diff)), int(pool_max))
+    ret.triforce_pool = get_choice_default('triforce_pool', default=0)
+    ret.triforce_goal = get_choice_default('triforce_goal', default=0)
+    ret.triforce_pool_min = get_choice_default('triforce_pool_min', default=0)
+    ret.triforce_pool_max = get_choice_default('triforce_pool_max', default=0)
+    ret.triforce_goal_min = get_choice_default('triforce_goal_min', default=0)
+    ret.triforce_goal_max = get_choice_default('triforce_goal_max', default=0)
+    ret.triforce_min_difference = get_choice_default('triforce_min_difference', default=0)
+    ret.triforce_max_difference = get_choice_default('triforce_max_difference', default=10000)
 
     ret.mode = get_choice('world_state')
     if ret.mode == 'retro':
         ret.mode = 'open'
         ret.retro = True
-    ret.retro = get_choice('retro') == 'on'  # this overrides world_state if used
+    ret.retro = get_choice_bool('retro')  # this overrides world_state if used
     ret.take_any = get_choice_default('take_any', default='none')
 
-    ret.bombbag = get_choice('bombbag') == 'on'
+    ret.bombbag = get_choice_bool('bombbag')
 
-    ret.hints = get_choice('hints') == 'on'
+    ret.hints = get_choice_bool('hints')
 
     swords = get_choice('weapons')
     if swords is not None:
@@ -179,6 +217,7 @@ def roll_settings(weights):
     ret.enemy_damage = damage_choice
 
     ret.enemy_health = get_choice('enemy_health')
+    ret.any_enemy_logic = get_choice('any_enemy_logic')
 
     ret.beemizer = get_choice('beemizer') if 'beemizer' in weights else '0'
 
@@ -194,15 +233,15 @@ def roll_settings(weights):
     if 'rom' in weights:
         romweights = weights['rom']
         ret.sprite = get_choice('sprite', romweights)
-        ret.disablemusic = get_choice('disablemusic', romweights) == 'on'
-        ret.quickswap = get_choice('quickswap', romweights) == 'on'
-        ret.reduce_flashing = get_choice('reduce_flashing', romweights) == 'on'
+        ret.disablemusic = get_choice_bool('disablemusic', romweights)
+        ret.quickswap = get_choice_bool('quickswap', romweights)
+        ret.reduce_flashing = get_choice_bool('reduce_flashing', romweights)
         ret.fastmenu = get_choice('menuspeed', romweights)
         ret.heartcolor = get_choice('heartcolor', romweights)
-        ret.heartbeep = get_choice('heartbeep', romweights)
+        ret.heartbeep = get_choice_non_bool('heartbeep', romweights)
         ret.ow_palettes = get_choice('ow_palettes', romweights)
         ret.uw_palettes = get_choice('uw_palettes', romweights)
-        ret.shuffle_sfx = get_choice('shuffle_sfx', romweights) == 'on'
-        ret.msu_resume = get_choice('msu_resume', romweights) == 'on'
+        ret.shuffle_sfx = get_choice_bool('shuffle_sfx', romweights)
+        ret.msu_resume = get_choice_bool('msu_resume', romweights)
 
     return ret

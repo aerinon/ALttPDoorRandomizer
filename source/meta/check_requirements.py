@@ -1,6 +1,4 @@
 import importlib.util
-import webbrowser
-from tkinter import Tk, Label, Button, Frame
 
 
 def check_requirements(console=False):
@@ -26,6 +24,9 @@ def check_requirements(console=False):
             logger.error('See the step about "Installing Platform-specific dependencies":')
             logger.error('https://github.com/aerinon/ALttPDoorRandomizer/blob/DoorDev/docs/BUILDING.md')
         else:
+            import webbrowser
+            from tkinter import Tk, Label, Button, Frame
+
             master = Tk()
             master.title('Error')
             frame = Frame(master)

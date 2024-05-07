@@ -12,35 +12,43 @@ See https://alttpr.com/ for more details on the normal randomizer.
       1. [Dungeon Door Shuffle](#door-shuffle)
       2. [Intensity Level](#intensity---intensity-number)
       3. [Key Drop Shuffle (Legacy)](#key-drop-shuffle-legacy---keydropshuffle)
-      4. [Door Type Shuffle](#door-type_shuffle)
-      5. [Decouple Doors](#decouple-doors)
-      6. [Pottery](#pottery)
-      7. [Small Key Shuffle](#small-key-shuffle)
-      8. [Shuffle Enemy Key Drops](#shuffle-enemy-key-drops)
-      9. [Experimental Features](#experimental-features)
-      10. [Crossed Dungeon Specific Settings](#crossed-dungeon-specific-settings)
-   2. [Item Randomization Changes](#item-randomization)
+      4. [Door Type Shuffle](#door-type-shuffle)
+      5. [Trap Door Removal](#trap-door-removal)
+      6. [Key Logic Algorithm](#key-logic-algorithm)
+      7. [Dungeon Items](#dungeon-items)
+      7. [Decouple Doors](#decouple-doors)
+      1. [Allow Self-Looping Spiral Stairs](#allow-self-looping-spiral-stairs)
+      8. [Experimental Features](#experimental-features)
+      9. [Crossed Dungeon Specific Settings](#crossed-dungeon-specific-settings)
+   2. [Pool Expansions](#pool-expansions)
+      1. [Pottery](#pottery)
+      2. [Small Key Shuffle](#small-key-shuffle)
+      3. [Shuffle Enemy Drops](#shuffle-enemy-drops) 
+      4. [Take Any Caves](#take-any-caves)
+   3. [Item Randomization Changes](#item-randomization)
       1. [New "Items"](#new-items)
       2. [Shopsanity](#shopsanity)
       3. [Logic Level](#logic-level)
       4. [Goal](#goal)
       5. [Item Sorting](#item-sorting)
       6. [Forbidden Boss Items](#forbidden-boss-items)
-   3. [Customizer](#customizer)
-   4. [Entrance Randomization](#entrance-randomization)
+   4. [Customizer](#customizer)
+   5. [Entrance Randomization](#entrance-randomization)
       1. [Shuffle Links House](#shuffle-links-house)
       2. [Overworld Map](#overworld-map)
-   5. [Enemizer](#enemizer)
-   6. [Retro Changes](#retro-changes)
-   7. [Standard Changes](#standard-changes)
-   8. [Game Options](#game-options)
-   9. [Generation Setup & Miscellaneous](#generation-setup--miscellaneous)
+   6. [Enemizer](#enemizer)
+   7. [Glitched Logic](#glitched-logic)
+   8. [Retro Changes](#retro-changes)
+   8. [Standard Changes](#standard-changes)
+   9. [Game Options](#game-options)
+   10. [Generation Setup & Miscellaneous](#generation-setup--miscellaneous)
+   
 
 ## Setup and Installation
 
 ### Feedback and Bug Reports
 
-Please just DM me on discord for now. I (Aerinon) can be found at the [ALTTP Randomizer discord](https://discordapp.com/invite/alttprandomizer).
+You can use the #bug-reports or #door-rando channel at the [ALTTP Randomizer discord](https://discordapp.com/invite/alttprandomizer) to provide feedback or bug reports.
 
 ### Installation
 
@@ -73,15 +81,14 @@ Most of these apply only when the door shuffle is not vanilla.
 
 ### Starting Item
 
-You start with a “Mirror Scroll”, a dumbed-down mirror that only works in dungeons, not the overworld and can’t erase blocks like the Mirror.
+You start with a “Mirror Scroll” (it looks like a map), a dumbed-down mirror that only works in dungeons, not the overworld, and can’t erase blocks like the Mirror.
 
 ### Navigation
 
-* The Pinball Room’s trap door can be removed in the case where it is required to go through to get to the back of Skull Woods.
 * Holes in Mire Torches Top and Mire Torches Bottom fall through to rooms below (you only need fire to get the chest)
 * You can Hookshot from the left Mire wooden Bridge to the right one.
 * In the PoD Arena, you can bonk with Boots between the two blue crystal barriers against the ladder to reach the Arena Bridge chest and door. (Bomb Jump also possible but not in logic - Boots are required)
-* Flooded Rooms in Swamp can be traversed backward and may be required.
+* Flooded Rooms in Swamp can be traversed backward and may be required. The flippers are needed to get out of the water.
 
 ### Other Logic
 
@@ -126,29 +133,100 @@ CLI: `--doorShuffle [vanilla|basic|partitioned|crossed]`
 * Level 2 - Same as Level 1 plus open edges and both types of straight staircases are shuffled.
 * Level 3 -  Same as Level 2 plus Dungeon Lobbies are shuffled
 
-### Key Drop Shuffle (Legacy) (--keydropshuffle)
-
-Adds 33 new locations to the randomization pool. The 32 small keys found under pots and dropped by enemies and the Big
-Key drop location are added to the pool. The keys normally found there are added to the item pool. Retro adds
-32 generic keys to the pool instead. This has been can be controlled more granularly with the [Pottery](#pottery) and 
-[Shuffle Enemy Key Drops](#shuffle-enemy-key-drops)
-
 ### Door Type Shuffle
 
 Four options here, and all of them only take effect if Dungeon Door Shuffle is not vanilla:
 
 * Small Key Doors, Bomb Doors, Dash Doors: This is what was normally shuffled previously
 * Adds Big Keys Doors: Big key doors are now shuffled in addition to those above, and Big Key doors are enabled to be on in both vertical directions thanks to a graphic that ended up on the cutting room floor. This does change
-* Adds Trap Doors: All trap doors that are permanently shut in vanilla are shuffled.
+* Adds Trap Doors: All trap doors that are permanently shut in vanilla are shuffled, excluding those by bosses.
 * Increases all Door Types: This is a chaos mode where each door type per dungeon is randomized between 1 less and 4 more.
 
 CLI: `--door_type_mode [original|big|all|chaos]`
+
+### Trap Door Removal
+
+Options here for making dungeon traversal nicer. Only applies if door shuffle is not vanilla.
+
+* No Removal: This does not remove any trap doors.
+* Removed If Blocking Path: Dungeon generation is relaxed to allow annoying trap doors to be removed if necessary. Note that boss trap doors are never shuffled in this mode.
+* Remove Boss Traps: Boss traps are removed, this includes the one near Mothula.
+* Remove All Annoying Traps: This removes all trap doors that are annoying, including boss traps.
+
+If trap doors are shuffled the first two option behave the same. The last option overrides the shuffle because there is nothing left to shuffle. Boss traps are never shuffled.
+
+In all cases, that the trap door near the mire cutscene chest (Mire Warping Pool ES) is left alone because it enforces the use of fire to get to the chest.
+
+CLI: `--trap_door_mode [vanilla|optional|boss|oneway]`
+
+### Dungeon Items
+
+#### Small Keys
+
+* In Dungeon: Small keys are restricted to their own dungeon
+* Randomized: Small keys to dungeon can be found anywhere 
+* Universal: Small keys are not specific to their own dungeon, can be found anywhere, and there will be at least one shop that sells keys. Hearkens back to the original Legend of Zelda.
+
+CLI: `--keyshuffle [none|wild|universal]`
+
+All other dungeon items can be restricted to their own dungeon or shuffled in the general pool. This includes maps, compasses and Big Keys.
+
+### Key Logic Algorithm
+
+Determines how small key door logic works.
+
+* ~~Default: Current key logic. Assumes worse case usage, placement checks, but assumes you can't get to a chest until you have sufficient keys. (May assume items are unreachable)~~ (Not recommended to use this setting)
+* Partial Protection: Assumes you always have full inventory and worse case usage. This should account for dark room and bunny revival glitches.
+* Strict: For those would like to glitch and be protected from yourselves. Small keys door require all small keys to be available to be in logic.
+
+CLI: `--key_logic [default|partial|strict]`
 
 ### Decouple Doors
 
 This is similar to insanity mode in ER where door entrances and exits are not paired anymore. Tends to remove more logic from dungeons as many rooms will not be required to traverse to explore. Hope you like transitions.
 
-CLI `--decoupledoors`
+CLI: `--decoupledoors`
+
+### Allow Self-Looping Spiral Stairs
+
+If enabled, spiral stairs are allowed to lead to themselves.
+
+CLI: `--door_self_loops`
+
+### Experimental Features
+
+You will start as a bunny if your spawn point is in the dark world. CLI: `--experimental`
+
+### Crossed Dungeon Specific Settings
+
+#### Dungeon Chest Counters
+
+* Auto - picks an appropriate setting based on other settings. Generally will be pickup if the number of item in a dungeon changes.
+* On - Dungeon counters on hud always displayed
+* Off - Dungeon counters on hud never displayer
+* On Compass Pickup - Dungeons with a compass item will display the counter once the compass is found. Dungeons without a compass item will display always unless the number of items in the dungeon is completely vanilla.
+
+CLI: `--dungeon_counters` from `auto, on, off, pickup`
+
+#### Mixed Travel (--mixed_travel value)
+
+Due to Hammerjump, Hovering in PoD Arena, and the Mire Big Key Chest bomb jump, two sections of a supertile that are
+otherwise unconnected logically can be reached using these glitches. To prevent the player from unintentionally changing
+dungeons while doing these tricks, you may use one of the following options:
+
+* Prevent (default):
+  Rails are added the 3 spots to prevent these tricks. This setting is recommend for those learning crossed dungeon mode to learn what is dangerous and what is not. No logic seeds ignore this setting.
+* Allow: The rooms are left alone and it is up to the discretion of the player whether to use these tricks or not.
+* Force: The two disjointed sections are forced to be in the same dungeon but the glitches are never logically required to complete that game.
+
+#### Standardize Palettes (--standardize_palettes)
+No effect if door shuffle is not on crossed
+
+* Standardize (default): Rooms in the same dungeon have their palettes changed to match. Hyrule Castle is split between Sewer and HC palette.
+  Rooms adjacent to sanctuary get their coloring to match the Sanctuary's original palette.
+* Original: Rooms/supertiles keep their original palettes.
+
+## Pool Expansions
 
 ### Pottery
 
@@ -181,55 +259,30 @@ CLI `--colorizepots`
 
 This continues to works the same by shuffling all pots on a supertile. It works with the lottery option as well to move the switches to any valid pot on the supertile regardless of the pots chosen in the pottery mode. This may increase the number of pot locations slightly depending on the mode.
 
-### Small Key Shuffle
+### Shuffle Enemy Drops
 
-There are three options now available:
+Option that controls whether enemies that drop items are randomized or not.
 
-* In Dungeon: The small key will be in their own dungeon
-* Randomized: Small keys can be shuffled outside their own dungeon
-* Universal: Retro keys without the other options
+* None: Special enemies drop keys normally
+* Keys: Enemies that drop keys are added to the randomization pool. Includes the Hyrule Castle Big Key. Universal adds
+   generic keys to the pool instead.
+* Underworld: Enemies in the underworld are added to the randomization pool. Vanilla drops from the various drop tables are added to the item pool. In caves and in dungeons while you have the compass, a blue square will indicate if there are any enemies on the supertile that still have an available drop in the dungeon. Certain enemies do have logical requirements. In particular, the Red Bari requires Fire Rod or Bombos to collect it's drop. More information in hte [Enemizer](#enemizer) section.
 
-CLI: `--keyshuffle [none|wild|universal]`
+CLI: `--dropshuffle [none|keys|underworld]`
 
-### Shuffle Enemy Key Drops
+### Enable Key Drop Shuffle (Legacy)
 
-Enemies that drop keys can have their drop shuffled into the pool. This is the one part of the keydropshuffle option.
-See the pottery option for more options involving pots.
+This sets Pottery to "Key Pots" and Shuffle Enemy Drop to "Keys" unless those option have already been changed.
 
-CLI: `--dropshuffle`
+### Take Any Caves
 
-### Experimental Features
+These are now independent of retro mode and have three options: None, Random, and Fixed. None disables the caves. Random works as take-any caves did before. Fixed means that the take any caves replace specific fairy caves in the pool and will be at those entrances unless ER is turned on (then they can be shuffled wherever). The fixed entrances are:
 
-You will start as a bunny if your spawn point is in the dark world. CLI: `--experimental`
-
-### Crossed Dungeon Specific Settings
-
-#### Dungeon Chest Counters
-
-* Auto - picks an appropriate setting based on other settings. Generally will be pickup if the number of item in a dungeon changes.
-* On - Dungeon counters on hud always displayed
-* Off - Dungeon counters on hud never displayer
-* On Compass Pickup - Dungeons with a compass item will display the counter once the compass is found. Dungeons without a compass item will display always unless the number of items in the dungeon is completely vanilla.
-
-CLI: `--dungeon_counters` from `auto, on, off, pickup`
-
-#### Mixed Travel (--mixed_travel value)
-
-Due to Hammerjump, Hovering in PoD Arena, and the Mire Big Key Chest bomb jump, two sections of a supertile that are
-otherwise unconnected logically can be reached using these glitches. To prevent the player from unintentionally changing
-dungeons while doing these tricks, you may use one of the following options:
-
-* Prevent (default): 
-Rails are added the 3 spots to prevent these tricks. This setting is recommend for those learning crossed dungeon mode to learn what is dangerous and what is not. No logic seeds ignore this setting.
-* Allow: The rooms are left alone and it is up to the discretion of the player whether to use these tricks or not.
-* Force: The two disjointed sections are forced to be in the same dungeon but the glitches are never logically required to complete that game.
-
-#### Standardize Palettes (--standardize_palettes)
-No effect if door shuffle is not on crossed
-
-* Standardize (default): Rooms in the same dungeon have their palettes changed to match. Hyrule Castle is split between Sewer and HC palette.
-Rooms adjacent to sanctuary get their coloring to match the Sanctuary's original palette.
-* Original: Rooms/supertiles keep their original palettes.
+* Desert Healer Fairy
+* Swamp Healer Fairy (aka Light Hype Cave)
+* Dark Death Mountain Healer Fairy
+* Dark Lake Hylia Ledge Healer Fairy (aka Shopping Mall Bomb)
+* Bonk Fairy (Dark)
 
 ## Item Randomization
 
@@ -367,18 +420,12 @@ Arrow Capacity upgrades are now replaced by Rupees wherever it might end up.
  
 The Ten Arrows and 5 randomly selected Small Hearts or Blue Shields are replaced by the quiver item (represented by the Single Arrow in game.) 5 Red Potion refills are replaced by the Universal small key. It is assured that at least one shop sells Universal Small Keys. The quiver may thus not be found in shops. The quiver and small keys retain their original base price, but may be discounted.
 
-### Logic Level
-
-Overworld Glitches is now supported.
-
-CLI: `--logic owglitches`
-
 ### Goal
 
 New supported goals:
 
 * Trinity: Find one of 3 triforces to win. One is at pedestal. One is with Ganon. One is with Murahdahla who wants you to find 8 of 10 triforce pieces to complete.
-* Triforce Hunt + Ganon: Collect the requisite triforce pieces, then defeat Ganon. (Aga2 not required). Use `ganonhunt` on CLI
+* Ganonhunt: Collect the requisite triforce pieces, then defeat Ganon. (Aga2 not required). Use `ganonhunt` on CLI
 * Completionist: All dungeons not enough for you? You have to obtain every item in the game too. This option turns on the collection rate counter and forces accessibility to be 100% locations. Finish by defeating Ganon.
 
 
@@ -466,7 +513,9 @@ Please see [Customizer documentation](docs/Customizer.md) on how to create custo
 
 ### New Modes
 
-Lite and Lean ER is now available when Experimental Features are turned on. (todo: bring over documenation of these modes)
+* Lite: Non item entrances are vanilla.
+* Lean
+* Swapped: Entrances are swapped with each other
 
 ### Shuffle Links House
 
@@ -490,16 +539,42 @@ If you do not shuffle the compass or map outside of the dungeon, the non-shuffle
 CLI ```--overworld_map [default|compass|map]```
 
 
-
 ## Enemizer
+
+Enemizer has been incorporated into the generator adn no longer requires an external program. However, there are differences.
+
+A document hightlighting the major changes: [Enemizer in DR](https://docs.google.com/document/d/1iwY7Gy50DR3SsdXVaLFIbx4xRBqo9a-e1_jAl5LMCX8/edit?usp=sharing)
+
+### Enemy Shuffle
+
+Shuffling enemies is different as there are places that certain enemies are not allowed to go. This is known as the enemy ban list, and is updated regularly as report of poor enemy placement occurs. Poor enemy placement included Bumpers, Statues, Beamos or other enemies that block your path with or without certain items. Other disallowed placements include unavoidable damage and glitches. Thieves are unkillable, but restricted to the overworld and even then, are banned from narrow locations.
+
+### Enemy Damage
+
+The shuffled setting actually shuffled the damage table unlike the process from the enemizer that simply randomizes values and lowers damage for armor upgrades.
 
 ### Boss Shuffle: Unique
 
-At least one boss each of the prize bosses will be present guarding the prizes. GT bosses can be anything.
+Same as before, with some exceptions: 
 
-### Blind Note
+* Trinexx is not allowed on the GT basement when DR is enabled to avoid certain low percentage kills. Future work on health logic should make this reasonable.
+* In general, some of the harder bosses in the GT basement now have some concessions in the logic to make low precentage requirements less likely and onerous.
 
-If bosses are shuffled and Blind is chosen to be the boss of Thieves Town, then bombing the attic and delivering the maiden is still required.
+New variant Unique: At least one boss each of the prize bosses will be present guarding the prizes. GT bosses can be anything.
+
+Blind Note: If bosses are shuffled and Blind is chosen to be the boss of Thieves Town, then bombing the attic and delivering the maiden is still required.
+
+### Enemy Health
+
+Same as beofre but health is taken into account for challenge rooms if magic or ammo is required
+
+### Enemy Logic
+
+This version of the enemizer can account for logical access to both challenge room and item or key drops when enemies are shuffled. (See [Enemy Drop Shuffle](#shuffle-enemy-drops)). The enemies with particularly special logic are: Red Mimics, Red Eyegores, Terrorpins, Deadrocks, & Lynels. When bombbag is enabled Stalfos Knights, and Buzzblobs have advanced logic. For enemy drops, in particular, Red Baris must be killed with either the Fire Rod or Bombos to acquire the drop. These are in effect unless a different option is chosen:
+
+* Forbid special enemies: These special enemies are disallowed from drops and challenge rooms.
+* Item drops may have special enemies: Challenge rooms will not have these special enemies, but item drops may.
+* Allow special enemies anywhere: Both challenge rooms and enemy drops can have these special requirements occur.
 
 ## Standard Changes
 
@@ -507,19 +582,42 @@ When dungeon door shuffle is on, the Sanctuary is guaranteed to be behind the Th
 
 ## Retro Changes
 
-Retro can be partially enabled: see Small Key Shuffle and Bow Mode. Retro checkbox or Retro mode still enable all 3 options.
+Retro can be partially enabled: see Small Key Shuffle, Bow Mode, and Take Any Caves. Enable Retro button enables all 3 options.
 
-New supported option:
+## Glitched Logic
 
-### Take Any Caves
+Overworld glitches, Hybrid Major Glitches (HMG) and No Logic are currently supported.
 
-These are now independent of retro mode and have three options: None, Random, and Fixed. None disables the caves. Random works as take-any caves did before. Fixed means that the take any caves replace specific fairy caves in the pool and will be at those entrances unless ER is turned on (then they can be shuffled wherever). The fixed entrances are:
+CLI: `--logic [noglitches|owglitches|hybridglitches|nologic]`
 
-* Desert Healer Fairy
-* Swamp Healer Fairy (aka Light Hype Cave)
-* Dark Death Mountain Healer Fairy
-* Dark Lake Hylia Ledge Healer Fairy (aka Shopping Mall Bomb)
-* Bonk Fairy (Dark)
+### Overworld Glitches
+_Support added by qadan and compiling_
+
+Overworld Glitches logic includes (but is not limited to) the following:
+* Overworld teleports and clips to reach various items/entrances
+* Use of superbunny to obtain items and/or bonk open entrances
+* Use of mirror to access Desert Palace East Entrance
+* Use of bunny pocket to access the Back of Skull Woods and VOO Hammer house entrances
+
+
+### Hybrid Major Glitches
+_Support added by Muffins (ported from work by Espeon)_.
+
+**Not currently compatible with Door Shuffle**
+
+Hybrid Major Glitches logic includes the following:
+* All Overworld Glitches logic
+* Kikiskip to access PoD wihtout MP or DW access
+* IP Lobby clip to skip fire requirement
+* Traversal between TT -> Desert
+* Traversal between Spec rock upper -> Spec rock mid
+* Traversal between Paradox lower -> Paradox mid + upper
+* Traversal between Mire -> Hera -> Swamp
+* Stealing SK from Mire to open SP
+* Using the Mire big key to open Hera doors and big chest
+
+All traversals mentioned are considered connectors in entrance shuffle
+
 
 ## Game Options
 
@@ -547,13 +645,14 @@ Create bps patch(es) instead of generating rom(s) for distribution. `--bps`
 
 ### Triforce Hunt Settings
 
-A collection of settings to control the triforce piece pool for the CLI/Mystery
+A collection of settings to control the triforce piece pool if not specified through --triforce_goal and --triforce_pool
 
 * --triforce_goal_min: Minimum number of pieces to collect to win
 * --triforce_goal_max: Maximum number of pieces to collect to win
 * --triforce_pool_min: Minimum number of pieces in item pool
 * --triforce_pool_max: Maximum number of pieces in item pool
 * --triforce_min_difference: Minimum difference between pool and goal to win
+* --triforce_max_difference: Maximum difference between pool and goal to win
 
 ### Seed
 
@@ -562,6 +661,5 @@ Can be used to set a seed number to generate. Using the same seed with same sett
 ### Count
 
 Use to batch generate multiple seeds with same settings. If a seed number is provided, it will be used for the first seed, then used to derive the next seed (i.e. generating 10 seeds with the same seed number given will produce the same 10 (different) roms each time).
-
 
 

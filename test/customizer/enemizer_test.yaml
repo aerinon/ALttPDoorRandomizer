@@ -1,0 +1,2058 @@
+#placements:
+#  1:
+#    Dark Lake Hylia Shop - Left: Blue Potion
+meta:
+  players: 1
+#  seed: 140
+  seed: 773569045
+settings:
+  1:
+#    boss_shuffle: unique
+    enemy_shuffle: shuffled
+#    dropshuffle: underworld
+#    dungeon_counters: 'on'
+#    door_shuffle: crossed
+#    intensity: 3
+enemies:
+  1:
+    Underworld:
+#      0x2:
+#        0: Wizzrobe
+#        1: Wizzrobe
+#        2: Wizzrobe
+#        3: Wizzrobe
+#        4: Wizzrobe
+#        14: Wizzrobe
+#        15: Wizzrobe
+      0x4:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        9: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+        15: Wizzrobe
+      0x9:
+        2: Wizzrobe
+      0xa:
+        0: Wizzrobe
+        1: Wizzrobe
+      0xb:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+      0xe:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0x11:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x13:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+      0x15:
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+      0x16:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0x17:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+      0x19:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0x1a:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+      0x1b:
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x1e:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x1f:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x21:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+      0x22:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x24:
+        2: Wizzrobe
+        3: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x26:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+      0x27:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x28:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x2a:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x2b:
+        2: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x2e:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x31:
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+      0x32:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x34:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x35:
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+      0x36:
+        1: Wizzrobe
+        2: Wizzrobe
+        5: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+      0x37:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        9: Wizzrobe
+      0x38:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x39:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x3a:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x3b:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x3c:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0x3d:
+        2: Wizzrobe
+        3: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+      0x3e:
+        1: Wizzrobe
+        2: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+      0x3f:
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x40:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x41:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0x42:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x43:
+        0: Wizzrobe
+      0x44:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        8: Wizzrobe
+      0x45:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+#      0x46:
+#        0: Wizzrobe
+#        2: Wizzrobe
+#        4: Wizzrobe
+      0x49:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+      0x4a:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0x4b:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x4c:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x4e:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0x50:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0x51:
+        1: Wizzrobe
+        2: Wizzrobe
+      0x52:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0x53:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+      0x54:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x55:
+        1: Wizzrobe
+        2: Wizzrobe
+      0x56:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+      0x57:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+      0x58:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+      0x59:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+      0x5b:
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+      0x5d:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+      0x5e:
+        3: Wizzrobe
+        4: Wizzrobe
+      0x5f:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0x60:
+        0: Wizzrobe
+      0x61:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0x62:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0x63:
+        1: Wizzrobe
+#      0x64:
+#        0: Wizzrobe
+#        2: Wizzrobe
+#        3: Wizzrobe
+#        4: Wizzrobe
+#        5: Wizzrobe
+#        6: Wizzrobe
+      0x65:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+#      0x66:
+#        0: Wizzrobe
+#        2: Wizzrobe
+#        3: Wizzrobe
+#        6: Wizzrobe
+#        7: Wizzrobe
+#        8: Wizzrobe
+#        9: Wizzrobe
+#        11: Wizzrobe
+      0x67:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+      0x68:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x6a:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x6b:
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+      0x6d:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+      0x6e:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x71:
+        0: Wizzrobe
+        1: Wizzrobe
+      0x72:
+        0: Wizzrobe
+        1: Wizzrobe
+      0x73:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x74:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x75:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+#      0x76:
+#        1: Wizzrobe
+#        2: Wizzrobe
+#        3: Wizzrobe
+#        4: Wizzrobe
+#        6: Wizzrobe
+      0x77:
+        0: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x7b:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+      0x7c:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x7d:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+#      0x7e:
+#        0: Wizzrobe
+#        1: Wizzrobe
+#        2: Wizzrobe
+#        5: Wizzrobe
+#        6: Wizzrobe
+      0x7f:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x80:
+        1: Wizzrobe
+        2: Wizzrobe
+      0x81:
+        0: Wizzrobe
+        1: Wizzrobe
+      0x82:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0x83:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+      0x84:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x85:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+      0x87:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        12: Wizzrobe
+      0x8b:
+        0: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x8c:
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+      0x8d:
+        2: Wizzrobe
+        3: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        12: Wizzrobe
+      0x8e:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x91:
+        1: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x92:
+        2: Wizzrobe
+        4: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+      0x93:
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x95:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0x96:
+        0: Wizzrobe
+      0x98:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x99:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+      0x9b:
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+      0x9c:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x9d:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+#      0x9e:
+#        0: Wizzrobe
+#        1: Wizzrobe
+#        2: Wizzrobe
+#        3: Wizzrobe
+      0x9f:
+        4: Wizzrobe
+        5: Wizzrobe
+      0xa0:
+        1: Wizzrobe
+        2: Wizzrobe
+      0xa1:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+      0xa5:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+      0xa6:
+        1: Wizzrobe
+      0xa8:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0xa9:
+        0: Wizzrobe
+        1: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0xaa:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0xab:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0xae:
+        0: Wizzrobe
+        1: Wizzrobe
+      0xaf:
+        0: Wizzrobe
+      0xb0:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+      0xb1:
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+      0xb2:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+      0xb3:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        4: Wizzrobe
+      0xb5:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0xb6:
+        0: Wizzrobe
+        1: Wizzrobe
+        5: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+      0xb7:
+        0: Wizzrobe
+        1: Wizzrobe
+      0xb8:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0xba:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0xbb:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+      0xbc:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+#      0xbe:
+#        0: Wizzrobe
+#        2: Wizzrobe
+#        3: Wizzrobe
+#        4: Wizzrobe
+#        5: Wizzrobe
+#        6: Wizzrobe
+      0xbf:
+        1: Wizzrobe
+      0xc0:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0xc1:
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        8: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+      0xc2:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0xc3:
+        6: Wizzrobe
+      0xc4:
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+      0xc5:
+        6: Wizzrobe
+      0xc6:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0xc9:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0xcb:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+      0xcc:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+      0xce:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0xd0:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+      0xd1:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0xd2:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+      0xd5:
+        4: Wizzrobe
+      0xd8:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+      0xd9:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0xda:
+        0: Wizzrobe
+        1: Wizzrobe
+      0xdb:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0xdc:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+      0xdf:
+        0: Wizzrobe
+        1: Wizzrobe
+      0xe0:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+#      0xe4:
+#        0: Wizzrobe
+#        1: Wizzrobe
+#        2: Wizzrobe
+      0xe5:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0xe6:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0xe7:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0xe8:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0xee:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0xef:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+#      0xf0:
+#        0: Wizzrobe
+#        1: Wizzrobe
+#        2: Wizzrobe
+#        3: Wizzrobe
+#        4: Wizzrobe
+#        5: Wizzrobe
+#        6: Wizzrobe
+#        7: Wizzrobe
+#        9: Wizzrobe
+      0xf1:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+      0xf9:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0xfb:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0xfd:
+        0: Wizzrobe
+        1: Wizzrobe
+        4: Wizzrobe
+      0xfe:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x107:
+        1: Wizzrobe
+        2: Wizzrobe
+      0x108:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0x10b:
+        6: Wizzrobe
+      0x10c:
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x10d:
+        0: Wizzrobe
+        1: Wizzrobe
+#      0x123:
+#        0: Wizzrobe
+#        1: Wizzrobe
+#        2: Wizzrobe
+#        3: Wizzrobe
+    Overworld:
+      0x21b:
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x40:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+        15: Wizzrobe
+        16: Wizzrobe
+        17: Wizzrobe
+        18: Wizzrobe
+        19: Wizzrobe
+      0x42:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+      0x45:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0x4a:
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+#      0x4f:
+#        0: Wizzrobe
+#        2: Wizzrobe
+#        3: Wizzrobe
+      0x50:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x51:
+        0: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x52:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x53:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x54:
+        0: Wizzrobe
+        3: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x55:
+        1: Wizzrobe
+        2: Wizzrobe
+        4: Wizzrobe
+        6: Wizzrobe
+      0x56:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x57:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x58:
+        0: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+        15: Wizzrobe
+      0x5a:
+        0: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x5b:
+        0: Wizzrobe
+        3: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+      0x5d:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x5e:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+        15: Wizzrobe
+        16: Wizzrobe
+        17: Wizzrobe
+        19: Wizzrobe
+        20: Wizzrobe
+      0x62:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x65:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x6b:
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x6c:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x6d:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x6e:
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x6f:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x70:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+      0x72:
+        1: Wizzrobe
+        2: Wizzrobe
+        4: Wizzrobe
+      0x73:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x74:
+        0: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        6: Wizzrobe
+      0x75:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+        15: Wizzrobe
+        16: Wizzrobe
+        17: Wizzrobe
+        18: Wizzrobe
+        19: Wizzrobe
+        20: Wizzrobe
+        21: Wizzrobe
+      0x77:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x7a:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0x7b:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x7c:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x7f:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x81:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        14: Wizzrobe
+        15: Wizzrobe
+        16: Wizzrobe
+        17: Wizzrobe
+        18: Wizzrobe
+        19: Wizzrobe
+        20: Wizzrobe
+        21: Wizzrobe
+        22: Wizzrobe
+        23: Wizzrobe
+        24: Wizzrobe
+        25: Wizzrobe
+        26: Wizzrobe
+        27: Wizzrobe
+        28: Wizzrobe
+      0x0:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+#      0x2:
+#        0: Wizzrobe
+#        2: Wizzrobe
+      0x3:
+        2: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+      0x5:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+      0x7:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0xa:
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+      0xf:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x10:
+        0: Wizzrobe
+        3: Wizzrobe
+      0x11:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+      0x12:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+      0x13:
+        1: Wizzrobe
+      0x14:
+        0: Wizzrobe
+        1: Wizzrobe
+      0x15:
+        1: Wizzrobe
+        3: Wizzrobe
+#      0x16:
+#        0: Wizzrobe
+#        2: Wizzrobe
+      0x17:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x18:
+        9: Wizzrobe
+        10: Wizzrobe
+      0x1a:
+        0: Wizzrobe
+        1: Wizzrobe
+        4: Wizzrobe
+      0x1b:
+        2: Wizzrobe
+        3: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+      0x1d:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x1e:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+        15: Wizzrobe
+        16: Wizzrobe
+        17: Wizzrobe
+        18: Wizzrobe
+      0x22:
+        1: Wizzrobe
+        2: Wizzrobe
+      0x25:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x2b:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0x2c:
+        0: Wizzrobe
+        1: Wizzrobe
+      0x2d:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0x2e:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0x2f:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0x30:
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        15: Wizzrobe
+        16: Wizzrobe
+        17: Wizzrobe
+        18: Wizzrobe
+        19: Wizzrobe
+        20: Wizzrobe
+        21: Wizzrobe
+        22: Wizzrobe
+      0x32:
+        1: Wizzrobe
+        2: Wizzrobe
+      0x33:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+      0x34:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x35:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+        15: Wizzrobe
+        16: Wizzrobe
+        18: Wizzrobe
+        19: Wizzrobe
+        20: Wizzrobe
+        21: Wizzrobe
+        22: Wizzrobe
+      0x37:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x3a:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0x3b:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0x3c:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+      0x3f:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        4: Wizzrobe
+      0x90:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        13: Wizzrobe
+      0x93:
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+      0x95:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+      0x97:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0x9a:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0x9f:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        6: Wizzrobe
+      0xa0:
+        0: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0xa1:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+      0xa2:
+        1: Wizzrobe
+        3: Wizzrobe
+      0xa3:
+        2: Wizzrobe
+        3: Wizzrobe
+      0xa4:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0xa5:
+        1: Wizzrobe
+        3: Wizzrobe
+#      0xa6:
+#        0: Wizzrobe
+#        2: Wizzrobe
+      0xa7:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0xa8:
+        0: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+      0xaa:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+      0xab:
+        0: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+      0xad:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0xae:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+        15: Wizzrobe
+        16: Wizzrobe
+        17: Wizzrobe
+        19: Wizzrobe
+      0xb2:
+        1: Wizzrobe
+        2: Wizzrobe
+      0xb5:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0xb8:
+        0: Wizzrobe
+        4: Wizzrobe
+      0xb9:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0xbb:
+        0: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0xbc:
+        0: Wizzrobe
+        1: Wizzrobe
+      0xbd:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+      0xbe:
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0xbf:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+      0xc0:
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+        16: Wizzrobe
+        17: Wizzrobe
+        18: Wizzrobe
+        19: Wizzrobe
+      0xc2:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        5: Wizzrobe
+      0xc3:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0xc4:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0xc5:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+        8: Wizzrobe
+        9: Wizzrobe
+        10: Wizzrobe
+        11: Wizzrobe
+        12: Wizzrobe
+        13: Wizzrobe
+        14: Wizzrobe
+        15: Wizzrobe
+        16: Wizzrobe
+        17: Wizzrobe
+        19: Wizzrobe
+        20: Wizzrobe
+        21: Wizzrobe
+        22: Wizzrobe
+      0xc7:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0xca:
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+        6: Wizzrobe
+        7: Wizzrobe
+      0xcb:
+        0: Wizzrobe
+        1: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+        5: Wizzrobe
+      0xcc:
+        0: Wizzrobe
+        1: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+        4: Wizzrobe
+      0xcf:
+        0: Wizzrobe
+        2: Wizzrobe
+        3: Wizzrobe
+start_inventory:
+  1:
+    - Lamp
+    - Progressive Sword
+    - Ocarina (Activated)
+    - Hookshot
+  2: []
+

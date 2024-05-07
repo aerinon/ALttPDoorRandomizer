@@ -2,11 +2,17 @@
   "checkboxes": {
     "createrom":          { "type": "checkbox" },
     "bps":                { "type": "checkbox" },
-    "createspoiler":      { "type": "checkbox" },
+    "spoiler":      {
+      "type": "selectbox",
+      "options": [
+        "none",
+        "settings",
+        "semi",
+        "full",
+        "debug"
+      ]
+    },
     "calcplaythrough":    { "type": "checkbox" },
-    "print_custom_yaml":  { "type": "checkbox" },
-    "usestartinventory":  { "type": "checkbox" },
-    "usecustompool":      { "type": "checkbox" },
-    "race":               { "type": "checkbox" }
+    "print_custom_yaml":  { "type": "checkbox" }
   }
 }

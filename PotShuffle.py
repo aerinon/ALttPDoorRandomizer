@@ -750,7 +750,7 @@ vanilla_pots = {
            Pot(88, 14, PotItem.SmallMagic, 'Bumper Cave (bottom)', obj=RoomObject(0x0AADED, [0xB3, 0x73, 0xFA])),
            Pot(92, 14, PotItem.Heart, 'Bumper Cave (bottom)', obj=RoomObject(0x0AADF0, [0xBB, 0x73, 0xFA])),
            Pot(96, 14, PotItem.SmallMagic, 'Bumper Cave (bottom)', obj=RoomObject(0x0AADF3, [0xC3, 0x73, 0xFA]))],
-    0xF1: [Pot(64, 5, PotItem.Heart, 'Old Man Cave', obj=RoomObject(0x0AA6B2, [0x83, 0x2B, 0xFA]))],
+    0xF1: [Pot(64, 5, PotItem.Heart, 'Old Man Cave (East)', obj=RoomObject(0x0AA6B2, [0x83, 0x2B, 0xFA]))],
     0xF3: [Pot(0x28, 0x14, PotItem.Nothing, 'Elder House', obj=RoomObject(0x0AA76F, [0x53, 0xA3, 0xFA])),
            Pot(0x2C, 0x14, PotItem.Nothing, 'Elder House', obj=RoomObject(0x0AA772, [0x5B, 0xA3, 0xFA])),
            Pot(0x30, 0x14, PotItem.Nothing, 'Elder House', obj=RoomObject(0x0AA775, [0x63, 0xA3, 0xFA]))],
@@ -788,12 +788,12 @@ vanilla_pots = {
     0x108: [Pot(166, 19, PotItem.Chicken, 'Chicken House', obj=RoomObject(0x03EFA9, [0x4F, 0x9F, 0xFA]))],
     0x10C: [Pot(88, 14, PotItem.Heart, 'Hookshot Fairy', obj=RoomObject(0x03F329, [0xB3, 0x73, 0xFA]))],
     # note: these addresses got moved thanks to waterfall fairy edit
-    0x114: [Pot(92, 4, PotItem.Heart, 'Dark Desert Hint', obj=RoomObject(0x03F79A, [0xBB, 0x23, 0xFA])),
-            Pot(96, 4, PotItem.Heart, 'Dark Desert Hint', obj=RoomObject(0x03F79D, [0xC3, 0x23, 0xFA])),
-            Pot(92, 5, PotItem.Bomb, 'Dark Desert Hint', obj=RoomObject(0x03F7A0, [0xBB, 0x2B, 0xFA])),
-            Pot(96, 5, PotItem.Bomb, 'Dark Desert Hint', obj=RoomObject(0x03F7A3, [0xC3, 0x2B, 0xFA])),
-            Pot(92, 10, PotItem.FiveArrows, 'Dark Desert Hint', obj=RoomObject(0x03F7A6, [0xBB, 0x53, 0xFA])),
-            Pot(96, 10, PotItem.Heart, 'Dark Desert Hint', obj=RoomObject(0x03F7A9, [0xC3, 0x53, 0xFA]))],
+    0x114: [Pot(92, 4, PotItem.Heart, 'Mire Hint', obj=RoomObject(0x03F79A, [0xBB, 0x23, 0xFA])),
+            Pot(96, 4, PotItem.Heart, 'Mire Hint', obj=RoomObject(0x03F79D, [0xC3, 0x23, 0xFA])),
+            Pot(92, 5, PotItem.Bomb, 'Mire Hint', obj=RoomObject(0x03F7A0, [0xBB, 0x2B, 0xFA])),
+            Pot(96, 5, PotItem.Bomb, 'Mire Hint', obj=RoomObject(0x03F7A3, [0xC3, 0x2B, 0xFA])),
+            Pot(92, 10, PotItem.FiveArrows, 'Mire Hint', obj=RoomObject(0x03F7A6, [0xBB, 0x53, 0xFA])),
+            Pot(96, 10, PotItem.Heart, 'Mire Hint', obj=RoomObject(0x03F7A9, [0xC3, 0x53, 0xFA]))],
     0x117: [Pot(138, 3, PotItem.Heart, 'Spike Cave', obj=RoomObject(0x03FCB2, [0x17, 0x1F, 0xFA])),  # 0x38A -> 38A
             Pot(142, 3, PotItem.Heart, 'Spike Cave', obj=RoomObject(0x03FCB8, [0x1F, 0x1F, 0xFA])),
             Pot(166, 3, PotItem.Heart, 'Spike Cave', obj=RoomObject(0x03FCC1, [0x4F, 0x1F, 0xFA])),
@@ -851,10 +851,10 @@ vanilla_pots = {
             Pot(100, 22, PotItem.Heart, 'Dark Lake Hylia Ledge Spike Cave', obj=RoomObject(0x0AB62A, [0xCB, 0xB3, 0xFA])),
             Pot(88, 28, PotItem.Heart, 'Dark Lake Hylia Ledge Spike Cave', obj=RoomObject(0x0AB633, [0xB3, 0xE3, 0xFA])),
             Pot(100, 28, PotItem.Heart, 'Dark Lake Hylia Ledge Spike Cave', obj=RoomObject(0x0AB636, [0xCB, 0xE3, 0xFA]))],
-    0x127: [Pot(24, 25, PotItem.Nothing, 'Dark World Hammer Peg Cave', obj=RoomObject(0x2B801A, [0x33, 0xCB, 0xFA])),
-            Pot(28, 25, PotItem.Nothing, 'Dark World Hammer Peg Cave', obj=RoomObject(0x2B801D, [0x3B, 0xCB, 0xFA])),
-            Pot(32, 25, PotItem.Nothing, 'Dark World Hammer Peg Cave', obj=RoomObject(0x2B8020, [0x43, 0xCB, 0xFA])),
-            Pot(36, 25, PotItem.Nothing, 'Dark World Hammer Peg Cave', obj=RoomObject(0x2B8023, [0x4B, 0xCB, 0xFA]))],
+    0x127: [Pot(24, 25, PotItem.Nothing, 'Hammer Peg Cave', obj=RoomObject(0x2B801A, [0x33, 0xCB, 0xFA])),
+            Pot(28, 25, PotItem.Nothing, 'Hammer Peg Cave', obj=RoomObject(0x2B801D, [0x3B, 0xCB, 0xFA])),
+            Pot(32, 25, PotItem.Nothing, 'Hammer Peg Cave', obj=RoomObject(0x2B8020, [0x43, 0xCB, 0xFA])),
+            Pot(36, 25, PotItem.Nothing, 'Hammer Peg Cave', obj=RoomObject(0x2B8023, [0x4B, 0xCB, 0xFA]))],
 }
 
 
@@ -919,14 +919,14 @@ def shuffle_pots(world, player):
 
         new_pot_contents.room_map[super_tile] = new_pots
 
-    world.pot_contents[player] = new_pot_contents
+    world.data_tables[player].pot_secret_table = new_pot_contents
 
 
 def shuffle_pot_switches(world, player):
     import RaceRandom as random
 
     for super_tile in vanilla_pots:
-        new_pots = world.pot_contents[player].room_map[super_tile]
+        new_pots = world.data_tables[player].pot_secret_table.room_map[super_tile]
         # sort in the order Hole, Switch, Key, Other, Nothing
         sort_order = {PotItem.Hole: 4, PotItem.Switch: 3, PotItem.Key: 2, PotItem.Nothing: 0}
         old_pots = sorted(new_pots, key=lambda pot: sort_order.get(pot.item, 1), reverse=True)
@@ -1016,16 +1016,16 @@ key_drop_data = {
     'Swamp Palace - Trench 2 Pot Key': ['Pot', 0x35, 'in a pot in Swamp Palace', 'Small Key (Swamp Palace)'],
     'Swamp Palace - Waterway Pot Key': ['Pot', 0x16, 'in a pot in Swamp Palace', 'Small Key (Swamp Palace)'],
     'Skull Woods - West Lobby Pot Key': ['Pot', 0x56, 'in a pot in Skull Woods', 'Small Key (Skull Woods)'],
-    'Skull Woods - Spike Corner Key Drop': ['Drop', (0x09DD74, 0x39, 1), 'dropped near Mothula', 'Small Key (Skull Woods)'],
+    'Skull Woods - Spike Corner Key Drop': ['Drop', (0x09DD74, 0x39, 2), 'dropped near Mothula', 'Small Key (Skull Woods)'],
     "Thieves' Town - Hallway Pot Key": ['Pot', 0xBC, "in a pot in Thieves Town", 'Small Key (Thieves Town)'],
     "Thieves' Town - Spike Switch Pot Key": ['Pot', 0xAB, "in a pot in Thieves Town", 'Small Key (Thieves Town)'],
     'Ice Palace - Jelly Key Drop': ['Drop', (0x09DA21, 0xE, 3), 'dropped in Ice Palace', 'Small Key (Ice Palace)'],
-    'Ice Palace - Conveyor Key Drop': ['Drop', (0x09DE08, 0x3E, 8), 'dropped in Ice Palace', 'Small Key (Ice Palace)'],
+    'Ice Palace - Conveyor Key Drop': ['Drop', (0x09DE08, 0x3E, 9), 'dropped in Ice Palace', 'Small Key (Ice Palace)'],
     'Ice Palace - Hammer Block Key Drop': ['Pot', 0x3F, 'under a block in Ice Palace', 'Small Key (Ice Palace)'],
-    'Ice Palace - Many Pots Pot Key': ['Pot', 0x9F, 'int a pot in Ice Palace', 'Small Key (Ice Palace)'],
+    'Ice Palace - Many Pots Pot Key': ['Pot', 0x9F, 'in a pot in Ice Palace', 'Small Key (Ice Palace)'],
     'Misery Mire - Spikes Pot Key': ['Pot', 0xB3, 'in a pot in Misery Mire', 'Small Key (Misery Mire)'],
     'Misery Mire - Fishbone Pot Key': ['Pot', 0xA1, 'in a pot in forgotten Mire', 'Small Key (Misery Mire)'],
-    'Misery Mire - Conveyor Crystal Key Drop': ['Drop', (0x09E7FB, 0xC1, 9), 'dropped in Misery Mire', 'Small Key (Misery Mire)'],
+    'Misery Mire - Conveyor Crystal Key Drop': ['Drop', (0x09E7FB, 0xC1, 10), 'dropped in Misery Mire', 'Small Key (Misery Mire)'],
     'Turtle Rock - Pokey 1 Key Drop': ['Drop', (0x09E70D, 0xB6, 5), 'dropped in Turtle Rock', 'Small Key (Turtle Rock)'],
     'Turtle Rock - Pokey 2 Key Drop': ['Drop', (0x09DA5D, 0x13, 6), 'dropped in Turtle Rock', 'Small Key (Turtle Rock)'],
     'Ganons Tower - Conveyor Cross Pot Key': ['Pot', 0x8B, "in a pot in Ganon's Tower", 'Small Key (Ganons Tower)'],
@@ -1034,18 +1034,21 @@ key_drop_data = {
     'Ganons Tower - Mini Helmasaur Key Drop': ['Drop', (0x09DDC4, 0x3D, 2), "dropped atop Ganon's Tower", 'Small Key (Ganons Tower)']
 }
 
+key_drop_special = {(data[1][1], data[1][2]): name for name, data in key_drop_data.items() if data[0] == 'Drop'}
+
 
 class PotSecretTable(object):
     def __init__(self):
         self.room_map = defaultdict(list)
         self.multiworld_count = 0
 
-    def write_pot_data_to_rom(self, rom, colorize):
-        pointer_address = 0x140000  # pots currently in bank 28
-        pointer_offset = 0x128 * 2
-        empty_address = (pointer_address + pointer_offset)
+    def write_pot_data_to_rom(self, rom, colorize, data_tables):
+        pointer_address = snes_to_pc(0x09D87E)  # pots currently in bank 9
+        data_bank_address = snes_to_pc(0x09DACE)
+        # pointer_offset = 0x128 * 2
+        empty_address = data_bank_address
         empty_pointer = pc_to_snes(empty_address) & 0xFFFF
-        data_pointer = pointer_address + pointer_offset + 2
+        data_pointer = data_bank_address + 2
         for room in range(0, 0x128):
             if room in self.room_map:
                 list_idx = 0
@@ -1056,9 +1059,13 @@ class PotSecretTable(object):
                     rom.write_bytes(data_pointer + list_idx * 3, pot.pot_data())
                     if pot.location is not None and not pot.location.forced_item:
                         collection_rate_mask |= 1 << (15 - list_idx)
-                        if colorize and pot.obj_ref:
-                            pot.obj_ref.change_type(Shuffled_Pot)
-                            pot.obj_ref.write_to_rom(rom)
+                        if colorize:
+                            if room in data_tables.room_list:
+                                room_object = data_tables.room_list[room]
+                                room_object.find_all_pots()[list_idx].change_type(Shuffled_Pot)
+                            elif pot.obj_ref:
+                                pot.obj_ref.change_type(Shuffled_Pot)
+                                pot.obj_ref.write_to_rom(rom)
                     list_idx += 1
                 rom.write_bytes(data_pointer + list_idx * 3, [0xFF, 0xFF])
                 rom.write_bytes(snes_to_pc(0x28AA60) + room * 2, int16_as_bytes(collection_rate_mask))

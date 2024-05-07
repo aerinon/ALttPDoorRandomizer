@@ -1,0 +1,23 @@
+meta:
+  players: 1
+  race: true
+settings:
+  1:
+    shopsanity: true
+    pseudoboots: true
+    goal: crystals
+    crystals_gt: random
+    shuffle: crossed
+    shufflelinks: true
+    keysanity: true
+    door_shuffle: crossed
+    intensity: 3
+    door_type_mode: big
+    pottery: keys
+    dropshuffle: keys
+    experimental: true
+    dungeon_counters: 'on'
+    hints: true
+    msu_resume: true
+    collection_rate: true
+    quickswap: true

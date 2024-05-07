@@ -1,0 +1,22 @@
+meta:
+  players: 1
+settings:
+  1:
+    key_logic_algorithm: strict
+    keysanity: true
+placements:
+  1:
+    Hobo: Big Key (Misery Mire)
+    Waterfall Fairy - Left: Small Key (Misery Mire)
+advanced_placements:
+  1:
+    - type: Verification
+      item: Flippers
+      locations:
+        Misery Mire - Map Chest: False
+        Misery Mire - Main Lobby: False
+        Misery Mire - Bridge Chest: True
+        Misery Mire - Spike Chest: True
+        Misery Mire - Compass Chest: False
+        Misery Mire - Big Key Chest: False
+        Misery Mire - Boss: False

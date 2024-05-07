@@ -53,18 +53,17 @@ class InitialSram:
     def pre_open_pyramid_hole(self):
         self._or_value(OVERWORLD_DATA+0x5B, 0x20)
 
+    def pre_open_tr_bomb_doors(self):
+        self._or_value(ROOM_DATA+0x47, 0x80)
+        self._or_value(ROOM_DATA+0x01AB, 0x80)
+
     def set_starting_equipment(self, world: object, player: int):
         equip = [0] * (0x340 + 0x4F)
         equip[0x36C] = 0x18
         equip[0x36D] = 0x18
         equip[0x379] = 0x68
-        if world.bombbag[player]:
-            starting_max_bombs = 0
-        else:
-            starting_max_bombs = 10
-        starting_max_arrows = 30
-        starting_bomb_cap_upgrades = 0
-        starting_arrow_cap_upgrades = 0
+        starting_bomb_cap_upgrades = 10 if not world.bombbag[player] else 0
+        starting_arrow_cap_upgrades = 30
         starting_bombs = 0
         starting_arrows = 0
 
@@ -204,8 +203,8 @@ class InitialSram:
 
         equip[0x370] = min(starting_bomb_cap_upgrades, 50)
         equip[0x371] = min(starting_arrow_cap_upgrades, 70)
-        equip[0x343] = min(starting_bombs, (equip[0x370] + starting_max_bombs))
-        equip[0x377] = min(starting_arrows, (equip[0x371] + starting_max_arrows))
+        equip[0x343] = min(starting_bombs, equip[0x370])
+        equip[0x377] = min(starting_arrows, equip[0x371])
         
         # Assertion and copy equip to initial_sram_bytes
         assert equip[:0x340] == [0] * 0x340

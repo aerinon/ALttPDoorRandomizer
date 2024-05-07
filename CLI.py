@@ -107,7 +107,7 @@ def parse_cli(argv, no_defaults=False):
         ret.keyshuffle = 'wild'
 
     if ret.keydropshuffle:
-        ret.dropshuffle = True
+        ret.dropshuffle = 'keys' if ret.dropshuffle == 'none' else ret.dropshuffle
         ret.pottery = 'keys' if ret.pottery == 'none' else ret.pottery
 
     if ret.retro or ret.mode == 'retro':
@@ -132,7 +132,7 @@ def parse_cli(argv, no_defaults=False):
                          'flute_mode', 'bow_mode', 'take_any', 'boots_hint',
                          'shuffle', 'door_shuffle', 'intensity', 'crystals_ganon', 'crystals_gt', 'openpyramid',
                          'mapshuffle', 'compassshuffle', 'keyshuffle', 'bigkeyshuffle', 'startinventory',
-                         'usestartinventory', 'bombbag', 'overworld_map', 'restrict_boss_items',
+                         'usestartinventory', 'bombbag', 'overworld_map', 'restrict_boss_items', 'triforce_max_difference',
                          'triforce_pool_min', 'triforce_pool_max', 'triforce_goal_min', 'triforce_goal_max',
                          'triforce_min_difference', 'triforce_goal', 'triforce_pool', 'shufflelinks', 'shuffletavern',
                          'pseudoboots', 'retro', 'accessibility', 'hints', 'beemizer', 'experimental', 'dungeon_counters',
@@ -140,7 +140,8 @@ def parse_cli(argv, no_defaults=False):
                          'ow_palettes', 'uw_palettes', 'sprite', 'disablemusic', 'quickswap', 'fastmenu', 'heartcolor',
                          'heartbeep', 'remote_items', 'shopsanity', 'dropshuffle', 'pottery', 'keydropshuffle',
                          'mixed_travel', 'standardize_palettes', 'code', 'reduce_flashing', 'shuffle_sfx',
-                         'msu_resume', 'collection_rate', 'colorizepots', 'decoupledoors', 'door_type_mode']:
+                         'msu_resume', 'collection_rate', 'colorizepots', 'decoupledoors', 'door_type_mode',
+                         'trap_door_mode', 'key_logic_algorithm', 'door_self_loops', 'any_enemy_logic', 'aga_randomness']:
                 value = getattr(defaults, name) if getattr(playerargs, name) is None else getattr(playerargs, name)
                 if player == 1:
                     setattr(ret, name, {1: value})
@@ -185,7 +186,7 @@ def parse_settings():
         "restrict_boss_items": "none",
 
         # Shuffle Ganon defaults to TRUE
-        "openpyramid": False,
+        "openpyramid": 'auto',
         "shuffleganon": True,
         "shuffle": "vanilla",
         "shufflelinks": False,
@@ -198,13 +199,13 @@ def parse_settings():
         "shufflebosses": "none",
         "enemy_damage": "default",
         "enemy_health": "default",
-        "enemizercli": os.path.join(".", "EnemizerCLI", "EnemizerCLI.Core"),
+        'any_enemy_logic': 'allow_all',
 
         "shopsanity": False,
         'keydropshuffle': False,
-        'dropshuffle': False,
+        'dropshuffle': 'none',
         'pottery': 'none',
-        'colorizepots': False,
+        'colorizepots': True,
         'shufflepots': False,
         'mapshuffle': False,
         'compassshuffle': False,
@@ -214,19 +215,24 @@ def parse_settings():
         'door_shuffle': 'vanilla',
         'intensity': 2,
         'door_type_mode': 'original',
+        'trap_door_mode': 'optional',
+        'key_logic_algorithm': 'partial',
         'decoupledoors': False,
+        'door_self_loops': False,
         'experimental': False,
         'dungeon_counters': 'default',
         'mixed_travel': 'prevent',
         'standardize_palettes': 'standardize',
-        
+        'aga_randomness': True,
+
         "triforce_pool": 0,
         "triforce_goal": 0,
         "triforce_pool_min": 0,
         "triforce_pool_max": 0,
         "triforce_goal_min": 0,
         "triforce_goal_max": 0,
-        "triforce_min_difference": 10,
+        "triforce_min_difference": 0,
+        "triforce_max_difference": 10000,
 
         "code": "",
         "multi": 1,
@@ -247,10 +253,9 @@ def parse_settings():
         'msu_resume': False,
         'collection_rate': False,
 
-        # Spoiler     defaults to TRUE
+        'spoiler': 'full',
         # Playthrough defaults to TRUE
         # ROM         defaults to TRUE
-        "create_spoiler": True,
         "calc_playthrough": True,
         "create_rom": True,
         "bps": False,
@@ -342,11 +347,9 @@ def parse_settings():
         "outputpath": os.path.join("."),
         "saveonexit": "ask",
         "outputname": "",
-        "startinventoryarray": {}
+        "startinventoryarray": {},
+        "notes": ""
     }
-
-    if sys.platform.lower().find("windows"):
-        settings["enemizercli"] += ".exe"
 
     # read saved settings file if it exists and set these
     settings_path = os.path.join(".", "resources", "user", "settings.json")

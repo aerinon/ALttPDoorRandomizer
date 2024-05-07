@@ -55,7 +55,7 @@ def create_district_helper(world, player):
                         'Desert Palace Entrance (North)', 'Desert Palace Entrance (East)', 'Desert Fairy',
                         'Aginahs Cave', '50 Rupee Cave', 'Checkerboard Cave']
     lake_entrances = ['Capacity Upgrade', 'Mini Moldorm Cave', 'Good Bee Cave', '20 Rupee Cave', 'Ice Rod Cave',
-                      'Cave Shop (Lake Hylia)', 'Lake Hylia Fortune Teller']
+                      'Lake Hylia Shop', 'Lake Hylia Fortune Teller']
     east_lw_entrances = ['Eastern Palace', 'Waterfall of Wishing', 'Lake Hylia Fairy', 'Sahasrahlas Hut',
                          'Long Fairy Cave', 'Potion Shop']
     lw_dm_entrances = ['Tower of Hera', 'Old Man Cave (East)', 'Old Man House (Bottom)', 'Old Man House (Top)',
@@ -64,34 +64,24 @@ def create_district_helper(world, player):
                        'Paradox Cave (Top)', 'Fairy Ascension Cave (Bottom)', 'Fairy Ascension Cave (Top)',
                        'Spiral Cave', 'Spiral Cave (Bottom)', 'Hookshot Fairy', 'Mimic Cave']
     east_dw_entrances = ['Palace of Darkness', 'Pyramid Entrance', 'Pyramid Fairy', 'East Dark World Hint',
-                         'Palace of Darkness Hint', 'Dark Lake Hylia Fairy', 'Dark World Potion Shop', 'Pyramid Hole']
+                         'Palace of Darkness Hint', 'Dark Lake Hylia Fairy', 'Dark Potion Shop', 'Pyramid Hole']
     south_dw_entrances = ['Ice Palace', 'Swamp Palace', 'Dark Lake Hylia Ledge Fairy',
                           'Dark Lake Hylia Ledge Spike Cave', 'Dark Lake Hylia Ledge Hint', 'Hype Cave',
                           'Bonk Fairy (Dark)', 'Archery Game', 'Big Bomb Shop', 'Dark Lake Hylia Shop', ]
     voo_north_entrances = ['Thieves Town', 'Skull Woods First Section Door', 'Skull Woods Second Section Door (East)',
                            'Skull Woods Second Section Door (West)', 'Skull Woods Final Section',
                            'Bumper Cave (Bottom)', 'Bumper Cave (Top)', 'Brewery', 'C-Shaped House', 'Chest Game',
-                           'Dark World Hammer Peg Cave', 'Red Shield Shop', 'Dark Sanctuary Hint',
-                           'Fortune Teller (Dark)', 'Dark World Shop', 'Dark World Lumberjack Shop',
+                           'Hammer Peg Cave', 'Red Shield Shop', 'Dark Sanctuary Hint',
+                           'Fortune Teller (Dark)', 'Dark World Shop', 'Dark Lumberjack Shop',
                            'Skull Woods First Section Hole (West)', 'Skull Woods First Section Hole (East)',
                            'Skull Woods First Section Hole (North)', 'Skull Woods Second Section Hole']
-    mire_entrances = ['Misery Mire', 'Mire Shed', 'Dark Desert Hint', 'Dark Desert Fairy']
+    mire_entrances = ['Misery Mire', 'Mire Shed', 'Mire Hint', 'Mire Fairy']
     ddm_entrances = ['Turtle Rock', 'Dark Death Mountain Ledge (West)', 'Dark Death Mountain Ledge (East)',
                      'Turtle Rock Isolated Ledge Entrance', 'Superbunny Cave (Top)', 'Superbunny Cave (Bottom)',
                      'Hookshot Cave', 'Hookshot Cave Back Entrance', 'Ganons Tower', 'Spike Cave',
-                     'Cave Shop (Dark Death Mountain)', 'Dark Death Mountain Fairy']
+                     'Dark Death Mountain Shop', 'Dark Death Mountain Fairy']
 
     if inverted:
-        south_dw_entrances.remove('Big Bomb Shop')
-        central_lw_entrances.append('Inverted Big Bomb Shop')
-        central_lw_entrances.remove('Links House')
-        south_dw_entrances.append('Inverted Links House')
-        voo_north_entrances.remove('Dark Sanctuary Hint')
-        voo_north_entrances.append('Inverted Dark Sanctuary')
-        ddm_entrances.remove('Ganons Tower')
-        central_lw_entrances.append('Inverted Ganons Tower')
-        central_lw_entrances.remove('Agahnims Tower')
-        ddm_entrances.append('Inverted Agahnims Tower')
         east_dw_entrances.remove('Pyramid Entrance')
         central_lw_entrances.append('Inverted Pyramid Entrance')
         east_dw_entrances.remove('Pyramid Hole')
@@ -141,7 +131,7 @@ def resolve_districts(world):
                                 if not location.item and location.real:
                                     district.locations.add(location.name)
                             for ext in region.exits:
-                                if ext.connected_region not in visited:
+                                if ext.connected_region and ext.connected_region not in visited:
                                     queue.appendleft(ext.connected_region)
                         elif region.type == RegionType.Dungeon and region.dungeon:
                             district.dungeons.add(region.dungeon.name)
@@ -160,10 +150,10 @@ def find_reachable_locations(state, player):
     return check_set
 
 
-inaccessible_regions_std = {'Desert Palace Lone Stairs', 'Bumper Cave Ledge', 'Skull Woods Forest (West)',
+inaccessible_regions_std = {'Desert Mouth', 'Bumper Cave Ledge', 'Skull Woods Forest (West)',
                             'Dark Death Mountain Ledge', 'Dark Death Mountain Isolated Ledge',
-                            'Death Mountain Floating Island (Dark World)'}
+                            'Dark Death Mountain Floating Island'}
 
 
-inaccessible_regions_inv = {'Desert Palace Lone Stairs', 'Maze Race Ledge', 'Desert Ledge',
-                            'Desert Palace Entrance (North) Spot', 'Hyrule Castle Ledge', 'Death Mountain Return Ledge'}
+inaccessible_regions_inv = {'Desert Mouth', 'Maze Race Ledge', 'Desert Ledge',
+                            'Desert Ledge Keep', 'Hyrule Castle Ledge', 'Mountain Pass Ledge'}

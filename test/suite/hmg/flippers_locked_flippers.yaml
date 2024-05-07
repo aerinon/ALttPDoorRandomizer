@@ -1,0 +1,20 @@
+meta:
+  players: 1
+settings:
+  1:
+    logic: hybridglitches
+start_inventory:
+  1:
+    - Pegasus Boots
+    - Moon Pearl
+    - Progressive Sword
+advanced_placements:
+  1:
+    - type: Verification
+      item: Flippers
+      locations:
+        Zora's Ledge: True
+        Hobo: True
+        Ice Palace - Boss: True
+        Swamp Palace - Entrance: False
+

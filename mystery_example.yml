@@ -22,10 +22,22 @@
     big: 2
     all: 1
     chaos: 1
+  trap_door_mode:
+    vanilla: 1
+    boss: 0
+    oneway: 0
+  key_logic_algorithm:
+    default: 1
+    partial: 0
+    strict: 0
   decoupledoors: off
-  dropshuffle:
+  door_self_loops:
     on: 1
     off: 1
+  dropshuffle:
+    none: 4
+    keys: 1
+    underworld: 1
   pottery:
     none: 8
     keys: 1
@@ -60,8 +72,21 @@
     simple: 2
     restricted: 2
     full: 2
+    lite: 2
+    lean: 2
+    swapped: 2
     crossed: 3
     insanity: 1
+  open_pyramid:
+    auto: 1
+    yes: 0
+    no: 0
+  shufflelinks:
+    on: 1
+    off: 1
+  shuffleganon:
+    on: 1
+    off: 1
   overworld_map: # control how the overworld map operates when entrance shuffle is on
     default: 1
     compass: 10
@@ -89,6 +114,7 @@
   triforce_pool_min: 20
   triforce_pool_max: 40
   triforce_min_difference: 10
+  triforce_max_difference: 15
   dungeon_items:
     standard: 10
     mc: 3
@@ -143,6 +169,10 @@
     none: 3
     shuffled: 2
     random: 1
+  any_enemy_logic:
+    none: 1
+    allow_drops: 2
+    allow_all: 3
   hints:
     on: 1
     off: 1

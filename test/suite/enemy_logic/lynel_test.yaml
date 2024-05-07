@@ -1,0 +1,29 @@
+meta:
+  players: 1
+settings:
+  1:
+    mode: open
+    enemy_shuffle: shuffled
+    dropshuffle: underworld
+enemies:
+  1:
+    Underworld:
+      0x55:
+        1: Lynel
+placements:  # all the ways to kill a Lynel are Flipper locked
+  1:
+    Waterfall Fairy - Left: Progressive Sword
+    Waterfall Fairy - Right: Progressive Sword
+    Hobo: Progressive Sword
+    Swamp Palace - Map Chest: Progressive Bow
+    Swamp Palace - Compass Chest: Progressive Bow
+    Zora's Ledge: Hammer
+advanced_placements:
+  1:
+    - type: Verification
+      item: Flippers
+      locations:
+        'Hyrule Castle Secret Entrance Enemy #2': False  # can't kill the lynel
+        Link's Uncle: True
+
+

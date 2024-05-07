@@ -1,0 +1,23 @@
+meta:
+  players: 2
+settings:
+  1:
+    pottery: cavekeys
+    keysanity: True
+  2:
+    keysanity: True
+placements:
+  1:
+    Sanctuary: Small Key (Escape)#2
+    'Links House Pot #3': Rupees (20)#2
+start_inventory:
+  1:
+    - Pegasus Boots
+    - Ocarina (Activated)
+    - Magic Mirror
+    - Boss Heart Container
+    - Boss Heart Container
+    - Boss Heart Container
+    - Boss Heart Container
+    - Red Mail
+    - Golden Sword

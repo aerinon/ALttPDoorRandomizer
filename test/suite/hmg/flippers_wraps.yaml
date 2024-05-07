@@ -1,0 +1,29 @@
+meta:
+  players: 1
+settings:
+  1:
+    logic: owglitches
+start_inventory:
+  1:
+    - Pegasus Boots
+    - Moon Pearl
+    - Progressive Sword
+    - Flippers
+placements:
+  1:
+    Peg Cave: Magic Mirror
+advanced_placements:
+  1:
+    - type: Verification
+      item: Hammer
+      locations:
+        Link's House: True
+        Magic Bat: False
+advanced_placements:
+  1:
+    - type: Verification
+      item: Progressive Glove
+      locations:
+        Link's House: True
+        Ice Palace - Freezor Chest: False
+

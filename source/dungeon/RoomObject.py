@@ -8,9 +8,10 @@ Shuffled_Pot = (0xFB, 0, 0)  # formerly weird pot, or black diagonal thing
 
 class RoomObject:
 
-    def __init__(self, address, data):
+    def __init__(self, address, data, dummy=False):
         self.address = address
         self.data = data
+        self.dummy = dummy  # some room objects are dummies, unreachable
 
     def change_type(self, new_type):
         type_id, datum_a, datum_b = new_type
@@ -21,6 +22,17 @@ class RoomObject:
 
     def write_to_rom(self, rom):
         rom.write_bytes(snes_to_pc(self.address), self.data)
+
+    # subtype 3 only?
+    def matches_oid(self, oid):
+        my_oid = (self.data[2] << 4) | ((self.data[1] & 3) << 2) | (self.data[0] & 3)
+        return my_oid == oid
+
+    @staticmethod
+    def subtype3_factory(x, y, type_id):
+        return RoomObject(None, [((x << 2) & 0xFC) | (type_id & 0x3),
+                                 ((y << 2) & 0xFC) | ((type_id >> 2) & 0x3),
+                                 0xF0 | ((type_id >> 4) & 0xF)])
 
 
 class DoorObject:

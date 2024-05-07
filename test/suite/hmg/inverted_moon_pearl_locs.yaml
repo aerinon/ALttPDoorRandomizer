@@ -1,0 +1,31 @@
+meta:
+  players: 1
+settings:
+  1:
+    logic: hybridglitches
+    mode: inverted
+start_inventory:
+  1:
+    - Flippers
+    - Progressive Sword
+    - Progressive Sword
+    - Book of Mudora
+    - Lamp
+    - Magic Mirror
+    - Ether
+    - Quake
+    - Bombos
+advanced_placements:
+  1:
+    - type: Verification
+      item: Moon Pearl
+      locations:
+        Tower of Hera - Big Chest: True
+        Desert Palace - Big Chest: True
+        Eastern Palace - Big Chest: True
+        Bombos Tablet: True
+        Cave 45: True
+
+        
+        
+      

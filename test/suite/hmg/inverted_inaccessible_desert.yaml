@@ -1,0 +1,26 @@
+meta:
+  players: 1
+settings:
+  1:
+    logic: hybridglitches
+    mode: inverted
+    shuffle: crossed
+
+start_inventory:
+  1:
+    - Pegasus Boots
+    - Progressive Sword
+    - Hammer
+    - Fire Rod
+placements:
+  1:
+    Desert Palace - Boss: Moon Pearl
+entrances:
+  1:
+    two-way:
+      Skull Woods Final Section: Desert Palace Exit (West)
+      Skull Woods Second Section Door (West): Desert Palace Exit (East)
+      Thieves Town: Thieves Town Exit
+      Hyrule Castle Entrance (East): Desert Palace Exit (South)
+      Hyrule Castle Entrance (West): Desert Palace Exit (North)
+

@@ -103,7 +103,7 @@ def create_rooms(world, player):
         Room(player, 0x60, 0x51309).door(Position.NorthE2, DoorKind.NormalLow2).door(Position.East2, DoorKind.NormalLow2).door(Position.East2, DoorKind.ToggleFlag).door(Position.EastN, DoorKind.Normal).door(Position.SouthE, DoorKind.Normal).door(Position.SouthE, DoorKind.IncognitoEntrance),
         Room(player, 0x61, 0x51454).door(Position.West2, DoorKind.NormalLow).door(Position.West2, DoorKind.ToggleFlag).door(Position.East2, DoorKind.NormalLow).door(Position.East2, DoorKind.ToggleFlag).door(Position.South2, DoorKind.NormalLow).door(Position.South2, DoorKind.IncognitoEntrance).door(Position.WestN, DoorKind.Normal),
         Room(player, 0x62, 0x51577).door(Position.West2, DoorKind.NormalLow2).door(Position.West2, DoorKind.ToggleFlag).door(Position.NorthW2, DoorKind.NormalLow2).door(Position.North, DoorKind.Normal).door(Position.SouthW, DoorKind.Normal).door(Position.SouthW, DoorKind.IncognitoEntrance),
-        Room(player, 0x63, 0xf88ed).door(Position.NorthE, DoorKind.StairKey).door(Position.InteriorW, DoorKind.TrapTriggerable).door(Position.SouthW, DoorKind.DungeonEntrance),  # looked like a huge typo - I had to guess on StairKey
+        Room(player, 0x63, 0xf88ed).door(Position.NorthW, DoorKind.StairKey).door(Position.InteriorW, DoorKind.TrapTriggerable).door(Position.SouthW, DoorKind.DungeonEntrance),  # looked like a huge typo - I had to guess on StairKey
         Room(player, 0x64, 0xfda53).door(Position.InteriorS, DoorKind.Trap2),
         Room(player, 0x65, 0xfdac5).door(Position.InteriorS, DoorKind.Normal),
         Room(player, 0x66, 0xfa01b).door(Position.InteriorE2, DoorKind.Waterfall).door(Position.SouthW2, DoorKind.NormalLow2).door(Position.SouthW2, DoorKind.ToggleFlag).door(Position.InteriorW2, DoorKind.NormalLow2),
@@ -244,7 +244,9 @@ def create_rooms(world, player):
         # Room(player, 0xff, 0x52c9a).door(Position.InteriorW, DoorKind.Bombable).door(Position.InteriorE, DoorKind.Bombable).door(Position.SouthE, DoorKind.CaveEntrance),
     ]
     # fix some wonky things
-    world.get_room(0x51, player).change(1, DoorKind.Normal)  # fix the dungeon changer
+    # should I put back the dungeon changer for certain logic - like no logic? maybe in basic
+    if world.doorShuffle[player] != 'vanilla':
+        world.get_room(0x51, player).delete(1)   # remove the dungeon changer
     world.get_room(0x60, player).swap(2, 4)  # puts the exit at pos 2 - enables pos 3
     world.get_room(0x61, player).swap(1, 6)  # puts the WN door at pos 1 - enables it
     world.get_room(0x61, player).swap(5, 6)  # puts the Incognito Entrance at the end, so it can be deleted

@@ -4,19 +4,27 @@ meta:
 settings:
   1:
     shopsanity: true
-    pseudoboots: true
+    pottery: keys
+    dropshuffle: keys
+    keysanity: true
+    accessibility: locations
+
     goal: crystals
     crystals_gt: random
+
     shuffle: crossed
     shufflelinks: true
-    keysanity: true
+    shuffletavern: true
+
     door_shuffle: crossed
     intensity: 3
     door_type_mode: big
-    pottery: keys
-    dropshuffle: true
+    key_logic_algorithm: partial
+
     experimental: true
     dungeon_counters: 'on'
+
+    pseudoboots: true
     hints: true
     msu_resume: true
     collection_rate: true

@@ -459,7 +459,7 @@ def refine_placement_rules(key_layout, max_ctr):
     changed = True
     while changed:
         changed = False
-        rules_to_remove = []
+        rules_to_remove = {}
         for rule in key_logic.placement_rules:
             if rule.check_locations_w_bk:
                 rule.check_locations_w_bk.difference_update(key_logic.sm_restricted)
@@ -468,7 +468,7 @@ def refine_placement_rules(key_layout, max_ctr):
                     rule.check_locations_w_bk.difference_update(key_onlys)
                     rule.needed_keys_w_bk -= len(key_onlys)
                 if rule.needed_keys_w_bk == 0:
-                    rules_to_remove.append(rule)
+                    rules_to_remove[rule] = None
                 # todo: evaluate this usage
                 # if rule.bk_relevant and len(rule.check_locations_w_bk) == rule.needed_keys_w_bk + 1:
                 #     new_restricted = set(max_ctr.free_locations) - rule.check_locations_w_bk
@@ -481,13 +481,13 @@ def refine_placement_rules(key_layout, max_ctr):
                 #         changed = True
                 if rule.needed_keys_w_bk > key_layout.max_chests or len(rule.check_locations_w_bk) < rule.needed_keys_w_bk:
                     logging.getLogger('').warning('Invalid rule - what went wrong here??')
-                    rules_to_remove.append(rule)
+                    rules_to_remove[rule] = None
                     changed = True
             if rule.bk_conditional_set is not None:
                 rule.bk_conditional_set.difference_update(key_logic.bk_restricted)
                 rule.bk_conditional_set.difference_update(max_ctr.key_only_locations)
                 if len(rule.bk_conditional_set) == 0:
-                    rules_to_remove.append(rule)
+                    rules_to_remove[rule] = None
             if rule.check_locations_wo_bk:
                 rule.check_locations_wo_bk.difference_update(key_logic.sm_restricted)
                 key_onlys = rule.check_locations_wo_bk.intersection(max_ctr.key_only_locations)
@@ -495,11 +495,11 @@ def refine_placement_rules(key_layout, max_ctr):
                     rule.check_locations_wo_bk.difference_update(key_onlys)
                     rule.needed_keys_wo_bk -= len(key_onlys)
                 if rule.needed_keys_wo_bk == 0:
-                    rules_to_remove.append(rule)
+                    rules_to_remove[rule] = None
                 if len(rule.check_locations_wo_bk) < rule.needed_keys_wo_bk or rule.needed_keys_wo_bk > key_layout.max_chests:
                     if not rule.prize_relevance and len(rule.bk_conditional_set) > 0:
                         key_logic.bk_restricted.update(rule.bk_conditional_set)
-                        rules_to_remove.append(rule)
+                        rules_to_remove[rule] = None
                         changed = True  # impossible for bk to be here, I think
         for rule_a, rule_b in itertools.combinations([x for x in key_logic.placement_rules if x not in rules_to_remove], 2):
             if rule_b.bk_conditional_set and rule_a.check_locations_w_bk:
@@ -511,25 +511,25 @@ def refine_placement_rules(key_layout, max_ctr):
                 common_locs = len(rule_b.check_locations_w_bk & rule_a.check_locations_wo_bk)
                 if (common_needed - common_locs) * 2 > key_layout.max_chests:
                     key_logic.bk_restricted.update(rule_a.bk_conditional_set)
-                    rules_to_remove.append(rule_a)
+                    rules_to_remove[rule_a] = None
                     changed = True
                     break
         equivalent_rules = []
         for rule in key_logic.placement_rules:
             for rule2 in key_logic.placement_rules:
-                if rule != rule2:
+                if rule != rule2 and rule not in rules_to_remove and rule2 not in rules_to_remove:
                     if rule.check_locations_w_bk and rule2.check_locations_w_bk:
                         if rule2.check_locations_w_bk == rule.check_locations_w_bk and rule2.needed_keys_w_bk > rule.needed_keys_w_bk:
-                            rules_to_remove.append(rule)
+                            rules_to_remove[rule] = None
                         elif rule2.needed_keys_w_bk == rule.needed_keys_w_bk and rule2.check_locations_w_bk < rule.check_locations_w_bk:
-                            rules_to_remove.append(rule)
+                            rules_to_remove[rule] = None
                         elif rule2.check_locations_w_bk == rule.check_locations_w_bk and rule2.needed_keys_w_bk == rule.needed_keys_w_bk:
                             equivalent_rules.append((rule, rule2))
                     if rule.check_locations_wo_bk and rule2.check_locations_wo_bk and rule.bk_conditional_set == rule2.bk_conditional_set:
                         if rule2.check_locations_wo_bk == rule.check_locations_wo_bk and rule2.needed_keys_wo_bk > rule.needed_keys_wo_bk:
-                            rules_to_remove.append(rule)
+                            rules_to_remove[rule] = None
                         elif rule2.needed_keys_wo_bk == rule.needed_keys_wo_bk and rule2.check_locations_wo_bk < rule.check_locations_wo_bk:
-                            rules_to_remove.append(rule)
+                            rules_to_remove[rule] = None
                         elif rule2.check_locations_wo_bk == rule.check_locations_wo_bk and rule2.needed_keys_wo_bk == rule.needed_keys_wo_bk:
                             equivalent_rules.append((rule, rule2))
         if len(rules_to_remove) > 0:
@@ -1410,18 +1410,18 @@ def forced_big_key_avail(locations):
     return None
 
 
-def prize_relevance(key_layout, dungeon_entrance):
+def prize_relevance(key_layout, dungeon_entrance, is_atgt_swapped):
     if len(key_layout.start_regions) > 1 and dungeon_entrance and dungeon_table[key_layout.key_logic.dungeon].prize:
-        if dungeon_entrance.name in ['Ganons Tower', 'Inverted Ganons Tower']:
+        if dungeon_entrance.name == ('Agahnims Tower' if is_atgt_swapped else 'Ganons Tower'):
             return 'GT'
         elif dungeon_entrance.name == 'Pyramid Fairy':
             return 'BigBomb'
     return None
 
 
-def prize_relevance_sig2(start_regions, d_name, dungeon_entrance):
+def prize_relevance_sig2(start_regions, d_name, dungeon_entrance, is_atgt_swapped):
     if len(start_regions) > 1 and dungeon_entrance and dungeon_table[d_name].prize:
-        if dungeon_entrance.name in ['Ganons Tower', 'Inverted Ganons Tower']:
+        if dungeon_entrance.name == ('Agahnims Tower' if is_atgt_swapped else 'Ganons Tower'):
             return 'GT'
         elif dungeon_entrance.name == 'Pyramid Fairy':
             return 'BigBomb'
@@ -1430,14 +1430,14 @@ def prize_relevance_sig2(start_regions, d_name, dungeon_entrance):
 
 def validate_bk_layout(proposal, builder, start_regions, world, player):
     bk_special = check_bk_special(builder.master_sector.regions, world, player)
-    if world.bigkeyshuffle[player] and (world.dropshuffle[player] or not bk_special):
+    if world.bigkeyshuffle[player] and (world.dropshuffle[player] != 'none' or not bk_special):
         return True
     flat_proposal = flatten_pair_list(proposal)
     state = ExplorationState(dungeon=builder.name)
     state.big_key_special = bk_special
     for region in start_regions:
         dungeon_entrance, portal_door = find_outside_connection(region)
-        prize_relevant_flag = prize_relevance_sig2(start_regions, builder.name, dungeon_entrance)
+        prize_relevant_flag = prize_relevance_sig2(start_regions, builder.name, dungeon_entrance, world.is_atgt_swapped(player))
         if prize_relevant_flag:
             state.append_door_to_list(portal_door, state.prize_doors)
             state.prize_door_set[portal_door] = dungeon_entrance
@@ -1468,7 +1468,7 @@ def validate_key_layout(key_layout, world, player):
     state.big_key_special = check_bk_special(key_layout.sector.regions, world, player)
     for region in key_layout.start_regions:
         dungeon_entrance, portal_door = find_outside_connection(region)
-        prize_relevant_flag = prize_relevance(key_layout, dungeon_entrance)
+        prize_relevant_flag = prize_relevance(key_layout, dungeon_entrance, world.is_atgt_swapped(player))
         if prize_relevant_flag:
             state.append_door_to_list(portal_door, state.prize_doors)
             state.prize_door_set[portal_door] = dungeon_entrance
@@ -1561,13 +1561,18 @@ def validate_key_layout_sub_loop(key_layout, state, checked_states, flat_proposa
 def invalid_self_locking_key(key_layout, state, prev_state, prev_avail, world, player):
     if prev_state is None or state.used_smalls == prev_state.used_smalls:
         return False
-    new_bk_doors = set(state.big_doors).difference(set(prev_state.big_doors))
-    state_copy = state.copy()
-    while len(new_bk_doors) > 0:
-        for door in new_bk_doors:
-            open_a_door(door.door, state_copy, key_layout.flat_prop, world, player)
-        new_bk_doors = set(state_copy.big_doors).difference(set(prev_state.big_doors))
-    expand_key_state(state_copy, key_layout.flat_prop, world, player)
+    if state.found_forced_bk() and not prev_state.found_forced_bk():
+        return False
+    if state.big_key_opened:
+        new_bk_doors = set(state.big_doors).difference(set(prev_state.big_doors))
+        state_copy = state.copy()
+        while len(new_bk_doors) > 0:
+            for door in new_bk_doors:
+                open_a_door(door.door, state_copy, key_layout.flat_prop, world, player)
+            new_bk_doors = set(state_copy.big_doors).difference(set(prev_state.big_doors))
+        expand_key_state(state_copy, key_layout.flat_prop, world, player)
+    else:
+        state_copy = state
     new_locations = set(state_copy.found_locations).difference(set(prev_state.found_locations))
     important_found = False
     for loc in new_locations:
@@ -1600,7 +1605,7 @@ def determine_prize_lock(key_layout, world, player):
     prize_lock_possible = False
     for region in key_layout.start_regions:
         dungeon_entrance, portal_door = find_outside_connection(region)
-        prize_relevant_flag = prize_relevance(key_layout, dungeon_entrance)
+        prize_relevant_flag = prize_relevance(key_layout, dungeon_entrance, world.is_atgt_swapped(player))
         if prize_relevant_flag:
             state.append_door_to_list(portal_door, state.prize_doors)
             state.prize_door_set[portal_door] = dungeon_entrance
@@ -1677,7 +1682,7 @@ def create_key_counters(key_layout, world, player):
                 state.big_key_special = True
     for region in key_layout.start_regions:
         dungeon_entrance, portal_door = find_outside_connection(region)
-        prize_relevant_flag = prize_relevance(key_layout, dungeon_entrance)
+        prize_relevant_flag = prize_relevance(key_layout, dungeon_entrance, world.is_atgt_swapped(player))
         if prize_relevant_flag:
             state.append_door_to_list(portal_door, state.prize_doors)
             state.prize_door_set[portal_door] = dungeon_entrance
@@ -1795,7 +1800,7 @@ def imp_locations_factory(world, player):
     imp_locations = ['Agahnim 1', 'Agahnim 2', 'Attic Cracked Floor', 'Suspicious Maiden']
     if world.mode[player] == 'standard':
         imp_locations.append('Zelda Pickup')
-        imp_locations.append('Zelda Dropoff')
+        imp_locations.append('Zelda Drop Off')
     return imp_locations
 
 
@@ -2094,7 +2099,29 @@ def validate_key_placement(key_layout, world, player):
     if world.bigkeyshuffle[player]:
         max_counter = find_max_counter(key_layout)
         big_key_outside = bigkey_name not in (l.item.name for l in max_counter.free_locations if l.item)
+    for i in world.precollected_items:
+        if i.player == player and i.name == bigkey_name:
+            big_key_outside = True
+            break
+        if i.player == player and i.name == smallkey_name:
+            keys_outside += 1
 
+    if world.logic[player] == 'hybridglitches':
+        # Swamp keylogic
+        if smallkey_name.endswith('(Swamp Palace)'):
+            swamp_entrance = world.get_location('Swamp Palace - Entrance', player)
+            # Swamp small not vanilla
+            if swamp_entrance.item is None or (swamp_entrance.item.name != smallkey_name or swamp_entrance.item.player != player):
+                mire_keylayout = world.key_layout[player]['Misery Mire']
+                mire_smallkey_name = dungeon_keys[mire_keylayout.sector.name]
+                # Check if any mire keys are in swamp (excluding entrance), if none then add one to keys_outside
+                mire_keys_in_swamp = sum([1 if x.item.name == mire_smallkey_name else 0 for x in key_layout.item_locations if x.item is not None and x != swamp_entrance])
+                if mire_keys_in_swamp == 0:
+                    keys_outside +=1 
+        # Mire keylogic
+        if smallkey_name.endswith('(Tower of Hera)'):
+            # TODO: Make sure that mire medallion isn't in hera basement, or if it it, the small key is available downstairs
+            big_key_outside = True
     for code, counter in key_layout.key_counters.items():
         if len(counter.child_doors) == 0:
             continue

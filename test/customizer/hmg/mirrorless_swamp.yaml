@@ -1,0 +1,42 @@
+meta:
+  players: 1
+settings:
+  1:
+    accessibility: items
+    door_shuffle: vanilla
+    logic: hybridglitches
+    mode: open
+    shuffle: vanilla
+start_inventory:
+     1:
+       - Flippers
+       - Lamp
+       - Tempered Sword
+       - Boss Heart Container
+       - Boss Heart Container
+       - Boss Heart Container
+doors:
+  1:
+    doors:
+      Hera Beetles WS: Hera Startile Corner ES
+      Hera Startile Corner ES: Hera Beetles WS
+      Hera Startile Corner NW: Hera Startile Wide SW
+      Hera Startile Wide SW: Hera Startile Corner NW
+      Skull 1 Lobby ES: Skull Map Room WS
+      Skull 2 West Lobby ES: Skull Small Hall WS
+      Skull 2 West Lobby NW: Skull X Room SW
+      Skull Big Chest N: Skull Pull Switch S
+      Skull Compass Room WS: Skull Left Drop ES
+      Skull Final Drop WS: Skull Spike Corner ES
+      Skull Left Drop ES: Skull Compass Room WS
+      Skull Map Room WS: Skull 1 Lobby ES
+      Skull Pot Circle WN: Skull Pull Switch EN
+      Skull Pull Switch EN: Skull Pot Circle WN
+      Skull Pull Switch S: Skull Big Chest N
+      Skull Small Hall WS: Skull 2 West Lobby ES
+      Skull Spike Corner ES: Skull Final Drop WS
+      Skull X Room SW: Skull 2 West Lobby NW
+    lobbies: {}
+placements:
+  1:
+    Swamp Palace - Big Chest: Magic Mirror

@@ -1,0 +1,160 @@
+# For contrast with default logic
+# Examples of valid big key placement that doesn't work with pure worst case scenarios
+# Basically chests that are obtainable two ways+ of spending keys
+# (Possible fix: access to the extra door grants access to the mini helma key too)
+meta:
+  players: 1
+settings:
+  1:
+    key_logic_algorithm: partial
+    crystals_needed_for_gt: 0  # to skip trash fill
+advanced_placements:
+  1:
+    - type: Verification
+      item: Big Key (Desert Palace)
+      locations:
+        Desert Palace - Big Chest: False
+        Desert Palace - Big Key Chest: True
+        Desert Palace - Boss: False
+        Desert Palace - Compass Chest: True
+        Desert Palace - Map Chest: True
+        Desert Palace - Torch: True
+    - type: Verification
+      item: Big Key (Eastern Palace)
+      locations:
+        Eastern Palace - Big Chest: False
+        Eastern Palace - Big Key Chest: True
+        Eastern Palace - Boss: False
+        Eastern Palace - Cannonball Chest: True
+        Eastern Palace - Compass Chest: True
+        Eastern Palace - Map Chest: True
+    - type: Verification
+      item: Big Key (Ganons Tower)
+      locations:
+        # These four require not wasting keys upstairs because the big key is down here
+        Ganons Tower - Big Key Chest: False
+        Ganons Tower - Big Key Room - Left: False
+        Ganons Tower - Big Key Room - Right: False
+        Ganons Tower - Bob's Chest: False
+        # These are normal
+        Ganons Tower - Big Chest: False
+        Ganons Tower - Bob's Torch: True
+        Ganons Tower - Compass Room - Bottom Left: True
+        Ganons Tower - Compass Room - Bottom Right: True
+        Ganons Tower - Compass Room - Top Left: True
+        Ganons Tower - Compass Room - Top Right: True
+        Ganons Tower - DMs Room - Bottom Left: True
+        Ganons Tower - DMs Room - Bottom Right: True
+        Ganons Tower - DMs Room - Top Left: True
+        Ganons Tower - DMs Room - Top Right: True
+        Ganons Tower - Firesnake Room: True
+        Ganons Tower - Hope Room - Left: True
+        Ganons Tower - Hope Room - Right: True
+        Ganons Tower - Map Chest: True
+        Ganons Tower - Mini Helmasaur Room - Left: False
+        Ganons Tower - Mini Helmasaur Room - Right: False
+        Ganons Tower - Pre-Moldorm Chest: False
+        Ganons Tower - Randomizer Room - Bottom Left: True
+        Ganons Tower - Randomizer Room - Bottom Right: True
+        Ganons Tower - Randomizer Room - Top Left: True
+        Ganons Tower - Randomizer Room - Top Right: True
+        Ganons Tower - Tile Room: True
+        Ganons Tower - Validation Chest: False
+    - type: Verification
+      item: Big Key (Ice Palace)
+      locations:
+        Ice Palace - Big Chest: False
+        Ice Palace - Big Key Chest: True
+        Ice Palace - Boss: False
+        Ice Palace - Compass Chest: True
+        Ice Palace - Freezor Chest: True
+        Ice Palace - Iced T Room: True
+        Ice Palace - Map Chest: True
+        Ice Palace - Spike Room: True
+    - type: Verification
+      item: Big Key (Misery Mire)
+      locations:
+        Misery Mire - Big Chest: False
+        Misery Mire - Big Key Chest: True
+        Misery Mire - Boss: False
+        Misery Mire - Bridge Chest: True
+        Misery Mire - Compass Chest: True
+        Misery Mire - Main Lobby: True
+        Misery Mire - Map Chest: True
+        Misery Mire - Spike Chest: True
+    - type: Verification
+      item: Big Key (Palace of Darkness)
+      locations:
+        Palace of Darkness - Big Chest: False
+        Palace of Darkness - Big Key Chest: True
+        Palace of Darkness - Boss: False
+        Palace of Darkness - Compass Chest: True
+        Palace of Darkness - Dark Basement - Left: True
+        Palace of Darkness - Dark Basement - Right: True
+        Palace of Darkness - Dark Maze - Bottom: True
+        Palace of Darkness - Dark Maze - Top: True
+        Palace of Darkness - Harmless Hellway: True
+        Palace of Darkness - Map Chest: True
+        Palace of Darkness - Shooter Room: True
+        Palace of Darkness - Stalfos Basement: True
+        Palace of Darkness - The Arena - Bridge: True
+        Palace of Darkness - The Arena - Ledge: True
+    - type: Verification
+      item: Big Key (Skull Woods)
+      locations:
+        Skull Woods - Big Chest: True
+        Skull Woods - Big Key Chest: True
+        Skull Woods - Boss: True
+        Skull Woods - Bridge Room: True
+        Skull Woods - Compass Chest: True
+        Skull Woods - Map Chest: True
+        Skull Woods - Pinball Room: True
+        Skull Woods - Pot Prison: True
+    - type: Verification
+      item: Big Key (Swamp Palace)
+      locations:
+        Swamp Palace - Big Chest: True
+        Swamp Palace - Big Key Chest: True
+        Swamp Palace - Boss: True
+        Swamp Palace - Compass Chest: True
+        Swamp Palace - Entrance: False
+        Swamp Palace - Flooded Room - Left: True
+        Swamp Palace - Flooded Room - Right: True
+        Swamp Palace - Map Chest: True
+        Swamp Palace - Waterfall Room: True
+        Swamp Palace - West Chest: True
+    - type: Verification
+      item: Big Key (Thieves Town)
+      locations:
+        Thieves' Town - Ambush Chest: True
+        Thieves' Town - Attic: False
+        Thieves' Town - Big Chest: False
+        Thieves' Town - Big Key Chest: True
+        Thieves' Town - Blind's Cell: False
+        Thieves' Town - Boss: False
+        Thieves' Town - Compass Chest: True
+        Thieves' Town - Map Chest: True
+    - type: Verification
+      item: Big Key (Tower of Hera)
+      locations:
+        Tower of Hera - Basement Cage: True
+        Tower of Hera - Big Chest: False
+        Tower of Hera - Big Key Chest: True
+        Tower of Hera - Boss: False
+        Tower of Hera - Compass Chest: False
+        Tower of Hera - Map Chest: True
+    - type: Verification
+      item: Big Key (Turtle Rock)
+      locations:
+        Turtle Rock - Big Chest: False
+        Turtle Rock - Big Key Chest: True
+        Turtle Rock - Boss: False
+        Turtle Rock - Chain Chomps: True
+        Turtle Rock - Compass Chest: True
+        Turtle Rock - Crystaroller Room: False
+        Turtle Rock - Eye Bridge - Bottom Left: False
+        Turtle Rock - Eye Bridge - Bottom Right: False
+        Turtle Rock - Eye Bridge - Top Left: False
+        Turtle Rock - Eye Bridge - Top Right: False
+        Turtle Rock - Roller Room - Left: True
+        Turtle Rock - Roller Room - Right: True

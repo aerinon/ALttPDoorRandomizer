@@ -1,0 +1,168 @@
+SheetChoices:
+# Complex
+  - slots: [0, 1]
+    assignments:
+      0: 0x46
+      1: 0xd
+    weight: .5  # BluesainBolt(1/2) - 2 types
+  - slots: [0, 1]
+    assignments:
+      0: 0x46
+      1: 0x49
+    weight: 5.5 # CannonTrooper,  BallNChain, RedBushGuard, RedJavelinGuard, BombGuard, BluesainBolt(1/2)
+  - slots: [0, 1]
+    assignments:
+      0: 0x48
+      1: 0x49
+    weight: 2 # GreenBushGuard,  BlueArcher
+  - slots: [1, 2]
+    assignments:
+      1: 0x49
+      2: 0x13
+    weight: 1  # GreenKnifeGuard
+  - slots: [0, 2]
+    assignments:
+      0: 0x16
+      2: 0x17
+    weight: 1  # Snapdragon
+  - slots: [2, 3]
+    assignments:
+      2: 0xc
+      3: 0x44
+    weight: 1  # Zora (walking)
+
+# Slot 0  (21 enemy types require slot 0)
+  - slots: [0]
+    assignments:
+       0: [0xe, 0x15]
+    weight: 1  # Thief
+  - slots: [0]
+    assignments:
+      0: 0x16
+    weight: 2  # Ropa, Hinox
+  - slots: [0]
+    assignments:
+      0: 0x1f
+    weight: 7  # Sparks, Firebars, FloatingSkull, RedBari, BlueBari, Firesnake, Stalfos, ~~YellowStalfos~~
+  - slots: [0]
+    assignments:
+      0: 0x2f
+    weight: 2  # Debirandos, Leever
+
+# Slot 1 (24 enemy types require slot 1)
+  - slots: [1]
+    assignments:
+      1: 0x1e
+    weight: 3  # MiniMoldorm, MiniHelmasaur, Hardhat
+  - slots: [1]
+    assignments:
+      1: 0x20
+    weight: 3  # StalfosKnight, Blob, Babasus
+  - slots: [1]
+    assignments:
+      1: 0x23
+    weight: 1  # Wallmaster
+  - slots: [1]
+    assignments:
+      1: 0x2c
+    weight: 4  # Beamos, Popos, Mimics (2)
+  - slots: [1]
+    assignments:
+      1: 0x49
+    weight: 2.5  # GreenGuard, RedSpearGuard, BlueGuard, UsainBolt (1/2)
+  - slots: [1]
+    assignments:
+      1: 0xd
+    weight: 1.5  # RedSpearGuard, BlueGuard, UsainBolt (1/2)
+
+# Slot 2 (29 enemy types require slot 2)
+  - slots: [2]
+    assignments:
+      2: 0xc
+    weight: 3  # Crab, Octoballon, FireballZora(1/2), Octorocks(1/2) (4Way is 0xC only?)
+  - slots: [2]
+    assignments:
+      2: 0x12
+    weight: 2  # Vulture, Geldman
+  - slots: [2]
+    assignments:
+      2: 0x17
+    weight: 1  # Moblin
+  - slots: [2]
+    assignments:
+      2: 0x18
+    weight: 1  # FireballZora(1/2) (note: immersible only), Octoroks(1/2)
+  - slots: [2]
+    assignments:
+      2: [0x1c, 0x24]
+    weight: 3  # Keese, CricketRat, Snake
+  - slots: [2]
+    assignments:
+      2: 0x22
+    weight: 2  # Kyameron (note: immersible only), Hover
+  - slots: [2]
+    assignments:
+      2: 0x23
+    weight: 1  # Gibdo
+  - slots: [2]
+    assignments:
+      2: 0x25
+    weight: 1.5  # Sluggula, Wizzrobe (half)
+  - slots: [2]
+    assignments:
+      2: 0x26
+    weight: 1  # Pengator
+  - slots: [2]
+    assignments:
+      2: 0x27
+    weight: 3  # Rollers4, Chainchomp, Pokey
+  - slots: [2]
+    assignments:
+      2: 0x28
+    weight: 3  # Gibo, BlueZazak, RedZazak
+  - slots: [2]
+    assignments:
+      2: 0x29
+    weight: .5  # Wizzrobe (half)
+  - slots: [2]
+    assignments:
+      2: 0x2a
+    weight: 2  # Kodongo, Terrorpin
+  - slots: [2]
+    assignments:
+      2: 0x2e
+    weight: 2  # GreenEyeGoreMimic, RedEyeGoreMimic (Eyegores only)
+
+# Slot 3  (21 enemy types require slot 3)
+  - slots: [3]
+    assignments:
+      3: 0x10
+    weight: 3  # Deadrock, Tektite, ArmosStatue
+  - slots: [3]
+    assignments:
+      3: 0x11
+    weight: 4.5  # FakeMasterSword, Hoarder, Buzzblob, Toppo, Raven(1/2)
+  - slots: [3]
+    assignments:
+      3: 0x14
+    weight: 1  # Lynel
+  - slots: [3]
+    assignments:
+      3: 0x15
+    weight: 1.5  # Poe, Cucco(1/2)
+  - slots: [3]
+    assignments:
+      3: 0x19
+    weight: 1.5  # Swamola, Raven(1/2)
+  - slots: [3]
+    assignments:
+      3: 0x1b
+    weight: 3  # GreenZirro, BlueZirro, Pikit
+  - slots: [3]
+    assignments:
+      3: [0x50]
+    weight: .5  # Cucco(1/2)
+  - slots: [3]
+    assignments:
+      3: [0x52, 0x53]
+    weight: 5  # SpikeBlock, Bumper, BigSpike, AntiFairy, Statue  (AntiFairyCircle?)

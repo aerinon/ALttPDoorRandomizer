@@ -1,0 +1,34 @@
+meta:
+  players: 1
+
+settings:
+  1:
+    logic: hybridglitches
+    shuffle: crossed
+start_inventory:
+  1:
+    - Flippers
+    - Pegasus Boots
+    - Progressive Sword
+    - Hammer
+    - Progressive Glove
+    - Progressive Glove
+    - Fire Rod
+    - Book of Mudora
+    - Bottle
+    - Magic Mirror
+    - Lamp
+advanced_placements:
+  1:
+    - type: Verification
+      item: Moon Pearl
+      locations:
+        Pyramid Fairy - Left: True
+entrances:
+  1:
+    entrances:
+      Skull Woods Final Section: Pyramid Fairy
+    two-way:
+      Chicken House: Two Brothers House Exit (West)
+      Skull Woods Second Section Door (West): Two Brothers House Exit (East)
+

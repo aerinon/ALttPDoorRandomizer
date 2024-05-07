@@ -4,14 +4,14 @@
     "action": "store_true",
     "type": "bool"
   },
-  "create_spoiler": {
-    "action": "store_false",
-    "dest": "suppress_spoiler",
-    "type": "bool",
-    "help": "suppress"
-  },
-  "suppress_spoiler": {
-    "action": "store_true"
+  "spoiler": {
+    "choices": [
+      "none",
+      "settings",
+      "semi",
+      "full",
+      "debug"
+    ]
   },
   "mystery": {
     "action": "store_true",
@@ -23,6 +23,7 @@
       "noglitches",
       "minorglitches",
       "owglitches",
+      "hybridglitches",
       "nologic"
     ]
   },
@@ -95,8 +96,11 @@
     "type": "bool"
   },
   "dropshuffle" : {
-    "action": "store_true",
-    "type": "bool"
+    "choices" : [
+      "none",
+      "keys",
+      "underworld"
+    ]
   },
   "pottery" : {
     "choices" : [
@@ -164,6 +168,7 @@
       "simple",
       "restricted",
       "full",
+      "swapped",
       "crossed",
       "insanity",
       "dungeonsfull",
@@ -193,7 +198,26 @@
       "chaos"
     ]
   },
+  "trap_door_mode": {
+    "choices": [
+      "vanilla",
+      "optional",
+      "boss",
+      "oneway"
+    ]
+  },
+  "key_logic_algorithm": {
+    "choices": [
+      "default",
+      "partial",
+      "strict"
+    ]
+  },
   "decoupledoors": {
+    "action": "store_true",
+    "type": "bool"
+  },
+  "door_self_loops": {
     "action": "store_true",
     "type": "bool"
   },
@@ -225,8 +249,11 @@
     ]
   },
   "openpyramid": {
-    "action": "store_true",
-    "type": "bool"
+    "choices": [
+      "auto",
+      "yes",
+      "no"
+    ]
   },
   "rom": {},
   "loglevel": {
@@ -321,6 +348,7 @@
   "triforce_goal_min": {},
   "triforce_goal_max": {},
   "triforce_min_difference": {},
+  "triforce_max_difference": {},
   "custom": {
     "type": "bool",
     "help": "suppress"
@@ -440,9 +468,6 @@
   "bps": {
     "action": "store_true"
   },
-  "enemizercli": {
-    "setting": "enemizercli"
-  },
   "shufflebosses": {
     "choices": [
       "none",
@@ -455,9 +480,7 @@
   "shuffleenemies": {
     "choices": [
       "none",
-      "shuffled",
-      "random",
-      "legacy"
+      "shuffled"
     ]
   },
   "enemy_health": {
@@ -476,6 +499,13 @@
       "random"
     ]
   },
+  "any_enemy_logic": {
+    "choices": [
+      "none",
+      "allow_drops",
+      "allow_all"
+    ]
+  },
   "remote_items": {
     "action": "store_true",
     "type": "bool"
@@ -486,6 +516,10 @@
     "action": "store_true",
     "type": "bool"
   },
+  "aga_randomness": {
+    "action": "store_false",
+    "type": "bool"
+  },
   "saveonexit": {
     "choices": [
       "ask",
@@ -494,5 +528,6 @@
     ]
   },
   "outputname": {},
+  "notes": {},
   "code": {}
 }

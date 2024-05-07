@@ -1,0 +1,26 @@
+meta:
+  players: 1
+settings:
+  1:
+    logic: hybridglitches
+start_inventory:
+  1:
+    - Flippers
+    - Moon Pearl
+    - Progressive Sword
+    - Lamp
+    - Magic Mirror
+    - Ether
+    - Quake
+    - Bombos
+advanced_placements:
+  1:
+    - type: Verification
+      item: Big Key (Tower of Hera)
+      locations:
+        Tower of Hera - Big Key Chest: True
+        Tower of Hera - Basement Cage: True
+        Tower of Hera - Map Chest: True
+        Tower of Hera - Compass Chest: True
+        Tower of Hera - Big Chest: True
+        Tower of Hera - Boss: True

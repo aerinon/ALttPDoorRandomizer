@@ -23,34 +23,44 @@ def loadcliargs(gui, args, settings=None):
 
         # Cycle through each page
         for mainpage in options:
+            subpage = None
+            _, v = next(iter(options[mainpage].items()))
+            if isinstance(v, str):
+                subpage = ""
             # Cycle through each subpage (in case of Item Randomizer)
-            for subpage in options[mainpage]:
+            for subpage in (options[mainpage] if subpage is None else [subpage]):
                 # Cycle through each widget
-                for widget in options[mainpage][subpage]:
-                    if widget in gui.pages[mainpage].pages[subpage].widgets:
+                for widget in (options[mainpage][subpage] if subpage != "" else options[mainpage]):
+                    page = gui.pages[mainpage].pages[subpage] if subpage != "" else gui.pages[mainpage]
+                    pagewidgets = page.content.customWidgets if mainpage == "custom" else page.content.startingWidgets if mainpage == "startinventory" else page.widgets
+                    if widget in pagewidgets:
                         thisType = ""
                         # Get the value and set it
-                        arg = options[mainpage][subpage][widget]
+                        arg = options[mainpage][subpage][widget] if subpage != "" else options[mainpage][widget]
                         if args[arg] == None:
                             args[arg] = ""
-                        label = fish.translate("gui","gui",mainpage + '.' + subpage + '.' + widget)
-                        if hasattr(gui.pages[mainpage].pages[subpage].widgets[widget],"type"):
-                            thisType = gui.pages[mainpage].pages[subpage].widgets[widget].type
+                        label_ref = mainpage + ('.' + subpage if subpage != "" else '') + '.' + widget
+                        label = fish.translate("gui","gui", label_ref)
+                        if hasattr(pagewidgets[widget],"type"):
+                            thisType = pagewidgets[widget].type
                             if thisType == "checkbox":
-                                gui.pages[mainpage].pages[subpage].widgets[widget].checkbox.configure(text=label)
+                                pagewidgets[widget].checkbox.configure(text=label)
                             elif thisType == "selectbox":
-                                theseOptions = gui.pages[mainpage].pages[subpage].widgets[widget].selectbox.options
-                                gui.pages[mainpage].pages[subpage].widgets[widget].label.configure(text=label)
+                                theseOptions = pagewidgets[widget].selectbox.options
+                                pagewidgets[widget].label.configure(text=label)
                                 i = 0
                                 for value in theseOptions["values"]:
-                                    gui.pages[mainpage].pages[subpage].widgets[widget].selectbox.options["labels"][i] = fish.translate("gui","gui",mainpage + '.' + subpage + '.' + widget + '.' + str(value))
+                                    pagewidgets[widget].selectbox.options["labels"][i] = fish.translate("gui","gui", label_ref + '.' + str(value))
                                     i += 1
                                 for i in range(0, len(theseOptions["values"])):
-                                    gui.pages[mainpage].pages[subpage].widgets[widget].selectbox["menu"].entryconfigure(i, label=theseOptions["labels"][i])
-                                gui.pages[mainpage].pages[subpage].widgets[widget].selectbox.options = theseOptions
+                                    pagewidgets[widget].selectbox["menu"].entryconfigure(i, label=theseOptions["labels"][i])
+                                pagewidgets[widget].selectbox.options = theseOptions
                             elif thisType == "spinbox":
-                                gui.pages[mainpage].pages[subpage].widgets[widget].label.configure(text=label)
-                        gui.pages[mainpage].pages[subpage].widgets[widget].storageVar.set(args[arg])
+                                pagewidgets[widget].label.configure(text=label)
+                            elif thisType == 'button':
+                                pagewidgets[widget].button.configure(text=label)
+                        if hasattr(pagewidgets[widget], 'storageVar'):
+                            pagewidgets[widget].storageVar.set(args[arg])
                         # If we're on the Game Options page and it's not about Hints
                         if subpage == "gameoptions" and widget not in ["hints", "collection_rate"]:
                             # Check if we've got settings
@@ -69,20 +79,6 @@ def loadcliargs(gui, args, settings=None):
                             if hasWidget is None:
                                 # If we've got a Game Options val and we don't have an Adjust val, use the Game Options val
                                 gui.pages["adjust"].content.widgets[widget].storageVar.set(args[arg])
-
-        # Get EnemizerCLI setting
-        mainpage = "randomizer"
-        subpage = "enemizer"
-        widget = "enemizercli"
-        setting = "enemizercli"
-        # set storagevar
-        gui.pages[mainpage].pages[subpage].widgets[widget].storageVar.set(args[setting])
-        # set textbox/frame label
-        label = fish.translate("gui","gui",mainpage + '.' + subpage + '.' + widget)
-        gui.pages[mainpage].pages[subpage].widgets[widget].pieces["frame"].label.configure(text=label)
-        # set get from web label
-        label = fish.translate("gui","gui",mainpage + '.' + subpage + '.' + widget + ".online")
-        gui.pages[mainpage].pages[subpage].widgets[widget].pieces["online"].label.configure(text=label)
 
         # Get baserom path
         mainpage = "randomizer"
@@ -196,7 +192,9 @@ def loadadjustargs(gui, settings):
                 "heartbeep": "adjust.heartbeep",
                 "menuspeed": "adjust.menuspeed",
                 "owpalettes": "adjust.owpalettes",
-                "uwpalettes": "adjust.uwpalettes"
+                "uwpalettes": "adjust.uwpalettes",
+                "reduce_flashing": "adjust.reduce_flashing",
+                "shuffle_sfx": "adjust.shuffle_sfx"
             }
         }
     }

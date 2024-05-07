@@ -1,0 +1,14 @@
+meta:
+  players: 1
+settings:
+  1:
+    door_shuffle: crossed
+    intensity: 3
+    mode: standard
+    pottery: keys
+    dropshuffle: 'on'
+doors:
+  1:
+    doors:
+      Hyrule Dungeon Cellblock Up Stairs:
+        dest: Ice Hammer Block Down Stairs

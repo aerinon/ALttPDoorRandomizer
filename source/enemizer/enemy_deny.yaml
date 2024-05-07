@@ -1,0 +1,742 @@
+UwGeneralDeny:
+  - [ 0x0002, 0, [ "RollerVerticalDown", "Statue" ] ]  #"Sewers - Rat Pots - Rat 1"
+  - [ 0x0002, 1, [ "RollerVerticalDown", "Statue" ] ]  #"Sewers - Rat Pots - Rat 2"
+  - [ 0x0002, 2, [ "RollerVerticalUp", "Statue" ] ]  #"Sewers - Rat Pots - Rat 3"
+  - [ 0x0002, 3, [ "RollerVerticalUp", "Statue" ] ]  #"Sewers - Rat Pots - Rat 4"
+  - [ 0x0002, 4, [ "Statue" ] ]  #"Sewers - Rat Pots - Rat 5"
+  - [ 0x0002, 15, [ "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft" ] ]  #"Sewers - Rat Pots - Rat 6"
+  - [ 0x0002, 16, [ "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft" ] ]  #"Sewers - Rat Pots - Rat 7"
+  - [ 0x0004, 1, ["Statue"]]
+  - [ 0x0004, 2, ["Statue"]]
+  - [ 0x0004, 3, ["Statue"]]
+  - [ 0x0004, 4, ["Statue"]]
+  - [ 0x0004, 15, ["Statue"]]
+  - [ 0x000a, 0, [ "RollerVerticalDown", "RollerVerticalUp" ] ]  #"Palace of Darkness - Basement Ledge - Terrorpin 1"
+  - [ 0x000a, 1, [ "RollerHorizontalRight", "RollerHorizontalLeft" ] ]  #"Palace of Darkness - Basement Ledge - Terrorpin 2"
+  - [ 0x000b, 1, [ "RollerVerticalDown", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Palace of Darkness - Callback - Terrorpin 1"
+  - [ 0x000e, 0, [ "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft" ] ]  #"Ice Palace - Entrance - Freezor"
+  - [ 0x000e, 1, [ "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft" ] ]  #"Ice Palace - Bari Key - Top Bari"
+  - [ 0x000e, 2, [ "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft" ] ]  #"Ice Palace - Bari Key - Middle Bari"
+  - [ 0x0016, 0, [ "RollerVerticalDown", "RollerVerticalUp", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper", "GreenMimic", "RedMimic", "Pikit"] ]  #"Swamp Palace - Pool - Zol 1"
+  - [ 0x0016, 1, [ "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper", "GreenMimic", "RedMimic", "Pikit" ] ]  #"Swamp Palace - Pool - Zol 2"
+  - [ 0x0016, 2, [ "SparkCW", "SparkCCW", "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper", "GreenMimic", "RedMimic", "Pikit" ] ]  #"Swamp Palace - Pool - Blue Bari"
+  - [ 0x0016, 3, [ "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Swamp Palace - Pool - Zol 3"
+  - [ 0x0017, 5, [ "Beamos", "AntiFairyCircle", "SpikeBlock", "Bumper" ] ]  #"Tower Of Hera - Bumper Room - Fire Bar (Clockwise)"
+  - [ 0x0019, 0, [ "SparkCW", "SparkCCW", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Palace of Darkness - Dark Maze - Kodongo 1"
+  - [ 0x0019, 1, [ "RollerVerticalUp" ] ]  #"Palace of Darkness - Dark Maze - Kodongo 2"
+  - [ 0x0019, 2, [ "RollerVerticalDown", "RollerVerticalUp" ] ]  #"Palace of Darkness - Dark Maze - Kodongo 3"
+  - [ 0x0019, 3, [ "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft" ] ]  #"Palace of Darkness - Dark Maze - Kodongo 4"
+  - [ 0x001a, 0, [ "SparkCW", "SparkCCW", "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "FirebarCW", "FirebarCCW", "SpikeBlock", "Bumper" ] ]  #"Palace of Darkness - Compass Room - Mini Helmasaur 1"
+  - [ 0x001a, 5, [ "SparkCW", "SparkCCW", "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "FirebarCW", "FirebarCCW", "SpikeBlock", "Bumper" ] ]  #"Palace of Darkness - Compass Room - Mini Helmasaur 2"
+  - [ 0x001b, 3, [ "Beamos", "AntiFairyCircle", "Bumper" ] ]  #"Palace of Darkness - Mimics 2 - Red Eyegore"
+  - [ 0x001b, 4, [ "RollerVerticalUp" ] ]  #"Palace of Darkness - Mimics 2 - Green Eyegore L"
+  - [ 0x001e, 3, [ "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "BigSpike", "Bumper" ] ]  #"Ice Palace - Blob Ambush - Red Bari 3"
+  - [ 0x001e, 4, [ "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "BigSpike", "Bumper" ] ]  #"Ice Palace - Blob Ambush - Red Bari 4"
+  - [ 0x001e, 5, [ "SparkCW", "SparkCCW", "RollerVerticalDown", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ice Palace - Blob Ambush - Zol 1"
+  - [ 0x001e, 6, [ "SparkCW", "SparkCCW", "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ice Palace - Blob Ambush - Zol 2"
+  - [ 0x001f, 0, [ "RollerHorizontalRight" ] ]  #"Ice Palace - Big Key View - Pengator 1"
+  - [ 0x001f, 3, [ "Wizzrobe", "Statue" ] ]  # Wizzrobes can't spawn on pots
+  - [ 0x0021, 3, [ "RollerVerticalDown", "RollerVerticalUp" ] ]  #"Sewers - Dark U - Rat 2"
+  - [ 0x0021, 4, [ "RollerVerticalDown", "RollerVerticalUp" ] ]  #"Sewers - Dark U - Rat 3"
+  - [ 0x0024, 6, [ "Wizzrobe", "Statue" ] ]  # Wizzrobes can't spawn on pots
+  - [ 0x0026, 1, [ "SparkCW", "SparkCCW", "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper", "Statue" ] ]  #"Swamp Palace - Big Spoon - Red Bari 1"
+  - [ 0x0026, 8, [ "AntiFairyCircle", "Bumper", "Statue" ] ]  #"Swamp Palace - Big Spoon - Red Bari 3"
+  - [ 0x0026, 9, [ "RollerHorizontalRight", "Statue" ] ]  #"Swamp Palace - Big Spoon - Kyameron"
+  - [ 0x0026, 10, [ "Statue" ] ]  # multiple push statues in this room can cause issues
+  - [ 0x0026, 11, [ "Statue" ] ]  # multiple push statues in this room can cause issues
+  - [ 0x0027, 0, [ "SparkCW", "SparkCCW", "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalLeft", "FirebarCW" ] ]  #"Tower Of Hera - Petting Zoo - Mini Moldorm 1"
+  - [ 0x0027, 1, [ "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "AntiFairyCircle", "SpikeBlock", "Bumper" ] ]  #"Tower Of Hera - Petting Zoo - Mini Moldorm 2"
+  - [ 0x0027, 2, [ "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "AntiFairyCircle", "SpikeBlock", "Bumper" ] ]  #"Tower Of Hera - Petting Zoo - Mini Moldorm 3"
+  - [ 0x0027, 4, ["Bumper", "BigSpike", "AntiFairyCircle", "RollerVerticalDown", "RollerVerticalUp"]]
+  - [ 0x0027, 5, [ "SparkCW", "SparkCCW", "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Tower Of Hera - Petting Zoo - Kodongo 1"
+  - [0x0028, 0, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora"]]
+  - [0x0028, 1, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora"]]
+  - [0x0028, 2, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora"]]
+  - [0x0028, 3, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora"]]
+  - [0x0028, 4, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora", "RollerVerticalUp"]]  #"Swamp Palace - Entrance Ledge - Spike Trap"
+  - [ 0x002a, 2, [ "SparkCW", "SparkCCW", "RollerHorizontalRight", "RollerHorizontalLeft", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper"]]  #"Palace of Darkness - Arena Main - Hardhat Beetle 1"
+  - [ 0x002a, 3, [ "Statue", "SparkCW", "SparkCCW", "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "FirebarCW", "FirebarCCW", "SpikeBlock", "Bumper" ] ]  #"Palace of Darkness - Arena Main - Hardhat Beetle 2"
+  - [ 0x002a, 4, [ "Statue", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper", "RollerHorizontalRight", "RollerHorizontalLeft"]]
+  - [ 0x002a, 6, [ "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Palace of Darkness - Arena Main - Hardhat Beetle 5"
+  - [ 0x002b, 5, [ "RollerHorizontalRight" ] ]  #"Palace of Darkness - Fairies - Red Bari 2"
+  - [ 0x002e, 0, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "BigSpike", "FirebarCW", "FirebarCCW" ] ]  #"Ice Palace - Penguin Chest - Pengator 1"
+  - [ 0x002e, 1, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "BigSpike", "FirebarCW", "FirebarCCW" ] ]  #"Ice Palace - Penguin Chest - Pengator 2"
+  - [ 0x002e, 2, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "BigSpike", "FirebarCW", "FirebarCCW" ] ]  #"Ice Palace - Penguin Chest - Pengator 3"
+  - [ 0x002e, 3, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "BigSpike", "FirebarCW", "FirebarCCW" ] ]  #"Ice Palace - Penguin Chest - Pengator 4"
+  - [ 0x002e, 4, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "BigSpike", "FirebarCW", "FirebarCCW" ] ]  #"Ice Palace - Penguin Chest - Pengator 5"
+  - [ 0x002e, 5, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "BigSpike", "FirebarCW", "FirebarCCW" ] ]  #"Ice Palace - Penguin Chest - Pengator 6"
+  - [ 0x0034, 0, [ "SparkCW", "SparkCCW", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Swamp Palace - West Wing - Hover 1"
+  - [ 0x0034, 1, [ "SparkCW", "SparkCCW", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Swamp Palace - West Wing - Hover 2"
+  - [ 0x0034, 2, [ "SparkCW", "SparkCCW", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Swamp Palace - West Wing - Kyameron"
+  - [ 0x0034, 4, [ "Statue", "SparkCW", "SparkCCW", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Swamp Palace - West Wing - Zol"
+  - [ 0x0035, 6, [ "RollerHorizontalRight" ] ]  #"Swamp Palace - West Lever - Stalfos 2"
+  - [ 0x0035, 9, [ "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "Bumper" ] ]  #"Swamp Palace - West Lever - Blue Bari"
+  - [0x0036, 5, ["AntiFairyCircle", "Bumper"]]
+  - [ 0x0036, 7, [ "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "FirebarCW", "FirebarCCW", "SpikeBlock", "Bumper" ] ]  #"Swamp Palace - Lobby - Hover 3"
+  - [ 0x0037, 7, [ "RollerHorizontalRight" ] ]  #"Swamp Palace - Water 1 - Blue Bari"
+  - [ 0x0038, 4, [ "RollerHorizontalRight" ] ]  #"Swamp Palace - Long Hall - Kyameron 2"
+  - [ 0x0039, 3, [ "RollerVerticalUp", "RollerHorizontalLeft" ] ]  #"Skull Woods - Play Pen - Mini Helmasaur"
+  - [ 0x0039, 4, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "FirebarCW", "FirebarCCW" ] ]  #"Skull Woods - Play Pen - Spike Trap 1"
+  - [0x0039, 5, ["RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "Bumper"]]  #"Skull Woods - Play Pen - Hardhat Beetle"
+  - [ 0x0039, 6, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "FirebarCW", "FirebarCCW" ] ]  #"Skull Woods - Play Pen - Spike Trap 2"
+  - [ 0x003b, 1, [ "Bumper" ]]
+  - [ 0x003c, 0, ["BigSpike"]]
+  - [ 0x003c, 1, [ "SparkCW", "SparkCCW", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Hookshot Cave - Blue Bari 1"
+  - [ 0x003c, 2, [ "SparkCW", "SparkCCW", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Hookshot Cave - Blue Bari 2"
+  - [ 0x003d, 9, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - Torches 2 - Spark (Counterclockwise)"
+  - [ 0x003d, 10, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - Torches 2 - Spark (Clockwise) 1"
+  - [ 0x003d, 12, [ "AntiFairyCircle", "Bumper" ] ]  #"Ganon's Tower - Torches 2 - Bunny Beam"
+  - [ 0x003d, 13, [ "AntiFairyCircle", "Bumper" ] ] #"Ganon's Tower - Torches 2 - Antifairy"
+  - [0x003e, 8, ["Wizzrobe"]]
+  - [0x003e, 9, ["Wizzrobe"]]
+  - [0x003e, 10, ["Wizzrobe"]]
+  - [0x003e, 11, ["Wizzrobe"]]
+  - [ 0x003f, 1, [ "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "FirebarCW", "FirebarCCW", "SpikeBlock", "Bumper", "Statue"] ]  #"Ice Palace - P Room - Stalfos Knight 1"
+  - [ 0x003f, 3, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper", "Statue"] ]  #"Ice Palace - P Room - Stalfos Knight 2"
+  - [ 0x003f, 4, [ "Wizzrobe", "Statue", "Bumper", "BigSpike", "AntiFairyCircle"]]  # Wizzrobes can't spawn on pots
+  - [ 0x0040, 0, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  # Agahnims Tower - Bridge - Blue Guard 1
+  - [ 0x0040, 1, [ "Statue", "RollerVerticalUp", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  # Agahnims Tower - Bridge - Blue Guard 2
+  - [ 0x0041, 0, [ "RollerHorizontalLeft" ] ]  #"Sewers - Dark Cactus - Rat 1"
+  - [ 0x0041, 1, [ "RollerVerticalDown", "RollerHorizontalRight" ] ]  #"Sewers - Dark Cactus - Rat 2"
+  - [ 0x0041, 2, [ "RollerVerticalUp" ] ]  #"Sewers - Dark Cactus - Rat 3"
+  - [ 0x0042, 0, [ "SparkCW", "SparkCCW", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper", "Chainchomp" ] ]  #"Sewers - Dark Rope Corridor - Rope 1"
+  - [ 0x0042, 1, [ "SparkCW", "SparkCCW", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper", "Chainchomp" ] ]  #"Sewers - Dark Rope Corridor - Rope 2"
+  - [ 0x0042, 2, [ "SparkCW", "SparkCCW", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper", "Chainchomp" ] ]  #"Sewers - Dark Rope Corridor - Rope 3"
+  - [ 0x0042, 3, [ "SparkCW", "SparkCCW", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper", "Chainchomp" ] ]  #"Sewers - Dark Rope Corridor - Rope 4"
+  - [ 0x0042, 4, [ "SparkCW", "SparkCCW", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper", "Chainchomp" ] ]  #"Sewers - Dark Rope Corridor - Rope 5"
+  - [ 0x0042, 5, [ "SparkCW", "SparkCCW", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper", "Chainchomp" ] ]  #"Sewers - Dark Rope Corridor - Rope 6"
+  - [ 0x0044, 4, [ "RollerVerticalUp", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Thieves' Town - Joke Room - Zol"
+  - [ 0x0044, 6, [ "RollerVerticalUp", "RollerVerticalDown", "Beamos", "BigSpike" ] ]  #"Thieves' Town - Joke Room - Red Bari"
+  - [ 0x0044, 8, [ "Statue", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "SpikeBlock", "Bumper" ] ]  #"Thieves' Town - Joke Room - Blue Bari 4"
+  - [ 0x0045, 1, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Thieves' Town - Basement Block Totems - Red Zazak"
+  - [ 0x0045, 4, [ "Wizzrobe", "Statue" ] ]  # Wizzrobes can't spawn on pots
+  - [ 0x0045, 7, [ "AntiFairyCircle", "Bumper" ] ]  #"Thieves' Town - Cells - Blue Zazak 4"
+  - [ 0x0045, 8, [ "RollerHorizontalRight" ] ]  #"Thieves' Town - Cells - Zol"
+  - [ 0x0046, 0, [ "RollerVerticalUp", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "Bumper", "Statue" ] ]  #"Swamp Palace - Big O Top - Hover 1"
+  - [ 0x0046, 2, [ "RollerVerticalDown", "RollerHorizontalLeft", "AntiFairyCircle", "BigSpike", "Bumper", "Statue" ] ]  #"Swamp Palace - Big O Top - Hover 2"
+  - [ 0x0046, 4, [ "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "Bumper", "Statue" ] ]  #"Swamp Palace - Big O Top - Hover 3"
+  - [ 0x0049, 5, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Skull Woods - Bari Pits - Gibdo 2"
+  - [ 0x0049, 7, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Skull Woods - Bari Pits - Gibdo 4"
+  - [ 0x0049, 8, [ "Beamos", "AntiFairyCircle", "Bumper" ] ]  #"Skull Woods - Bari Pits - Gibdo 5"
+  - [ 0x004b, 0, [ "Beamos", "AntiFairyCircle", "Bumper" ] ]  #"Palace of Darkness - Mimics 1 - Red Eyegore"
+  - [ 0x004b, 1, [ "RollerHorizontalRight" ] ]  #"Palace of Darkness - Warp Hint - Antifairy 1"
+  - [ 0x004b, 5, [ "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Palace of Darkness - Jelly Hall - Blue Bari 1"
+  - [ 0x004b, 6, [ "AntiFairyCircle", "BigSpike" ] ]  #"Palace of Darkness - Jelly Hall - Blue Bari 2"
+  - [ 0x004b, 7, [ "AntiFairyCircle", "BigSpike" ] ]  #"Palace of Darkness - Jelly Hall - Blue Bari 3"
+  - [ 0x004e, 0, [ "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ice Palace - Blob Alley - Zol 1"
+  - [ 0x004e, 1, [ "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ice Palace - Blob Alley - Zol 2"
+  - [ 0x004e, 2, [ "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ice Palace - Blob Alley - Zol 3"
+  - [ 0x0050, 0, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Hyrule Castle - North West Passage - Green Guard"
+  - [ 0x0050, 1, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Hyrule Castle - North West Passage - Green Knife Guard 1"
+  - [ 0x0050, 2, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Hyrule Castle - North West Passage - Green Knife Guard 2"
+  - [ 0x0052, 0, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "Bumper" ] ]  #"Hyrule Castle - North East Passage - Green Guard"
+  - [ 0x0052, 1, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "Bumper" ] ]  #"Hyrule Castle - North East Passage - Green Knife Guard 1"
+  - [ 0x0052, 2, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "Bumper" ] ]  #"Hyrule Castle - North East Passage - Green Knife Guard 2"
+  - [ 0x0053, 1, [ "AntiFairyCircle", "Bumper" ] ]  #"Desert Palace - Bridge - Beamos 1"
+  - [ 0x0053, 5, [ "RollerVerticalDown" ] ]  #"Desert Palace - Popo Genocide - Popo TL"
+  - [ 0x0053, 7, ["Beamos", "AntiFairyCircle", "Bumper", "RollerVerticalUp", "RollerVerticalDown"]]  #"Desert Palace - Bridge - Popo 5"
+  - [ 0x0055, 1, [ "RollerVerticalUp", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Secret Passage Exit - Green Knife Guard 1"
+  - [ 0x0057, 0, [ "Wizzrobe", "Statue" ] ]  # Wizzrobes can't spawn on pots
+  - [ 0x0057, 1, ["Statue"]]  # Statue switch issues
+  - [ 0x0057, 2, [ "RollerVerticalUp", "AntiFairyCircle", "Bumper", "Statue" ] ]  #"Skull Woods - Big Key Room - Spike Trap"
+  - [ 0x0057, 3, ["Statue"]]  # Statue switch issues
+  - [ 0x0057, 4, ["Statue"]]  # Statue switch issues
+  - [ 0x0057, 5, ["Statue"]]  # Statue switch issues
+  - [ 0x0057, 7, [ "RollerVerticalUp", "RollerVerticalDown", "Statue" ] ]  #"Skull Woods - Big Key Room - Gibdo 2"
+  - [ 0x0057, 8, ["Statue"]]  # Statue switch issues
+  - [ 0x0057, 9, ["Statue"]]  # Statue switch issues
+  - [ 0x0057, 10, ["Statue"]]  # Statue switch issues
+  - [ 0x0057, 11, ["Statue"]]  # Statue switch issues
+  - [ 0x0057, 12, [ "RollerVerticalUp", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "Bumper", "BigSpike", "SpikeBlock", "Statue"]]  #"Skull Woods - Big Key Room - Gibdo 6"
+  - [ 0x0057, 13, [ "RollerVerticalDown", "Beamos", "AntiFairyCircle", "Bumper", "Statue", "BigSpike"]]  #"Skull Woods - Big Key Room - Blue Bari 1"
+  - [ 0x0057, 14, [ "RollerVerticalDown", "Beamos", "AntiFairyCircle", "Bumper", "Statue", "BigSpike"]]  #"Skull Woods - Big Key Room - Blue Bari 2"
+  - [ 0x0058, 0, ["Statue"]]
+  - [ 0x0058, 1, ["Statue"]]
+  - [ 0x0058, 2, ["Statue"]]
+  - [ 0x0058, 3, ["Statue"]]
+  - [ 0x0058, 4, ["Statue"]]
+  - [ 0x0058, 6, ["Statue"]]
+  - [ 0x0058, 7, [ "RollerHorizontalLeft", "Statue" ] ]  #"Skull Woods - Lever Room - Hardhat Beetle 2"
+  - [ 0x0058, 8, ["Statue"]]
+  - [ 0x0059, 0, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Skull Woods - Bridge Room - Mini Moldorm 1"
+  - [ 0x0059, 1, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Skull Woods - Bridge Room - Mini Moldorm 2"
+  - [0x0059, 5, ["RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper"]]
+  - [ 0x0059, 9, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Skull Woods - Bridge Room - Gibdo 1"
+  - [ 0x005e, 3, [ "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "SpikeBlock", "Bumper" ] ]  #"Ice Palace - Pit Trap - Big Spike Trap"
+  - [ 0x005e, 4, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Ice Palace - Pit Trap - Fire Bar (Clockwise)"
+  - [ 0x005f, 0, [ "RollerVerticalDown", "RollerHorizontalLeft" ] ]  #"Ice Palace - Bari University - Blue Bari 1"
+  - [ 0x005f, 1, [ "RollerVerticalDown", "RollerHorizontalRight" ] ]  #"Ice Palace - Bari University - Blue Bari 2"
+  - [ 0x0060, 0, [ "RollerVerticalUp", "RollerHorizontalLeft", "AntiFairyCircle", "BigSpike", "Bumper", "Beamos" ] ]  #"Hyrule Castle - West - Blue Guard"
+  - [ 0x0062, 0, [ "RollerVerticalUp", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Hyrule Castle - East - Blue Guard"
+  - [ 0x0064, 2, [ "Bumper" , "Beamos" ] ]  #"Thieves' Town - Attic Hall Left - Keese 2"
+  - [ 0x0064, 3, [ "Wizzrobe", "Statue" ] ]  # Wizzrobes can't spawn on pots
+  - [ 0x0064, 4, [ "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Thieves' Town - Attic Hall Left - Rat 1"
+  - [ 0x0065, 0, [ "RollerVerticalUp", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Thieves' Town - Attic Window - Rat 1"
+  - [ 0x0065, 1, [ "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Thieves' Town - Attic Window - Rat 2"
+  - [ 0x0065, 2, [ "Beamos", "AntiFairyCircle", "Bumper" ] ]  #"Thieves' Town - Attic Window - Rat 3"
+  - [ 0x0066, 0, [ "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Swamp Palace - Waterfall Room - Hover 1"
+  - [ 0x0066, 2, [ "AntiFairyCircle", "Bumper"]]
+  - [ 0x0067, 1, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Skull Woods - Firebar Pits - Blue Bari 1"
+  - [ 0x0067, 2, ["Bumper"]]  #"Skull Woods - Firebar Pits - Blue Bari 2"
+  - [ 0x0067, 3, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Skull Woods - Firebar Pits - Hardhat Beetle 1"
+  - [ 0x0067, 4, [ "AntiFairyCircle", "Bumper" ]]
+  - [ 0x0067, 5, ["RollerVerticalDown", "Beamos"]]  #"Skull Woods - Firebar Pits - Hardhat Beetle 3"
+  - [ 0x0067, 6, [ "RollerVerticalDown" ] ]  #"Skull Woods - Firebar Pits - Hardhat Beetle 4"
+  - [ 0x0067, 7, [ "Beamos", "AntiFairyCircle", "Bumper", "BunnyBeam" ] ]  #"Skull Woods - Firebar Pits - Fire Bar (Clockwise)"
+  - [ 0x006a, 0, [ "RollerVerticalUp", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Palace of Darkness - Dark Alley - Terrorpin 1"
+  - [ 0x006a, 1, [ "RollerVerticalUp", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Palace of Darkness - Dark Alley - Terrorpin 2"
+  - [ 0x006a, 2, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Palace of Darkness - Dark Alley - Antifairy 1"
+  - [ 0x006a, 4, [ "RollerVerticalUp", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Palace of Darkness - Dark Alley - Terrorpin 3"
+  - [ 0x006a, 5, [ "RollerVerticalUp", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Palace of Darkness - Dark Alley - Terrorpin 4"
+  - [ 0x006b, 7, [ "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "Bumper" ] ]  #"Ganon's Tower - Mimics 1 - Spike Trap 1"
+  - [ 0x0071, 0, [ "RollerHorizontalLeft" ] ]  #"Hyrule Castle - Basement Trap - Green Guard"
+  - [ 0x0074, 0, [ "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Desert Palace - North Hallway - Red Devalant 1"
+  - [ 0x0074, 1, [ "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Desert Palace - North Hallway - Red Devalant 2"
+  - [ 0x0074, 4, [ "AntiFairyCircle", "Bumper" ] ]  #"Desert Palace - North Hallway - Leever 1"
+  - [ 0x0074, 5, [ "AntiFairyCircle", "Bumper" ] ]  #"Desert Palace - North Hallway - Leever 2"
+  - [ 0x0076, 1, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Swamp Palace - Toilet Left - Hover 1"
+  - [ 0x0076, 2, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Swamp Palace - Toilet Left - Kyameron"
+  - [ 0x0076, 3, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Swamp Palace - Toilet Left - Hover 2"
+  - [ 0x0076, 4, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Swamp Palace - Toilet Left - Zol"
+  - [ 0x0076, 6, [ "RollerVerticalDown", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Swamp Palace - Toilet Left - Blue Bari"
+  - [ 0x007b, 0, [ "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - DMs Room - Blue Bari 1"
+  - [ 0x007b, 1, [ "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - DMs Room - Blue Bari 2"
+  - [ 0x007b, 6, [ "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - DMs Room - Statue"
+  - [ 0x007b, 7, [ "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - DMs Room - Hardhat Beetle"
+  - [ 0x007c, 1, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - Randomizer Room - Fire Bar (Counterclockwise)"
+  - [ 0x007c, 2, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - Randomizer Room - Spike Trap"
+  - [ 0x007c, 3, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "Bumper", "Statue"]]  #"Ganon's Tower - Randomizer Room - Fire Bar (Clockwise)"
+  - [ 0x007c, 4, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - Randomizer Room - Hardhat Beetle"
+  - [ 0x007d, 0, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - The Zoo - Fire Snake 1"
+  - [ 0x007d, 1, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - The Zoo - Fire Snake 2"
+  - [ 0x007d, 2, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - The Zoo - Fire Snake 3"
+  - [ 0x007d, 3, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - The Zoo - Fire Snake 4"
+  - [ 0x007d, 4, ["StalfosKnight", "Geldman", "Blob", "Stal"]]
+  - [ 0x007d, 7, ["RollerVerticalUp", "RollerHorizontalLeft", "StalfosKnight", "Geldman", "Blob", "Stal"]]  #"Ganon's Tower - The Zoo - Mini Helmasaur"
+  - [ 0x007d, 8, ["RollerVerticalUp", "RollerHorizontalLeft", "RollerHorizontalRight", "StalfosKnight", "Geldman", "Blob", "Stal"]]  #"Ganon's Tower - The Zoo - Red Bari"
+  - [ 0x007d, 10, ["StalfosKnight", "Geldman", "Blob", "Stal"]]
+# todo - consider adding firesnake to 0-3: has a hard time moving, could block hookshots for quite a while
+  - [ 0x007f, 0, [ "Statue", "SparkCW", "SparkCCW", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "FirebarCW", "FirebarCCW", "SpikeBlock", "Bumper" ] ]  #"Ice Palace - Big Spikes - Red Bari 1"
+  - [ 0x007f, 1, [ "Statue", "SparkCW", "SparkCCW", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "FirebarCW", "FirebarCCW", "SpikeBlock", "Bumper", "ArmosStatue" ] ]  #"Ice Palace - Big Spikes - Red Bari 2"
+  - [ 0x007f, 2, [ "Statue", "SparkCW", "SparkCCW", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "FirebarCW", "FirebarCCW", "SpikeBlock", "Bumper" ] ]  #"Ice Palace - Big Spikes - Red Bari 3"
+  - [ 0x007f, 3, [ "Statue", "SparkCW", "SparkCCW", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "FirebarCW", "FirebarCCW", "SpikeBlock", "Bumper" ] ]  #"Ice Palace - Big Spikes - Red Bari 4"
+  - [ 0x007f, 4, [ "RollerVerticalDown" ] ]  #"Ice Palace - Big Spikes - Big Spike Trap 1"
+  - [ 0x007f, 5, [ "RollerVerticalDown" ] ]  #"Ice Palace - Big Spikes - Big Spike Trap 2"
+  - [ 0x0082, 0, [ "RollerVerticalDown" ] ]  #"Hyrule Castle - Basement Playpit - Blue Guard 1"
+  - [ 0x0082, 2, [ "RollerVerticalUp" ] ]  #"Hyrule Castle - Basement Playpit - Blue Guard 3"
+  - [ 0x0083, 0, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Desert Palace - Left Hallway - Blue Devalant 1"
+  - [ 0x0084, 0, [ "RollerVerticalDown", "RollerHorizontalLeft", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Desert Palace - Main Room - Left - Leever 1"
+  - [ 0x0084, 1, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Desert Palace - Main Room - Left - Leever 2"
+  - [ 0x0085, 2, [ "RollerHorizontalRight" ] ]  #"Desert Palace - Compass Room - Popo TL"
+  - [ 0x0085, 7, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Desert Palace - Right Hallway - Leever 2"
+  - [ 0x008b, 3, ["RollerHorizontalRight"]]
+  - [ 0x008b, 4, [ "Statue", "RollerVerticalUp", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "Bumper", "BigSpike"]]  #"Ganon's Tower - Map Room - Spike Trap"
+  - [ 0x008b, 6, [ "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - Map Room - Fire Bar (Clockwise)"
+  - [ 0x008b, 7, [ "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - Map Room - Fire Bar (Counterclockwise)"
+  - [ 0x008c, 14, ["AntiFairyCircle", "BigSpike", "Bumper"]]
+  - [ 0x008d, 1, [ "AntiFairyCircle", "Bumper" ] ]  #"Ganon's Tower - Tile Room - Yomo Medusa T"
+  - [ 0x008d, 7, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - Tile Room - Spike Trap"
+  - [ 0x008d, 8, [ "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - Tile Room - Stalfos"
+  - [ 0x008d, 9, [ "Statue", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - Tile Room - Fire Bar (Clockwise)"
+  - [ 0x008d, 10, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Ganon's Tower - Tile Room - Blue Bari 1"
+  - [ 0x008d, 12, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Ganon's Tower - Tile Room - Blue Bari 2"
+  - [0x008e, 2, ["Wizzrobe", "Statue", "FirebarCW", "FirebarCCW"]]  # Wizzrobes can't spawn on pots
+  - [ 0x0092, 8, [ "RollerVerticalUp", "Beamos", "AntiFairyCircle", "Bumper" ] ]  #"Misery Mire - Dark Weave - Spike Trap"
+  - [ 0x0092, 9, [ "RollerHorizontalRight" ] ]  #"Misery Mire - Dark Weave - Antifairy 3"
+  - [ 0x0092, 10, [ "RollerHorizontalLeft" ] ]  #"Misery Mire - Dark Weave - Stalfos"
+  - [ 0x0095, 0, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock" ] ]  #"Ganon's Tower - Conveyer Falling Bridge - Red Spear Guard 1"
+  - [ 0x0095, 1, [ "Statue", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - Conveyer Falling Bridge - Red Spear Guard 2"
+  - [ 0x0095, 2, [ "Statue", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - Conveyer Falling Bridge - Red Spear Guard 3"
+  - [ 0x0095, 3, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "AntiFairyCircle", "BigSpike", "SpikeBlock" ] ]  #"Ganon's Tower - Conveyer Falling Bridge - Red Spear Guard 4"
+  - [ 0x0096, 0, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - Torches 1 - Fire Bar (Clockwise)"
+  - [ 0x0098, 0, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Misery Mire - Entrance - Zol 1"
+  - [ 0x0098, 1, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Misery Mire - Entrance - Zol 2"
+  - [ 0x0098, 2, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Misery Mire - Entrance - Zol 3"
+  - [ 0x0098, 3, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Misery Mire - Entrance - Zol 4"
+  - [ 0x0098, 4, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Misery Mire - Entrance - Zol 5"
+  - [0x0099, 8, ["RollerHorizontalLeft", "RollerHorizontalRight"]]
+  - [ 0x009b, 3, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - Spike Switch - Spike Trap 1"
+  - [ 0x009b, 4, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - Spike Switch - Spike Trap 2"
+  - [ 0x009b, 5, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]
+  - [ 0x009b, 7, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - Spike Switch - Spike Trap 4"
+  - [ 0x009b, 8, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - Spike Switch - Spike Trap 5"
+  - [ 0x009b, 9, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - Spike Switch - Spike Trap 6"
+  - [ 0x009b, 10, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - Spike Switch - Spike Trap 7"
+  - [ 0x009c, 1, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - Invisible Floor Maze - Mini Helmasaur"
+  - [ 0x009c, 2, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - Invisible Floor Maze - Hardhat Beetle 2"
+  - [ 0x009c, 3, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - Invisible Floor Maze - Hardhat Beetle 3"
+  - [ 0x009c, 4, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - Invisible Floor Maze - Hardhat Beetle 4"
+  - [ 0x009c, 5, [ "RollerVerticalUp", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - Invisible Floor Maze - Hardhat Beetle 5"
+  - [ 0x009d, 3, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ganon's Tower - Compass Room - Gibdo 2"
+  - [ 0x009d, 6, [ "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Ganon's Tower - Compass Room - Blue Bari 1"
+  - [ 0x009d, 7, [ "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - Compass Room - Blue Bari 2"
+  - [ 0x009d, 8, [ "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Ganon's Tower - Compass Room - Blue Bari 3"
+  - [ 0x009e, 0, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ice Palace - Fairy Drop - blue - Red Bari 1"
+  - [ 0x009e, 1, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ice Palace - Fairy Drop - blue - Red Bari 2"
+  - [ 0x009e, 2, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ice Palace - Fairy Drop - blue - Stalfos Knight"
+  - [ 0x009e, 3, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ice Palace - Fairy Drop - blue - Red Bari 3"
+  - [ 0x00a0, 1, [ "RollerHorizontalLeft", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Misery Mire - Boss Antechamber - Antifairy"
+  - [ 0x00a1, 2, [ "Statue", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Misery Mire - Fish Room  - Spark (Clockwise) 2"
+  - [ 0x00a1, 7, [ "Wizzrobe", "Statue"] ]  # Wizzrobes can't spawn on pots
+  - [ 0x00a5, 2, [ "BigSpike" ] ]  #"GT Wizzrobes 1 - Wizzrobe 3"
+  - [ 0x00a5, 10, [ "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ganon's Tower - Laser Bridge - Red Spear Guard"
+  - [ 0x00a8, 1, [ "RollerVerticalUp", "RollerHorizontalLeft" ] ]  #"Eastern Palace - West Wing - Top - Stalfos 2"
+  - [ 0x00a8, 3, [ "RollerVerticalDown", "RollerHorizontalLeft" ] ]  #"Eastern Palace - West Wing - Top - Stalfos 4"
+  - [ 0x00a9, 1, [ "RollerHorizontalRight", "RollerHorizontalLeft" ] ]
+  - [ 0x00aa, 4, [ "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Eastern Palace - East Wing - Top - Stalfos 3"
+  - [ 0x00aa, 5, [ "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Eastern Palace - East Wing - Top - Popo B 2"
+  - [ 0x00ab, 7, [ "RollerVerticalUp", "RollerHorizontalLeft" ] ]  #"Thieves' Town - Spike Dodge - Spike Trap 6"
+  - [ 0x00ae, 0, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ice Palace - Ice T - Blue Bari 1"
+  - [ 0x00ae, 1, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Ice Palace - Ice T - Blue Bari 2"
+  - [ 0x00af, 0, [ "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Ice Palace - Ice Clock - Fire Bar (Clockwise)"
+  - [0x00b0, 7, [ "StalfosKnight", "Blob", "Stal", "Wizzrobe"]] # blocked, but Geldmen are probably okay
+  - [0x00b0, 8, [ "StalfosKnight", "Blob", "Stal", "Wizzrobe"]] # blocked, but Geldmen are probably okay
+  - [ 0x00b1, 2, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Misery Mire - Hourglass - Spike Trap 1"
+  - [ 0x00b1, 3, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Misery Mire - Hourglass - Spike Trap 2"
+  - [ 0x00b1, 4, ["Bumper", "BigSpike", "AntiFairyCircle" ]]
+  - [ 0x00b2, 1, [ "Wizzrobe", "Statue" ] ]  # Wizzrobes can't spawn on pots
+  - [ 0x00b2, 3, [ "Wizzrobe", "Statue" ] ]  # Wizzrobes can't spawn on pots
+  - [ 0x00b2, 6, [ "RollerVerticalUp", "RollerHorizontalLeft" ] ]  #"Misery Mire - Sluggula Cross - Sluggula TR"
+  - [ 0x00b2, 8, [ "RollerVerticalDown" ] ]  #"Misery Mire - Popo Push - Medusa 1"
+  - [ 0x00b2, 9, [ "RollerVerticalUp" ] ]  #"Misery Mire - Sluggula Cross - Sluggula BL"
+  - [ 0x00b3, 0, [ "RollerVerticalUp", "RollerHorizontalRight", "BigSpike", "SpikeBlock" ] ]  #"Misery Mire - Spike Room - Stalfos 1"
+  - [ 0x00b3, 2, [ "Statue", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "FirebarCW", "Bumper" ] ]  #"Misery Mire - Spike Room - Beamos"
+  - [ 0x00b3, 3, ["AntiFairyCircle", "Bumper" ]]  #"Misery Mire - Spike Room - Yomo Medusa"
+  - [ 0x00b3, 4, ["AntiFairyCircle", "Bumper"]]
+  - [ 0x00b6, 7, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Turtle Rock - Tile Room - Zol 1"
+  - [ 0x00b6, 8, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Turtle Rock - Tile Room - Zol 2"
+  - [ 0x00ba, 1, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Eastern Palace - Dark Stalfos - Antifairy 1"
+  - [ 0x00ba, 3, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Eastern Palace - Dark Stalfos - Antifairy 2"
+  - [ 0x00ba, 4, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Eastern Palace - Dark Stalfos - Popo B 1"
+  - [ 0x00ba, 6, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Eastern Palace - Dark Stalfos - Popo B 2"
+  - [ 0x00bb, 1, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Thieves' Town - Spikeveyer - Gibo 1"
+  - [ 0x00bb, 4, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "Bumper" ] ]  #"Thieves' Town - Spikeveyer - Antifairy 1"
+  - [ 0x00bb, 5, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Thieves' Town - Spikeveyer - Gibo 3"
+  - [ 0x00bb, 6, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Thieves' Town - Spikeveyer - Fire Snake"
+  - [ 0x00bb, 7, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "SpikeBlock", "Bumper" ] ]  #"Thieves' Town - Spikeveyer - Gibo 4"
+  - [ 0x00bb, 8, [ "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Thieves' Town - Spikeveyer - Gibo 5"
+  - [ 0x00bb, 9, [ "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Thieves' Town - Spikeveyer - Antifairy 2"
+  - [ 0x00bc, 6, [ "AntiFairyCircle", "SpikeBlock", "Bumper" ] ]  #"Thieves' Town - Toilet - Stalfos 2"
+  - [ 0x00bc, 7, [ "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Thieves' Town - Toilet - Stalfos 3"
+  - [ 0x00bc, 8, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Thieves' Town - Toilet - Stalfos 4"
+  - [ 0x00bf, 0, [ "Wizzrobe", "Statue" ] ]  # Wizzrobes can't spawn on collision
+  - [ 0x00c1, 3, [ "RollerVerticalUp", "RollerHorizontalLeft" ] ]  #"Misery Mire - 4 Rails - Stalfos 1"
+  - [ 0x00c2, 0, [ "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Misery Mire - Main Lobby - blue - Fire Snake 1"
+  - [ 0x00c2, 5, [ "Wizzrobe", "Statue" ] ]  # Wizzrobes can't spawn on pots
+  - [ 0x00c5, 6, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Turtle Rock - Catwalk - Mini Helmasaur"
+  - [ 0x00c5, 7, [ "Statue" ] ]  #"Turtle Rock - Catwalk - Laser Eye (Left) 4"
+  - [0x00c6, 5, ["Bumper"]]
+  - [ 0x00cb, 0, [ "Wizzrobe", "Statue" ] ]  # Wizzrobes can't spawn on pots
+  - [ 0x00cb, 3, [ "RollerVerticalUp", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Thieves' Town - Grand Room NW - Zol 1"
+  - [ 0x00cb, 5, [ "RollerVerticalUp", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Thieves' Town - Grand Room NW - Zol 2"
+  - [ 0x00cb, 9, [ "RollerVerticalUp", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]
+  - [ 0x00cb, 10, [ "RollerVerticalUp", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]
+  - [ 0x00cb, 11, [ "Wizzrobe", "Statue" ] ]  # Wizzrobes can't spawn on pots
+  - [ 0x00cc, 8, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #Prevents Pot access (Beamos okay?)
+  - [ 0x00cc, 12, [ "RollerVerticalUp", "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #Prevents Pot access (Beamos okay?)
+  - [ 0x00ce, 0, [ "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "AntiFairyCircle", "Antifairy", "BigSpike", "FirebarCCW", "Bumper", "Chainchomp"]]  #"Ice Palace - Over Boss - top - Red Bari 1"
+  - [ 0x00ce, 1, [ "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "AntiFairyCircle", "Antifairy", "BigSpike", "FirebarCW", "Bumper" ] ]  #"Ice Palace - Over Boss - top - Red Bari 2"
+  - [ 0x00ce, 3, [ "SparkCW", "SparkCCW", "RollerVerticalDown", "RollerVerticalUp", "RollerHorizontalRight", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "Antifairy", "BigSpike", "FirebarCW", "FirebarCCW", "SpikeBlock", "Bumper", "Chainchomp"]]  #"Ice Palace - Over Boss - top - Statue"
+  - [0x00ce, 4, ["RollerVerticalDown", "RollerVerticalUp", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Beamos", "Bumper", "FirebarCW", "FirebarCCW", "Chainchomp"]]
+  - [0x00ce, 5, ["RollerVerticalDown", "RollerVerticalUp", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Beamos", "Bumper", "FirebarCW", "FirebarCCW", "Chainchomp"]]
+  - [0x00ce, 6, ["RollerVerticalDown", "RollerVerticalUp", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Beamos", "Bumper", "FirebarCW", "FirebarCCW", "Chainchomp"]]
+  - [0x00ce, 7, ["RollerVerticalDown", "RollerVerticalUp", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Beamos", "Bumper", "FirebarCW", "FirebarCCW", "Chainchomp"]]
+  - [ 0x00d0, 0, [ "Statue", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper"]]
+  - [ 0x00d0, 1, [ "AntiFairyCircle", "BigSpike", "Bumper"]]
+  - [ 0x00d0, 4, [ "Statue", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper"]]
+  - [ 0x00d0, 5, [ "Statue", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper"]]
+  - [ 0x00d0, 6, [ "Statue", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper"]]
+  - [ 0x00d0, 7, [ "Statue", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper"]]
+  - [ 0x00d0, 9, [ "AntiFairyCircle", "BigSpike", "Bumper"]]
+  - [ 0x00d0, 6, [ "Statue", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  # Agahnims Tower - Dark Maze - Blue Guard 2
+  - [0x00d2, 0, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora"]]
+  - [0x00d2, 1, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora"]]
+  - [0x00d2, 2, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora"]]
+  - [0x00d2, 3, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora"]]
+  - [0x00d2, 4, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora"]]
+  - [0x00d2, 5, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora"]]
+  - [0x00d2, 6, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora"]]
+  - [0x00d2, 7, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora"]]
+  - [0x00d2, 8, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora", "RollerVerticalDown", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Misery Mire - Mire 2 - Popo BL"
+  - [0x00d2, 9, ["Raven", "Poe", "GreenZirro", "BlueZirro", "Swamola", "Zora"]]
+  - [ 0x00d5, 4, [ "Statue", "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "FirebarCW", "FirebarCCW", "SpikeBlock", "Bumper" ] ]  #"Turtle Rock - Eye Bridge - Hardhat Beetle"
+  - [ 0x00d8, 0, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Eastern Palace - Kill Room 2 - Red Eyegore L"
+  - [ 0x00d8, 1, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Eastern Palace - Kill Room 2 - Red Eyegore R"
+  - [ 0x00d8, 2, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Eastern Palace - Kill Room 2 - Popo B TL"
+  - [ 0x00d8, 3, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Eastern Palace - Kill Room 2 - Popo B TR"
+  - [ 0x00d8, 4, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Eastern Palace - Kill Room 2 - Popo B LT"
+  - [ 0x00d8, 5, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Eastern Palace - Kill Room 2 - Popo B RT"
+  - [ 0x00d8, 6, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Eastern Palace - Kill Room 2 - Popo LB"
+  - [ 0x00d8, 7, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Eastern Palace - Kill Room 2 - Popo RB"
+  - [ 0x00d8, 8, [ "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Eastern Palace - Kill Room 1 - Red Eyegore"
+  - [ 0x00d9, 1, [ "RollerHorizontalRight" ] ]  #"Eastern Palace - Dodgeball - Green Eyegore 1"
+  - [ 0x00db, 0, [ "Wizzrobe", "Statue" ] ]  # Wizzrobes can't spawn on pots
+  - [ 0x00db, 3, [ "Bumper" ] ]  # Okay in vanilla
+  - [ 0x00dc, 2, [ "AntiFairyCircle", "BigSpike", "Bumper" ] ]
+  - [ 0x00dc, 9, [ "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Thieves' Town - Grand Room SE - Fire Snake 2"
+  - [ 0x00df, 0, [ "RollerVerticalDown", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Paradox Cave - Top - Mini Moldorm 1"
+  - [ 0x00df, 1, [ "RollerVerticalDown", "RollerHorizontalRight", "AntiFairyCircle" ] ]  #"Paradox Cave - Top - Mini Moldorm 2"
+  - [ 0x00e4, 0, [ "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Old Man Home - Keese 1"
+  - [ 0x00e4, 1, [ "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Old Man Home - Keese 2"
+  - [ 0x00e4, 2, [ "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Old Man Home - Keese 3"
+  - [ 0x00e5, 4, [ "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Old Man Home Circle - Keese 5"
+  - [ 0x00e5, 5, [ "RollerVerticalDown", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Old Man Home Circle - Keese 6"
+  - [ 0x00e7, 0, [ "RollerVerticalUp", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Death Mountain Descent Cave Right - Keese 1"
+  - [ 0x00e7, 1, [ "RollerVerticalUp", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Death Mountain Descent Cave Right - Keese 2"
+  - [ 0x00e7, 2, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalRight" ] ]  #"Death Mountain Descent Cave Right - Keese 3"
+  - [ 0x00e7, 3, [ "RollerVerticalDown", "Beamos", "AntiFairyCircle", "Bumper" ] ]  #"Death Mountain Descent Cave Right - Keese 4"
+  - [ 0x00e7, 4, [ "RollerVerticalDown", "Beamos", "AntiFairyCircle", "Bumper" ] ]  #"Death Mountain Descent Cave Right - Keese 5"
+  - [ 0x00e7, 5, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalRight" ] ]  #"Death Mountain Descent Cave Right - Keese 6"
+  - [ 0x00e7, 6, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalRight" ] ]  #"Death Mountain Descent Cave Right - Keese 7"
+  - [ 0x00e8, 0, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "AntiFairyCircle", "SpikeBlock", "Bumper" ] ]  #"Super Bunny Exit - Hardhat Beetle 1"
+  - [ 0x00e8, 1, [ "RollerVerticalUp", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Super Bunny Exit - Hardhat Beetle 2"
+  - [ 0x00ee, 0, [ "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "Bumper" ] ]  #"Sprial Cave Top - Mini Moldorm 1"
+  - [ 0x00ee, 1, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Sprial Cave Top - Mini Moldorm 2"
+  - [ 0x00ee, 2, [ "RollerHorizontalLeft", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Sprial Cave Top - Mini Moldorm 3"
+  - [ 0x00ee, 3, [ "RollerVerticalUp", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Sprial Cave Top - Blue Bari 1"
+  - [ 0x00ee, 4, [ "RollerVerticalUp", "RollerVerticalDown", "Beamos", "AntiFairyCircle", "BigSpike", "SpikeBlock", "Bumper" ] ]  #"Sprial Cave Top - Blue Bari 2"
+  - [ 0x00ef, 1, [ "RollerVerticalUp", "RollerVerticalDown" ] ]  #"Paradox Cave - Middle - Mini Moldorm 2"
+  - [ 0x00f1, 0, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Old Man Maze - Keese 1"
+  - [ 0x00f1, 1, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Old Man Maze - Keese 2"
+  - [ 0x00f1, 2, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Old Man Maze - Keese 3"
+  - [ 0x00f1, 3, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Old Man Maze - Keese 4"
+  - [ 0x00f1, 4, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Old Man Maze - Keese 5"
+  - [ 0x00f1, 5, [ "RollerVerticalUp", "RollerVerticalDown", "RollerHorizontalLeft", "RollerHorizontalRight" ] ]  #"Old Man Maze - Keese 6"
+  - [ 0x00fd, 0, [ "Bumper" ] ]
+  - [ 0x0107, 1, ["Beamos", "Bumper", "BigSpike", "AntiFairyCircle"]]
+  - [ 0x0107, 2, ["Beamos", "Bumper", "BigSpike", "AntiFairyCircle"]]
+  - [0x010b, 6, ["RollerHorizontalRight"]]
+  - [0x010c, 4, ["AntiFairyCircle"]]
+  - [0x010c, 5, ["AntiFairyCircle"]]
+  - [0x010c, 6, ["StalfosKnight", "Geldman", "Blob", "Stal", "Wizzrobe"]]
+  - [0x010c, 7, ["StalfosKnight", "Geldman", "Blob", "Stal", "Wizzrobe"]]
+OwGeneralDeny:
+  - [0x03, 2, ["Gibo"]]  # OldMan eating Gibo
+  - [0x03, 4, ["Gibo"]]  # OldMan eating Gibo
+  - [0x03, 5, ["Gibo"]]  # OldMan eating Gibo
+  - [0x03, 6, ["Gibo"]]  # OldMan eating Gibo
+  - [0x03, 8, ["Gibo"]]  # OldMan eating Gibo
+  - [0x03, 9, ["Gibo"]]  # OldMan eating Gibo
+  - [0x03, 10, ["Gibo"]]  # OldMan eating Gibo
+  - [0x05, 11, ["Bumper", "AntiFairyCircle"]]  # Blocks path to portal
+  - [0x1e, 3, ["Beamos", "Bumper", "BigSpike", "AntiFairyCircle"]]  # forbid a beamos here
+  - [0x35, 8, ["RollerVerticalUp", "RollerVerticalDown"]]  # blocks the dock
+  - [0x40, 0, ["Beamos", "Bumper", "BigSpike", "AntiFairyCircle", "Thief"]]
+  - [0x40, 7, ["Beamos", "Bumper", "BigSpike", "AntiFairyCircle", "Thief"]]
+  - [0x40, 13, ["Beamos", "Bumper", "BigSpike", "AntiFairyCircle", "Thief"]]
+  - [0x40, 14, ["Beamos", "Bumper", "BigSpike", "AntiFairyCircle", "Thief"]]
+  - [0x40, 16, ["RollerVerticalUp", "RollerVerticalDown"]]  # Ropa near back hole is really large as a roller
+  - [0x55, 6, ["BigSpike"]]
+  - [0x57, 5, ["RollerVerticalUp", "RollerVerticalDown"]]
+  - [0x5e, 0, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 1, ["Gibo", "RollerVerticalUp", "RollerVerticalDown"]]  # kiki eating Gibo
+  - [0x5e, 2, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 3, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 4, ["RollerVerticalUp", "RollerVerticalDown", "Gibo"]]  # forbid that one roller for kiki pod, and the kiki eating Gibo
+  - [0x5e, 5, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 6, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 7, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 8, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 9, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 10, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 11, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 12, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 13, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 14, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 15, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 16, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 17, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 18, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 19, ["Gibo"]]  # kiki eating Gibo
+  - [0x5e, 20, ["Gibo"]]  # kiki eating Gibo
+  - [0x77, 1, ["Bumper"]]  # soft-lock potential near ladder
+  - [0x7f, 1, ["Bumper"]]  # soft-lock potential near ladder
+UwEnemyDrop:
+  - [0x0085, 9, ["Babasu"]]  # ran off the edge and didn't return
+  - [0x00cb, 3, ["Zoro"]]  # layer issues
+  - [0x00cb, 5, ["Zoro"]]  # layer issues
+  - [0x00cb, 9, ["Zoro"]]  # layer issues
+  - [0x00cb, 10, ["Zoro"]]  # layer issues
+  - [0x00cc, 5, ["Babasu"]]  # little hard to see and kill appropriately
+# the following are behind rails or otherwise unactivate-able
+  - [0x0077, 4, ["StalfosKnight", "Geldman", "Blob", "Stal", "Wizzrobe"]]  # can't activate here
+  - [0x0077, 5, ["StalfosKnight", "Geldman", "Blob", "Stal", "Wizzrobe"]]
+  - [0x008D, 10, ["StalfosKnight", "Geldman", "Blob", "Stal"]]
+  - [0x008D, 12, ["StalfosKnight", "Geldman", "Blob", "Stal"]]
+# the following are not allowed at certain pits (or on conveyors near pits)
+# because they despawned or clipped away or immediately fell, etc
+  - [0x003d, 9, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x003d, 10, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                  "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                  "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x0044, 0, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "Hover"]]
+  - [0x0044, 1, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "Hover"]]
+  - [0x0044, 2, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "Hover"]]
+  - [0x0044, 3, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "Hover"]]
+  - [0x0044, 4, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "Hover"]]
+  - [0x0044, 5, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "Hover"]]
+  - [0x0044, 6, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "Hover"]]
+  - [0x0044, 8, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "Hover"]]
+  - [0x0049, 10, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard",
+                  "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                  "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "Hover"]]
+  - [0x007b, 0, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "Hover"]]
+  - [0x007b, 1, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "Hover"]]
+  - [0x007f, 0, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x007f, 1, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x007f, 2, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x007f, 3, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x0095, 0, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "Hover"]]
+  - [0x0095, 1, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x0095, 2, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x0095, 3, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "Hover"]]
+  - [0x00af, 0, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "Hover"]]
+  - [0x00b5, 0, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x00b5, 1, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x00b5, 2, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x00c6, 2, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x00c6, 3, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x00c6, 4, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x00c6, 5, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Bumper", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x00c6, 6, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  - [0x00e6, 0, ["HardhatBeetle", "Wizzrobe", "MiniHelmasaur", "BlueGuard", "GreenGuard", "RedSpearGuard", "Hover",
+                 "BluesainBolt", "UsainBolt", "BlueArcher", "GreenBushGuard", "RedJavelinGuard", "RedBushGuard",
+                 "BombGuard", "GreenKnifeGuard", "Stal", "GreenMimic", "RedMimic", "StalfosKnight", "Geldman", "Blob"]]
+  # wizzrobe despawn issues - on pots/blocks - too close to some object
+  - [0x0013, 3, ["Wizzrobe"]]
+  - [0x0016, 0, ["Wizzrobe"]]
+  - [0x0016, 1, ["Wizzrobe"]]
+  - [0x0016, 2, ["Wizzrobe"]]
+  - [0x0016, 3, ["Wizzrobe"]]
+  - [0x0017, 5, ["Wizzrobe", "Stal"]]
+  - [0x0019, 2, ["Wizzrobe"]]
+  - [0x0019, 3, ["Wizzrobe"]]
+  - [0x001e, 1, ["Wizzrobe"]]
+  - [0x001e, 2, ["Wizzrobe"]]
+  - [0x0027, 5, ["Wizzrobe"]]
+  - [0x0027, 6, ["Wizzrobe"]]
+  - [0x002a, 3, ["Wizzrobe"]]
+  - [0x002a, 7, ["Wizzrobe"]]
+  - [0x002e, 4, ["Wizzrobe"]]
+  - [0x0035, 5, ["Wizzrobe"]]
+  - [0x0036, 8, ["Wizzrobe"]]
+  - [0x003b, 0, ["Wizzrobe"]]
+  - [0x003b, 2, ["Wizzrobe"]]
+  - [0x003b, 4, ["Wizzrobe"]]
+  - [0x003b, 6, ["Wizzrobe"]]
+  - [0x003c, 1, ["Wizzrobe"]]
+  - [0x003d, 11, ["Wizzrobe"]]
+  - [0x003d, 12, ["Wizzrobe"]]
+  - [0x003d, 13, ["Wizzrobe"]]
+  - [0x004b, 2, ["Wizzrobe"]]
+  - [0x004b, 6, ["Wizzrobe"]]
+  - [0x004b, 7, ["Wizzrobe"]]
+  - [0x004e, 3, ["Wizzrobe", "Stal"]]
+  - [0x0054, 3, ["Wizzrobe", "Stal"]]
+  - [0x0055, 2, ["Wizzrobe"]] # slightly on wall
+  - [0x005e, 4, ["Wizzrobe", "Stal"]]
+  - [0x0065, 3, ["Wizzrobe"]]
+  - [0x0067, 5, ["Wizzrobe"]]
+  - [0x0067, 6, ["Wizzrobe"]]
+  - [0x0067, 7, ["Wizzrobe", "Stal"]]
+  - [0x0067, 8, ["Wizzrobe", "Stal"]]
+  - [0x0074, 5, ["Wizzrobe"]]
+  - [0x007c, 1, ["Wizzrobe", "Stal"]]
+  - [0x007c, 3, ["Wizzrobe", "Stal"]]
+  - [0x007e, 1, ["Wizzrobe", "Stal"]]
+  - [0x007e, 6, ["Wizzrobe", "Stal"]]
+  - [0x0083, 9, ["Wizzrobe"]]
+  - [0x008b, 6, ["Wizzrobe", "Stal"]]
+  - [0x008b, 7, ["Wizzrobe", "Stal"]]
+  - [0x008d, 9, ["Wizzrobe", "Stal"]]
+  - [0x0096, 0, ["Wizzrobe", "Stal"]]
+  - [0x009b, 11, ["Wizzrobe"]]
+  - [0x009f, 5, ["Wizzrobe", "Stal"]]
+  - [0x00a1, 1, ["Wizzrobe"]]
+  - [0x00aa, 5, ["Wizzrobe"]]
+  - [0x00b0, 1, ["Wizzrobe"]]
+  - [0x00b0, 2, ["Wizzrobe"]]
+  - [0x00b2, 4, ["Wizzrobe"]]
+  - [0x00b8, 2, ["Wizzrobe"]]
+  - [0x00bf, 1, ["Wizzrobe"]]
+  - [0x00c1, 3, ["Wizzrobe", "Stal"]]
+  - [0x00c2, 0, ["Wizzrobe"]]
+  - [0x00c2, 3, ["Wizzrobe"]]
+  - [0x00c2, 7, ["Wizzrobe"]]
+  - [0x00ce, 4, ["Wizzrobe", "Leever", "BlueGuard", "GreenGuard", "RedSpearGuard", "BluesainBolt", "UsainBolt",
+                 "BlueArcher", "RedJavelinGuard", "GreenKnifeGuard", "GreenMimic", "RedMimic"]]
+  - [0x00ce, 5, ["Wizzrobe", "Leever", "BlueGuard", "GreenGuard", "RedSpearGuard", "BluesainBolt", "UsainBolt",
+                 "BlueArcher", "RedJavelinGuard", "GreenKnifeGuard", "GreenMimic", "RedMimic"]]
+  - [0x00ce, 6, ["Wizzrobe", "Leever", "BlueGuard", "GreenGuard", "RedSpearGuard", "BluesainBolt", "UsainBolt",
+                 "BlueArcher", "RedJavelinGuard", "GreenKnifeGuard", "GreenMimic", "RedMimic"]]
+  - [0x00ce, 7, ["Wizzrobe", "Leever", "BlueGuard", "GreenGuard", "RedSpearGuard", "BluesainBolt", "UsainBolt",
+                 "BlueArcher", "RedJavelinGuard", "GreenKnifeGuard", "GreenMimic", "RedMimic"]]
+  - [0x00d0, 0, ["Wizzrobe"]]
+  - [0x00d0, 2, ["Wizzrobe"]]
+  - [0x00d0, 4, ["Wizzrobe"]]
+  - [0x00d0, 5, ["Wizzrobe"]]
+  - [0x00d0, 9, ["Wizzrobe"]]
+  - [0x00d5, 4, ["Wizzrobe"]]
+  - [0x00df, 1, ["Wizzrobe"]] # slightly on wall
+  - [0x00e7, 4, ["Wizzrobe"]] # slightly on wall
+  - [0x00fd, 1, ["Wizzrobe"]] # slightly on rock
+  - [0x010c, 4, ["Wizzrobe"]]
+  - [0x010c, 5, ["Wizzrobe"]]
+  # other mimic cave spots are in the rail section
+
+  # enemies that have problems with conveyors - add wizzrobes here - for collision?
+  - [0x003b, 0, ["GreenMimic", "RedMimic"]]
+  - [0x003b, 1, ["GreenMimic", "RedMimic"]]
+  - [0x003b, 2, ["GreenMimic", "RedMimic"]]
+  - [0x003b, 3, ["GreenMimic", "RedMimic"]]
+  - [0x003b, 4, ["GreenMimic", "RedMimic"]]
+  - [0x003b, 5, ["GreenMimic", "RedMimic"]]
+  - [0x003b, 6, ["GreenMimic", "RedMimic"]]
+  - [0x003d, 6, ["GreenMimic", "RedMimic"]]
+  - [0x003d, 7, ["GreenMimic", "RedMimic"]]
+  - [0x003e, 8, ["GreenMimic", "RedMimic"]]
+  - [0x003e, 9, ["GreenMimic", "RedMimic"]]
+  - [0x003e, 10, ["GreenMimic", "RedMimic"]]
+  - [0x003e, 11, ["GreenMimic", "RedMimic"]]
+  - [0x0044, 0, ["GreenMimic", "RedMimic"]]
+  - [0x0044, 1, ["GreenMimic", "RedMimic"]]
+  - [0x0044, 2, ["GreenMimic", "RedMimic"]]
+  - [0x0044, 3, ["GreenMimic", "RedMimic"]]
+  - [0x0044, 5, ["GreenMimic", "RedMimic"]]
+  - [0x004c, 0, ["GreenMimic", "RedMimic"]]
+  - [0x004c, 1, ["GreenMimic", "RedMimic"]]
+  - [0x004c, 2, ["GreenMimic", "RedMimic"]]
+  - [0x004c, 3, ["GreenMimic", "RedMimic"]]
+  - [0x004c, 4, ["GreenMimic", "RedMimic"]]
+  - [0x004c, 5, ["GreenMimic", "RedMimic"]]
+  - [0x004c, 6, ["GreenMimic", "RedMimic"]]
+  - [0x004c, 7, ["GreenMimic", "RedMimic"]]
+  - [0x005d, 3, ["GreenMimic", "RedMimic"]]
+  - [0x005d, 4, ["GreenMimic", "RedMimic"]]
+  - [0x005d, 5, ["GreenMimic", "RedMimic"]]
+  - [0x005d, 6, ["GreenMimic", "RedMimic"]]
+  - [0x005d, 8, ["GreenMimic", "RedMimic"]]
+  - [0x005d, 9, ["GreenMimic", "RedMimic"]]
+  - [0x005d, 10, ["GreenMimic", "RedMimic"]]
+  - [0x005d, 11, ["GreenMimic", "RedMimic"]]
+  - [0x005d, 12, ["GreenMimic", "RedMimic"]]
+#  - [0x006d, ?, ["GreenMimic", "RedMimic"]] # conveyor doesn't hit edge
+#  - [0x008b, ?, ["GreenMimic", "RedMimic"]] # conveyor doesn't hit edge
+  - [0x0092, 2, ["GreenMimic", "RedMimic"]]
+  - [0x00a5, 0, ["GreenMimic", "RedMimic"]]
+  - [0x00a5, 1, ["GreenMimic", "RedMimic"]]
+  - [0x00a5, 4, ["GreenMimic", "RedMimic"]]
+  - [0x00a5, 5, ["GreenMimic", "RedMimic"]]
+  - [0x00a5, 6, ["GreenMimic", "RedMimic"]]
+  - [0x00bb, 1, ["GreenMimic", "RedMimic", "Terrorpin"]]
+  - [0x00bb, 4, ["GreenMimic", "RedMimic", "Terrorpin"]]
+  - [0x00bb, 5, ["GreenMimic", "RedMimic", "Terrorpin"]]
+  - [0x00bb, 6, ["GreenMimic", "RedMimic", "Terrorpin"]]
+  - [0x00bb, 7, ["GreenMimic", "RedMimic", "Terrorpin"]]
+  - [0x00bb, 8, ["GreenMimic", "RedMimic"]]
+  - [0x00bb, 9, ["GreenMimic", "RedMimic"]]
+  - [0x00bb, 10, ["GreenMimic", "RedMimic"]]
+  - [0x00bc, 0, ["GreenMimic", "RedMimic"]]
+  - [0x00bc, 1, ["GreenMimic", "RedMimic"]]
+  - [0x00bc, 2, ["GreenMimic", "RedMimic"]]
+  - [0x00bc, 3, ["GreenMimic", "RedMimic"]]
+  - [0x00bc, 4, ["GreenMimic", "RedMimic"]]
+  - [0x00bc, 5, ["GreenMimic", "RedMimic"]]
+  - [0x00c1, 5, ["GreenMimic", "RedMimic"]]
+  - [0x00c1, 8, ["GreenMimic", "RedMimic"]]
+  - [0x00c1, 9, ["GreenMimic", "RedMimic"]]
+  - [0x00c1, 10, ["GreenMimic", "RedMimic"]]
+  - [0x00c1, 11, ["GreenMimic", "RedMimic"]]
+  - [0x00d1, 5, ["GreenMimic", "RedMimic"]]
+  - [0x00d1, 6, ["GreenMimic", "RedMimic"]]
+
+  # the following are all slightly in the wall on spawn - not too applicable right now, these don't drop anyway
+  - [0x0064, 0, ["Leever"]]
+  - [0x00e5, 3, ["Wizzrobe"]]
+  - [0x00e5, 4, ["Leever", "Wizzrobe"]]
+  - [0x00e5, 5, ["Leever", "Wizzrobe"]]
+  # the pit one in 0xe6 room is in the pit section
+  - [0x00e6, 1, ["Leever", "Wizzrobe"]]
+  - [0x00e6, 2, ["Leever", "Wizzrobe"]]
+  - [0x00e6, 3, ["Leever", "Wizzrobe"]]
+  - [0x00e6, 4, ["Leever", "Wizzrobe"]]
+  - [0x00e7, 0, ["Wizzrobe"]]
+  - [0x00e7, 1, ["Wizzrobe"]]
+  - [0x00e7, 2, ["Wizzrobe"]]
+  - [0x00e7, 3, ["Leever"]]
+  - [0x00e7, 4, ["Leever", "Wizzrobe"]]
+  - [0x00e7, 5, ["Leever", "Wizzrobe"]]
+  - [0x00e7, 6, ["Wizzrobe"]]
+  - [0x00f0, 2, ["Leever"]]  # clipped away
+  - [0x00f0, 3, ["Leever"]]
+  - [0x00f0, 4, ["Leever"]]
+  - [0x00f0, 5, ["Leever"]]
+  - [0x00f0, 6, ["Leever"]]
+  - [0x00f0, 8, ["Leever"]]
+  - [0x00f1, 0, ["Leever", "Wizzrobe"]]
+  - [0x00f1, 1, ["Leever", "Wizzrobe"]]
+  - [0x00f1, 2, ["Wizzrobe"]]
+  - [0x00f1, 3, ["Wizzrobe"]]
+  - [0x00f1, 4, ["Wizzrobe"]]
+  - [0x00f1, 5, ["Wizzrobe"]]
+  - [0x00f1, 6, ["Leever", "Wizzrobe"]]
+  - [0x00f1, 7, ["Leever", "Wizzrobe"]]
+  - [0x00f1, 8, ["Leever", "Wizzrobe"]]
+  - [0x00f1, 9, ["Leever", "Wizzrobe"]]
+

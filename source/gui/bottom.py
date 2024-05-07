@@ -1,4 +1,4 @@
-from tkinter import ttk, messagebox, StringVar, Button, Entry, Frame, Label, E, W, LEFT, RIGHT, X
+from tkinter import ttk, messagebox, StringVar, Button, Entry, Frame, Label, LEFT, RIGHT, X
 from argparse import Namespace
 import logging
 import os
@@ -70,65 +70,67 @@ def bottom_frame(self, parent, args=None):
     def generateRom():
         guiargs = create_guiargs(parent)
         # get default values for missing parameters
-        for k,v in vars(parse_cli(['--multi', str(guiargs.multi)])).items():
+        cliargs = ['--multi', str(guiargs.multi)]
+        if hasattr(guiargs, 'customizer'):
+            cliargs.extend(['--customizer', str(guiargs.customizer)])
+        for k,v in vars(parse_cli(cliargs)).items():
             if k not in vars(guiargs):
                 setattr(guiargs, k, v)
-            elif type(v) is dict: # use same settings for every player
-                setattr(guiargs, k, {player: getattr(guiargs, k) for player in range(1, guiargs.multi + 1)})
+            elif type(v) is dict:  # use same settings for every player
+                players = guiargs.multi if len(v) == 0 else len(v)
+                setattr(guiargs, k, {player: getattr(guiargs, k) for player in range(1, players + 1)})
         argsDump = vars(guiargs)
-        hasEnemizer = "enemizercli" in argsDump and os.path.isfile(argsDump["enemizercli"])
-        needEnemizer = False
-        if hasEnemizer:
-            falsey = ["none", "default", False, 0]
-            for enemizerOption in ["shuffleenemies", "enemy_damage", "shufflebosses", "enemy_health"]:
-                if enemizerOption in argsDump:
-                    if isinstance(argsDump[enemizerOption], dict):
-                        for playerID,playerSetting in argsDump[enemizerOption].items():
-                            if not playerSetting in falsey:
-                                needEnemizer = True
-                    elif not argsDump[enemizerOption] in falsey:
-                        needEnemizer = True
-        seeds = []
-        if not needEnemizer or (needEnemizer and hasEnemizer):
-            try:
-                if guiargs.count is not None and guiargs.seed:
-                    seed = guiargs.seed
-                    for _ in range(guiargs.count):
-                        seeds.append(seed)
-                        main(seed=seed, args=guiargs, fish=parent.fish)
-                        seed = random.randint(0, 999999999)
-                else:
-                    if guiargs.seed:
-                        seeds.append(guiargs.seed)
-                    else:
-                        random.seed(None)
-                        guiargs.seed = random.randint(0, 999999999)
-                        seeds.append(guiargs.seed)
-                    main(seed=guiargs.seed, args=guiargs, fish=parent.fish)
-            except (FillError, EnemizerError, Exception, RuntimeError) as e:
-                logging.exception(e)
-                messagebox.showerror(title="Error while creating seed", message=str(e))
-            else:
-                YES = parent.fish.translate("cli","cli","yes")
-                NO = parent.fish.translate("cli","cli","no")
-                successMsg = ""
-                made = {}
-                for k in [ "rom", "playthrough", "spoiler" ]:
-                    made[k] = parent.fish.translate("cli","cli","made." + k)
-                made["enemizer"] = parent.fish.translate("cli","cli","used.enemizer")
-                for k in made:
-                    v = made[k]
-                    pattern = "([\w]+)(:)([\s]+)(.*)"
-                    m = re.search(pattern,made[k])
-                    made[k] = m.group(1) + m.group(2) + ' ' + m.group(4)
-                successMsg += (made["rom"] % (YES if (guiargs.create_rom) else NO)) + "\n"
-                successMsg += (made["playthrough"] % (YES if (guiargs.calc_playthrough) else NO)) + "\n"
-                successMsg += (made["spoiler"] % (YES if (not guiargs.jsonout and guiargs.create_spoiler) else NO)) + "\n"
-                successMsg += (made["enemizer"] % (YES if needEnemizer else NO)) + "\n"
-                # FIXME: English
-                successMsg += ("Seed%s: %s" % ('s' if len(seeds) > 1 else "", ','.join(str(x) for x in seeds)))
 
-                messagebox.showinfo(title="Success", message=successMsg)
+        needEnemizer = False
+        falsey = ["none", "default", False, 0]
+        for enemizerOption in ["shuffleenemies", "enemy_damage", "shufflebosses", "enemy_health"]:
+            if enemizerOption in argsDump:
+                if isinstance(argsDump[enemizerOption], dict):
+                    for playerID,playerSetting in argsDump[enemizerOption].items():
+                        if not playerSetting in falsey:
+                            needEnemizer = True
+                elif not argsDump[enemizerOption] in falsey:
+                    needEnemizer = True
+        seeds = []
+
+        try:
+            if guiargs.count is not None and guiargs.seed:
+                seed = guiargs.seed
+                for _ in range(guiargs.count):
+                    seeds.append(seed)
+                    main(seed=seed, args=guiargs, fish=parent.fish)
+                    seed = random.randint(0, 999999999)
+            else:
+                if guiargs.seed:
+                    seeds.append(guiargs.seed)
+                else:
+                    random.seed(None)
+                    guiargs.seed = random.randint(0, 999999999)
+                    seeds.append(guiargs.seed)
+                main(seed=guiargs.seed, args=guiargs, fish=parent.fish)
+        except (FillError, EnemizerError, Exception, RuntimeError) as e:
+            logging.exception(e)
+            messagebox.showerror(title="Error while creating seed", message=str(e))
+        else:
+            YES = parent.fish.translate("cli","cli","yes")
+            NO = parent.fish.translate("cli","cli","no")
+            successMsg = ""
+            made = {}
+            for k in [ "rom", "playthrough", "spoiler" ]:
+                made[k] = parent.fish.translate("cli","cli","made." + k)
+            made["enemizer"] = parent.fish.translate("cli","cli","used.enemizer")
+            for k in made:
+                v = made[k]
+                pattern = "([\w]+)(:)([\s]+)(.*)"
+                m = re.search(pattern,made[k])
+                made[k] = m.group(1) + m.group(2) + ' ' + m.group(4)
+            successMsg += (made["rom"] % (YES if (guiargs.create_rom) else NO)) + "\n"
+            successMsg += (made["playthrough"] % (YES if (guiargs.calc_playthrough) else NO)) + "\n"
+            successMsg += (made["enemizer"] % (YES if needEnemizer else NO)) + "\n"
+            # FIXME: English
+            successMsg += ("Seed%s: %s" % ('s' if len(seeds) > 1 else "", ','.join(str(x) for x in seeds)))
+
+            messagebox.showinfo(title="Success", message=successMsg)
 
     ## Generate Button
     # widget ID
@@ -203,16 +205,20 @@ def create_guiargs(parent):
 
     # Cycle through each page
     for mainpage in options:
+        subpage = None
+        _, v = next(iter(options[mainpage].items()))
+        if isinstance(v, str):
+            subpage = ""
         # Cycle through each subpage (in case of Item Randomizer)
-        for subpage in options[mainpage]:
+        for subpage in (options[mainpage] if subpage is None else [subpage]):
             # Cycle through each widget
-            for widget in options[mainpage][subpage]:
+            for widget in (options[mainpage][subpage] if subpage != "" else options[mainpage]):
                 # Get the value and set it
-                arg = options[mainpage][subpage][widget]
-                setattr(guiargs, arg, parent.pages[mainpage].pages[subpage].widgets[widget].storageVar.get())
-
-    # Get EnemizerCLI setting
-    guiargs.enemizercli = parent.pages["randomizer"].pages["enemizer"].widgets["enemizercli"].storageVar.get()
+                arg = options[mainpage][subpage][widget] if subpage != "" else options[mainpage][widget]
+                page = parent.pages[mainpage].pages[subpage] if subpage != "" else parent.pages[mainpage]
+                pagewidgets = page.content.customWidgets if mainpage == "custom" else page.content.startingWidgets if mainpage == "startinventory" else page.widgets
+                if hasattr(pagewidgets[widget], 'storageVar'):
+                    setattr(guiargs, arg, pagewidgets[widget].storageVar.get())
 
     # Get Multiworld Worlds count
     guiargs.multi = int(parent.pages["bottom"].pages["content"].widgets["worlds"].storageVar.get())
@@ -226,7 +232,7 @@ def create_guiargs(parent):
         guiargs.customizer = customizer_value
 
     # Get if we're using the Custom Item Pool
-    guiargs.custom = bool(parent.pages["randomizer"].pages["generation"].widgets["usecustompool"].storageVar.get())
+    guiargs.custom = bool(parent.pages["custom"].content.customWidgets["usecustompool"].storageVar.get())
 
     # Get Seed ID
     guiargs.seed = None
@@ -246,7 +252,9 @@ def create_guiargs(parent):
       "heartbeep": "heartbeep",
       "menuspeed": "fastmenu",
       "owpalettes": "ow_palettes",
-      "uwpalettes": "uw_palettes"
+      "uwpalettes": "uw_palettes",
+      "reduce_flashing": "reduce_flashing",
+      "shuffle_sfx": "shuffle_sfx"
     }
     for adjustarg in adjustargs:
       internal = adjustargs[adjustarg]
@@ -279,18 +287,5 @@ def create_guiargs(parent):
     guiargs.outputpath = parent.settings["outputpath"]
 
     guiargs = update_deprecated_args(guiargs)
-
-    # Key drop shuffle stuff
-    if guiargs.keydropshuffle:
-        guiargs.dropshuffle = 1
-        guiargs.pottery = 'keys' if guiargs.pottery == 'none' else guiargs.pottery
-
-    if guiargs.retro or guiargs.mode == 'retro':
-        if guiargs.bow_mode == 'progressive':
-            guiargs.bow_mode = 'retro'
-        elif guiargs.bow_mode == 'silvers':
-            guiargs.bow_mode = 'retro_silvers'
-        guiargs.take_any = 'random' if guiargs.take_any == 'none' else guiargs.take_any
-        guiargs.keyshuffle = 'universal'
 
     return guiargs

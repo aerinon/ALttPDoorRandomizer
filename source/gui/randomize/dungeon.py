@@ -1,4 +1,4 @@
-from tkinter import ttk, Frame, Label, E, W, LEFT, RIGHT
+from tkinter import ttk, Frame, Label, E, W, LEFT, RIGHT, TOP
 import source.gui.widgets as widgets
 import json
 import os
@@ -16,8 +16,8 @@ def dungeon_page(parent):
     self.frames["keysanity"].pack(anchor=W)
 
     ## Dungeon Item Shuffle
-    mscbLabel = Label(self.frames["keysanity"], text="Shuffle: ")
-    mscbLabel.pack(side=LEFT)
+    mscbLabel = Label(self.frames["keysanity"], text="Dungeon Items: ")
+    mscbLabel.pack(side=TOP, anchor=W)
 
     # Load Dungeon Shuffle option widgets as defined by JSON file
     # Defns include frame name, widget type, widget options, widget placement attributes
@@ -28,7 +28,9 @@ def dungeon_page(parent):
         dictWidgets = widgets.make_widgets_from_dict(self, myDict, self.frames["keysanity"])
         for key in dictWidgets:
             self.widgets[key] = dictWidgets[key]
-            self.widgets[key].pack(side=LEFT)
+            packAttrs = {"side":LEFT}
+            packAttrs = widgets.add_padding_from_config(packAttrs, myDict[key])
+            self.widgets[key].pack(packAttrs)
 
     # These get split left & right
     self.frames["widgets"] = Frame(self)
@@ -39,6 +41,8 @@ def dungeon_page(parent):
         dictWidgets = widgets.make_widgets_from_dict(self, myDict, self.frames["widgets"])
         for key in dictWidgets:
             self.widgets[key] = dictWidgets[key]
-            self.widgets[key].pack(anchor=W)
+            packAttrs = {"anchor":W}
+            packAttrs = widgets.add_padding_from_config(packAttrs, myDict[key])
+            self.widgets[key].pack(packAttrs)
 
     return self

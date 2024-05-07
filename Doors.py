@@ -66,7 +66,7 @@ def create_doors(world, player):
         create_door(player, 'Hyrule Castle Back Hall Down Stairs', Sprl).dir(Dn, 0x01, 0, HTL).ss(A, 0x2a, 0x00),
         create_door(player, 'Hyrule Castle Throne Room Tapestry', Lgcl),
         create_door(player, 'Hyrule Castle Tapestry Backwards', Lgcl),
-        create_door(player, 'Hyrule Castle Throne Room N', Nrml).dir(No, 0x51, Mid, High).pos(1),
+        create_door(player, 'Hyrule Castle Throne Room N', Nrml).dir(No, 0x51, Mid, High).pos(0),
         create_door(player, 'Hyrule Castle Throne Room South Stairs', StrS).dir(So, 0x51, Mid, Low),
 
         # hyrule dungeon level
@@ -250,7 +250,7 @@ def create_doors(world, player):
         create_door(player, 'Desert Tiles 2 NE', Intr).dir(No, 0x43, Right, High).small_key().pos(1),
         create_door(player, 'Desert Wall Slide SE', Intr).dir(So, 0x43, Right, High).small_key().pos(1),
         create_door(player, 'Desert Wall Slide NW', Nrml).dir(No, 0x43, Left, High).big_key().pos(0).no_entrance(),
-        create_door(player, 'Desert Boss SW', Nrml).dir(So, 0x33, Left, High).no_exit().trap(0x4).pos(0),  # .portal(Z, 0x00), problem with enemizer
+        create_door(player, 'Desert Boss SW', Nrml).dir(So, 0x33, Left, High).no_exit().trap(0x4).pos(0).portal(Z, 0x00),
 
         # Hera
         create_door(player, 'Hera Lobby S', Nrml).dir(So, 0x77, Mid, Low).pos(0).portal(Z, 0x22, 1),
@@ -410,6 +410,8 @@ def create_doors(world, player):
         create_door(player, 'PoD Map Balcony Drop Down', Lgcl),
         create_door(player, 'PoD Map Balcony to Ranged Crystal', Lgcl),
         create_door(player, 'PoD Map Balcony Ranged Crystal Exit', Lgcl),
+        create_door(player, 'PoD Map Balcony ES', Intr).dir(Ea, 0x2b, Bot, High).pos(0),
+        create_door(player, 'PoD Fairy Pool WS', Intr).dir(We, 0x2b, Bot, High).pos(0),
         create_door(player, 'PoD Map Balcony WS', Nrml).dir(We, 0x2b, Bot, High).pos(1),
         create_door(player, 'PoD Map Balcony South Stairs', StrS).dir(So, 0x2b, Left, High),
         create_door(player, 'PoD Conveyor North Stairs', StrS).dir(No, 0x3b, Left, High),
@@ -425,6 +427,8 @@ def create_doors(world, player):
         create_door(player, 'PoD Falling Bridge EN', Intr).dir(Ea, 0x1a, Top, High).pos(4),
         create_door(player, 'PoD Falling Bridge Path N', Lgcl),
         create_door(player, 'PoD Falling Bridge Path S', Lgcl),
+        create_door(player, 'PoD Falling Bridge Mid Path S', Lgcl),
+        create_door(player, 'PoD Falling Bridge Mid Path N', Lgcl),
         create_door(player, 'PoD Big Chest Balcony W', Nrml).dir(We, 0x1a, Mid, High).pos(2),
         create_door(player, 'PoD Dark Maze EN', Nrml).dir(Ea, 0x19, Top, High).small_key().pos(1),
         create_door(player, 'PoD Dark Maze E', Nrml).dir(Ea, 0x19, Mid, High).pos(0),
@@ -736,6 +740,7 @@ def create_doors(world, player):
         create_door(player, 'Ice Cross Top Push Block Right', Lgcl),  # dynamic
         create_door(player, 'Ice Cross Bottom SE', Nrml).dir(So, 0x1e, Right, High).pos(3).portal(X, 0x00),
         create_door(player, 'Ice Cross Right ES', Nrml).dir(Ea, 0x1e, Bot, High).trap(0x4).pos(0),
+        create_door(player, 'Ice Bomb Drop Path', Lgcl),
         create_door(player, 'Ice Bomb Drop Hole', Hole),
         create_door(player, 'Ice Compass Room NE', Nrml).dir(No, 0x2e, Right, High).pos(0),
         create_door(player, 'Ice Pengator Switch WS', Nrml).dir(We, 0x1f, Bot, High).trap(0x4).pos(0),
@@ -767,6 +772,8 @@ def create_doors(world, player):
         create_door(player, 'Ice Spike Room WS', Nrml).dir(We, 0x5f, Bot, High).small_key().pos(0),
         create_door(player, 'Ice Spike Room Down Stairs', Sprl).dir(Dn, 0x5f, 3, HTH).ss(Z, 0x11, 0x48, True, True),
         create_door(player, 'Ice Spike Room Up Stairs', Sprl).dir(Up, 0x5f, 4, HTH).ss(Z, 0x1a, 0xa4, True, True),
+        create_door(player, 'Ice Right H Path', Lgcl),
+        create_door(player, 'Ice Hammer Block Path', Lgcl),
         create_door(player, 'Ice Hammer Block Down Stairs', Sprl).dir(Dn, 0x3f, 0, HTH).ss(Z, 0x11, 0xb8, True, True).kill(),
         create_door(player, 'Ice Hammer Block ES', Intr).dir(Ea, 0x3f, Bot, High).pos(0),
         create_door(player, 'Ice Tongue Pull WS', Intr).dir(We, 0x3f, Bot, High).pos(0),
@@ -924,9 +931,9 @@ def create_doors(world, player):
         create_door(player, 'Mire Torches Top SW', Intr).dir(So, 0x97, Left, High).pos(1),
         create_door(player, 'Mire Torches Bottom Holes', Hole),
         create_door(player, 'Mire Torches Bottom NW', Intr).dir(No, 0x97, Left, High).pos(1),
-        create_door(player, 'Mire Torches Bottom WS', Intr).dir(We, 0x97, Bot, High).pos(0),
+        create_door(player, 'Mire Torches Bottom ES', Intr).dir(Ea, 0x97, Bot, High).pos(0),
         create_door(player, 'Mire Torches Top Holes', Hole),
-        create_door(player, 'Mire Attic Hint ES', Intr).dir(Ea, 0x97, Bot, High).pos(0),
+        create_door(player, 'Mire Attic Hint WS', Intr).dir(We, 0x97, Bot, High).pos(0),
         create_door(player, 'Mire Attic Hint Hole', Hole),
         create_door(player, 'Mire Dark Shooters Up Stairs', Sprl).dir(Up, 0x93, 0, LTH).ss(A, 0x32, 0xec),
         create_door(player, 'Mire Dark Shooters SW', Intr).dir(So, 0x93, Left, High).pos(0),
@@ -1067,7 +1074,7 @@ def create_doors(world, player):
         create_door(player, 'TR Final Abyss Balcony Path', Lgcl),
         create_door(player, 'TR Final Abyss Ledge Path', Lgcl),
         create_door(player, 'TR Final Abyss NW', Nrml).dir(No, 0xb4, Left, High).big_key().pos(0),
-        create_door(player, 'TR Boss SW', Nrml).dir(So, 0xa4, Left, High).no_exit().trap(0x4).pos(0),  # .portal(Z, 0x00), -enemizer doesn't work
+        create_door(player, 'TR Boss SW', Nrml).dir(So, 0xa4, Left, High).no_exit().trap(0x4).pos(0).portal(Z, 0x00),
 
         create_door(player, 'GT Lobby S', Nrml).dir(So, 0x0c, Mid, High).pos(0).portal(Z, 0x22),
         create_door(player, 'GT Lobby Left Down Stairs', Sprl).dir(Dn, 0x0c, 1, HTL).ss(A, 0x0f, 0x80),
@@ -1115,6 +1122,8 @@ def create_doors(world, player):
         create_door(player, 'GT Invisible Catwalk NE', Nrml).dir(No, 0x9c, Right, High).pos(2),
         create_door(player, 'GT Conveyor Cross EN', Nrml).dir(Ea, 0x8b, Top, High).pos(2),
         create_door(player, 'GT Conveyor Cross WN', Intr).dir(We, 0x8b, Top, High).pos(0),
+        create_door(player, 'GT Conveyor Cross Hammer Path', Lgcl),
+        create_door(player, 'GT Conveyor Cross Hookshot Path', Lgcl),
         create_door(player, 'GT Hookshot EN', Intr).dir(Ea, 0x8b, Top, High).pos(0),
         create_door(player, 'GT Hookshot East-Mid Path', Lgcl),
         create_door(player, 'GT Hookshot Mid-East Path', Lgcl),
@@ -1497,14 +1506,14 @@ def create_doors(world, player):
 
     # static portal flags
     world.get_door('Sanctuary S', player).dead_end(allowPassage=True)
-    if world.mode[player] == 'open' and world.shuffle[player] not in ['crossed', 'insanity']:
+    if world.mode[player] == 'open' and world.shuffle[player] not in ['lean', 'swapped', 'crossed', 'insanity']:
         world.get_door('Sanctuary S', player).lw_restricted = True
     world.get_door('Eastern Hint Tile Blocked Path SE', player).passage = False
     world.get_door('TR Big Chest Entrance SE', player).passage = False
     world.get_door('Sewers Secret Room Key Door S', player).dungeonLink = 'Hyrule Castle'
     world.get_door('Desert Cannonball S', player).dead_end()
-    # world.get_door('Desert Boss SW', player).dead_end()
-    # world.get_door('Desert Boss SW', player).dungeonLink = 'Desert Palace'
+    world.get_door('Desert Boss SW', player).dead_end()
+    world.get_door('Desert Boss SW', player).dungeonLink = 'Desert Palace'
     world.get_door('Skull 1 Lobby S', player).dungeonLink = 'Skull Woods'
     world.get_door('Skull Map Room SE', player).dungeonLink = 'Skull Woods'
     world.get_door('Skull Spike Corner SW', player).dungeonLink = 'Skull Woods'
@@ -1514,8 +1523,8 @@ def create_doors(world, player):
     world.get_door('Mire Right Bridge SE', player).dead_end(allowPassage=True)
     world.get_door('TR Roller Room SW', player).dead_end()
     world.get_door('TR Tile Room SE', player).dead_end()
-    # world.get_door('TR Boss SW', player).dead_end()
-    # world.get_door('TR Boss SW', player).dungeonLink = 'Turtle Rock'
+    world.get_door('TR Boss SW', player).dead_end()
+    world.get_door('TR Boss SW', player).dungeonLink = 'Turtle Rock'
     world.get_door('GT Petting Zoo SE', player).dead_end()
     world.get_door('GT DMs Room SW', player).dead_end()
     world.get_door("GT Bob\'s Room SE", player).passage = False

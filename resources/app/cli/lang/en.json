@@ -55,19 +55,30 @@
     "building.collection.spheres": "Building up collection spheres",
     "building.calculating.spheres": "Calculated sphere %i, containing %i of %i progress items.",
     "building.final.spheres": "Calculated final sphere %i, containing %i of %i progress items.",
-    "old.python.version": "Door Rando may have issues with python versions earlier than 3.7.  Detected version: %s"
+    "old.python.version": "Door Rando may have issues with python versions earlier than 3.7.  Detected version: %s",
+    "hybridglitches.door.shuffle": "Hybrid Major Glitches is not currently compatible with Door Shuffle."
   },
   "help": {
     "lang": [ "App Language, if available, defaults to English" ],
-    "create_spoiler": [ "Output a Spoiler File" ],
+    "spoiler": [
+      "Spoiler File Options. (default: %(default)s)",
+      "None:            No Spoiler",
+      "Meta:            Meta information only about game. Intended for mystery settings",
+      "Settings:        Only settings information",
+      "Semi:            ",
+      "Full:            Full spoiler generated",
+      "Debug:           Includes debug information"
+    ],
     "bps": [ "Output BPS patches instead of ROMs"],
     "logic": [
       "Select Enforcement of Item Requirements. (default: %(default)s)",
-      "No Glitches:    No Glitch knowledge required.",
-      "Minor Glitches: May require Fake Flippers, Bunny Revival",
-      "                and Dark Room Navigation.",
-      "No Logic:       Distribute items without regard for",
-      "                item requirements."
+      "No Glitches:           No Glitch knowledge required.",
+      "Minor Glitches:        May require Fake Flippers, Bunny Revival",
+      "                       and Dark Room Navigation.",
+      "Overworld Glitches:    May require overworld clips and teleports.",
+      "Hybrid Major Glitches: May require underworld clips.",
+      "No Logic:              Distribute items without regard for",
+      "                       item requirements."
     ],
     "mode": [
       "Select game mode. (default: %(default)s)",
@@ -206,6 +217,7 @@
       "                connect remaining entrances.",
       "Crossed:        Mix cave and dungeon entrances freely while allowing",
       "                caves to cross between worlds.",
+      "Swapped:        Same as Crossed, but entrances switch places in pairs.",
       "Insanity:       Decouple entrances and exits from each other and",
       "                shuffle them freely. Caves that used to be single",
       "                entrance will still exit to the same location from",
@@ -220,6 +232,7 @@
     "door_shuffle": [
       "Select Door Shuffling Algorithm. (default: %(default)s)",
       "Basic:          Doors are mixed within a single dungeon.",
+      "Paired          Dungeon are paired (with one trio) and only mixed in those groups",
       "Partitioned     Doors are mixed in 3 partitions: L1-3+HC+AT, D1-4, D5-8",
       "Crossed:        Doors are mixed between all dungeons.",
       "Vanilla:        All doors are connected the same way they were in the",
@@ -239,7 +252,21 @@
       "all:      Adds traps doors (and any future supported door types)",
       "chaos:    Increases the number of door types in all dungeon pools"
     ],
+    "trap_door_mode" : [
+      "Trap Door Removal (default: %(default)s)",
+      "vanilla:  No trap door removal",
+      "optional: Trap doors removed if blocking",
+      "boss:     Also remove boss traps",
+      "oneway:   Remove all annoying trap doors"
+    ],
+    "key_logic_algorithm": [
+      "Key Logic Algorithm (default: %(default)s)",
+      "default: Balance between safety and randomization",
+      "partial: Partial protection when using certain minor glitches",
+      "strict:  Ensure small keys are available"
+    ],
     "decoupledoors" : [ "Door entrances and exits are decoupled" ],
+    "door_self_loops" : [ "Spiral stairs are allowed to self-loop" ],
     "experimental": [ "Enable experimental features. (default: %(default)s)" ],
     "dungeon_counters": [ "Enable dungeon chest counters. (default: %(default)s)" ],
     "crystals_ganon": [
@@ -280,7 +307,11 @@
     "keyshuffle": [ "Small Keys are no longer restricted to their dungeons, but can be anywhere. (default: %(default)s)" ],
     "bigkeyshuffle": [ "Big Keys are no longer restricted to their dungeons, but can be anywhere. (default: %(default)s)" ],
     "shopsanity": ["Shop contents are shuffle in the main item pool and other items can take their place. (default: %(default)s)"],
-    "dropshuffle": [ "Keys dropped by enemies are shuffled and other items can take their place. (default: %(default)s)"],
+    "dropshuffle": [ "Controls how enemies drop items (default: %(default)s)",
+      "None:        Enemies drops prize packs or keys as normal",
+      "Keys:        Enemies that drop keys can drop other items and the keys are shuffled into the pool",
+      "Underworld:  All killable enemies in the underworld can drop items"
+    ],
     "pottery": [ "Controls how items under pots are shuffled and if other items can take their place:",
       "None:      No pots are changed",
       "Keys:      Key pots are included in the location pool and other items can take their place",
@@ -318,6 +349,12 @@
     ],
     "pseudoboots": [ " Players starts with pseudo boots that allow dashing but no item checks (default: %(default)s"],
     "bombbag": ["Start with 0 bomb capacity. Two capacity upgrades (+10) are added to the pool (default: %(default)s)" ],
+    "any_enemy_logic": [
+      "How to handle potential traversal between dungeon in Crossed door shuffle",
+      "None:         Enemies that required unusual weaponry are not allowed to logical protect doors, chests, or key drops.",
+      "Allow_Drops:  Drops are okay for those enemies, and a correct weapon is logically required",
+      "Allow_All:    All enemies allowed anywhere. (Logic will be adapted to the placement)"
+    ],
     "startinventory": [ "Specifies a list of items that will be in your starting inventory (separated by commas). (default: %(default)s)" ],
     "usestartinventory": [ "Toggle usage of Starting Inventory." ],
     "customizer": ["Path to a customizer file."],

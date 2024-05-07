@@ -1,5 +1,13 @@
 {
   "keysanity": {
+    "smallkeyshuffle": {
+      "type": "selectbox",
+      "options": [
+        "none",
+        "wild",
+        "universal"
+      ]
+    },
     "mapshuffle":       { "type": "checkbox" },
     "compassshuffle":   { "type": "checkbox" },
     "bigkeyshuffle":    { "type": "checkbox" }
