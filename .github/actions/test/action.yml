@@ -31,18 +31,26 @@ runs:
         path: ./resources/user/meta/manifests
 
     # run tests
-    - name: 🖥️Test
+    - name: 🖥️Test Base
       shell: bash
       run: |
-        echo "🖥️Test"
-    - name: 🖥️Test
+        echo "🖥️Test Base"
+    - name: 🖥️Test Base
       shell: bash
       run: |
         mkdir -p ./failures
         echo "" > ./failures/errors.txt
         python -m pip install tqdm
         python ./test/NewTestSuite.py
+    - name: 🖥️Test Mystery
+      shell: bash
+      run: |
+        echo "🖥️Test Mystery"
+    - name: 🖥️Test Mystery
+      shell: bash
+      run: |
         python ./test/MysteryTestSuite.py
+      if: contains(${{ inputs.os-name }}, 'macos')
 
     # print failures
     - name: 💬Print Failures

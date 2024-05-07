@@ -136,4 +136,6 @@ if __name__ == "__main__":
         stream.write(str.join("\n", successes))
         results["success"] = successes
 
+    print(f"Errors:  {len(results['errors'])}")
+    print(f"Success: {len(results['success'])}")
     print(results)
