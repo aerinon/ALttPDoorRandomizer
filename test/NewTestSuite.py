@@ -16,6 +16,11 @@ if os.path.isfile(PIPLINE_PATH):
     with open(PIPLINE_PATH) as pipline_file:
         PYLINE = pipline_file.read().replace("-m pip","").strip()
 
+results = {
+    "errors": [],
+    "success": []
+}
+
 def main(args=None):
     successes = []
     errors = []
@@ -124,6 +129,10 @@ if __name__ == "__main__":
                 stream.write(error[0] + "\n")
                 stream.write(error[1] + "\n")
                 stream.write(error[2] + "\n\n")
+                results["errors"].push(error)
 
     with open("new-test-suite-success.txt", "w") as stream:
         stream.write(str.join("\n", successes))
+        results["success"] = successes
+
+    print(results)
