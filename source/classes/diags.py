@@ -3,7 +3,7 @@ try:
     import pkg_resources
 except ModuleNotFoundError as e:
     pass
-from datetime import datetime
+import datetime
 
 from Main import __version__
 DR_VERSION = __version__
@@ -17,7 +17,7 @@ def output():
   lines = [
     f"{PROJECT_NAME} Diagnostics",
     "=================================",
-    diagpad("UTC Time") + str(datetime.now(datetime.UTC))[:19],
+    diagpad("UTC Time") + str(datetime.datetime.now(datetime.UTC))[:19],
     diagpad(f"{PROJECT_NAME} Version") + DR_VERSION,
     diagpad("Python Version") + platform.python_version()
   ]
