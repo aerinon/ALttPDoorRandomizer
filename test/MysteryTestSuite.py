@@ -128,6 +128,7 @@ if __name__ == "__main__":
                         stream.write(error[0] + "\n")
                         stream.write(error[1] + "\n")
                         stream.write(error[2] + "\n\n")
+                        error[2] = error[2].split("\n")
                         results["errors"].append(error)
 
     with open("mystery-success.txt", "w") as stream:
