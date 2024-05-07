@@ -644,7 +644,7 @@ class MultiByteCoreTextMapper(object):
             linespace = wrap
             line = lines.pop(0)
 
-            match = re.search('^\{[A-Z0-9_:]+\}$', line)
+            match = re.search('^{[A-Z0-9_:]+}$', line)
             if match:
                 if line == '{PAGEBREAK}':
                     if lineindex % 3 != 0:
@@ -663,13 +663,13 @@ class MultiByteCoreTextMapper(object):
             while words:
                 word = words.pop(0)
 
-                match = re.search('^(\{[A-Z0-9_:]+\}).*', word)
+                match = re.search('^({[A-Z0-9_:]+}).*', word)
                 if match:
                     start_command = match.group(1)
                     outbuf.extend(cls.special_commands[start_command])
                     word = word.replace(start_command, '')
 
-                match = re.search('(\{[A-Z0-9_:]+\})\.?$', word)
+                match = re.search('({[A-Z0-9_:]+})\.?$', word)
                 if match:
                     end_command = match.group(1)
                     word = word.replace(end_command, '')
