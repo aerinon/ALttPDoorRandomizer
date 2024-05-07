@@ -50,7 +50,7 @@ runs:
       shell: bash
       run: |
         python ./test/MysteryTestSuite.py
-      if: contains(${{ inputs.os-name }}, 'macos')
+      if: contains(inputs.os-name, 'macos')
 
     # print failures
     - name: 💬Print Failures
