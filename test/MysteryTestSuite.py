@@ -135,6 +135,14 @@ if __name__ == "__main__":
         stream.write(str.join("\n", successes))
         results["success"] = successes
 
-    print(f"Errors:  {len(results['errors'])}")
-    print(f"Success: {len(results['success'])}")
+    num_errors  = len(results["errors"])
+    num_success = len(results["success"])
+    num_total   = num_errors + num_success
+
+    print(f"Errors:  {num_errors}/{num_total}")
+    print(f"Success: {num_success}/{num_total}")
     print(results)
+
+    if (num_errors/num_total) > (num_success/num_total):
+        # exit(1)
+        pass

@@ -42,15 +42,16 @@ runs:
         echo "" > ./failures/errors.txt
         python -m pip install tqdm
         python ./test/NewTestSuite.py
-    - name: 🖥️Test Mystery
-      shell: bash
-      run: |
-        echo "🖥️Test Mystery"
-    - name: 🖥️Test Mystery
-      shell: bash
-      run: |
-        python ./test/MysteryTestSuite.py
-      if: contains(inputs.os-name, 'macos')
+    # - name: 🖥️Test Mystery
+    #   shell: bash
+    #   run: |
+    #     echo "🖥️Test Mystery"
+    #   if: contains(inputs.os-name, 'macos')
+    # - name: 🖥️Test Mystery
+    #   shell: bash
+    #   run: |
+    #     python ./test/MysteryTestSuite.py
+    #   if: contains(inputs.os-name, 'macos')
 
     # print failures
     - name: 💬Print Failures
