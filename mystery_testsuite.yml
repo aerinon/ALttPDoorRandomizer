@@ -98,8 +98,8 @@ compass_shuffle:
   on: 1
   off: 1
 smallkey_shuffle:
-  on: 1
-  off: 1
+  wild: 1
+  none: 1
 bigkey_shuffle:
   on: 1
   off: 1
