@@ -669,7 +669,7 @@ class MultiByteCoreTextMapper(object):
                     outbuf.extend(cls.special_commands[start_command])
                     word = word.replace(start_command, '')
 
-                match = re.search('({[A-Z0-9_:]+})\.?$', word)
+                match = re.search('({[A-Z0-9_:]+})[\.]?$', word)
                 if match:
                     end_command = match.group(1)
                     word = word.replace(end_command, '')
