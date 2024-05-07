@@ -40,6 +40,7 @@ runs:
       run: |
         mkdir -p ./failures
         echo "" > ./failures/errors.txt
+        python -m pip install tqdm
         python ./test/NewTestSuite.py
         python ./test/MysteryTestSuite.py
 
