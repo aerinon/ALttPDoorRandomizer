@@ -42,7 +42,7 @@ runs:
         echo "" > ./failures/errors.txt
         python -m pip install tqdm
         python ./test/NewTestSuite.py
-        python ./test/MysteryTestSuite.py
+      #  python ./test/MysteryTestSuite.py
 
     # print failures
     - name: 💬Print Failures

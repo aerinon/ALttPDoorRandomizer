@@ -1,5 +1,5 @@
 # workflow name
-name: ⏱️Test, 🔨Build & 🚀Deploy
+name: ⏱️Test/🔨Build/🚀Deploy
 
 # fire on
 on: [
