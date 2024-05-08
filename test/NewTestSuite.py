@@ -123,8 +123,12 @@ if __name__ == "__main__":
     successes += s
     print()
 
+    LOGPATH = os.path.join(".","logs")
+    if not os.path.isdir(LOGPATH):
+        os.makedirs(LOGPATH)
+
     if errors:
-        with open(f"new-test-suite-errors.txt", 'w') as stream:
+        with open(os.path.join(LOGPATH, "new-test-suite-errors.txt"), 'w') as stream:
             for error in errors:
                 stream.write(error[0] + "\n")
                 stream.write(error[1] + "\n")
@@ -132,7 +136,7 @@ if __name__ == "__main__":
                 error[2] = error[2].split("\n")
                 results["errors"].append(error)
 
-    with open("new-test-suite-success.txt", "w") as stream:
+    with open(os.path.join(LOGPATH, "new-test-suite-success.txt"), 'w') as stream:
         stream.write(str.join("\n", successes))
         results["success"] = successes
 
@@ -142,7 +146,7 @@ if __name__ == "__main__":
 
     print(f"Errors:  {num_errors}/{num_total}")
     print(f"Success: {num_success}/{num_total}")
-    print(results)
+    # print(results)
 
     if (num_errors/num_total) > (num_success/num_total):
         exit(1)
