@@ -53,6 +53,18 @@ runs:
     #     python ./test/MysteryTestSuite.py
     #   if: contains(inputs.os-name, 'macos')
 
+    # upload logs
+    - name: 🔼Upload Logs
+      shell: bash
+      run: |
+        echo "🔼Upload Logs"
+    - name: 🔼Upload Logs
+      uses: actions/upload-artifact
+      with:
+        name: logs-${{ inputs.os-name }}-py${{ inputs.python-version }}
+        path: ./logs
+        if-no-files-found: ignore
+
     # print failures
     - name: 💬Print Failures
       if: failure()
