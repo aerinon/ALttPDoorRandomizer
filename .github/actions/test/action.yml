@@ -59,7 +59,7 @@ runs:
       run: |
         echo "🔼Upload Logs"
     - name: 🔼Upload Logs
-      uses: actions/upload-artifact
+      uses: actions/upload-artifact@v4.3.3
       with:
         name: logs-${{ inputs.os-name }}-py${{ inputs.python-version }}
         path: ./logs
