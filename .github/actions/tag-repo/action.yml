@@ -1,0 +1,76 @@
+name: 🏷️Tag Repository
+description: Tag a repository
+
+inputs:
+  repository:
+    description: "Repository Owner/Name; octocat/Hello-World"
+    required: true
+  ref-name:
+    description: "Reference name; branch, tag, etc"
+    required: true
+  github-tag:
+    description: "Reference to tag with"
+    required: true
+  debug:
+    description: "Debug Mode, won't set tag"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🏷️Tag Repository
+      uses: actions/github-script@v7.0.1
+      with:
+        github-token: ${{ env.FINE_PAT }}
+        script: |
+          const debug = ${{ inputs.debug }} == "true" || ${{ inputs.debug }} == true;
+          const repository = '${{ inputs.repository }}';
+          const owner = repository.substring(0,repository.indexOf('/'));
+          const repo = repository.substring(repository.indexOf('/')+1);
+          const ref = '${{ inputs.ref-name }}';
+          // get git tag
+          const gitTag = '${{ inputs.github-tag }}';
+          console.log('Repo Data: ', `${owner}/${repo}@${ref}`)
+          console.log('Git tag:   ', gitTag)
+          if(gitTag == '') {
+            let msg = 'Result:    🔴No Git Tag sent, aborting!';
+            console.log(msg)
+            core.setFailed(msg)
+            return
+          }
+          // get latest commit
+          const latestCommit = await github.rest.git.getRef({
+            owner: owner,
+            repo: repo,
+            ref: ref
+          })
+          // get latest refs
+          const latestRefs = await github.rest.git.listMatchingRefs({
+            owner: owner,
+            repo: repo
+          })
+          let latestTag = ''; // bucket for latest tag
+          // get last tag in data
+          for(let thisRef of latestRefs.data) {
+            if(thisRef['ref'].indexOf('tags') > -1) {
+              let refParts = thisRef['ref'].split('/');
+              latestTag = refParts[-1];
+            }
+          }
+          console.log('Latest tag:', latestTag)
+          if(latestTag != gitTag) {
+            if(debug) {
+              console.log(`DEBUG:     🔵Creating '${gitTag}' tag`)
+            } else {
+              console.log(`Result:    🟢Creating '${gitTag}' tag`)
+              github.rest.git.createRef({
+                owner: owner,
+                repo: repo,
+                ref: `refs/tags/${gitTag}`,
+                sha: latestCommit.data.object.sha
+              })
+            }
+          } else {
+            console.log('Result:    🟡Not creating release tag')
+          }
