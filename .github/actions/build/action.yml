@@ -51,17 +51,17 @@ runs:
         pip install pyinstaller
         python -m source.meta.build
 
-    # upload binary artifact for later step
-    - name: 🔼Upload Problem Children Artifact
-      shell: bash
-      run: |
-        echo "🔼Upload Problem Children Artifact"
-    - name: 🔼Upload Problem Children Artifact
-      uses: actions/upload-artifact@v4.3.3
-      with:
-        name: problemchildren-${{ inputs.os-name }}-py${{ inputs.python-version }}
-        path: ./resources/app/meta/manifests/excluded_dlls.json
-        if-no-files-found: ignore # 'warn' or 'ignore' are also available, defaults to `warn`
+    # upload problem children
+    # - name: 🔼Upload Problem Children Artifact
+    #   shell: bash
+    #   run: |
+    #     echo "🔼Upload Problem Children Artifact"
+    # - name: 🔼Upload Problem Children Artifact
+    #   uses: actions/upload-artifact@v4.3.3
+    #   with:
+    #     name: problemchildren-${{ inputs.os-name }}-py${{ inputs.python-version }}
+    #     path: ./resources/app/meta/manifests/excluded_dlls.json
+    #     if-no-files-found: ignore # 'warn' or 'ignore' are also available, defaults to `warn`
 
     # prepare binary artifact for later step
     - name: 💬Prepare Binary Artifact
