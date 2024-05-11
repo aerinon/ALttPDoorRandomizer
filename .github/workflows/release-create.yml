@@ -303,6 +303,30 @@ jobs:
           name: archive-windows-latest-py${{ matrix.python-version }}
           path: ${{ steps.parentDir.outputs.parentDir }}/deploy/windows
 
+      # determine linux archive asset
+      - name: ❔Identify Linux Archive Asset
+        id: identify-linux-asset
+        shell: bash
+        run: |
+          ASSET_LINUX="$(ls ${{ steps.parentDir.outputs.parentDir }}/deploy/linux)"
+          echo "asset_linux=$ASSET_LINUX" >> $GITHUB_OUTPUT
+
+      # determine macos archive asset
+      - name: ❔Identify MacOS Archive Asset
+        id: identify-macos-asset
+        shell: bash
+        run: |
+          ASSET_MACOS="$(ls ${{ steps.parentDir.outputs.parentDir }}/deploy/macos)"
+          echo "asset_macos=$ASSET_MACOS" >> $GITHUB_OUTPUT
+
+      # determine windows archive asset
+      - name: ❔Identify Windows Archive Asset
+        id: identify-windows-asset
+        shell: bash
+        run: |
+          ASSET_WIN="$(ls ${{ steps.parentDir.outputs.parentDir }}/deploy/windows)"
+          echo "asset_windows=$ASSET_WIN" >> $GITHUB_OUTPUT
+
       # archive listing
       # - name: Archive Listing
       #   shell: bash
@@ -326,10 +350,13 @@ jobs:
           ASSET_PREFIX="${PROJECT_NAME}-${GITHUB_TAG}"
           echo "asset_prefix=$ASSET_PREFIX" >> $GITHUB_OUTPUT
 
-          echo "Project Name: ${PROJECT_NAME}"
-          echo "Release Name: ${RELEASE_NAME}"
-          echo "Asset Prefix: ${ASSET_PREFIX}"
-          echo "Git Tag:      ${GITHUB_TAG}"
+          echo "Project Name:  ${PROJECT_NAME}"
+          echo "Release Name:  ${RELEASE_NAME}"
+          echo "Asset Prefix:  ${ASSET_PREFIX}"
+          echo "Git Tag:       ${GITHUB_TAG}"
+          echo "Linux Asset:   ${ASSET_LINUX}"
+          echo "MacOS Asset:   ${ASSET_MACOS}"
+          echo "Windows Asset: ${ASSET_WIN}"
 
       # create a release (MASTER)
       #TODO: Make sure we updated RELEASENOTES.md
@@ -348,14 +375,6 @@ jobs:
           # draft: true
         if: contains(github.ref, 'master')
 
-      # determine linux archive asset
-      - name: ❔Identify Linux Archive Asset
-        id: identify-linux-asset
-        shell: bash
-        run: |
-          ASSET_LINUX="$(ls ${{ steps.parentDir.outputs.parentDir }}/deploy/linux)"
-          echo "asset_linux=$ASSET_LINUX" >> $GITHUB_OUTPUT
-
       # upload linux archive asset (MASTER)
       #TODO: Make sure we're firing on the proper branches
       - name: 🔼Upload Linux Archive Asset (MASTER)
@@ -370,14 +389,6 @@ jobs:
           asset_content_type: application/gzip
         if: contains(github.ref, 'master')
 
-      # determine macos archive asset
-      - name: ❔Identify MacOS Archive Asset
-        id: identify-macos-asset
-        shell: bash
-        run: |
-          ASSET_MACOS="$(ls ${{ steps.parentDir.outputs.parentDir }}/deploy/macos)"
-          echo "asset_macos=$ASSET_MACOS" >> $GITHUB_OUTPUT
-
       # upload macos archive asset (MASTER)
       #TODO: Make sure we're firing on the proper branches
       - name: 🔼Upload MacOS Archive Asset (MASTER)
@@ -391,14 +402,6 @@ jobs:
           asset_name: ${{ steps.debug_info.outputs.asset_prefix }}-osx.tar.gz
           asset_content_type: application/gzip
         if: contains(github.ref, 'master')
-
-      # determine windows archive asset
-      - name: ❔Identify Windows Archive Asset
-        id: identify-windows-asset
-        shell: bash
-        run: |
-          ASSET_WIN="$(ls ${{ steps.parentDir.outputs.parentDir }}/deploy/windows)"
-          echo "asset_windows=$ASSET_WIN" >> $GITHUB_OUTPUT
 
       # upload windows archive asset (MASTER)
       #TODO: Make sure we're firing on the proper branches
