@@ -354,9 +354,9 @@ jobs:
           echo "Release Name:  ${RELEASE_NAME}"
           echo "Asset Prefix:  ${ASSET_PREFIX}"
           echo "Git Tag:       ${GITHUB_TAG}"
-          echo "Linux Asset:   ${ASSET_LINUX}"
-          echo "MacOS Asset:   ${ASSET_MACOS}"
-          echo "Windows Asset: ${ASSET_WIN}"
+          echo "Linux Asset:   ${{ steps.identify-linux-asset.outputs.asset_linux }}"
+          echo "MacOS Asset:   ${{ steps.identify-macos-asset.outputs.asset_macos }}"
+          echo "Windows Asset: ${{ steps.identify-windows-asset.outputs.asset_windows }}"
 
       # create a release (MASTER)
       #TODO: Make sure we updated RELEASENOTES.md
