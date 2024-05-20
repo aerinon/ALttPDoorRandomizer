@@ -1,6 +1,7 @@
 import logging
 import RaceRandom as random
 from collections import defaultdict, deque, Counter
+from itertools import combinations
 
 from BaseClasses import Direction, RegionType, CrystalBarrier, DoorType, Door, flooded_keys
 from BaseClasses import hook_from_door
@@ -38,6 +39,8 @@ class SectorDescriptor:
         #   consistent suffix to help uniquely identify
 
         self.reachability = defaultdict(list)
+        self.blue_reachability = defaultdict(list)
+        self.crystal_switch_doors = []
         self.constraints = {}  # disjunction of optional constraints, indexed by Hooks consumed
         self.parity_id = ''
         self.init_parity_id()
@@ -77,6 +80,10 @@ class SectorDescriptor:
                 continue
             state = SimpleExplorationState(v_trap_flag)
             state.extend_reachable_state(door)
+            if state.visited_map[door.entrance.parent_region] == CrystalBarrier.Either:
+                self.crystal_switch_doors.append(door)
+            else:
+                self.blue_reachability[door].extend([region for region, crystal in state.visited_map.items() if crystal in [CrystalBarrier.Null, CrystalBarrier.Blue]])
             for explorable in state.unattached_doors:
                 if explorable.door == DoorType.Logical:  # skip sanc mirror route in this calc
                     continue
@@ -161,10 +168,28 @@ class SectorDescriptor:
                         self.must_enter_reqs.insert(0, d)
                     else:
                         self.must_enter_reqs.insert(0, tuple(covers_all))
-            # todo: check for crystal options
+
         if all(len(reach_list) == total_needed for source, reach_list in self.reachability.items()):
             if self.is_sector_neutral():
                 self.is_neutral = True
+
+        # todo: check for crystal options
+        blue_crystal_needed = {ext.parent_region for r in self.sector.regions for ext in r.exits if ext.door and ext.door.crystal == CrystalBarrier.Blue}
+        if blue_crystal_needed:
+            reqs = {r: [k for k, v in self.blue_reachability.items() if r in v] for r in blue_crystal_needed}
+            self.crystal_reqs = {}
+            for need, options in reqs.items():
+                is_subset = False
+                for need2, options2 in self.crystal_reqs.items():
+                    if set(options) <= set(options2):
+                        is_subset = True
+                        new_key = (need2 + (need,) if isinstance(need2, tuple) else (need2, need))
+                        self.crystal_reqs[new_key] = options2
+                        del self.crystal_reqs[need2]
+                        break
+                if not is_subset:
+                    self.crystal_reqs[need] = options
+
 
     def is_sector_neutral(self):
         if len(self.sector.outstanding_doors) == 2:
