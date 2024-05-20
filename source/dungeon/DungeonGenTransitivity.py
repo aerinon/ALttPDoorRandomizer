@@ -93,12 +93,23 @@ def do_transitivity_check(sector_list, starting_point_list):
                 next_state = current_state.copy()
                 for idx in range(len(path.sector_path), 0, -1):
                     sector = path.sector_path[idx-1]
-                    hooked_door = None
+                    hooked_door, priority_hangers, the_rest = None, [], []
                     for hanger in path.hangers:
+                        if any(hanger == req or (isinstance(req,tuple) and hanger in req) for req in current_state.must_enters):
+                            priority_hangers.append(hanger)
+                        else:
+                            the_rest.append(hanger)
+                    for hanger in priority_hangers:
                         hooks = next_state.get_possible_hooks(hanger)
                         if len(hooks) > 0:
                             hooked_door = hanger
                             break
+                    if hooked_door is None:
+                        for hanger in the_rest:
+                            hooks = next_state.get_possible_hooks(hanger)
+                            if len(hooks) > 0:
+                                hooked_door = hanger
+                                break
                     next_state.append_door(hooked_door, sector)
 
                 constrained_sector = door_sector_map[path.origin_door]
@@ -142,7 +153,7 @@ class Transitivity:
     def copy(self):
         copy = Transitivity()
         copy.explored_doors.update(self.explored_doors)
-        copy.current_hooks.update(self.current_hooks)
+        copy.current_hooks.update({k: list(v) for k, v in self.current_hooks.items()})
         copy.door_path.extend(self.door_path)
         copy.next_door = self.next_door
 
@@ -155,7 +166,7 @@ class Transitivity:
         copy.specials.update(self.specials)
         copy.crystal_needs.update(self.crystal_needs)
         copy.dead_ends.update(self.dead_ends)
-        copy.sector_reqs.update(self.sector_reqs)
+        copy.sector_reqs.update({k: list(v) for k, v in self.sector_reqs.items()})
 
         copy.others.extend(self.others)
         copy.neutrals.extend(self.neutrals)
@@ -200,9 +211,9 @@ class Transitivity:
     def find_next_constraints(self):
         if len(self.must_enters) > 0:
             # order them? hookable now better score than not, also those that provide more hooks
-            return self.must_enters.keys()
+            return list(self.must_enters.keys())
         if len(self.dead_ends) > 0:
-            return self.dead_ends.keys()
+            return list(self.dead_ends.keys())
         return []
 
     def find_possible_hooks(self):
@@ -231,12 +242,16 @@ class Transitivity:
             if any(len(self.get_possible_hooks(hanger)) for hanger in path.hangers):
                 solutions.append(path)
                 continue
-            if len(path.sector_path) >= len(self.others):
+            candidates = [s for s in self.sector_list if s not in path.sector_path
+                          and not s.descriptor.dead_end and not s.descriptor.is_neutral]
+            if len(path.sector_path) >= len(candidates):
                 continue
-            next_depth = [s for s in self.others if s not in path.sector_path]
-            for s in next_depth:
+            for s in candidates:
                 done_hooks = []
                 for d in s.outstanding_doors:
+                    # don't hook to your self or to a hard must-enter requirement
+                    if d == path.origin_door or d in self.must_enters:
+                        continue
                     hook = hook_from_door(d)
                     if hook in done_hooks:
                         continue
@@ -281,11 +296,12 @@ class Transitivity:
             del self.dead_ends[door]
         if sector in self.sector_reqs:
             req = self.find_sector_req_by_door(sector, door)
-            self.sector_reqs[sector].remove(req)
-            if len(self.sector_reqs[sector]) == 0:
-                del self.sector_reqs[sector]
-                self.connected_sectors.append(sector)
-                self.sector_list.remove(sector)
+            if req is not None:
+                self.sector_reqs[sector].remove(req)
+                if len(self.sector_reqs[sector]) == 0:
+                    del self.sector_reqs[sector]
+                    self.connected_sectors.append(sector)
+                    self.sector_list.remove(sector)
         else:
             if sector in self.others:
                 self.connected_sectors.append(sector)
