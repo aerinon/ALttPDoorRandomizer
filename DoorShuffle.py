@@ -13,7 +13,6 @@ from Dungeons import dungeon_regions, region_starts, standard_starts, split_regi
 from Dungeons import dungeon_bigs, dungeon_hints
 from Items import ItemFactory
 from RoomData import DoorKind, PairedDoor, reset_rooms
-from source.dungeon.DungeonGen2 import create_dungeon_builders_new
 # from source.dungeon.DungeonGen3 import create_dungeon_builders_prototype
 from source.dungeon.DungeonGenLocalSearch import create_dungeon_builders_prototype
 from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
@@ -888,11 +887,7 @@ def main_dungeon_pool(dungeon_pool, world, player):
             extra_dungeon_items(pool, world, player)
             sector_pool = convert_to_sectors(region_list, world, player)
             merge_sectors(sector_pool, world, player)
-            # todo: which dungeon to create
-            if world.experimental[player]:
-                builders = create_dungeon_builders_new(sector_pool, connections_tuple, world, player, pool, entrances, splits)
-            else:
-                builders = create_dungeon_builders(sector_pool, connections_tuple, world, player, pool, entrances, splits)
+            builders = create_dungeon_builders(sector_pool, connections_tuple, world, player, pool, entrances, splits)
             dungeon_builders.update(builders)
         door_type_pools.append((pool, DoorTypePool(pool, world, player)))
 

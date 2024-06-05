@@ -141,7 +141,7 @@ class Transitivity:
         # categories
         self.must_enters = {}  # door -> sector
         self.specials = {}  # tuple of doors -> sector?
-        self.crystal_needs = {}  # tuple fo doors -> sector?
+        self.crystal_needs = {}  # tuple of doors -> sector?
         self.dead_ends = {}
         self.sector_reqs = defaultdict(list)  # sector -> constraint list
 
