@@ -22,7 +22,6 @@ def create_sector_descriptors(sector_list, world, player):
         append_to_yaml(['data', 'gen', 'proposed_test.yaml'], descript.to_yaml())
 
 
-
 class SectorDescriptor:
     def __init__(self, sector, v_trap_flag):
         self.sector = sector
@@ -83,7 +82,7 @@ class SectorDescriptor:
             if state.visited_map[door.entrance.parent_region] == CrystalBarrier.Either:
                 self.crystal_switch_doors.append(door)
             else:
-                self.blue_reachability[door].extend([region for region, crystal in state.visited_map.items() if crystal in [CrystalBarrier.Null, CrystalBarrier.Blue]])
+                self.blue_reachability[door].extend([region for region, crystal in state.visited_map.items() if crystal in [CrystalBarrier.Null, CrystalBarrier.Blue, CrystalBarrier.Both]])
             for explorable in state.unattached_doors:
                 if explorable.door == DoorType.Logical:  # skip sanc mirror route in this calc
                     continue
@@ -176,19 +175,45 @@ class SectorDescriptor:
         # todo: check for crystal options
         blue_crystal_needed = {ext.parent_region for r in self.sector.regions for ext in r.exits if ext.door and ext.door.crystal == CrystalBarrier.Blue}
         if blue_crystal_needed:
-            reqs = {r: [k for k, v in self.blue_reachability.items() if r in v] for r in blue_crystal_needed}
-            self.crystal_reqs = {}
-            for need, options in reqs.items():
-                is_subset = False
-                for need2, options2 in self.crystal_reqs.items():
-                    if set(options) <= set(options2):
-                        is_subset = True
-                        new_key = (need2 + (need,) if isinstance(need2, tuple) else (need2, need))
-                        self.crystal_reqs[new_key] = options2
-                        del self.crystal_reqs[need2]
-                        break
-                if not is_subset:
-                    self.crystal_reqs[need] = options
+            doors_to_check = []
+            if self.must_enter_reqs:
+                for req in self.must_enter_reqs:
+                    if not isinstance(req, tuple):
+                        req = (req,)
+                    if any(d not in self.crystal_switch_doors for d in req):
+                        doors_to_check.append(req)
+            else:
+                doors_to_check.append(tuple(self.sector.outstanding_doors))
+
+            crystal_needs = [tuple(d for d in s if d not in self.crystal_switch_doors) for s in doors_to_check
+                             if any(d not in self.crystal_switch_doors for d in s)]
+            if crystal_needs:
+                constraint = CrystalConstraint()
+                constraint.must_enter_reqs = [tuple(d for d in s if d in self.crystal_switch_doors) for s in doors_to_check
+                                              if any(d in self.crystal_switch_doors for d in s)]
+
+                reqs = {r: [k for k, v in self.blue_reachability.items() if r in v] for r in blue_crystal_needed}
+                reqs = {k: v for k, v in reqs.items() if len(v) > 0}
+                region_reqs = {}
+                for need, options in reqs.items():
+                    is_subset = False
+                    for need2, options2 in region_reqs.items():
+                        if set(options) <= set(options2):
+                            is_subset = True
+                            new_key = (need2 + (need,) if isinstance(need2, tuple) else (need2, need))
+                            region_reqs[new_key] = options2
+                            del region_reqs[need2]
+                            break
+                    if not is_subset:
+                        region_reqs[need] = options
+                region_reqs = {k: v for k, v in region_reqs.items() if len(v) > 0}
+
+                if len(region_reqs) > 0:  # Hera pits doesn't need a constraint
+                    if len(region_reqs) > 1 and len(constraint.must_enter_reqs) == 0:
+                        constraint.type = 'all'
+                    for regions, doors in region_reqs.items():
+                        constraint.must_have_color_access.append(tuple(doors))
+                    self.crystal_reqs = constraint
 
 
     def is_sector_neutral(self):
@@ -296,6 +321,23 @@ class SectorDescriptor:
 
     def to_yaml(self):
         return {self.sector.sector_key(): [[c.to_yaml() for c in cm.values()] for cm in self.joined_constraints]}
+
+
+class CrystalConstraint:
+    def __init__(self):
+        self.type = 'any'  # vs all
+        self.must_enter_reqs = []
+        self.must_have_color_access = []
+        self.color = 'blue'  # vs orange (unsure if needed to support)
+
+    def constains_door(self, door_to_check):
+        for req in self.must_enter_reqs:
+            if door_to_check in req:
+                return True
+        for req in self.must_have_color_access:
+            if door_to_check in req:
+                return True
+        return False
 
 
 class SectorConstraint:
