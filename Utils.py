@@ -14,6 +14,15 @@ import yaml
 from pathlib import Path
 
 
+def flatten(lst):
+    result = []
+    for item in lst:
+        if isinstance(item, tuple):
+            result.extend(flatten(item))
+        else:
+            result.append(item)
+    return result
+
 def int16_as_bytes(value):
     value = value & 0xFFFF
     return [value & 0xFF, (value >> 8) & 0xFF]

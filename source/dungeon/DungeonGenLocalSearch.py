@@ -9,7 +9,8 @@ from Utils import clear_file
 from source.dungeon.DungeonGenerationCommon import DungeonBuilder, GenerationException, define_sector_features, dungeon_portals
 from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector, assign_sector_helper, hanger_from_door, hook_from_door
 from source.dungeon.DungeonGen3 import create_sector_descriptors
-from source.dungeon.DungeonGenTransitivity import do_transitivity_check as do_transitivity_check_new
+# from source.dungeon.DungeonGenTransitivity import do_transitivity_check as do_transitivity_check_new
+from source.dungeon.DungeonGenTransitivity2 import do_transitivity_check as do_transitivity_check_new
 
 # ------------------------------ #
 #         Main Algorithm
@@ -669,7 +670,7 @@ class Balance:
             return self.transitive_flag
         # new transitivity calc
         start_list = [d for s in self.sectors for d in s.outstanding_doors if d.portalAble]
-        transitivity = do_transitivity_check_new(self.sectors, start_list)
+        transitivity = do_transitivity_check_new(self.sectors)
         self.info.transitive_db[db_key] = transitivity
         self.transitive_flag = transitivity
         self.transitive_init = True
