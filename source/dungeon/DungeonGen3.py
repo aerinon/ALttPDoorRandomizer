@@ -172,7 +172,7 @@ class SectorDescriptor:
             if self.is_sector_neutral():
                 self.is_neutral = True
 
-        # todo: check for crystal options
+        # check for crystal options
         blue_crystal_needed = {ext.parent_region for r in self.sector.regions for ext in r.exits if ext.door and ext.door.crystal == CrystalBarrier.Blue}
         if blue_crystal_needed:
             doors_to_check = []
@@ -334,6 +334,12 @@ class CrystalConstraint:
         for req in self.must_enter_reqs:
             if door_to_check in req:
                 return True
+        for req in self.must_have_color_access:
+            if door_to_check in req:
+                return True
+        return False
+
+    def contains_color_access(self, door_to_check):
         for req in self.must_have_color_access:
             if door_to_check in req:
                 return True
