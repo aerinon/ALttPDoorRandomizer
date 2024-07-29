@@ -50,6 +50,7 @@ class SectorDescriptor:
         self.crystal_reqs = None
         self.is_neutral = False
 
+        self.shape_construct = {}
         self.analyze_sector(v_trap_flag)
 
         self.joined_constraints = []
@@ -69,7 +70,7 @@ class SectorDescriptor:
         self.reachability.clear()
         skip_door = None
         if self.sector.portal and not self.sector.portal.destination:
-            self.reachability[None].append((self.sector.portal.door, False))
+            self.reachability[None].append((self.sector.portal.door, CrystalBarrier.Orange))
             skip_door = self.sector.portal.door
             # todo: dependent portals
         # which outstanding doors are reachable from which outstanding doors
@@ -88,6 +89,12 @@ class SectorDescriptor:
                     continue
                 # crystal = self.resolve_crystal_prop(explorable.crystal, state.visited_map[explorable.door.entrance.parent_region])
                 self.reachability[door].append((explorable.door, explorable.crystal))
+
+        for door, reach_list in self.reachability.items():
+            if door is None:
+                door = skip_door
+            ctr = Counter([(hook_from_door(door), number) for door, number in reach_list if hook_from_door(door) is not None])
+            self.shape_construct[door] = (door.portalAble,) + tuple(sorted((ctr.items())))
 
         self.classify()
         # for door_hanger, reached_list in self.reachability.items():

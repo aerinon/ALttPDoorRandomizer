@@ -7,7 +7,8 @@ from BaseClasses import CrystalBarrier, DoorType, Hook, RegionType, Sector
 from BaseClasses import hook_from_door, flooded_keys
 from Regions import dungeon_events, flooded_keys_reverse
 from source.dungeon.DungeonGenerationCommon import dungeon_portals
-from source.dungeon.DungeonGenLocalSearch import default_lobby_drops, do_transitivity_check
+from source.dungeon.DungeonGenLocalSearch import default_lobby_drops
+from source.dungeon.DungeonGenTransitivity2 import do_transitivity_check
 
 def create_dungeon(builder, entrances_map, world, player):
     # proposed_map = generate_dungeon_find_proposal(builder, entrance_region_names, split_dungeon, world, player)
@@ -66,6 +67,7 @@ def determine_entrance_regions(builder, world, player):
         primary_portal = primary_candidates[0]
     non_destination_portals.remove(primary_portal)
     candidates = find_portal_candidates(master_door_list)
+    # todo: pick randomly, then check if is transitive if so, then we can skip checking the rest
     candidates = [c for c in candidates if do_transitivity_check(builder.sectors, [c])]
     assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, primary_portal)
 

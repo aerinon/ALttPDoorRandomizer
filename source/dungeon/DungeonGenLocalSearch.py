@@ -4,7 +4,7 @@ import os
 from collections import defaultdict, deque
 
 
-from BaseClasses import Direction, RegionType, CrystalBarrier, DoorType, Door, Hook
+from BaseClasses import Direction, RegionType, CrystalBarrier, DoorType, Door, Hook, Entrance
 from Utils import clear_file
 from source.dungeon.DungeonGenerationCommon import DungeonBuilder, GenerationException, define_sector_features, dungeon_portals
 from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector, assign_sector_helper, hanger_from_door, hook_from_door
@@ -46,6 +46,7 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
             portal_sector.portal.door = door  # assign placeholder door
             portal_assignments[key].append(portal_sector)
 
+
     define_sector_features(sector_pool)
     create_sector_descriptors(sector_pool + portal_pool, world, player)
 
@@ -55,7 +56,7 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
         dungeon_pool.append('Skull Woods Front')
         dungeon_pool.remove('Skull Woods')
         assignments = portal_assignments['Skull Woods']
-        # todo: feels like the back portal should always not be chosen as the desintation ones, see todo saying (analyze not based on inaccessible regions)
+        # todo: feels like the back portal should always not be chosen as the destination ones, see todo saying (analyze not based on inaccessible regions)
         # get skull 3 portal assignment if present, else a random 1
         skull3 = find_sector('Skull 3 Portal', assignments)
         if skull3 is not None and not skull3.portal.destination:
@@ -69,7 +70,7 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
         # the rest go in front
         for portal in assignments:
             portal_assignments['Skull Woods Front'].append(portal)
-    if 'Desert Palace' in dungeon_pool:  # a strict split will prevent this from being a cross-world connector inadvertantly
+    if 'Desert Palace' in dungeon_pool:  # a strict split will prevent this from being a cross-world connector inadvertently
         dungeon_pool.append('Desert Palace Back')
         dungeon_pool.append('Desert Palace Front')
         dungeon_pool.remove('Desert Palace')
@@ -462,6 +463,15 @@ def create_portal_door(world, player, entName):
     return d
 
 
+def create_bridge_door(world, player, bridge_name, region_name, target_region):
+    region = world.get_region(region_name, player)
+    ent = Entrance(player, bridge_name, region)
+    region.exits.append(ent)
+    # d = Door(player, bridge_name, DoorType.Logical, ent)
+    ent.connect(world.get_region(target_region, player))
+    return ent
+
+
 # ------------------------------ #
 #         Utility
 # ------------------------------ #
@@ -669,7 +679,6 @@ class Balance:
             self.transitive_init = True
             return self.transitive_flag
         # new transitivity calc
-        start_list = [d for s in self.sectors for d in s.outstanding_doors if d.portalAble]
         transitivity = do_transitivity_check_new(self.sectors)
         self.info.transitive_db[db_key] = transitivity
         self.transitive_flag = transitivity
