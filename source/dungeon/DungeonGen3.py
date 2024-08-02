@@ -8,7 +8,7 @@ from BaseClasses import hook_from_door
 from Regions import dungeon_events, flooded_keys_reverse
 from Utils import append_to_yaml, clear_file
 from source.dungeon.DungeonGenerationCommon import DungeonBuilder, define_sector_features, hanger_from_door, dungeon_portals
-from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector, GenerationException
+from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector, GenerationException, is_boss_trap
 from source.dungeon.DungeonStitcher import ExplorableDoor
 
 
@@ -94,7 +94,8 @@ class SectorDescriptor:
             if door is None:
                 door = skip_door
             ctr = Counter([(hook_from_door(door), number) for door, number in reach_list if hook_from_door(door) is not None])
-            self.shape_construct[door] = (door.portalAble,) + tuple(sorted((ctr.items())))
+            valid_portal = door.portalAble and not (door.blocked or is_boss_trap(door))
+            self.shape_construct[door] = (valid_portal,) + tuple(sorted((ctr.items())))
 
         self.classify()
         # for door_hanger, reached_list in self.reachability.items():

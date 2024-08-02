@@ -4680,7 +4680,7 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
             # todo: analyze not based on inaccessible regions
             # todo: deactivate some portals - because they are on the same supertile
             analyze_portals(world, player)
-            dungeon_builders = create_dungeon_builders_prototype(pool, sector_pool, portal_pool, world, player)
+            dungeon_builders.update(create_dungeon_builders_prototype(pool, sector_pool, portal_pool, world, player))
         door_type_pools.append((pool, DoorTypePool(pool, world, player)))
 
     update_forced_keys(dungeon_builders, entrances_map, world, player)

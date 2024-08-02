@@ -493,6 +493,10 @@ class GlobalPolarity:
     #     return gp.is_valid(odd_map)
 
 
+# ugly hack for now
+def is_boss_trap(d):
+    return ' Boss ' in d.name or ' Agahnim ' in d.name or d.name in ['Skull Spike Corner SW']
+
 class NeutralizingException(Exception):
     pass
 
