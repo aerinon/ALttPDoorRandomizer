@@ -9,7 +9,7 @@ from enum import Enum
 from BaseClasses import CrystalBarrier
 from Utils import flatten
 
-from source.dungeon.DungeonGenerationCommon import hanger_from_door, hook_from_door
+from source.dungeon.DungeonGenerationCommon import hanger_from_door, hook_from_door, is_boss_trap
 from source.dungeon.DungeonGen3 import CrystalConstraint
 
 logger = logging.getLogger('tlogger')
@@ -20,8 +20,6 @@ logger = logging.getLogger('tlogger')
 # logger.addHandler(handler)
 
 def do_transitivity_check(sector_list, limited_starting_points=None):
-    logger.debug("Starting Transitivity Check")
-    logger.debug(f"Sector List: {','.join(s.sector_key() for s in sector_list)}")
     start_time = time.process_time()
     if limited_starting_points is None:
         limited_starting_points = []
@@ -76,7 +74,8 @@ def do_transitivity_check(sector_list, limited_starting_points=None):
                 if not new_t.unsatisfied_constraints:
                     if iterations > 10000:
                         logger.warning(f'Transitivity check took {iterations} iterations for true result')
-                    logger.debug(f'Finished transitivity check "True" in {time.process_time() - start_time} seconds and {iterations} iterations')
+                        logger.debug(f'Finished transitivity check "True" in {time.process_time() - start_time} seconds and {iterations} iterations')
+                        logger.debug(f"Sector List: {','.join(s.sector_key() for s in sector_list)}")
                     return True
                 priority = new_t.priority()
                 new_t_key = frozenset(new_t.connection_map.items())
@@ -84,7 +83,8 @@ def do_transitivity_check(sector_list, limited_starting_points=None):
                 heapq.heappush(queue, (priority, -next(tiebreaker), new_t))
     if iterations > 10000:
         logger.warning(f'Transitivity check took {iterations} iterations for false result')
-    logger.debug(f'Finished transitivity check "False" in {time.process_time() - start_time} seconds and {iterations} iterations')
+        logger.debug(f'Finished transitivity check "False" in {time.process_time() - start_time} seconds and {iterations} iterations')
+        logger.debug(f"Sector List: {','.join(s.sector_key() for s in sector_list)}")
     return False
 
 
@@ -242,7 +242,8 @@ class Transitivity:
                 if available == d:  # might allow self-connecting spirals someday here, not too important for logic though
                     continue
                 if available.traversal_only:
-                    if d.portalAble and (not self.limited_starting_points or d in self.limited_starting_points):
+                    if (d.portalAble and (not d.blocked or is_boss_trap(d))
+                       and (not self.limited_starting_points or d in self.limited_starting_points)):
                         connectable_doors.append((d, available))
                 else:
                     if hook_from_door(available) == hanger_type:
@@ -460,6 +461,11 @@ class Transitivity:
                 forced_door = constraint.doors[0]
                 total_needed_per_type[hanger_from_door(forced_door)].append(forced_door)
                 forced_list.append(forced_door)
+            elif constraint.type == ConstraintType.Portal:
+                forced_door = constraint.doors[0]
+                if c_info.door_sector_map[forced_door].portal.destination:
+                    total_needed_per_type[hanger_from_door(forced_door)].append(forced_door)
+                    forced_list.append(forced_door)
         available_per_type = defaultdict(list)
         for door in self.remaining_doors + list(self.unconnected_doors.keys()):
             if door not in forced_list:
@@ -468,6 +474,8 @@ class Transitivity:
             if len(available_per_type[hanger]) < len(needed):
                 return True
         if self.check_for_forced_connections(available_per_type, total_needed_per_type, c_info):
+            return True
+        if self.detect_problematic_forced_scenarios(total_needed_per_type, forced_list, c_info):
             return True
 
         # branches vs dead-ends
@@ -520,7 +528,8 @@ class Transitivity:
                 if removals:
                     transformed = True
                     for h, r in removals:
-                        new_available[h].remove(r)
+                        if r in new_available[h]:
+                            new_available[h].remove(r)
                     del new_total_needed[hanger][:num_satisfied]
                     for h, r in new_required:
                         if r not in new_total_needed[h]:
@@ -530,10 +539,81 @@ class Transitivity:
                 return True
         return False
 
+    def detect_problematic_forced_scenarios(self, total_needed_per_type, forced_list, c_info):
+        available_cnt, avail_transfers, transfers_by_sector = defaultdict(int), defaultdict(int), defaultdict(list)
+        avail_by_type_list = defaultdict(list)
+        for door in self.remaining_doors + list(self.unconnected_doors.keys()):
+            if door in forced_list:
+                continue
+            sector = c_info.door_sector_map[door]
+            if sector.descriptor.is_neutral:
+                continue
+            # todo: xfers greater than 2? problematic in choosing later which to use
+            is_xfer = (door not in self.unconnected_doors
+                       and all(d not in forced_list for d in sector.outstanding_doors)
+                       and len(sector.outstanding_doors) == 2)
+            if is_xfer:
+                other_doors = [d for d in sector.outstanding_doors if d != door]
+                for other_door in other_doors:
+                    key = hook_from_door(door), hanger_from_door(other_door)
+                    if key[0] == key[1]:
+                        continue
+                    avail_transfers[key] += 1
+                    transfers_by_sector[sector].append(key)
+            else:  # 3,4,+ xferable doors? more lenient for now, assumes all doors will be available
+                available_cnt[hook_from_door(door)] += 1
+                avail_by_type_list[hook_from_door(door)].append(door)
+        total_cnt = defaultdict(int)
+        total_cnt.update({k: len(v) for k, v in total_needed_per_type.items()})
+        for hook, available in available_cnt.items():
+            consumed = min(total_cnt[hook], available)
+            total_cnt[hook] -= consumed
+            available_cnt[hook] -= consumed
+        changed = True
+        while any(c > 0 for c in total_cnt.values()) and changed:
+            changed = False
+            # attempt to find transfer to satisfy total
+            found_transfers = None
+            for hanger, needed in total_cnt.items():
+                if found_transfers:
+                    break
+                if needed <= 0:
+                    continue
+                init_state = ([], [hanger], avail_transfers, transfers_by_sector)
+                queue = deque([init_state])  # avail_transfers changes as certain ones are used
+                while len(queue) > 0:
+                    xfers, hangers, avail_xfers, xfers_by_sector = queue.pop()
+                    if any(available_cnt[h] > 0 for h in hangers):
+                        found_transfers = xfers
+                        break
+                    potentials = [xfer for xfer, num in avail_xfers.items() if num > 0 and xfer[0] in hangers and xfer[1] not in hangers]
+                    for xfer in potentials:
+                        s, used_xfers = next(((s, xfer_list) for s, xfer_list in xfers_by_sector.items() if xfer in xfer_list), None)
+                        next_xfers = dict(avail_xfers)
+                        for used_xfer in used_xfers:
+                            next_xfers[used_xfer] -= 1
+                        next_state = (xfers + [xfer], hangers + [xfer[1]], next_xfers, {k: v for k, v in xfers_by_sector.items() if k != s})
+                        queue.append(next_state)
+            if found_transfers:
+                changed = True
+                total_adj = found_transfers[0][0]
+                avail_adj = found_transfers[len(found_transfers)-1][1]
+                total_cnt[total_adj] -= 1
+                available_cnt[avail_adj] -= 1
+                avail_by_type_list[avail_adj].pop()
+                for found_transfer in found_transfers:
+                    s, used_xfers = next(((s, xfer_list) for s, xfer_list in transfers_by_sector.items() if found_transfer in xfer_list), None)
+                    del transfers_by_sector[s]
+                    for xfer in used_xfers:
+                        avail_transfers[xfer] -= 1
+        return any(c > 0 for c in total_cnt.values())
+
+
     def is_satisfied(self):
         for constraint in self.unsatisfied_constraints:
             if constraint.type != ConstraintType.DeadEnd:
                 return False
         return True
+
 
 
