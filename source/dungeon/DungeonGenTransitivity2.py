@@ -19,6 +19,7 @@ logger = logging.getLogger('tlogger')
 # handler.setLevel(logging.DEBUG)
 # logger.addHandler(handler)
 
+
 def do_transitivity_check(sector_list, limited_starting_points=None):
     start_time = time.process_time()
     if limited_starting_points is None:
@@ -96,7 +97,7 @@ class ConstraintInfo:
         self.door_sector_map = {}
         self.shape_map = {}
         for s in sector_list:
-            if s.portal and not s.portal.destination:
+            if (s.portal and not s.portal.destination) or 'Sewer Access Portal' in s.region_set():
                 self.init_portals.append(s)
             for d in s.outstanding_doors:
                 self.door_sector_map[d] = s
@@ -151,13 +152,15 @@ class ConstraintInfo:
                 if d.traversal_only:
                     if potential_match.traversal_only or not potential_match.portalAble:
                         continue
-                    if self.door_sector_map[d].portal.destination and (potential_is_dead_end or potential_is_must_enter):
+                    if (self.door_sector_map[d].portal and self.door_sector_map[d].portal.destination
+                            and (potential_is_dead_end or potential_is_must_enter)):
                         continue
 
                 if potential_match.traversal_only:
                     if d.traversal_only or not d.portalAble:
                         continue
-                    if self.door_sector_map[potential_match].portal.destination and (d_is_dead_end or d_is_must_enter):
+                    if (self.door_sector_map[d].portal and self.door_sector_map[potential_match].portal.destination
+                            and (d_is_dead_end or d_is_must_enter)):
                         continue
 
                 # bad cases: dead end to dead end, must enter to must enter, dead end to must enter, must enter to dead end
@@ -546,7 +549,7 @@ class Transitivity:
             if door in forced_list:
                 continue
             sector = c_info.door_sector_map[door]
-            if sector.descriptor.is_neutral:
+            if sector.descriptor.is_neutral and door not in self.unconnected_doors:
                 continue
             # todo: xfers greater than 2? problematic in choosing later which to use
             is_xfer = (door not in self.unconnected_doors

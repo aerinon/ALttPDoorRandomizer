@@ -688,6 +688,10 @@ def analyze_portals(world, player):
             sanc = world.get_portal('Sanctuary', player)
             sanc.destination = True
         for target_region, possible_portals in info.required_passage.items():
+            if 'Skull 3' in possible_portals and len(possible_portals) > 1:
+                possible_portals.remove('Skull 3')
+            if 'Desert Back' in possible_portals and len(possible_portals) > 1:
+                possible_portals.remove('Desert Back')
             if len(possible_portals) == 1:
                 world.get_portal(possible_portals[0], player).destination = True
             elif len(possible_portals) > 1:
@@ -950,11 +954,13 @@ def finish_dungeon_setup(door_type_pools, world, player):
                 compass_item = next((i for i in inside_items if i.compass), None)
                 if compass_item:
                     dungeon.dungeon_items.remove(compass_item)
+                    inside_items.remove(compass_item)
                     inside_item_count -= 1
                     continue
                 map_item = next((i for i in inside_items if i.map), None)
                 if map_item:
                     dungeon.dungeon_items.remove(map_item)
+                    inside_items.remove(map_item)
                     # would be nice to get this in inventory for now
                     world.push_precollected(map_item)
                     inside_item_count -= 1
@@ -4687,7 +4693,7 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
             for sector in sectors:
                 (portal_pool if len(sector.outstanding_doors) == 0 else sector_pool).append(sector)
             # todo: analyze not based on inaccessible regions
-            # todo: deactivate some portals - because they are on the same supertile
+            # todo: do it based on which dungeon are in this pool
             analyze_portals(world, player)
             dungeon_builders.update(create_dungeon_builders_prototype(pool, sector_pool, portal_pool, world, player))
         door_type_pools.append((pool, DoorTypePool(pool, world, player)))
@@ -4719,13 +4725,19 @@ def handle_intensity_settings(flags, world, player):
             connect_two_way(world, entrance, ext, player)
     if not flags.lobbies:
         for portal in world.dungeon_portals[1]:
-            target = portal.door
-            region_name = portal.name + ' Portal'
-            region = world.get_region(region_name, player)
-            entrance_door = next(e.name for e in region.exits if e.name.startswith('Enter '))
-            connect_two_way(world, entrance_door, target.name, player)
-            portal.assigned = True
-            target.dest = region
+            make_portal_vanilla(portal, world, player)
+    if world.mode[player] == 'standard':
+        make_portal_vanilla(world.get_portal('Sanctuary', player), world, player)
+
+
+def make_portal_vanilla(portal, world, player):
+    target = portal.door
+    region_name = portal.name + ' Portal'
+    region = world.get_region(region_name, player)
+    entrance_door = next(e.name for e in region.exits if e.name.startswith('Enter '))
+    connect_two_way(world, entrance_door, target.name, player)
+    portal.assigned = True
+    target.dest = region
 
 
 def main_dungeon_generation_prototype(dungeon_builders, entrances_map, world, player):
@@ -4773,7 +4785,21 @@ def main_dungeon_generation_prototype(dungeon_builders, entrances_map, world, pl
         b1.master_sector.regions.extend(b2.master_sector.regions)
         b1.name = 'Desert Palace'
         dungeon_builders['Desert Palace'] = b1
-    # todo: standard recombination
+    if 'Hyrule Castle Dungeon' in dungeon_builders:
+        b1 = dungeon_builders.pop('Hyrule Castle Dungeon')
+        b2 = dungeon_builders.pop('Hyrule Castle Sewers')
+        b1.master_sector.regions.extend(b2.master_sector.regions)
+        b1.name = 'Hyrule Castle'
+        dungeon_builders['Hyrule Castle'] = b1
+        sewer_door = world.get_door('Enter HC (Sewers)', player)
+        throne_door = world.get_door('Hyrule Castle Throne Room N', player)
+        connect_two_way(world, sewer_door.dest.name, throne_door.name, player)
+        sewer_door.dest.entrance.parent_region.entrances.remove(sewer_door.entrance)
+        connect_doors(sewer_door.dest, throne_door)
+        region = world.get_region('Sewer Access Portal', player)
+        world.regions.remove(region)
+        b1.master_sector.regions.remove(region)
+
     for builder in dungeon_builders.values():
         builder.entrance_list = builder.layout_starts = builder.path_entrances = find_accessible_entrances(world, player, builder)
         builder.master_sector.name = builder.name

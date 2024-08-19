@@ -1438,6 +1438,8 @@ def validate_bk_layout(proposal, builder, start_regions, world, player):
     bk_special = check_bk_special(builder.master_sector.regions, world, player)
     if world.bigkeyshuffle[player] and (world.dropshuffle[player] != 'none' or not bk_special):
         return True
+    if len(proposal) == 0:  # no bk doors proposed
+        return True
     flat_proposal = flatten_pair_list(proposal)
     state = ExplorationState(dungeon=builder.name)
     state.big_key_special = bk_special
