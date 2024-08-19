@@ -38,14 +38,16 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
         portal_list = dungeon_portals[key]
         for portal in portal_list:
             region_name = portal + ' Portal'
-            portal_sector = next(p for p in portal_pool if region_name in p.region_set())
-            region = world.get_region(region_name, player)
-            door = create_portal_door(world, player, next(e.name for e in region.exits if e.name.startswith('Enter ')))
-            portal_sector.outstanding_doors.append(door)
+            portal_sector = next((p for p in portal_pool if region_name in p.region_set()), None)
+            if portal_sector:
+                region = world.get_region(region_name, player)
+                door = create_portal_door(world, player, next(e.name for e in region.exits if e.name.startswith('Enter ')))
+                portal_sector.outstanding_doors.append(door)
+                portal_sector.portal.door = door  # assign placeholder door
+            else:
+                portal_sector = next(p for p in sector_pool if region_name in p.region_set())
             portal_sector.portal = world.get_portal(portal, player)
-            portal_sector.portal.door = door  # assign placeholder door
             portal_assignments[key].append(portal_sector)
-
 
     define_sector_features(sector_pool)
     create_sector_descriptors(sector_pool + portal_pool, world, player)
@@ -113,7 +115,7 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
 
     def lock_down_default_sectors(definition):
         for key, builder_list in definition.items():
-            sector = find_sector(key, sector_pool)
+            sector = find_sector(key, info.sector_pool)
             if sector:
                 candidate_builders = [d for d in dungeon_map if d in builder_list]
                 if len(candidate_builders) == 1:
@@ -129,10 +131,7 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
     if not info.flags.warps_pits or not info.flags.lobbies:
         lock_down_default_sectors(default_lobby_drops)
 
-    if not info.flags.lobbies:
-        # todo: lock lobbies for intensity 2 or less - can technically assign portals at this point too
-        pass
-    else:
+    if info.flags.lobbies:
         # randomly choose which portal will not be portalAble for this seed
         for dungeon, choices_list in portal_choices.items():
             # only needed if crossing, could restore later if they happen to be in the same dungeon
@@ -912,5 +911,6 @@ weight_map = {
     'Desert Palace Front': half_dungeon_weight,
     'Skull Woods Front': half_dungeon_weight,
     'Skull Woods Back': half_dungeon_weight,
-    # todo: standard
+    'Hyrule Castle Dungeon': half_dungeon_weight,
+    'Hyrule Castle Sewer': half_dungeon_weight
 }
