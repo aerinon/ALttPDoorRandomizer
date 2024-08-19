@@ -2061,6 +2061,7 @@ class Sector(object):
         self.portal = None
 
         self.locked = False
+        self.restrict_list = None
 
     def region_set(self):
         if self.r_name_set is None:

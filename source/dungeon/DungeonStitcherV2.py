@@ -3,7 +3,7 @@ import collections
 import logging
 import time
 
-from BaseClasses import CrystalBarrier, DoorType, Hook, RegionType, Sector
+from BaseClasses import CrystalBarrier, DoorType, Hook, RegionType, Sector, Portal
 from BaseClasses import hook_from_door, flooded_keys
 from Regions import dungeon_events, flooded_keys_reverse
 from source.dungeon.DungeonGenerationCommon import dungeon_portals
@@ -40,8 +40,14 @@ def determine_entrance_regions(builder, world, player):
 
     # customized portals and already fixed portal should have the assigned flag turned on
     entrance_regions = []
+    if any('Sewer Access Portal' in s.region_set() for s in builder.sectors):
+        p = Portal(player, 'Sewers Access', world.get_door('Enter HC (Sewers)', 1), 0, 0, -1)
+        builder_portals.append(p)
 
-    # todo: standard and rupee_bow flags
+    std_flag = world.mode[player] == 'standard'
+    hc_flag = std_flag and builder.name == 'Hyrule Castle'
+    rupee_bow_flag = hc_flag and world.bow_mode[player].startswith('retro')  # rupee bow
+
     single_entrance_flag = False
     if len(builder_portals) == 1:  # only one access
         destination_portals, non_destination_portals = [], builder_portals
@@ -66,7 +72,7 @@ def determine_entrance_regions(builder, world, player):
         primary_portal = primary_candidates[0]
     non_destination_portals.remove(primary_portal)
     if not primary_portal.assigned:
-        candidates = find_portal_candidates(master_door_list)
+        candidates = find_portal_candidates(master_door_list, standard=std_flag, rupee_bow=rupee_bow_flag)
         # todo: pick randomly, then check if is transitive if so, then we can skip checking the rest
         candidates = [c for c in candidates if do_transitivity_check(builder.sectors, [c])]
         assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, primary_portal)
@@ -76,12 +82,12 @@ def determine_entrance_regions(builder, world, player):
     # destination portals
     for portal in destination_portals:
         if not portal.assigned:
-            candidates = find_portal_candidates(master_door_list, True)
+            candidates = find_portal_candidates(master_door_list, True, standard=std_flag, rupee_bow=rupee_bow_flag)
             assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, False)
     # dead-end-able portals
     for portal in non_destination_portals:
         if not portal.assigned:
-            candidates = find_portal_candidates(master_door_list, False, True)
+            candidates = find_portal_candidates(master_door_list, False, True, standard=std_flag, rupee_bow=rupee_bow_flag)
             candidate = assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal)
             if candidate.deadEnd:
                 if candidate.passage:
@@ -93,6 +99,8 @@ def determine_entrance_regions(builder, world, player):
 
     # drop entrances
     for drop_region in default_lobby_drops:
+        if std_flag and drop_region == 'Sewers Rat Path':
+            continue
         if any(drop_region in s.region_set() for s in builder.sectors):
             region = world.get_region(drop_region, player)
             parent_region = next((x.parent_region for x in region.entrances
