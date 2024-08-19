@@ -14,7 +14,7 @@ from Dungeons import dungeon_bigs, dungeon_hints
 from Items import ItemFactory
 from RoomData import DoorKind, PairedDoor, reset_rooms
 # from source.dungeon.DungeonGen3 import create_dungeon_builders_prototype
-from source.dungeon.DungeonGenLocalSearch import create_dungeon_builders_prototype
+from source.dungeon.DungeonGenLocalSearch import create_dungeon_builders_prototype, DoorFlags
 from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
 from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
 from source.dungeon.DungeonStitcherV2 import create_dungeon
@@ -401,14 +401,14 @@ def connect_two_way(world, entrancename, exitname, player):
     y = world.check_for_door(exitname, player)
     if x is not None:
         x.dest = y
+        if x.dependents:
+            for dep in x.dependents:
+                connect_simple_door_to_region(dep, ext.parent_region)
     if y is not None:
         y.dest = x
-    if x.dependents:
-        for dep in x.dependents:
-            connect_simple_door_to_region(dep, ext.parent_region)
-    if y.dependents:
-        for dep in y.dependents:
-            connect_simple_door_to_region(dep, entrance.parent_region)
+        if y.dependents:
+            for dep in y.dependents:
+                connect_simple_door_to_region(dep, entrance.parent_region)
 
 
 def connect_one_way(world, entrancename, exitname, player):
@@ -570,7 +570,10 @@ def choose_portals(world, player):
 
     for portal in world.dungeon_portals[player]:
         connect_portal(portal, world, player)
+    handle_special_portal_cases(world, player)
 
+
+def handle_special_portal_cases(world, player):
     hc_south = world.get_door('Hyrule Castle Lobby S', player)
     if not hc_south.entranceFlag:
         world.get_room(0x61, player).delete(6)
@@ -768,7 +771,7 @@ def assign_portal_helper(candidate, portal, world, player):
             if other_portal.door == candidate:
                 other_portal.door = None
                 break
-    old_door = portal.door
+    old_door = portal.default_door
     if old_door:
         old_door.entranceFlag = False
         if old_door.name not in ['Hyrule Castle Lobby S', 'Sanctuary S', 'Hera Lobby S']:
@@ -4663,6 +4666,12 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
     entrances_map, potentials, connections = determine_entrance_list(world, player)
     dungeon_builders = {}
     door_type_pools = []
+
+    flags = DoorFlags().from_world(world, player)
+    # todo: custom intensity settings
+    handle_intensity_settings(flags, world, player)
+    # todo: customizer door connections
+
     for pool, region_list in dungeon_pool:
         if len(pool) == 1:
             dungeon_key = next(iter(pool))
@@ -4690,17 +4699,67 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
     finish_dungeon_setup(door_type_pools, world, player)
 
 
+def handle_intensity_settings(flags, world, player):
+    if not flags.normal:
+        for entrance, ext in default_door_connections:
+            connect_two_way(world, entrance, ext, player)
+        for ent, ext in default_one_way_connections:
+            connect_one_way(world, ent, ext, player)
+    if not flags.spiral:
+        for entrance, ext in spiral_staircases:
+            connect_two_way(world, entrance, ext, player)
+    if not flags.edges:
+        for entrance, ext in open_edges:
+            connect_two_way(world, entrance, ext, player)
+    if not flags.straight:
+        for entrance, ext in straight_staircases:
+            connect_two_way(world, entrance, ext, player)
+    if not flags.ladder:
+        for entrance, ext in ladders:
+            connect_two_way(world, entrance, ext, player)
+    if not flags.lobbies:
+        for portal in world.dungeon_portals[1]:
+            target = portal.door
+            region_name = portal.name + ' Portal'
+            region = world.get_region(region_name, player)
+            entrance_door = next(e.name for e in region.exits if e.name.startswith('Enter '))
+            connect_two_way(world, entrance_door, target.name, player)
+            portal.assigned = True
+            target.dest = region
+
+
 def main_dungeon_generation_prototype(dungeon_builders, entrances_map, world, player):
     for name, builder in dungeon_builders.items():
         # choose_portals_prototype(builder, entrances_map, world, player)
         master_sector = create_dungeon(builder, entrances_map, world, player)
         builder.master_sector = master_sector
+
     # assign portals properly
+    old_doors, new_doors = set(), set()
     for portal in world.dungeon_portals[player]:
-        if portal.default_door != portal.door:
-            assign_portal_helper(portal.door, portal, world, player)
-        else:
-            portal.door.entranceFlag = True
+        old_doors.add(portal.default_door)
+        new_doors.add(portal.door)
+    common_doors = old_doors.intersection(new_doors)
+    old_doors.difference_update(common_doors)
+    new_doors.difference_update(common_doors)
+    for d in common_doors:
+        d.entranceFlag = True
+    for old_door in old_doors:
+        if old_door.name not in ['Hyrule Castle Lobby S', 'Sanctuary S', 'Hera Lobby S']:
+            old_door_kind = DoorKind.NormalLow if old_door.layer or old_door.pseudo_bg else DoorKind.Normal
+            world.get_room(old_door.roomIndex, player).change(old_door.doorListPos, old_door_kind)
+    for candidate in new_doors:
+        if candidate.name not in ['Hyrule Castle Lobby S', 'Sanctuary S']:
+            if candidate.name == 'Swamp Hub S':
+                new_door_kind = DoorKind.CaveEntranceLow
+            elif candidate.layer or candidate.pseudo_bg:
+                new_door_kind = DoorKind.DungeonEntranceLow
+            else:
+                new_door_kind = DoorKind.DungeonEntrance
+        world.get_room(candidate.roomIndex, player).change(candidate.doorListPos, new_door_kind)
+        candidate.entranceFlag = True
+    handle_special_portal_cases(world, player)
+
     # combine builders
     if 'Skull Woods Front' in dungeon_builders:
         b1 = dungeon_builders.pop('Skull Woods Front')

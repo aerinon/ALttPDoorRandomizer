@@ -2164,6 +2164,7 @@ class Portal(object):
         self.deadEnd = False
         self.light_world = False
         self.chosen = False
+        self.assigned = False
 
     def find_portal_entrance(self):
         p_region = self.door.entrance.connected_region
