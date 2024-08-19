@@ -4,7 +4,8 @@ import os
 from collections import defaultdict, deque
 
 
-from BaseClasses import Direction, RegionType, CrystalBarrier, DoorType, Door, Hook, Entrance
+from BaseClasses import Direction, CrystalBarrier, DoorType, Door, Hook, Entrance, Sector
+from Regions import create_dungeon_region
 from Utils import clear_file
 from source.dungeon.DungeonGenerationCommon import DungeonBuilder, GenerationException, define_sector_features, dungeon_portals
 from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector, assign_sector_helper, hanger_from_door, hook_from_door
@@ -43,11 +44,23 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
                 region = world.get_region(region_name, player)
                 door = create_portal_door(world, player, next(e.name for e in region.exits if e.name.startswith('Enter ')))
                 portal_sector.outstanding_doors.append(door)
+                portal_sector.portal = world.get_portal(portal, player)
                 portal_sector.portal.door = door  # assign placeholder door
             else:
                 portal_sector = next(p for p in sector_pool if region_name in p.region_set())
-            portal_sector.portal = world.get_portal(portal, player)
+                portal_sector.portal = world.get_portal(portal, player)
             portal_assignments[key].append(portal_sector)
+
+    if 'Hyrule Castle' in dungeon_pool and world.mode[player] == 'standard':
+        sewer_portal = create_dungeon_region(player, 'Sewer Access Portal', 'Hyrule Castle', None, ['Enter HC (Sewers)'])
+        world.regions.append(sewer_portal)
+        door = create_portal_door(world, player, next(e.name for e in sewer_portal.exits if e.name.startswith('Enter ')))
+        sector = Sector()
+        sector.regions.append(sewer_portal)
+        sector.outstanding_doors.append(door)
+        sector_pool.append(sector)
+        throne_room = find_sector('Hyrule Castle Throne Room', sector_pool)
+        throne_room.outstanding_doors.remove(world.get_door('Hyrule Castle Throne Room N', player))
 
     define_sector_features(sector_pool)
     create_sector_descriptors(sector_pool + portal_pool, world, player)
@@ -91,10 +104,20 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
         for portal in assignments:
             portal_assignments['Desert Palace Front'].append(portal)
     if 'Hyrule Castle' in dungeon_pool and world.mode[player] == 'standard':
-        # todo: special edits for throne room, sewer "portal" sector
         dungeon_pool.append('Hyrule Castle Dungeon')
         dungeon_pool.append('Hyrule Castle Sewers')
         dungeon_pool.remove('Hyrule Castle')
+        assignments = portal_assignments['Hyrule Castle']
+        sanc_portal = find_sector('Sanctuary Portal', assignments)
+        portal_assignments['Hyrule Castle Sewers'].append(sanc_portal)
+        assignments.remove(sanc_portal)
+        main_portal = find_sector('Hyrule Castle South Portal', assignments)
+        portal_assignments['Hyrule Castle Dungeon'].append(main_portal)
+        assignments.remove(main_portal)
+        # the other two should go together
+        paired = random.choice(['Hyrule Castle Dungeon', 'Hyrule Castle Sewers'])
+        for portal in assignments:
+            portal_assignments[paired].append(portal)
 
     all_sectors = sector_pool + portal_pool
     info = DungeonGenInfo(gen_log, all_sectors, flags)
@@ -109,7 +132,8 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
             for r_name in ['Hyrule Dungeon Cellblock', 'Hyrule Castle Throne Room']:  # need to deliver zelda
                 propose_sector(current_dungeon, find_sector(r_name, sector_pool), info, True)
         elif key == 'Hyrule Castle Sewers':  # builder doesn't exist except in standard
-            propose_sector(current_dungeon, find_sector('Sanctuary', sector_pool), info, True)
+            # Sanctuary handled by portals above
+            propose_sector(current_dungeon, find_sector('Sewer Access Portal', sector_pool), info, True)
         elif key == 'Thieves Town' and world.get_dungeon("Thieves Town", player).boss.enemizer_name == 'Blind':
             propose_sector(current_dungeon, find_sector("Thieves Blind's Cell", sector_pool), info, True)
 
@@ -122,7 +146,7 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
                     chosen_builder = next(iter(candidate_builders))
                 else:
                     chosen_builder = random.choice(candidate_builders)
-                propose_sector(dungeon_map[chosen_builder], sector, info, True)
+                propose_sector(dungeon_map[chosen_builder], sector, info, False, restrict_list =list(builder_list))
 
     # this handles boss sectors
     lock_down_default_sectors(dungeon_boss_regions)
@@ -167,12 +191,16 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
     return dungeon_map
 
 
-def propose_sector(builder, new_sector, info, lock=False):
+def propose_sector(builder, new_sector, info, lock=False, restrict_list=None):
     info.proposal[builder.name].append(new_sector)
     if lock:
         new_sector.locked = True
         del info.sector_pool[new_sector]
         info.gen_log.debug(f'{new_sector.sector_key()} locked to {builder.name}')
+    elif restrict_list:
+        new_sector.restrict_list = restrict_list
+        del info.sector_pool[new_sector]
+        info.gen_log.debug(f'{new_sector.sector_key()} restricted to {builder.name}')
     else:
         info.gen_log.debug(f'{new_sector.sector_key()} assigned to {builder.name}')
 
@@ -260,7 +288,7 @@ def balance_move_sector(unbalanced, balance_map, info):
 def find_a_good_polarity_shift(provider, target, unbalanced, info):
     best_choices, best_charge = [], None
     for sector in info.proposal[provider]:
-        if not valid_for_move(sector, info) or is_sector_neutral(sector):
+        if not valid_for_move(sector, target, info) or is_sector_neutral(sector):
             continue
         target_charge = unbalanced[target].charge()
         target_balance = Balance(target, info)
@@ -292,7 +320,7 @@ def fix_crystal_balance(target, balance_map, info):
         if balance_info.crystal_provided == 0 or (balance_info.crystal_provided == 1 and balance_info.crystal_needed > 0):
             continue
         for sector in info.proposal[provider]:
-            if not valid_for_move(sector, info) or not sector.c_switch:
+            if not valid_for_move(sector, target, info) or not sector.c_switch:
                 continue
             bal = Balance(provider, info)
             bal.extend([x for x in info.proposal[provider] if x != sector])
@@ -338,7 +366,7 @@ def fix_portal_balance(target, balance_map, info):
     while best is None:
         provider, balance_info = candidates.pop()
         for sector in info.proposal[provider]:
-            if not valid_for_move(sector, info) or not criteria(sector):
+            if not valid_for_move(sector, target, info) or not criteria(sector):
                 continue
             bal = Balance(provider, info)
             bal.extend([x for x in info.proposal[provider] if x != sector])
@@ -352,9 +380,9 @@ def fix_portal_balance(target, balance_map, info):
 
 
 def fix_branching_balance(target, balance_map, info):
-    unlocked_cnt = {id: sum(1 for sector in info.proposal[id] if valid_for_move(sector, info)) for id in balance_map}
+    unlocked_cnt = {id: sum(1 for sector in info.proposal[id] if valid_for_move(sector, target, info)) for id in balance_map}
     candidates = sorted(list(balance_map.items()), key=lambda item: (item[1].branches, unlocked_cnt[item[0]]))
-    provider, best = find_min_charge_sector(candidates, info)
+    provider, best = find_min_charge_sector(target, candidates, info)
     perform_move(info, best, provider, target)
     info.gen_log.debug(f'Moved {best.sector_key()} from {provider} to {target} for branching balance')
 
@@ -372,7 +400,7 @@ def fix_parity_balance(target, balance_map, info):
             candidates = sorted(list(candidates.items()), key=lambda item: (item[1].branches, unlocked_cnt[item[0]]))
         provider, balance_info = candidates.pop()
         for sector in info.proposal[provider]:
-            if not valid_for_move(sector, info):
+            if not valid_for_move(sector, target, info):
                 continue
             bal = Balance(provider, info)
             bal.extend([x for x in info.proposal[provider] if x != sector])
@@ -393,13 +421,13 @@ def fix_transitivity(target, balance_map, info):
     unlocked_cnt = {id: sum(1 for sector in info.proposal[id] if not sector.locked) for id in balance_map}
     candidates = sorted(list(balance_map.items()), key=lambda item: unlocked_cnt[item[0]])
 
-    provider, best, best_charge = None, None, None
+    provider, best, best_charge, swap = None, None, None, False
     while best is None:
         provider, balance_info = candidates.pop()
         if provider == target:
             continue
         for sector in info.proposal[provider]:
-            if not valid_for_move(sector, info):
+            if not valid_for_move(sector, target, info):
                 continue
             target_balance = Balance(target, info)
             target_balance.extend([x for x in info.proposal[target]])
@@ -408,22 +436,44 @@ def fix_transitivity(target, balance_map, info):
                 continue
             bal = Balance(provider, info)
             bal.extend([x for x in info.proposal[provider] if x != sector])
+            if not bal.transitive():
+                continue
             charge = bal.charge()
             if best is None or charge < best_charge:
                 best = sector
                 best_charge = charge
+                swap = False
+        if best is None:
+            for sector in info.proposal[target]:
+                if not valid_for_move(sector, provider, info):
+                    continue
+                target_balance = Balance(target, info)
+                target_balance.extend([x for x in info.proposal[target] if x != sector])
+                if not target_balance.transitive():
+                    continue
+                bal = Balance(provider, info)
+                bal.extend([x for x in info.proposal[provider] if x != sector])
+                if not bal.transitive():
+                    continue
+                charge = bal.charge()
+                if best is None or charge < best_charge:
+                    best = sector
+                    best_charge = charge
+                    swap = True
 
+    if swap:
+        provider, target = target, provider
     perform_move(info, best, provider, target)
     info.gen_log.debug(f'Moved {best.sector_key()} from {provider} to {target} for transitivity')
 
 
 # losing the sector that will cause the least amt of harm
-def find_min_charge_sector(candidates, info):
+def find_min_charge_sector(target, candidates, info):
     provider, best_choices, best_charge = None, [], None
     while len(best_choices) == 0:
         provider, balance_info = candidates.pop()
         for sector in info.proposal[provider]:
-            if not valid_for_move(sector, info):
+            if not valid_for_move(sector, target, info):
                 continue
             bal = Balance(provider, info)
             bal.extend([x for x in info.proposal[provider] if x != sector])
@@ -438,8 +488,9 @@ def find_min_charge_sector(candidates, info):
     return provider, best
 
 
-def valid_for_move(sector, info):
-    return not sector.locked and sector not in info.recent_moves
+def valid_for_move(sector, dest, info):
+    return (not sector.locked and sector not in info.recent_moves
+            and (sector.restrict_list is None or dest in sector.restrict_list))
 
 
 def perform_move(info, sector, provider, target):
@@ -670,9 +721,9 @@ class Balance:
     def transitive(self):
         if self.transitive_init:
             return self.transitive_flag
-        neutral_sectors = [s for s in self.sectors if is_sector_neutral(s)]
-        non_neutral_sectors = [s for s in self.sectors if s not in neutral_sectors]
-        db_key = frozenset([str(s) for s in non_neutral_sectors])
+        # neutral_sectors = [s for s in self.sectors if is_sector_neutral(s)]
+        # non_neutral_sectors = [s for s in self.sectors if s not in neutral_sectors]
+        db_key = frozenset([str(s) for s in self.sectors])
         if db_key in self.info.transitive_db:
             self.transitive_flag = self.info.transitive_db[db_key]
             self.transitive_init = True
@@ -912,5 +963,5 @@ weight_map = {
     'Skull Woods Front': half_dungeon_weight,
     'Skull Woods Back': half_dungeon_weight,
     'Hyrule Castle Dungeon': half_dungeon_weight,
-    'Hyrule Castle Sewer': half_dungeon_weight
+    'Hyrule Castle Sewers': half_dungeon_weight
 }
