@@ -141,9 +141,9 @@ class SectorDescriptor:
     def classify(self):
         total_needed = len(self.sector.outstanding_doors)
         unreached = set(self.sector.outstanding_doors)
-        if total_needed == 1:
+        if total_needed == 1 and self.sector.portal is None:
             self.dead_end = True
-        else:
+        elif self.sector.portal is None or self.sector.portal.destination:
             if 'Ice Cross Left' in self.sector.r_name_set:
                 specials = []
                 for source, dest_list in self.reachability.items():

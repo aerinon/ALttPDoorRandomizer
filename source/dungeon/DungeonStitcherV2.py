@@ -38,8 +38,7 @@ def determine_entrance_regions(builder, world, player):
     builder_portals = [world.get_portal(p, player) for p in dungeon_portals[d_name]]
     builder_portals = [p for p in builder_portals if any(s.portal == p for s in builder.sectors)]
 
-    # todo: customized portals
-    # todo: already fixed portals i.e. intensity 2
+    # customized portals and already fixed portal should have the assigned flag turned on
     entrance_regions = []
 
     # todo: standard and rupee_bow flags
@@ -66,24 +65,31 @@ def determine_entrance_regions(builder, world, player):
     else:
         primary_portal = primary_candidates[0]
     non_destination_portals.remove(primary_portal)
-    candidates = find_portal_candidates(master_door_list)
-    # todo: pick randomly, then check if is transitive if so, then we can skip checking the rest
-    candidates = [c for c in candidates if do_transitivity_check(builder.sectors, [c])]
-    assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, primary_portal)
+    if not primary_portal.assigned:
+        candidates = find_portal_candidates(master_door_list)
+        # todo: pick randomly, then check if is transitive if so, then we can skip checking the rest
+        candidates = [c for c in candidates if do_transitivity_check(builder.sectors, [c])]
+        assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, primary_portal)
+    else:
+        record_entrance_regions(entrance_regions, primary_portal)
 
     # destination portals
     for portal in destination_portals:
-        candidates = find_portal_candidates(master_door_list, True)
-        assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, False)
+        if not portal.assigned:
+            candidates = find_portal_candidates(master_door_list, True)
+            assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, False)
     # dead-end-able portals
     for portal in non_destination_portals:
-        candidates = find_portal_candidates(master_door_list, False, True)
-        candidate = assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal)
-        if candidate.deadEnd:
-            if candidate.passage:
-                portal.destination = True
-            else:
-                portal.deadEnd = True
+        if not portal.assigned:
+            candidates = find_portal_candidates(master_door_list, False, True)
+            candidate = assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal)
+            if candidate.deadEnd:
+                if candidate.passage:
+                    portal.destination = True
+                else:
+                    portal.deadEnd = True
+        else:
+            record_entrance_regions(entrance_regions, portal)
 
     # drop entrances
     for drop_region in default_lobby_drops:
@@ -113,10 +119,15 @@ def assign_portal_candidate(builder, candidates, entrance_regions, master_door_l
         entrance_regions.append(candidate.entrance.parent_region)
     clean_up_outstanding_doors(builder, portal.door)
     clean_up_outstanding_doors(builder, candidate)
-    portal.door = candidate
+    portal.change_door(candidate)
     if portal.door.blocked:
         portal.door.blocked = False
     return candidate
+
+
+def record_entrance_regions(entrance_regions, portal, record_portal=True):
+    if record_portal and portal.dependent is None:
+        entrance_regions.append(portal.door.entrance.parent_region)
 
 
 def clean_up_outstanding_doors(builder, door):
