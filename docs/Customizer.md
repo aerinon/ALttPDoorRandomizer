@@ -66,7 +66,7 @@ Then each player can have the entire item pool defined. The name of item should 
 
 ##### Caveat 
  
-Dungeon items amount can be increased (but not decreased as the minimum of each dungeon item is either pre-determined or calculated by door rando) if the type of dungeon item is not shuffled then it is attempted to be placed in the dungeon. Extra item beyond dungeon capacity not be confined to the dungeon.
+Dungeon items amount can be increased (but not decreased as the minimum of each dungeon item is either pre-determined or calculated by door rando) if the type of dungeon item is not shuffled then it is attempted to be placed in the dungeon. Extra item beyond dungeon capacity will not be confined to the dungeon.
 
 ### placements
 
@@ -130,11 +130,52 @@ Chris Houlihan and Links House should be specified together or not at all.
 
 ### doors
 
-This must be defined by player. Each player number should be listed with the appropriate sections. This section has three primary subsections: `lobbies` and `doors`.
+This must be defined by player. Each player number should be listed with the appropriate sections. This section has these primary subsections:
+* `pools`
+* `sectors`
+* `sector_exclusions`
+* `lobbies`
+* `doors`
+* `intensity`
 
-`lobbies` lists the doors by which each dungeon is entered
+#### pools
+
+A list of what dungeons should be mixed together. Each item in the list is dungeon pool. Dungeons in the same pool will be mixed together.
+
+#### sectors
+
+Locks a sector with the given region to a specific dungeon. 
+
+`<region_name: <dungeon name>`
+
+#### sector_exclusions
+
+Forbids a sector from being shuffled to the dungeons in the list.
+
+`<region_name: [<dungeon 1>, <dungeon 2>, etc]`
+
+
+#### intensity
+
+These settings override the default intensity behavior.
+If true, then that transitions is shuffled, if false, then it is not.
+For the directional transitions, you can choose whether to shuffle only vertical or horizontal transitions, or both, or noe at all.
+
+Options are:
+* `sprial: <true|false>` Sprial staircases
+* `straight: <true|false>` Straight staircases
+* `ladder: <true|false>` In-floor ladders 
+* `normal: <none|vertical|horizontal|both>` Inter-room doors
+* `edges: <none|vertical|horizontal|both>` Edge transitions
+* `lobbies: <true|false>` (Note: shuffling lobbies without vertical normal transitions will limit which doors can be used as dungeon entrances.)
+
+#### lobbies
+
+`lobbies` lists the doors by which each dungeon is entered. Should be used with intensity 3 or lobbies specifically shuffled. 
 
 `<lobby name>: <door name>` Ex. `Turtle Rock Chest: TR Lava Escape SE`
+
+#### doors
 
 `doors` lists pairs of doors. The first door name is listed is the key. The value of this object may be the paired door name or optionally it can have two properties: `dest` and `type`. If you want a type, you must use the second option. 
 
@@ -151,15 +192,13 @@ Sewers Rat Path WS:
         type: Key Door
 ```
 
-You'll note that sub-tile door do not need to be listed, but if you want them to be key doors you will have to list them.
- 
- ###### Not Yet Implemented
+You'll note that intraroom doors do not need to be listed, but if you want them to be key doors you will have to list them.
  
  `one-way` to indicate decoupled doors
  
  ##### Known Issue
  
- If you specify a door type and those doors cannot be a stateful door due to the nature of the supertile (or you've placed too many on the supertile) an exception is thrown. 
+ If you specify a door type and those doors cannot be a stateful door due to the nature of the room (or you've placed too many on the room) an exception is thrown. 
 
 ### medallions
 

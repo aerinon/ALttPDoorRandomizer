@@ -116,6 +116,7 @@ def roll_settings(weights):
     ret.overworld_map = overworld_map if overworld_map != 'default' else 'default'
     door_shuffle = get_choice('door_shuffle')
     ret.door_shuffle = door_shuffle if door_shuffle != 'none' else 'vanilla'
+    ret.dungeon_shuffle_algorithm = get_choice('dungeon_shuffle_algorithm')
     ret.intensity = get_choice('intensity')
     ret.door_type_mode = get_choice('door_type_mode')
     ret.trap_door_mode = get_choice('trap_door_mode')

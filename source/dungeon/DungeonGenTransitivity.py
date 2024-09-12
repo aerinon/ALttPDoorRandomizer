@@ -1,402 +1,667 @@
-from collections import defaultdict, deque
+import heapq
+import itertools
+import logging
+import time
 
-from BaseClasses import Hook, CrystalBarrier, DoorType
+from collections import deque, defaultdict, Counter
+from enum import Enum
 
-from source.dungeon.DungeonGenerationCommon import hanger_from_door, hook_from_door, GenerationException
+from BaseClasses import CrystalBarrier, Hook, Direction
+from Utils import flatten
 
+from source.dungeon.DungeonGenerationCommon import hanger_from_door, hook_from_door, is_boss_trap
+from source.dungeon.DungeonGenSectorDesc import CrystalConstraint
 
-# 'Ice Portal'
-
-# Dead Ends
-# 'Ice Antechamber', 'TR Refill', 'Mire Chest View', 'Ice Compass Room', 'Hera Tile Room', 'PoD Big Chest Balcony'
-
-# Must Enters
-# 'GT Big Key Room', 'GT Frozen Over', 'Thieves Lobby'
-
-# Special
-# 'Ice Bomb Drop'
-
-# Neutral
-# 'TR Lava Escape', 'Skull Star Pits', 'PoD Conveyor', 'Tower Dark Archers', 'Sewers Dark Cross'
-
-# Other
-# 'TR Torches', 'Sewers Pull Switch', 'Swamp Left Elbow', 'Ice Spike Room'
-
-# pseudo code
-
-# Categorize into groups (Dead End, Must Enter, Portals, Neutral, Other, Special)
-# Find valid starting points (dead ends aren't)
-#   Bob's, Ice Cross S, Lava, Skull, PoD Cov, Pull Switch, Swamp Pull Statue
-#   Portalable neutrals could be satisfied here without any loss of generality
-    # Satisfy: Lava, Skull, Convey, Dark Cross
-#   Prefer Must-Exit,Special over Other
-#   Bob's -> Ice Cross -> Sewers Pull/Swamp Left Elbow
-# Bob's Chosen
-#   Satisfy: Tower Dark Archers
-# How to Expand. Note Frozen, Lobby needs Torches, Spike connectors. No other options.
-# Which do you connect to which? Best option is Spike Room > TT Lobby, but only because of lookahead
-    # Recalc reachability?
-# Must-enters now Either Ice Spike Stair or TR Torch south
-
-# Choose Ice Spike Stair
-# Avail hangers: ice spike stair + either frozen stair or lobby nx2/s
-# Poor choice: 2 stairs avail
-# Pull Switch or Swamp Left, either gets 1 S
-#
+logger = logging.getLogger('tlogger')
+# for handler in logger.handlers[:]:
+#     logger.removeHandler(handler)
+# handler = logging.FileHandler('transitivity.log')
+# handler.setLevel(logging.DEBUG)
+# logger.addHandler(handler)
 
 
-def do_transitivity_check(sector_list, starting_point_list):
-    door_sector_map = {d: s for s in sector_list for d in s.outstanding_doors}
-
-    init_state = Transitivity(sector_list, starting_point_list)
-    init_state.initialize()
-    queue = deque([init_state])
-    while len(queue) > 0:
-        current_state = queue.pop()
-        if current_state.next_door is None:
-            if len(current_state.sector_list) == 0:  # everything is satisfied
-                return True
-            # find next doors to explore
-            constraints = current_state.find_next_constraints()
-            if len(constraints) == 0:
-                # no more constraints to fill - check others/neutrals
-                changed = True
-                available_hooks = {hook_from_door(d) for d in current_state.explored_doors}
-                while changed:
-                    changed = False
-                    satisfied = []
-                    for s in current_state.others:
-                        if any(hanger_from_door(d) in available_hooks for d in s.outstanding_doors):
-                            satisfied.append(s)
-                            more_hooks = {hook_from_door(d) for d in s.outstanding_doors}
-                            if any(h not in available_hooks for h in more_hooks):
-                                available_hooks.update(more_hooks)
-                                changed = True
-                    for s in satisfied:
-                        current_state.others.remove(s)
-                        current_state.sector_list.remove(s)
-                    satisfied = []
-                    for s in current_state.neutrals:
-                        if any(hanger_from_door(d) in available_hooks for d in s.outstanding_doors):
-                            satisfied.append(s)
-                    for s in satisfied:
-                        current_state.neutrals.remove(s)
-                        current_state.sector_list.remove(s)
-                return len(current_state.sector_list) == 0
-            for next_door in constraints:
-                child_state = current_state.copy()
-                child_state.next_door = next_door
-                queue.append(child_state)
-        else:
-            found_paths = current_state.find_possible_hooks()
-            for path in found_paths:
-                next_state = current_state.copy()
-                for idx in range(len(path.sector_path), 0, -1):
-                    sector = path.sector_path[idx-1]
-                    hooked_door, priority_hangers, the_rest = None, [], []
-                    for hanger in path.hangers:
-                        if any(hanger == req or (isinstance(req,tuple) and hanger in req) for req in current_state.must_enters):
-                            priority_hangers.append(hanger)
-                        else:
-                            the_rest.append(hanger)
-                    for hanger in priority_hangers:
-                        hooks = next_state.get_possible_hooks(hanger)
-                        if len(hooks) > 0:
-                            hooked_door = hanger
-                            break
-                    if hooked_door is None:
-                        for hanger in the_rest:
-                            hooks = next_state.get_possible_hooks(hanger)
-                            if len(hooks) > 0:
-                                hooked_door = hanger
-                                break
-                    next_state.append_door(hooked_door, sector)
-
-                constrained_sector = door_sector_map[path.origin_door]
-                next_state.append_door(path.origin_door, constrained_sector)
-                next_state.next_door = None
-                queue.append(next_state)
+def do_transitivity_check(sector_list, flags, limited_starting_points=None):
+    greed_success = do_transitivity_check_main(sector_list, flags, limited_starting_points=limited_starting_points, greedy=True)
+    if greed_success:
+        return True
+    return do_transitivity_check_main(sector_list, flags, limited_starting_points=limited_starting_points)
 
 
-    return False  # no valid transitivity found
+def do_transitivity_check_main(sector_list, flags, limited_starting_points=None, greedy=False):
+    start_time = time.process_time()
+    if limited_starting_points is None:
+        limited_starting_points = []
+    all_outstanding_doors = []
+    for s in sector_list:
+        all_outstanding_doors.extend(s.outstanding_doors)
+    if len(all_outstanding_doors) == 0:
+        return True
+
+    # clear out neutral constraints - a n/s neutral might be needed as a portal (todo: could result in a false negative)
+    c_info = ConstraintInfo(sector_list, flags)
+    neutral_constraints = [x for x in c_info.constraints if x.type == ConstraintType.Neutral]
+    neutral_checks = []
+    for c in neutral_constraints:
+        if any(d.portalAble or (not d.portalAble and d.direction == Direction.South) for d in c.doors):
+            continue
+        all_outstanding_doors = [x for x in all_outstanding_doors if x not in c.doors]
+        neutral_checks.extend(c.doors)
+    satisfied = True
+    for d in neutral_checks:
+        hanger = hanger_from_door(d)
+        if all(hanger != hook_from_door(door) for door in all_outstanding_doors):
+            satisfied = False
+            break
+    if not satisfied:
+        return False
+    unsatisfied_constraints = [x for x in c_info.constraints if x.type != ConstraintType.Neutral]
+
+    # initialize portals
+    t = Transitivity(all_outstanding_doors, unsatisfied_constraints, limited_starting_points)
+    visited = set()
+    for sector in c_info.init_portals:
+        t.append_sector_free(sector, c_info)
+    initial_options = t.find_connectable_doors(c_info)
+    tiebreaker = itertools.count()
+    queue = []
+    for conn in initial_options:
+        init_t = t.connect_door(conn, c_info)
+        if not init_t.now_impossible(c_info, visited):
+            if not init_t.unsatisfied_constraints:
+                return True  # that was easy
+            priority = init_t.priority()
+            visited.add(frozenset(init_t.connection_map.items()))
+            heapq.heappush(queue, (priority, -next(tiebreaker), init_t))
+    iterations = 0
+    while queue:
+        iterations += 1
+        priority_prev, ignored, current = heapq.heappop(queue)
+        # logger.debug(f'TStats: Iteration {iterations}, Priority {priority_prev}, Depth {len(current.door_path)}, Constraints {len(current.unsatisfied_constraints)}')
+        new_options = current.find_connectable_doors(c_info)
+        if greedy and len(new_options) > 1:
+            new_options = new_options[-1:]
+        for conn in new_options:
+            new_t = current.connect_door(conn, c_info)
+            if not new_t.now_impossible(c_info, visited):
+                if not new_t.unsatisfied_constraints:
+                    ttl_time = time.process_time() - start_time
+                    if iterations > 10000 or ttl_time > 2:
+                        logger.warning(f'Transitivity check took {iterations} iterations in {ttl_time}s for "true" result')
+                        logger.debug(f"Sector List: {','.join(s.sector_key() for s in sector_list)}")
+                    return True
+                priority = new_t.priority()
+                new_t_key = frozenset(new_t.connection_map.items())
+                visited.add(new_t_key)
+                heapq.heappush(queue, (priority, -next(tiebreaker), new_t))
+    ttl_time = time.process_time() - start_time
+    if iterations > 10000 or ttl_time > 2:
+        logger.warning(f'Transitivity check took {iterations} iterations in {ttl_time}s for "false" result')
+        logger.debug(f"Sector List: {','.join(s.sector_key() for s in sector_list)}")
+    return False
 
 
+class ConstraintInfo:
+    def __init__(self, sector_list, flags):
+        self.constraints = []
+        self.switch_doors = []
+        self.init_portals = []
+        self.dependent_portals = {}
+        self.door_sector_map = {}
+        self.shape_map = {}
+        self.flags = flags
+        for s in sector_list:
+            if (s.portals and any(not p.destination for p in s.portals)) or 'Sewer Access Portal' in s.region_set():
+                if s.portals and all(p.dependent for p in s.portals):
+                    for p in s.portals:
+                        if p.dependent:
+                            for d in s.outstanding_doors:
+                                self.dependent_portals[d] = (s, p.dependent)
+                else:
+                    self.init_portals.append(s)
+            for d in s.outstanding_doors:
+                self.door_sector_map[d] = s
+                self.shape_map[d] = s.descriptor.shape_construct[d]
+                if d.traversal_only:
+                    self.constraints.append(Constraint(ConstraintType.Portal, [d], None))
+                if d in s.descriptor.crystal_switch_doors:
+                    self.switch_doors.append(d)
+            if s.descriptor.must_enter_reqs:
+                for req in s.descriptor.must_enter_reqs:
+                    if isinstance(req, tuple):
+                        self.constraints.append(Constraint(ConstraintType.MustEnter, list(req), None))
+                    else:
+                        self.constraints.append(Constraint(ConstraintType.MustEnter, [req], None))
+            # special constraint (we can formulate as must enter for now, the trick is for the ice cross - no traps allowed)
+            if s.descriptor.special_reqs:
+                participants = flatten(s.descriptor.special_reqs)
+                self.constraints.append(Constraint(ConstraintType.Special, participants, None))
+            if s.descriptor.crystal_reqs:
+                c_req = s.descriptor.crystal_reqs
+                if c_req.type == 'any':
+                    participants = flatten(c_req.must_have_color_access)
+                    if c_req.must_enter_reqs:
+                        participants += flatten(c_req.must_enter_reqs)
+                    self.constraints.append(Constraint(ConstraintType.Crystal, participants, c_req))
+                else:
+                    for req in c_req.must_have_color_access:
+                        new_req = CrystalConstraint()
+                        new_req.must_have_color_access.append(req)
+                        self.constraints.append(Constraint(ConstraintType.Crystal, flatten(req), new_req))
+            if s.descriptor.dead_end and all(not d.traversal_only for d in s.outstanding_doors):
+                self.constraints.append(Constraint(ConstraintType.DeadEnd, s.outstanding_doors, None))
+            if s.descriptor.is_neutral:
+                self.constraints.append(Constraint(ConstraintType.Neutral, s.outstanding_doors, None))
 
-# state class
+        self.door_constraint_map = defaultdict(list)
+        for constraint in self.constraints:
+            for d in constraint.doors:
+                self.door_constraint_map[d].append(constraint)
+        self.door_matches = defaultdict(list)
+        for d in self.door_sector_map:
+            for potential_match in self.door_sector_map:
+                if d == potential_match:
+                    continue
+                if hanger_from_door(d) != hook_from_door(potential_match):
+                    continue
+                d_is_dead_end = d in self.door_constraint_map and any(c.type == ConstraintType.DeadEnd for c in self.door_constraint_map[d])
+                d_is_must_enter = d in self.door_constraint_map and any(c.type == ConstraintType.MustEnter and d in c.doors and len(c.doors) == 1 for c in self.door_constraint_map[d])
+                potential_is_dead_end = potential_match in self.door_constraint_map and any(c.type == ConstraintType.DeadEnd for c in self.door_constraint_map[potential_match])
+                potential_is_must_enter = potential_match in self.door_constraint_map and any(c.type == ConstraintType.MustEnter and potential_match in c.doors and len(c.doors) == 1 for c in self.door_constraint_map[potential_match])
+
+                if d.traversal_only:
+                    if potential_match.traversal_only or not valid_portal(potential_match, flags):
+                        continue
+                    if (self.door_sector_map[d].portals and all(p.destination for p in self.door_sector_map[d].portals)
+                            and (potential_is_dead_end or potential_is_must_enter)):
+                        continue
+
+                if potential_match.traversal_only:
+                    if d.traversal_only or not valid_portal(d, flags):
+                        continue
+                    if (self.door_sector_map[potential_match].portals and all(p.destination for p in self.door_sector_map[potential_match].portals)
+                            and (d_is_dead_end or d_is_must_enter)):
+                        continue
+
+                # bad cases: dead end to dead end, must enter to must enter, dead end to must enter, must enter to dead end
+                if ((d_is_dead_end and potential_is_dead_end)
+                   or (d_is_must_enter and potential_is_must_enter)
+                   or (d_is_dead_end and potential_is_must_enter)
+                   or (d_is_must_enter and potential_is_dead_end)):
+                    continue
+                self.door_matches[d].append(potential_match)
+
+
+def valid_portal(door, flags):
+    return door.portalAble and (not flags.vanilla_traps or not door.blocked or is_boss_trap(door))
+
+
+class ConstraintType(Enum):
+    MustEnter = 1
+    Special = 2  # used for ice cross for now?
+    Crystal = 3
+    DeadEnd = 4
+    Neutral = 5
+    Portal = 6
+
+
+class Constraint:
+
+    def __init__(self, type, doors, constraint):
+        self.type = type
+        self.doors = list(doors)
+        self.constraint = constraint
+
+
 class Transitivity:
+    def __init__(self, door_list, constraint_list, limited_starting_points):
+        self.remaining_doors = list(door_list)
+        self.unconnected_doors = {}  # door -> potential crystal state
+        self.door_path = []  # door choices made to get to this point
+        self.connection_map = {}  # hard connections made
+        self.crystal_switch_included = False
 
-    def __init__(self, sector_list=None, starting_points=None):
-
-        # mutable state
-        self.explored_doors = set()  # reached doors
-        self.current_hooks = defaultdict(list)  # hook -> doors
-        self.door_path = []
-        self.next_door = None
-
-        self.sector_list = sector_list
-        self.starting_points = starting_points
-        self.connected_sectors = []
-        self.connection_map = {}
-
-        # categories
-        self.must_enters = {}  # door -> sector
-        self.specials = {}  # tuple of doors -> sector?
-        self.crystal_needs = {}  # tuple of doors -> sector?
-        self.dead_ends = {}
-        self.sector_reqs = defaultdict(list)  # sector -> constraint list
-
-        self.others = []
-        self.neutrals = []
-
-        self.switch_providers = []
+        # which constraints are satisfied and remaining?
+        self.unsatisfied_constraints = list(constraint_list)
+        self.satisfied_constraints = []
+        self.limited_starting_points = list(limited_starting_points)
+        self.used_starting_points = []
 
     def copy(self):
-        copy = Transitivity()
-        copy.explored_doors.update(self.explored_doors)
-        copy.current_hooks.update({k: list(v) for k, v in self.current_hooks.items()})
+        copy = Transitivity(self.remaining_doors, self.unsatisfied_constraints, self.limited_starting_points)
+        copy.unconnected_doors.update(self.unconnected_doors)
         copy.door_path.extend(self.door_path)
-        copy.next_door = self.next_door
-
-        copy.sector_list = self.sector_list.copy()
-        copy.starting_points = self.starting_points.copy()
-        copy.connected_sectors.extend(self.connected_sectors)
         copy.connection_map.update(self.connection_map)
-
-        copy.must_enters.update(self.must_enters)
-        copy.specials.update(self.specials)
-        copy.crystal_needs.update(self.crystal_needs)
-        copy.dead_ends.update(self.dead_ends)
-        copy.sector_reqs.update({k: list(v) for k, v in self.sector_reqs.items()})
-
-        copy.others.extend(self.others)
-        copy.neutrals.extend(self.neutrals)
-        copy.switch_providers.extend(self.switch_providers)
+        copy.crystal_switch_included = self.crystal_switch_included
+        copy.satisfied_constraints.extend(self.satisfied_constraints)
+        copy.used_starting_points.extend(self.used_starting_points)
         return copy
 
-    def initialize(self):
-        free_portals = []
-        for s in self.sector_list:
-            if s.portal and not s.portal.destination:  # this doesn't handle dependent sectors, yet
-                self.append_sector_free(s)
-                free_portals.append(s)
-        self.connected_sectors.extend(free_portals)
-        self.sector_list = [s for s in self.sector_list if s not in free_portals]
-        self.classify_sectors()
-
-    def classify_sectors(self):
-        for s in self.sector_list:
-            if s.descriptor.dead_end:
-                d = next(iter(s.outstanding_doors))
-                self.dead_ends[d] = s
-                self.sector_reqs[s].append(d)
-            else:
-                if s.descriptor.must_enter_reqs:
-                    for req in s.descriptor.must_enter_reqs:
-                        self.must_enters[req] = s
-                        self.sector_reqs[s].append(req)
-            if s not in self.sector_reqs:
-                if s.descriptor.is_neutral:
-                    self.neutrals.append(s)
-                else:
-                    self.others.append(s)
-            if s.c_switch:
-                self.switch_providers.append(s)
-
-    def append_sector_free(self, sector):
+    def append_sector_free(self, sector, c_info):
         for d in sector.outstanding_doors:
-            self.explored_doors.add(d)
+            self.remaining_doors.remove(d)
+            self.unconnected_doors[d] = CrystalBarrier.Orange
             self.door_path.append(d)
-            self.current_hooks[Hook.NormalPortal].append(d)
+            if d in c_info.switch_doors:
+                self.crystal_switch_included = True
 
-    def find_next_constraints(self):
-        if len(self.must_enters) > 0:
-            # order them? hookable now better score than not, also those that provide more hooks
-            return list(self.must_enters.keys())
-        if len(self.dead_ends) > 0:
-            return list(self.dead_ends.keys())
-        return []
+    # big task here - a lot of doors are "equivalent" logically for what we're checking
+    # and so shouldn't be explored independently, not sure how to determine that here
+    def find_connectable_doors(self, c_info):
+        connectable_doors = []
+        doors_to_check = list(self.unconnected_doors.keys()) + self.remaining_doors
+        doors_to_check_set = set(doors_to_check)
+        unconnected_set = set(self.unconnected_doors.keys())
+        # check for forced doors first
+        for d, possibles in c_info.door_matches.items():
+            if d not in unconnected_set:
+                continue
+            forced_connection = self.is_door_forced(possibles, doors_to_check_set)
+            if forced_connection:
+                connectable_doors.append((forced_connection, d))
+                break  # short-circuit, we'll just use this one anyway
+        # for door, info in c_info.dependent_portals.items():
+        #     dependent, enabler = info
+        #     if all(d in self.remaining_doors for d in dependent.outstanding_doors) and enabler.door not in self.remaining_doors:
+        #         connectable_doors.append((door, None))
 
-    def find_possible_hooks(self):
-        door_set = self.next_door if isinstance(self.next_door, tuple) else (self.next_door,)
-        solutions = []
-        for d in door_set:
-            if len(self.get_possible_hooks(d)) > 0:
-                solutions.append(Path([d], d))
-        if solutions:
-            return solutions
+        if connectable_doors:
+            return connectable_doors[:1]
 
-        # look for intervening sectors using others
-        current_depth = 0
-        init_paths = []
-        for d in door_set:
-            init_paths.append(Path([d], d))
-        found_paths = deque(init_paths)
-
-        while len(found_paths) > 0:
-            path = found_paths.popleft()
-            if len(path.sector_path) > current_depth:
-                if len(solutions) > 0:
-                    return solutions
+        doors_to_check = self.winnow_doors_to_check(doors_to_check, c_info)
+        doors_to_connect = self.get_unique_unconnected_doors(c_info)
+        for d in doors_to_check:
+            hanger_type = hanger_from_door(d)
+            for available in doors_to_connect:
+                if available == d:  # might allow self-connecting spirals someday here, not too important for logic though
+                    continue
+                if available.traversal_only:
+                    if (valid_portal(d, c_info.flags)
+                       and (available not in c_info.dependent_portals or available in self.unconnected_doors)
+                       and (not self.limited_starting_points or d in self.limited_starting_points)):
+                        connectable_doors.append((d, available))
+                elif d.traversal_only:
+                    if (valid_portal(available, c_info.flags)
+                       and (d not in c_info.dependent_portals or d in self.unconnected_doors)
+                       and (not self.limited_starting_points or available in self.limited_starting_points)):
+                        connectable_doors.append((d, available))
                 else:
-                    current_depth = len(path.sector_path)
-            if any(len(self.get_possible_hooks(hanger)) for hanger in path.hangers):
-                solutions.append(path)
+                    if hook_from_door(available) == hanger_type:
+                        connectable_doors.append((d, available))
+        connectable_doors.sort(key=lambda c: self.score_possible_connection(c, c_info))
+        return connectable_doors
+
+
+    @staticmethod
+    def is_door_forced(possibles, doors_to_check_set):
+        found_forced, forced_connection = False, None
+        for p in possibles:
+            if p in doors_to_check_set:
+                if found_forced:
+                    return None # found multiple possible doors
+                else:
+                    forced_connection = p
+                    found_forced = True
+        return forced_connection
+
+    def winnow_doors_to_check(self, doors_to_check, c_info):
+        reachability_dict = {}
+        for door in doors_to_check:
+            constraint_flag = any(door in c.doors for c in self.unsatisfied_constraints)
+            limited_flag = door in self.limited_starting_points
+            reach_key = (hanger_from_door(door), constraint_flag, limited_flag) + c_info.shape_map[door]
+            reachability_dict[reach_key] = door  # If reachability is the same, the door will be overwritten
+        return list(reachability_dict.values())  # Get the doors from the dictionary
+
+    def get_unique_unconnected_doors(self, c_info):
+        unique_dict = {}
+        for door in self.unconnected_doors:
+            reachability = c_info.door_sector_map[door].descriptor.reachability
+            if door in reachability:
+                reach_key = tuple(sorted({d.name: c for d, c in reachability[door]}.items()))  # Convert dict to tuple for hashing
+            else:
+                reach_key = ()
+            unique_dict[(hook_from_door(door), self.unconnected_doors[door]) + reach_key] = door
+        return list(unique_dict.values())
+
+    def score_possible_connection(self, connection, c_info):
+        if connection[0] in c_info.switch_doors and not self.crystal_switch_included:
+            return 5
+        best = 0
+        for constraint in self.unsatisfied_constraints:
+            if connection[0] in constraint.doors:
+                new_score = self.score_against_constraint(connection, constraint)
+                if new_score > best:
+                    best = new_score
+        return best
+
+    def score_against_constraint(self, connection, constraint):
+        if constraint.type == ConstraintType.MustEnter:
+            return 4
+        if constraint.type == ConstraintType.Special:
+            return 3
+        if constraint.type == ConstraintType.Crystal:
+            if constraint.constraint.contains_color_access(connection[0]):
+                crystal = self.unconnected_doors[connection[1]]
+                if crystal in [CrystalBarrier.Blue, CrystalBarrier.Either, CrystalBarrier.Both]:
+                    return 2
+                return 0  # if it's not fulfilling a requirement, it's not a high priority
+            if constraint.constraint.contains_color_access(connection[1]) and connection[0] in self.unconnected_doors:
+                crystal = self.unconnected_doors[connection[0]]
+                if crystal in [CrystalBarrier.Blue, CrystalBarrier.Either, CrystalBarrier.Both]:
+                    return 2
+                return 0
+            return 2
+        if constraint.type == ConstraintType.DeadEnd:
+            return 1
+        return 0
+
+    def priority(self):
+        # return 0
+        # doors_left = len(self.remaining_doors) + len(self.unconnected_doors)
+        # number of constraints satisfied per depth
+        # extraneous_depth = len(self.door_path) - len(self.satisfied_constraints)
+        # efficiency_ratio = len(self.satisfied_constraints) / len(self.door_path)
+        # efficiency_score = (-extraneous_depth * 100) + len(self.door_path)  # depth bonus
+
+        unsatisfied_crystal = False
+        constraints_score = 0
+        for constraint in self.unsatisfied_constraints:
+            if constraint.type == ConstraintType.MustEnter:
+                constraints_score += 4
+            elif constraint.type == ConstraintType.Special:
+                constraints_score += 3
+            elif constraint.type == ConstraintType.Crystal:
+                unsatisfied_crystal = True
+                constraints_score += 2
+            elif constraint.type in [ConstraintType.DeadEnd, ConstraintType.Portal]:
+                constraints_score += 1
+            else:
+                constraints_score += 0.5
+        if unsatisfied_crystal and not self.crystal_switch_included:
+            constraints_score += 5
+        score = len(self.door_path) / constraints_score  # penalize for unsatisfied constraints
+        return -score  # for min-heap, need to negate priority
+
+    def connect_door(self, connection, c_info):
+        t = self.copy()
+        hanger, hook = connection  # we are attaching the hanger to the hook
+        t.door_path.append(hanger)
+        t.connection_map[hook] = hanger
+        t.connection_map[hanger] = hook
+        if hanger in c_info.switch_doors:
+            t.crystal_switch_included = True
+        if t.limited_starting_points and hanger in t.limited_starting_points:
+            t.limited_starting_points.remove(hanger)
+            t.used_starting_points.append(hanger)
+
+        # deal with reachabale remaining doors/unnconnected doors
+        crystal_prop = t.unconnected_doors.pop(hook)
+        backprop_queue = deque([])
+        visited = set()
+        if hanger in t.remaining_doors:
+            t.remaining_doors.remove(hanger)
+        if hanger in t.unconnected_doors:
+            hanger_cs = t.unconnected_doors.pop(hanger)
+            if not hanger.blocked:
+                if crystal_prop == CrystalBarrier.Null and hanger_cs != CrystalBarrier.Null:
+                    crystal_prop = hanger_cs
+                if ((hanger_cs == CrystalBarrier.Blue and crystal_prop == CrystalBarrier.Orange) or
+                   (hanger_cs == CrystalBarrier.Orange and crystal_prop == CrystalBarrier.Blue)):
+                    crystal_prop = CrystalBarrier.Both
+                if hanger_cs in [CrystalBarrier.Either, CrystalBarrier.Both]:
+                    crystal_prop = hanger_cs
+
+        # back-propagate crystal state - through queue
+        if not hanger.blocked and crystal_prop not in [CrystalBarrier.Either, CrystalBarrier.Both]:
+            hook_reach = c_info.door_sector_map[hook].descriptor.reachability
+            if hook in hook_reach and hook_reach[hook]:
+                self_hook = next((pair for pair in hook_reach[hook] if pair[0] == hook), None)
+                if self_hook and self_hook[1] == CrystalBarrier.Either:
+                    crystal_prop = self_hook[1]
+        reachability = c_info.door_sector_map[hanger].descriptor.reachability
+        for pair in reachability[hanger]:
+            reachable, new_crystal = pair
+            new_crystal = new_crystal if CrystalBarrier.Null != new_crystal else crystal_prop
+            # todo: decoupled doors? algorithm could be made more flexibile in that case? not sure it matters much
+            if reachable != hanger and reachable in t.remaining_doors:  # second condition mean it hasn't been seen yet
+                t.unconnected_doors[reachable] = new_crystal
+                t.remaining_doors.remove(reachable)
+            if reachable == hanger and new_crystal != CrystalBarrier.Null:
+                backprop_queue.append((hook, new_crystal))
+                visited.add((hook, new_crystal))
+
+        # special handling for ice cross and similar cases
+        if not hanger.blocked:
+            reachability = c_info.door_sector_map[hook].descriptor.reachability
+            for pair in reachability[hook]:
+                reachable, new_crystal = pair
+                if reachable != hook and reachable in t.remaining_doors:
+                    new_crystal = new_crystal if CrystalBarrier.Null != new_crystal else crystal_prop
+                    t.unconnected_doors[reachable] = new_crystal
+                    t.remaining_doors.remove(reachable)
+
+        while backprop_queue:
+            backprop_door, new_crystal = backprop_queue.pop()
+            reachability = c_info.door_sector_map[backprop_door].descriptor.reachability
+            for pair in reachability[backprop_door]:
+                reachable, c_prop = pair
+                if reachable != backprop_door:
+                    if reachable in t.unconnected_doors:
+                        if t.unconnected_doors[reachable] not in [CrystalBarrier.Either, CrystalBarrier.Both] and new_crystal in [CrystalBarrier.Either, CrystalBarrier.Both]:
+                            t.unconnected_doors[reachable] = new_crystal
+                    if reachable in t.connection_map:
+                        if c_prop == CrystalBarrier.Null:
+                            target = t.connection_map[reachable]
+                            if (target, new_crystal) not in visited:
+                                visited.add((target, new_crystal))
+                                backprop_queue.append((target, new_crystal))
+
+        # deal with newly satisfied constraints
+        new_unsatisfied_constraints = []
+        for constraint in t.unsatisfied_constraints:
+            if ConstraintType.Portal == constraint.type and (hook in constraint.doors or hanger in constraint.doors):
+                t.satisfied_constraints.append(constraint)
+            elif hanger in constraint.doors:
+                if constraint.type in [ConstraintType.MustEnter, ConstraintType.Special, ConstraintType.DeadEnd]:
+                    t.satisfied_constraints.append(constraint)
+                elif constraint.type == ConstraintType.Crystal:
+                    if (not constraint.constraint.contains_color_access(hanger)
+                            or crystal_prop in [CrystalBarrier.Blue, CrystalBarrier.Either, CrystalBarrier.Both]):
+                        t.satisfied_constraints.append(constraint)
+                    else:
+                        new_unsatisfied_constraints.append(constraint)
+                else:
+                    new_unsatisfied_constraints.append(constraint)
+            # fulfill color required by back propagation
+            elif hook in constraint.doors:
+                if constraint.type == ConstraintType.Crystal:
+                    if (constraint.constraint.contains_color_access(hook)
+                            and crystal_prop in [CrystalBarrier.Blue, CrystalBarrier.Either, CrystalBarrier.Both]):
+                        t.satisfied_constraints.append(constraint)
+                    else:
+                        new_unsatisfied_constraints.append(constraint)
+            else:
+                new_unsatisfied_constraints.append(constraint)
+        t.unsatisfied_constraints = new_unsatisfied_constraints
+
+        return t
+
+    def now_impossible(self, c_info, visited_states):
+        if frozenset(self.connection_map.items()) in visited_states:
+            return True
+        if len(self.unconnected_doors) == 0 and self.unsatisfied_constraints:
+            return True
+        if len(self.unconnected_doors) == 0 and len(self.remaining_doors) > 0:
+            return True
+
+        remaining_set = set(self.remaining_doors)
+
+        total_needed_per_type = defaultdict(list)
+        forced_set = set()
+        for constraint in self.unsatisfied_constraints:
+            if constraint.type == ConstraintType.MustEnter:
+                if all(d not in remaining_set and d not in self.unconnected_doors for d in constraint.doors):
+                    return True
+                if len(constraint.doors) == 1:
+                    forced_door = constraint.doors[0]
+                    total_needed_per_type[hanger_from_door(forced_door)].append(forced_door)
+                    forced_set.add(forced_door)
+            elif constraint.type == ConstraintType.Crystal:
+                if all(d not in remaining_set and d not in self.unconnected_doors for d in constraint.doors):
+                    return True
+            elif constraint.type == ConstraintType.DeadEnd:
+                forced_door = constraint.doors[0]
+                total_needed_per_type[hanger_from_door(forced_door)].append(forced_door)
+                forced_set.add(forced_door)
+            elif constraint.type == ConstraintType.Portal:
+                forced_door = constraint.doors[0]
+                sector = c_info.door_sector_map[forced_door]
+                if sector.portals and all(p.destination for p in sector.portals):
+                    total_needed_per_type[hanger_from_door(forced_door)].append(forced_door)
+                    forced_set.add(forced_door)
+        available_per_type = defaultdict(list)
+        for door in self.remaining_doors + list(self.unconnected_doors.keys()):
+            if door not in forced_set:
+                available_per_type[hook_from_door(door)].append(door)
+        for hanger, needed in total_needed_per_type.items():
+            if len(available_per_type[hanger]) < len(needed):
+                return True
+        if self.check_for_forced_connections(available_per_type, total_needed_per_type, c_info):
+            return True
+        if self.detect_problematic_forced_scenarios(total_needed_per_type, forced_set, c_info):
+            return True
+
+        # branches vs dead-ends
+        balance = len(self.unconnected_doors)
+        sectors_to_check = {c_info.door_sector_map[d] for d in remaining_set}
+        for sector in sectors_to_check:
+            if sector.portals and any(not p.destination for p in sector.portals):
+                balance += 1
+            else:
+                doors = [d for d in sector.outstanding_doors if d in remaining_set]
+                best = max(sum(1 for item in sector.descriptor.reachability[d] if item[0] in remaining_set) for d in doors)
+                missing_doors = len(doors) - best
+                balance += best - 2 - missing_doors
+        if balance < 0:
+            return True
+
+        # crystal switch death - self limited
+        # if all(d not in self.unconnected_doors and d not in self.remaining_doors for d in c_info.switch_doors):
+        #     if all()
+        return False
+
+    def check_for_forced_connections(self, available_per_type, total_needed_per_type, c_info):
+        def init(t, a):
+            new_t = defaultdict(list)
+            new_t.update({k: list(v) for k, v in t.items()})
+            new_a = defaultdict(list)
+            new_a.update({k: list(v) for k, v in a.items()})
+            return new_t, new_a
+
+        transformed = True
+        new_total_needed, new_available = init(total_needed_per_type, available_per_type)
+        while transformed:
+            transformed = False
+            new_total_needed, new_available = init(new_total_needed, new_available)
+            potentially_forced = [hanger for hanger, needed in new_total_needed.items() if len(new_available[hanger]) == len(needed)]
+            if potentially_forced:
+                hanger = next(iter(potentially_forced))
+                removals = []
+                new_required, num_satisfied = [], 0
+                for d in new_available[hanger]:
+                    reachability = c_info.door_sector_map[d].descriptor.reachability[d]
+                    if len(reachability) == 2 and not all(r[0] in self.unconnected_doors for r in reachability):
+                        potentials = [a for a, b in reachability if a != d and (a in new_available[hook_from_door(a)] or a in new_total_needed[hanger_from_door(a)])]
+                        if len(potentials) == 1:
+                            removals.append((hanger, d))
+                            removals.append((hook_from_door(potentials[0]), potentials[0]))
+                            new_required.append((hanger_from_door(potentials[0]), potentials[0]))
+                            num_satisfied += 1
+                if removals:
+                    transformed = True
+                    for h, r in removals:
+                        if r in new_available[h]:
+                            new_available[h].remove(r)
+                    del new_total_needed[hanger][:num_satisfied]
+                    for h, r in new_required:
+                        if r not in new_total_needed[h]:
+                            new_total_needed[h].append(r)
+        for hanger, needed in new_total_needed.items():
+            if len(new_available[hanger]) < len(needed):
+                return True
+        return False
+
+    def detect_problematic_forced_scenarios(self, total_needed_per_type, forced_set, c_info):
+        available_cnt, avail_transfers, transfers_by_sector = defaultdict(int), defaultdict(int), defaultdict(list)
+        avail_by_type_list = defaultdict(list)
+        for door in self.remaining_doors + list(self.unconnected_doors.keys()):
+            if door in forced_set:
                 continue
-            candidates = [s for s in self.sector_list if s not in path.sector_path
-                          and not s.descriptor.dead_end and not s.descriptor.is_neutral]
-            if len(path.sector_path) >= len(candidates):
+            sector = c_info.door_sector_map[door]
+            if sector.descriptor.is_neutral and door not in self.unconnected_doors:
                 continue
-            for s in candidates:
-                done_hooks = []
-                for d in s.outstanding_doors:
-                    # don't hook to your self or to a hard must-enter requirement
-                    if d == path.origin_door or d in self.must_enters:
+            # todo: xfers greater than 2? problematic in choosing later which to use
+            is_xfer = (door not in self.unconnected_doors
+                       and all(d not in forced_set for d in sector.outstanding_doors)
+                       and len(sector.outstanding_doors) == 2)
+            if is_xfer:
+                other_doors = [d for d in sector.outstanding_doors if d != door]
+                for other_door in other_doors:
+                    key = hook_from_door(door), hanger_from_door(other_door)
+                    if key[0] == key[1]:
                         continue
-                    hook = hook_from_door(d)
-                    if hook in done_hooks:
-                        continue
-                    if any(hook == hanger_from_door(h) for h in path.hangers):
-                        child_path = path.copy()
-                        child_path.sector_path.append(s)
-                        child_path.connection_type.append(hook)
-                        child_path.hangers = [door for door in s.outstanding_doors if door != d]
-                        found_paths.append(child_path)
-                        done_hooks.append(hook)
-        if len(solutions) > 0:
-            return solutions
-        return None
+                    avail_transfers[key] += 1
+                    transfers_by_sector[sector].append(key)
+            else:  # 3,4,+ xferable doors? more lenient for now, assumes all doors will be available
+                available_cnt[hook_from_door(door)] += 1
+                avail_by_type_list[hook_from_door(door)].append(door)
+        total_cnt = defaultdict(int)
+        total_cnt.update({k: len(v) for k, v in total_needed_per_type.items()})
+        for hook, available in available_cnt.items():
+            consumed = min(total_cnt[hook], available)
+            total_cnt[hook] -= consumed
+            available_cnt[hook] -= consumed
+        changed = True
+        while any(c > 0 for c in total_cnt.values()) and changed:
+            changed = False
+            # attempt to find transfer to satisfy total
+            found_transfers = None
+            for hanger, needed in total_cnt.items():
+                if found_transfers:
+                    break
+                if needed <= 0:
+                    continue
+                init_state = ([], [hanger], avail_transfers, transfers_by_sector)
+                queue = deque([init_state])  # avail_transfers changes as certain ones are used
+                while len(queue) > 0:
+                    xfers, hangers, avail_xfers, xfers_by_sector = queue.pop()
+                    if any(available_cnt[h] > 0 for h in hangers):
+                        found_transfers = xfers
+                        break
+                    potentials = [xfer for xfer, num in avail_xfers.items() if num > 0 and xfer[0] in hangers and xfer[1] not in hangers]
+                    for xfer in potentials:
+                        s, used_xfers = next(((s, xfer_list) for s, xfer_list in xfers_by_sector.items() if xfer in xfer_list), None)
+                        next_xfers = dict(avail_xfers)
+                        for used_xfer in used_xfers:
+                            next_xfers[used_xfer] -= 1
+                        next_state = (xfers + [xfer], hangers + [xfer[1]], next_xfers, {k: v for k, v in xfers_by_sector.items() if k != s})
+                        queue.append(next_state)
+            if found_transfers:
+                changed = True
+                total_adj = found_transfers[0][0]
+                avail_adj = found_transfers[len(found_transfers)-1][1]
+                total_cnt[total_adj] -= 1
+                available_cnt[avail_adj] -= 1
+                avail_by_type_list[avail_adj].pop()
+                for found_transfer in found_transfers:
+                    s, used_xfers = next(((s, xfer_list) for s, xfer_list in transfers_by_sector.items() if found_transfer in xfer_list), None)
+                    del transfers_by_sector[s]
+                    for xfer in used_xfers:
+                        avail_transfers[xfer] -= 1
+        return any(c > 0 for c in total_cnt.values())
 
-    def get_possible_hooks(self, door):
-        # non-starting point portals? not sure, I have to worry about that
-        if door.portalAble and door in self.starting_points and len(self.current_hooks[Hook.NormalPortal]) > 0:
-            return self.current_hooks[Hook.NormalPortal]
-        return self.current_hooks[hanger_from_door(door)]
-
-    def append_door(self, door, sector):
-        self.door_path.append(door)
-        if door.portalAble and len(self.current_hooks[Hook.NormalPortal]):
-            hook_to_use = Hook.NormalPortal
-        else:
-            hook_to_use = hanger_from_door(door)
-        used_door = self.current_hooks[hook_to_use].pop()  # shouldn't matter which?
-        self.connection_map[used_door] = door
-        self.explored_doors.add(door)
-        # todo: I think decoupled doors has diff logic here
-        new_doors = {d for d, c in sector.descriptor.reachability[door] if d != door and d not in self.explored_doors}
-        self.explored_doors.update(new_doors)
-        for d in new_doors:
-            if d.type != DoorType.Logical:
-                self.current_hooks[hook_from_door(d)].append(d)
-
-        # todo: alter specials, crystal_needs, neutral?
-        must_enter = self.find_must_enter_by_door(door)
-        if must_enter is not None:
-            del self.must_enters[must_enter]
-        if door in self.dead_ends:
-            del self.dead_ends[door]
-        if sector in self.sector_reqs:
-            req = self.find_sector_req_by_door(sector, door)
-            if req is not None:
-                self.sector_reqs[sector].remove(req)
-                if len(self.sector_reqs[sector]) == 0:
-                    del self.sector_reqs[sector]
-                    self.connected_sectors.append(sector)
-                    self.sector_list.remove(sector)
-        else:
-            if sector in self.others:
-                self.connected_sectors.append(sector)
-                self.sector_list.remove(sector)
-                self.others.remove(sector)
-
-    def find_must_enter_by_door(self, door):
-        for req in self.must_enters:
-            if door == req:
-                return req
-            elif isinstance(req, tuple) and door in req:
-                return req
-        return None
-
-    def find_sector_req_by_door(self, sector, door):
-        for req in self.sector_reqs[sector]:
-            if req == door:
-                return req
-            elif isinstance(req, tuple) and door in req:
-                return req
-        return None
-
-
-class Path:
-
-    def __init__(self, hangers, origin=None):
-        self.sector_path = []  # tuple of type used + sector at each step
-        self.connection_type = []
-        self.hangers = hangers
-        self.origin_door = origin
-
-    def copy(self):
-        path = Path(self.hangers)
-        path.sector_path.extend(self.sector_path)
-        path.connection_type.extend(self.connection_type)
-        path.origin_door = self.origin_door
-        return path
-
-
-
-# Portal: 'Eastern Portal'
-# Dead Ends: 'Eastern Boss', 'TR Roller Room', 'TR Compass Room', 'Thieves Big Chest Nook', 'PoD Shooter Room'
-# Must_Enter: 'GT Beam Dash', 'GT Hidden Star', 'GT Compass Room', 'Ice Big Key', 'Eastern Compass Room', 'Tower Altar'
-# Other: 'Mire Lobby', 'PoD Bow Statue Left', 'Desert Big Chest Room', 'Desert Compass Room',
-#        'Hyrule Castle East Hall', 'TR Torches', 'Ice Hammer Block', 'Ice Lonely Freezor', 'Thieves Compass Room',
-#         'Hyrule Dungeon South Abyss'
-# Crystal "Must Enter": 'Thieves Attic'
-# Neutral:
-
-# Providers: 'GT Compass Room', 'PoD Bow Statue Left'
-
-# Portable must-enters: 'Eastern Compass Room'
-# Look for starting points: [TR Roller Room SW, Mire Lobby S, PoD Mimics 2 SW, Desert East Lobby S, Eastern Hint Tile Blocked Path SE, Hyrule Castle East Hall SW, Hyrule Castle East Hall S]
-# Eliminate dead-ends [Mire Lobby S, PoD Mimics 2 SW, Desert East Lobby S, Eastern Hint Tile Blocked Path SE, Hyrule Castle East Hall SW, Hyrule Castle East Hall S]
-
-# What are your options that you can satisfy:
-# Constraints to satisfy: must_enters, specials (one of several options), crystals, dead-ends, neutrals
-
-# One path: Compass, Hidden, Ice Big, Beam Dash, GT Compass
-# 2 E Eastern Compass
-# 2 E, 1 S, 1 N pick an E, (Hidden Star) find Thieves Compass Room which has 2 W
-# 1W, 1E, 2N open: pick Ice Big Key because open
-# 1E, 2W, 1N: pick other E b/c W
-# 1 Str, 1W, 1E, 1N: pick S because that's what left' need a S, and any open thing: PoD Bow statue double S works
-# 1 Str, 1W, 2E : Must empty gone, crystal PoD Bow -> Thieves Compass -> Beam Dash -> Attic
-# 1W, 3E: Nook
-# 3E: HC East, Torches, HC South Abyss (Must be this way)
-# 2N, 2S: Boss, Roller, Compass
-# 1S: Ice Hammer (or Lonely Freezor)
-# 1 Str: PoD Shooter
-# Lobby + Lonely = either 1S/1N or 2 Str basically neutral
-# Tower Altar can fit anywhere
-
-
-# Crystal notes, getting the crystal provider attached early close to the portal is great
-# Could also attach directly or indirectly, but may have lots of variations in the indirect space
-
-# Potential preferences for must-exits:
-# Portable and portal available
-# Crystal switch provider
-# Door type available without any extra sectors
-# Those that need to search extra sectors to connect
-
-
-# Cleanup: ensure the unvisited sectors are neutral
-
-
-
-# [Desert Back Portal, Thieves Lobby, PoD Arena Ledge, PoD Left Cage, Eastern Cannonball Ledge, Mire Cross, Mire Ledgehop, Desert Arrow Pot Corner]
-
-
-# Portal: Desert Back Portal
-# Dead Ends: PoD Arena Ledge
-# Must_Enter: Thieves Lobby
-# Other: PoD Left Cage, Mire Cross, Mire Ledgehop, Desert Arrow Pot Corner
-# Crystal "Must Enter": XXX
-# Neutral: Eastern Cannonball Ledge
-
+    def is_satisfied(self):
+        for constraint in self.unsatisfied_constraints:
+            if constraint.type != ConstraintType.DeadEnd:
+                return False
+        return True

@@ -63,9 +63,14 @@
     "randomizer.dungeon.dungeondoorshuffle": "Dungeon Door Shuffle",
     "randomizer.dungeon.dungeondoorshuffle.vanilla": "Vanilla",
     "randomizer.dungeon.dungeondoorshuffle.basic": "Basic",
-    "randomizer.dungeon.dungeondoorshuffle.paired": "Paired",
+    "randomizer.dungeon.dungeondoorshuffle.paired": "Paired (Experimental)",
     "randomizer.dungeon.dungeondoorshuffle.partitioned": "Partitioned",
     "randomizer.dungeon.dungeondoorshuffle.crossed": "Crossed",
+
+    "randomizer.dungeon.dungeon_shuffle_algorithm": "Dungeon Shuffle Algorithm",
+    "randomizer.dungeon.dungeon_shuffle_algorithm.classic": "Classic",
+    "randomizer.dungeon.dungeon_shuffle_algorithm.experimental": "Experimental (v2)",
+    "randomizer.dungeon.dungeon_shuffle_algorithm.biased": "Biased (e.g. Helrule)",
 
     "randomizer.dungeon.dungeonintensity": "Intensity Level",
     "randomizer.dungeon.dungeonintensity.1": "1: Normal Supertile and Spiral Stairs",

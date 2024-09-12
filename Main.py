@@ -118,6 +118,7 @@ def main(args, seed=None, fish=None):
     world.enemy_damage = args.enemy_damage.copy()
     world.any_enemy_logic = args.any_enemy_logic.copy()
     world.beemizer = {player: str(args.beemizer[player]) for player in range(1, world.players + 1)}
+    world.dungeon_shuffle_algorithm = args.dungeon_shuffle_algorithm.copy()
     world.intensity = {player: random.randint(1, 3) if args.intensity[player] == 'random' else int(args.intensity[player]) for player in range(1, world.players + 1)}
     world.door_type_mode = args.door_type_mode.copy()
     world.trap_door_mode = args.trap_door_mode.copy()
@@ -171,7 +172,7 @@ def main(args, seed=None, fish=None):
     world.finish_init()
 
     # custom settings - these haven't been promoted to full settings yet
-    in_progress_settings = ['force_enemy', 'free_lamp_cone']
+    in_progress_settings = ['force_enemy', 'free_lamp_cone', 'dungeon_bias']
     for player in range(1, world.players + 1):
         for setting in in_progress_settings:
             if world.customizer and world.customizer.has_setting(player, setting):
@@ -273,8 +274,8 @@ def main(args, seed=None, fish=None):
         link_entrances_new(world, player)
 
     logger.info(world.fish.translate("cli", "cli", "shuffling.prep"))
-    if not world.experimental[player]:
-        for player in range(1, world.players + 1):
+    for player in range(1, world.players + 1):
+        if world.dungeon_shuffle_algorithm[player] == 'classic':
             link_doors_prep(world, player)
 
     if args.print_custom_yaml:
@@ -285,7 +286,7 @@ def main(args, seed=None, fish=None):
     logger.info(world.fish.translate("cli", "cli", "shuffling.dungeons"))
 
     for player in range(1, world.players + 1):
-        if world.experimental[player]:
+        if world.dungeon_shuffle_algorithm[player] != 'classic':
             link_doors_prototype(world, player)
         else:
             link_doors(world, player)
@@ -519,6 +520,7 @@ def copy_world(world):
     ret.enemy_damage = world.enemy_damage.copy()
     ret.any_enemy_logic = world.any_enemy_logic.copy()
     ret.beemizer = world.beemizer.copy()
+    ret.dungeon_shuffle_algorithm = world.dungeon_shuffle_algorithm.copy()
     ret.intensity = world.intensity.copy()
     ret.decoupledoors = world.decoupledoors.copy()
     ret.door_self_loops = world.door_self_loops.copy()

@@ -149,6 +149,9 @@ class World(object):
             set_player_attr('collection_rate', False)
             set_player_attr('colorizepots', True)
             set_player_attr('pot_pool', {})
+
+            set_player_attr('dungeon_shuffle_algorithm', 'classic')
+            set_player_attr('dungeon_bias', 'Hyrule Castle')
             set_player_attr('decoupledoors', False)
             set_player_attr('door_self_loops', False)
             set_player_attr('door_type_mode', 'original')
@@ -2048,10 +2051,11 @@ class Sector(object):
         self.sector_id = None  # a numeric identifier, not yet implemented
         self.key = None  # a readable/hashable key - lazy init? todo not consistent for intensity 3
         self.descriptor = None
-        self.portal = None
+        self.portals: list[Portal] = []
 
         self.locked = False
         self.restrict_list = None
+        self.exclude_list = None
 
     def region_set(self):
         if self.r_name_set is None:
@@ -2589,6 +2593,7 @@ class Spoiler(object):
                          'take_any': self.world.take_any,
                          'overworld_map': self.world.overworld_map,
                          'door_shuffle': self.world.doorShuffle,
+                         'dungeon_shuffle_algorithm': self.world.dungeon_shuffle_algorithm,
                          'intensity': self.world.intensity,
                          'door_type_mode': self.world.door_type_mode,
                          'trap_door_mode': self.world.trap_door_mode,
@@ -2832,6 +2837,7 @@ class Spoiler(object):
                     outfile.write(f"Key Logic Algorithm:'            {self.metadata['key_logic'][player]}\n")
                     outfile.write('Door Shuffle:                    %s\n' % self.metadata['door_shuffle'][player])
                     if self.metadata['door_shuffle'][player] != 'vanilla':
+                        outfile.write(f"Dungeon Shuffle Algorithm:       {self.metadata['dungeon_shuffle_algorithm'][player]}\n")
                         outfile.write(f"Intensity:                       {self.metadata['intensity'][player]}\n")
                         outfile.write(f"Door Type Mode:                  {self.metadata['door_type_mode'][player]}\n")
                         outfile.write(f"Trap Door Mode:                  {self.metadata['trap_door_mode'][player]}\n")
@@ -3163,6 +3169,8 @@ key_logic_algo = {'dangerous': 0, 'partial': 1, 'strict': 2}
 # byte 13: SSDD M??? (skullwoods, linked_drops, mirrorscroll, ??? = 3 free bytes)
 skullwoods_mode = {'original': 0, 'restricted': 1, 'loose': 2, 'followlinked': 3}
 linked_drops_mode = {'unset': 0, 'linked': 1, 'independent': 2}
+
+# todo: dungeon shuffle algorithm: 4-5 options?
 
 # sfx_shuffle and other adjust items does not affect settings code
 

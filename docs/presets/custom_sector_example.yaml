@@ -1,0 +1,118 @@
+#meta:
+#  algorithm: major_only
+#  seed: 523669134
+settings:
+  1:
+    goal: pedestal
+
+    pottery: keys
+    dropshuffle: keys
+
+    dungeon_shuffle_algorithm: experimental
+    door_shuffle: crossed
+    intensity: 3
+    door_type_mode: big
+    trap_door_mode: boss
+
+doors:
+  1:
+    sectors:
+      GT Big Chest: Ganons Tower
+      TR Big Chest: Turtle Rock
+      Mire Falling Bridge - Chest: Misery Mire
+      Ice Big Chest Landing: Ice Palace
+      Thieves Big Chest Room: Thieves Town
+      Thieves Attic Window: Thieves Town
+      Skull Big Chest: Skull Woods
+      Swamp Hub: Swamp Palace
+      PoD Big Chest Balcony: Palace of Darkness
+      Desert Big Chest Room: Desert Palace
+      Eastern Courtyard: Eastern Palace
+      Hyrule Dungeon Cellblock: Hyrule Castle
+    sector_exclusions:
+      Swamp Lobby: [Hyrule Castle]
+      GT Gauntlet 1: [Hyrule Castle]
+      GT Gauntlet 5: [Hyrule Castle]
+advanced_placements:
+  1:
+      - type: PreferredLocationGroup
+        items:
+          - Lamp
+          - Progressive Bow
+          - Progressive Glove
+          - Progressive Glove
+          - Moon Pearl
+          - Hammer
+          - Hookshot
+          - Fire Rod
+          - Cane of Somaria
+          - Flippers
+          - Ice Rod
+          - Magic Mirror
+        locations:
+          - Hyrule Castle - Zelda's Chest
+          - Eastern Palace - Big Chest
+          - Desert Palace - Big Chest
+          - Tower of Hera - Big Chest
+          - Palace of Darkness - Big Chest
+          - Swamp Palace - Big Chest
+          - Skull Woods - Big Chest
+          - Thieves' Town - Big Chest
+          - Misery Mire - Big Chest
+          - Ice Palace - Big Chest
+          - Turtle Rock - Big Chest  # For pyramid fairy
+          - Ganons Tower - Big Chest
+      - type: PreferredLocationGroup
+        items:
+          - Progressive Bow
+          - Powder
+          - Bombos
+          - Ether
+          - Quake
+          - Ocarina
+          - Book of Mudora
+          - Cane of Byrna
+          - Cape
+          - Pegasus Boots
+          - Magic Upgrade (1/2)
+          - Progressive Sword
+          - Progressive Sword
+          - Progressive Sword
+          - Progressive Sword
+          - Progressive Armor
+          - Progressive Armor
+          - Boss Heart Container
+          - Boss Heart Container
+          - Boss Heart Container
+          - Boss Heart Container
+          - Boss Heart Container
+          - Boss Heart Container
+          - Boss Heart Container
+        locations:
+          - Sunken Treasure
+          - Blind's Hideout - Top
+          - Zora's Ledge
+          - Aginah's Cave
+          - Maze Race
+          - Kakariko Well - Top
+          - Lost Woods Hideout
+          - Lumberjack Tree
+          - Cave 45
+          - Graveyard Cave
+          - Checkerboard Cave
+          - Bonk Rock Cave
+          - Lake Hylia Island
+          - Desert Ledge
+          - Spectacle Rock
+          - Spectacle Rock Cave
+          - Pyramid
+          - Digging Game
+          - Peg Cave
+          - Chest Game
+          - Bumper Cave Ledge
+          - Mire Shed - Left
+          - Floating Island
+          - Mimic Cave
+
+
+

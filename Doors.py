@@ -187,7 +187,7 @@ def create_doors(world, player):
         create_door(player, 'Eastern Single Eyegore NE', Intr).dir(No, 0xd8, Right, High).pos(1),
         create_door(player, 'Eastern Duo Eyegores SE', Intr).dir(So, 0xd8, Right, High).pos(1),
         create_door(player, 'Eastern Duo Eyegores NE', Nrml).dir(No, 0xd8, Right, High).trap(0x4).pos(0),
-        create_door(player, 'Eastern Boss SE', Nrml).dir(So, 0xc8, Right, High).no_exit().trap(0x4).pos(0),
+        create_door(player, 'Eastern Boss SE', Nrml).dir(So, 0xc8, Right, High).no_exit().trap(0x4).pos(0).portal(X, 0x00),
 
         # Desert Palace
         create_door(player, 'Desert Main Lobby S', Nrml).dir(So, 0x84, Mid, High).pos(0).portal(Z, 0x22),
@@ -353,6 +353,8 @@ def create_doors(world, player):
         create_door(player, 'Tower Altar SW', Intr).dir(So, 0x30, Left, High).no_exit().trap(0x2).pos(1),
         create_door(player, 'Tower Altar NW', Nrml).dir(No, 0x30, Left, High).pos(0),
         create_door(player, 'Tower Agahnim 1 SW', Nrml).dir(So, 0x20, Left, High).no_exit().trap(0x4).pos(0),
+        # this door cannot be a portal because the aga 1 cutscene grabs the wrong exit id if it is and breaks horribly
+        # .portal(Z, 0x00),
 
         # Palace of Darkness
         create_door(player, 'PoD Lobby S', Nrml).dir(So, 0x4a, Mid, High).pos(4).portal(Z, 0x20),
@@ -474,7 +476,7 @@ def create_doors(world, player):
         create_door(player, 'PoD Turtle Party NW', Intr).dir(No, 0x0b, Mid, High).pos(0),
         create_door(player, 'PoD Callback WS', Intr).dir(We, 0x0b, Mid, High).pos(1),
         create_door(player, 'PoD Callback Warp', Warp),
-        create_door(player, 'PoD Boss SE', Nrml).dir(So, 0x5a, Right, High).no_exit().trap(0x4).pos(0),
+        create_door(player, 'PoD Boss SE', Nrml).dir(So, 0x5a, Right, High).no_exit().trap(0x4).pos(0).portal(X, 0x00),
 
         create_door(player, 'Swamp Lobby S', Nrml).dir(So, 0x28, Mid, High).pos(1).portal(Z, 0x22),
         create_door(player, 'Swamp Lobby Moat', Lgcl),
@@ -588,7 +590,7 @@ def create_doors(world, player):
         create_door(player, 'Swamp I S', Intr).dir(So, 0x16, Mid, High).pos(0),
         create_door(player, 'Swamp T SW', Intr).dir(So, 0x16, Left, High).small_key().pos(1),
         create_door(player, 'Swamp T NW', Nrml).dir(No, 0x16, Left, High).pos(3),
-        create_door(player, 'Swamp Boss SW', Nrml).dir(So, 0x06, Left, High).no_exit().trap(0x4).pos(0),
+        create_door(player, 'Swamp Boss SW', Nrml).dir(So, 0x06, Left, High).no_exit().trap(0x4).pos(0).portal(Z, 0x00),
 
         create_door(player, 'Skull 1 Lobby S', Nrml).dir(So, 0x58, Left, High).pos(4).portal(Z, 0x00),
         create_door(player, 'Skull 1 Lobby WS', Nrml).dir(We, 0x58, Bot, High).small_key().pos(1),
@@ -675,7 +677,7 @@ def create_doors(world, player):
         create_door(player, 'Thieves Conveyor Maze EN', Intr).dir(Ea, 0xbc, Top, High).pos(2),
         create_door(player, 'Thieves Hallway WN', Intr).dir(We, 0xbc, Top, High).no_exit().trap(0x1).pos(2),
         create_door(player, 'Thieves Conveyor Maze Down Stairs', Sprl).dir(Dn, 0xbc, 0, HTH).ss(A, 0x11, 0x80, True, True),
-        create_door(player, 'Thieves Boss SE', Nrml).dir(So, 0xac, Right, High).no_exit().trap(0x4).pos(0),
+        create_door(player, 'Thieves Boss SE', Nrml).dir(So, 0xac, Right, High).no_exit().trap(0x4).pos(0).portal(X, 0x00),
         create_door(player, 'Thieves Spike Track ES', Nrml).dir(Ea, 0xbb, Bot, High).pos(5),
         create_door(player, 'Thieves Hellway NW', Nrml).dir(No, 0xbb, Left, High).pos(0),
         create_door(player, 'Thieves Triple Bypass EN', Nrml).dir(Ea, 0xbb, Top, High).pos(4),
@@ -961,7 +963,7 @@ def create_doors(world, player):
         create_door(player, 'Mire Firesnake Skip Orange Barrier', Lgcl),
         create_door(player, 'Mire Antechamber Orange Barrier', Lgcl),
         create_door(player, 'Mire Antechamber NW', Nrml).dir(No, 0xa0, Left, High).big_key().pos(0),
-        create_door(player, 'Mire Boss SW', Nrml).dir(So, 0x90, Left, High).no_exit().trap(0x4).pos(0),
+        create_door(player, 'Mire Boss SW', Nrml).dir(So, 0x90, Left, High).no_exit().trap(0x4).pos(0).portal(Z, 0x00),
 
         create_door(player, 'TR Main Lobby SE', Nrml).dir(So, 0xd6, Right, High).pos(1).portal(X, 0x02),
         create_door(player, 'TR Lobby Ledge NE', Nrml).dir(No, 0xd6, Right, High).pos(2),
@@ -1266,7 +1268,7 @@ def create_doors(world, player):
         create_door(player, 'GT Frozen Over Up Stairs', Sprl).dir(Up, 0x4c, 0, HTH).ss(S, 0x1a, 0x6c, True),
         create_door(player, 'GT Brightly Lit Hall Down Stairs', Sprl).dir(Dn, 0x1d, 0, HTH).ss(S, 0x11, 0x80, False, True),
         create_door(player, 'GT Brightly Lit Hall NW', Nrml).dir(No, 0x1d, Left, High).big_key().pos(0),
-        create_door(player, 'GT Agahnim 2 SW', Nrml).dir(So, 0x0d, Left, High).no_exit().trap(0x4).pos(0)
+        create_door(player, 'GT Agahnim 2 SW', Nrml).dir(So, 0x0d, Left, High).no_exit().trap(0x4).pos(0).portal(Z, 0x00)
     ]
 
     world.doors += doors

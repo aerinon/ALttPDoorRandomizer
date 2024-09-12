@@ -19,8 +19,18 @@
       "options": [
         "vanilla",
         "basic",
+        "paired",
         "partitioned",
         "crossed"
+      ]
+    },
+    "dungeon_shuffle_algorithm": {
+      "type": "selectbox",
+      "default": "classic",
+      "options": [
+        "classic",
+        "experimental",
+        "biased"
       ]
     },
     "dungeonintensity": {

@@ -127,6 +127,12 @@ Only extra settings are found here. All entrance randomizer settings are support
 
 CLI: `--doorShuffle [vanilla|basic|partitioned|crossed]`
 
+### Dungeon Shuffle Algorithm
+
+* Classic - The original algorithm that slices and dices dungeons. Has a few known generation issues.
+* Experimental - The new algorithm currently under development. Not tested with many settings still.
+* Biased - New algorithm, but attempt to place as much as possible in the biased dungeon. Defaults to Hyrule Castle.
+
 ### Intensity (--intensity number)
 
 * Level 1 - Normal door and spiral staircases are shuffled

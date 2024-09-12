@@ -41,6 +41,12 @@ def define_sector_features(sectors):
                 sector.item_logic.add('Bow')
             if region.name in ['Swamp Lobby', 'Swamp Entrance']:
                 sector.item_logic.add('Open Floodgate')
+        for door in sector.outstanding_doors:
+            if door.portalAble:
+                if len(sector.outstanding_doors) == 1 and not is_boss_trap(door):
+                    door.dead_end()
+                elif len(sector.outstanding_doors) == 1 and is_boss_trap(door) and door.deadEnd:
+                    door.deadEnd = False
 
 
 def handle_special_sectors(all_sectors, candidate_sectors, global_pole, dungeon_pool, connections_tuple,

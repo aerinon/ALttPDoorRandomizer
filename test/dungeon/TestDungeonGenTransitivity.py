@@ -9,7 +9,7 @@ from RoomData import create_rooms
 
 from DoorShuffle import prep_world_for_doors_prototype, convert_to_sectors
 from dungeon.DungeonGenTransitivity import do_transitivity_check
-from dungeon.DungeonGen3 import create_sector_descriptors
+from dungeon.DungeonGenSectorDesc import create_sector_descriptors
 
 
 class TestDungeon(unittest.TestCase):

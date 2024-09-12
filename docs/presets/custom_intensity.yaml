@@ -1,0 +1,25 @@
+meta:
+  algorithm: major_only
+  seed: 16
+settings:
+  1:
+    goal: pedestal
+#    mode: standard
+
+    pottery: keys
+    dropshuffle: keys
+    keysanity: true
+
+    door_shuffle: crossed
+    intensity: 1
+    door_type_mode: big
+
+    flute_mode: active
+    experimental: true
+doors:
+  1:
+    #    lobbies:
+    #    doors:
+    intensity:
+      normal: 'none'
+

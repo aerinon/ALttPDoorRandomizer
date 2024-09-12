@@ -121,6 +121,7 @@ class CustomSettings(object):
                 args.mixed_travel[p] = get_setting(settings['mixed_travel'], args.mixed_travel[p])
                 args.standardize_palettes[p] = get_setting(settings['standardize_palettes'],
                                                            args.standardize_palettes[p])
+                args.dungeon_shuffle_algorithm[p] = get_setting(settings['dungeon_shuffle_algorithm'], args.dungeon_shuffle_algorithm[p])
                 args.intensity[p] = get_setting(settings['intensity'], args.intensity[p])
                 args.door_type_mode[p] = get_setting(settings['door_type_mode'], args.door_type_mode[p])
                 args.trap_door_mode[p] = get_setting(settings['trap_door_mode'], args.trap_door_mode[p])
@@ -225,6 +226,31 @@ class CustomSettings(object):
             return self.file_source['doors']
         return None
 
+    def get_custom_pools(self, player):
+        if self.get_doors() and 'pools' in self.get_doors()[player]:
+            return self.get_doors()[player]['pools']
+        return None
+
+    def get_custom_intensity(self, player):
+        if self.get_doors() and 'intensity' in self.get_doors()[player]:
+            return self.get_doors()[player]['intensity']
+        return None
+
+    def get_custom_lobbies(self, player):
+        if self.get_doors() and 'lobbies' in self.get_doors()[player]:
+            return self.get_doors()[player]['lobbies']
+        return None
+
+    def get_dungeon_sectors(self, player):
+        if self.get_doors() and 'sectors' in self.get_doors()[player]:
+            return self.get_doors()[player]['sectors']
+        return None
+
+    def get_dungeon_exclusions(self, player):
+        if self.get_doors() and 'sector_exclusions' in self.get_doors()[player]:
+            return self.get_doors()[player]['sector_exclusions']
+        return None
+
     def get_bosses(self):
         if 'bosses' in self.file_source:
             return self.file_source['bosses']
@@ -293,6 +319,8 @@ class CustomSettings(object):
             settings_dict[p]['shuffle'] = world.shuffle[p]
             settings_dict[p]['door_shuffle'] = world.doorShuffle[p]
             settings_dict[p]['intensity'] = world.intensity[p]
+            settings_dict[p]['dungeon_shuffle_algorithm'] = world.dungeon_shuffle_algorithm[p]
+            settings_dict[p]['dungeon_bias'] = world.dungeon_shuffle_algorithm[p]
             settings_dict[p]['door_type_mode'] = world.door_type_mode[p]
             settings_dict[p]['trap_door_mode'] = world.trap_door_mode[p]
             settings_dict[p]['key_logic_algorithm'] = world.key_logic_algorithm[p]

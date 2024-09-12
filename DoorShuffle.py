@@ -134,7 +134,10 @@ def link_doors_prep(world, player):
 
 def create_dungeon_pool(world, player):
     pool = None
-    if world.doorShuffle[player] == 'basic':
+    if world.customizer and world.customizer.get_custom_pools(player):
+        pool_config = world.customizer.get_custom_pools(player)
+        pool = [(group, list(chain.from_iterable([dungeon_regions[d] for d in group]))) for group in pool_config]
+    elif world.doorShuffle[player] == 'basic':
         pool = [([name], regions) for name, regions in dungeon_regions.items()]
     elif world.doorShuffle[player] == 'paired':
         dungeon_pool = list(dungeon_regions.keys())
@@ -428,9 +431,12 @@ def connect_one_way(world, entrancename, exitname, player):
     y = world.check_for_door(exitname, player)
     if x is not None:
         x.dest = y
-    if x.dependents:
-        for dep in x.dependents:
-            connect_simple_door_to_region(dep, ext.parent_region)
+        if x.dependents:
+            for dep in x.dependents:
+                connect_simple_door_to_region(dep, ext.parent_region)
+    if y is not None:
+        y.dest = x
+
 
 
 def unmark_ugly_smalls(world, player):
@@ -594,11 +600,10 @@ def handle_special_portal_cases(world, player):
 
     # tr rock bomb entrances
     for portal in world.dungeon_portals[player]:
-        if not portal.destination and not portal.deadEnd:
-            if portal.door.name == 'TR Lazy Eyes SE':
-                world.get_room(0x23, player).change(0, DoorKind.DungeonEntrance)
-            if portal.door.name == 'TR Eye Bridge SW':
-                world.get_room(0xd5, player).change(0, DoorKind.DungeonEntrance)
+        if portal.door.name == 'TR Lazy Eyes SE':
+            world.get_room(0x23, player).change(0, DoorKind.DungeonEntrance)
+        if portal.door.name == 'TR Eye Bridge SW':
+            world.get_room(0xd5, player).change(0, DoorKind.DungeonEntrance)
 
     if not world.swamp_patch_required[player]:
         swamp_portal = world.get_portal('Swamp', player)
@@ -924,6 +929,7 @@ def extra_dungeon_items(pool, world, player):
         at_map.advancement = world.restrict_boss_items[player] != 'none'
         if at.dungeon_items.count(at_map) < 1:
             at.dungeon_items.append(at_map)
+
 
 def finish_dungeon_setup(door_type_pools, world, player):
     setup_custom_door_types(world, player)
@@ -1624,9 +1630,13 @@ def convert_to_sectors(region_names, world, player):
         exits = []
         exits.extend(region.exits)
         outstanding_doors = []
+        found_portals = []
         matching_sectors = []
         while len(exits) > 0:
             ext = exits.pop()
+            if ext.name.startswith('Enter '):
+                p_name = ext.parent_region.name.replace(' Portal', '')
+                found_portals.append(world.get_portal(p_name, player))
             door = ext.door
             if ext.connected_region is not None or door is not None and door.controller is not None:
                 if door is not None and door.controller is not None:
@@ -1651,9 +1661,11 @@ def convert_to_sectors(region_names, world, player):
             for match in matching_sectors:
                 sector.regions.extend(match.regions)
                 sector.outstanding_doors.extend(match.outstanding_doors)
+                sector.portals.extend(match.portals)
                 sectors.remove(match)
         sector.regions.extend(region_chunk)
         sector.outstanding_doors.extend(outstanding_doors)
+        sector.portals.extend(found_portals)
         sectors.append(sector)
     return sectors
 
@@ -4643,6 +4655,8 @@ def link_doors_prototype(world, player):
     pool = world.dungeon_pool[player]
     if pool:
         main_dungeon_pool_prototype(pool, world, player)
+    if world.doorShuffle[player] != 'vanilla':
+        create_door_spoiler(world, player)
 
 
 def prep_world_for_doors_prototype(world, player):
@@ -4674,9 +4688,12 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
     door_type_pools = []
 
     flags = DoorFlags().from_world(world, player)
-    # todo: custom intensity settings
+    # custom intensity settings
+    if world.customizer and world.customizer.get_custom_intensity(player):
+        flags.from_custom(world.customizer.get_custom_intensity(player))
     handle_intensity_settings(flags, world, player)
-    # todo: customizer door connections
+    connect_custom(world, player)
+    customize_lobbies(world, player)
 
     for pool, region_list in dungeon_pool:
         if len(pool) == 1:
@@ -4691,7 +4708,10 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
             merge_sectors(sectors, world, player)
             sector_pool, portal_pool = [], []
             for sector in sectors:
-                (portal_pool if len(sector.outstanding_doors) == 0 else sector_pool).append(sector)
+                if len(sector.outstanding_doors) == 0 and any(not p.assigned for p in sector.portals):
+                    portal_pool.append(sector)
+                else:
+                    sector_pool.append(sector)
             # todo: analyze not based on inaccessible regions
             # todo: do it based on which dungeon are in this pool
             analyze_portals(world, player)
@@ -4700,23 +4720,38 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
 
     update_forced_keys(dungeon_builders, entrances_map, world, player)
 
-    main_dungeon_generation_prototype(dungeon_builders, entrances_map, world, player)
+    main_dungeon_generation_prototype(dungeon_builders, flags, world, player)
 
     finish_dungeon_setup(door_type_pools, world, player)
 
 
 def handle_intensity_settings(flags, world, player):
-    if not flags.normal:
+    if flags.normal != 'none':
+        both_flag = flags.normal == 'both'
+        v_flag = flags.normal == 'vertical'
+        h_flag = flags.normal == 'horizontal'
         for entrance, ext in default_door_connections:
-            connect_two_way(world, entrance, ext, player)
+            if (not both_flag
+               or (v_flag and world.get_door(entrance, player).direction in [Direction.East, Direction.West])
+               or (h_flag and world.get_door(entrance, player).direction in [Direction.North, Direction.South])):
+                connect_two_way(world, entrance, ext, player)
         for ent, ext in default_one_way_connections:
-            connect_one_way(world, ent, ext, player)
+            if (not both_flag
+               or (v_flag and world.get_door(ent, player).direction in [Direction.East, Direction.West])
+               or (h_flag and world.get_door(ent, player).direction in [Direction.North, Direction.South])):
+                connect_one_way(world, ent, ext, player)
     if not flags.spiral:
         for entrance, ext in spiral_staircases:
             connect_two_way(world, entrance, ext, player)
-    if not flags.edges:
+    if flags.edges != 'none':
+        both_flag = flags.edges == 'both'
+        v_flag = flags.edges == 'vertical'
+        h_flag = flags.edges == 'horizontal'
         for entrance, ext in open_edges:
-            connect_two_way(world, entrance, ext, player)
+            if (not both_flag
+               or (v_flag and world.get_door(entrance, player).direction in [Direction.East, Direction.West])
+               or (h_flag and world.get_door(entrance, player).direction in [Direction.North, Direction.South])):
+                connect_two_way(world, entrance, ext, player)
     if not flags.straight:
         for entrance, ext in straight_staircases:
             connect_two_way(world, entrance, ext, player)
@@ -4724,26 +4759,48 @@ def handle_intensity_settings(flags, world, player):
         for entrance, ext in ladders:
             connect_two_way(world, entrance, ext, player)
     if not flags.lobbies:
-        for portal in world.dungeon_portals[1]:
+        for portal in world.dungeon_portals[player]:
             make_portal_vanilla(portal, world, player)
+    else:
+        for portal in world.dungeon_portals[player]:
+            portal.default_door.entranceFlag = False
+        # remove incognito doors
+        world.get_room(0x60, player).delete(5)
+        world.get_room(0x60, player).change(2, DoorKind.DungeonEntrance)
+        world.get_room(0x62, player).delete(5)
+        world.get_room(0x62, player).change(1, DoorKind.DungeonEntrance)
     if world.mode[player] == 'standard':
         make_portal_vanilla(world.get_portal('Sanctuary', player), world, player)
 
 
-def make_portal_vanilla(portal, world, player):
-    target = portal.door
+def customize_lobbies(world, player):
+    if world.customizer and world.customizer.get_custom_lobbies(player):
+        custom_lobbies = world.customizer.get_custom_lobbies(player)
+        for portal, assigned_door in custom_lobbies.items():
+            portal = world.get_portal('portal', player)
+            door = world.get_door(assigned_door, player)
+            connect_door_to_portal(door, portal, world, player)
+
+
+def connect_door_to_portal(door, portal, world, player):
     region_name = portal.name + ' Portal'
     region = world.get_region(region_name, player)
     entrance_door = next(e.name for e in region.exits if e.name.startswith('Enter '))
-    connect_two_way(world, entrance_door, target.name, player)
+    connect_two_way(world, entrance_door, door.name, player)
     portal.assigned = True
-    target.dest = region
+    door.dest = region
+    door.entranceFlag = True
 
 
-def main_dungeon_generation_prototype(dungeon_builders, entrances_map, world, player):
+def make_portal_vanilla(portal, world, player):
+    target = portal.door
+    connect_door_to_portal(target, portal, world, player)
+
+
+def main_dungeon_generation_prototype(dungeon_builders, flags, world, player):
     for name, builder in dungeon_builders.items():
         # choose_portals_prototype(builder, entrances_map, world, player)
-        master_sector = create_dungeon(builder, entrances_map, world, player)
+        master_sector = create_dungeon(builder, flags, world, player)
         builder.master_sector = master_sector
 
     # assign portals properly
