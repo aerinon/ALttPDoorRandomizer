@@ -230,13 +230,19 @@
       "the overworld vanilla."
     ],
     "door_shuffle": [
-      "Select Door Shuffling Algorithm. (default: %(default)s)",
+      "Select Door Shuffling Pool. (default: %(default)s)",
       "Basic:          Doors are mixed within a single dungeon.",
       "Paired          Dungeon are paired (with one trio) and only mixed in those groups",
       "Partitioned     Doors are mixed in 3 partitions: L1-3+HC+AT, D1-4, D5-8",
       "Crossed:        Doors are mixed between all dungeons.",
       "Vanilla:        All doors are connected the same way they were in the",
       "                base game."
+    ],
+    "dungeon_shuffle_algorithm": [
+      "Select Door Shuffle Algorithm. (default: %(default)s)",
+      "classic:        Classic algorithm.",
+      "experimental:   New algorithm.",
+      "biased:         Dumps most dungeons in to a particular dungeon (default: Hyrule Castle)"
     ],
     "intensity" : [
       "Door Shuffle Intensity Level (default: %(default)s)",

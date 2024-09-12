@@ -105,6 +105,7 @@ SETTINGSTOPROCESS = {
       "bigkeyshuffle": "bigkeyshuffle",
       "key_logic_algorithm": "key_logic_algorithm",
       "dungeondoorshuffle": "door_shuffle",
+      "dungeon_shuffle_algorithm": "dungeon_shuffle_algorithm",
       "dungeonintensity": "intensity",
       "door_type_mode": "door_type_mode",
       "trap_door_mode": "trap_door_mode",
