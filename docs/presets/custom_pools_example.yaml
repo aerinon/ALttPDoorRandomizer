@@ -1,0 +1,38 @@
+meta:
+#  algorithm:
+  seed: 523669134
+settings:
+  1:
+    goal: pedestal
+
+    pottery: keys
+    dropshuffle: keys
+
+    dungeon_shuffle_algorithm: experimental
+    door_shuffle: crossed
+    intensity: 3
+    door_type_mode: big
+    trap_door_mode: boss
+
+doors:
+  1:
+    pools:
+      -
+          - Palace of Darkness
+          - Eastern Palace
+      -
+          - Desert Palace
+          - Misery Mire
+      -
+          - Hyrule Castle
+          - Agahnims Tower
+      -
+          - Skull Woods
+          - Thieves Town
+      -
+          - Ice Palace
+          - Swamp Palace
+      -
+          - Tower of Hera
+          - Turtle Rock
+          - Ganons Tower

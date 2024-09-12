@@ -186,6 +186,13 @@
       "vanilla"
     ]
   },
+  "dungeon_shuffle_algorithm": {
+    "choices": [
+      "classic",
+      "experimental",
+      "biased"
+    ]
+  },
   "intensity": {
     "choices":[
       "3", "2", "1", "random"

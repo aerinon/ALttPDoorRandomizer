@@ -498,6 +498,11 @@ def distribute_items_restrictive(world, gftower_trash=False, fill_locations=None
             if num_ph_items < num_ph_locations < len(fill_locations):
                 for _ in range(num_ph_locations - num_ph_items):
                     placeholder_items.append(replace_trash_item(restitempool, 'Rupee (1)'))
+            if num_ph_items > num_ph_locations:
+                for _ in range(num_ph_items - num_ph_locations):
+                    item = placeholder_items.pop()
+                    restitempool.remove(item)
+                    restitempool.append(ItemFactory('Rupees (5)', item.player))
             assert len(placeholder_items) == len(placeholder_locations)
             for i in placeholder_items:
                 restitempool.remove(i)

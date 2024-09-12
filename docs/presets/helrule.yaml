@@ -1,0 +1,20 @@
+meta:
+  algorithm: dungeon_only
+  seed: 385191674
+  bps: true
+settings:
+  1:
+    mode: standard
+
+    pottery: keys
+    dropshuffle: keys
+
+    door_shuffle: crossed
+    dungeon_shuffle_algorithm: biased
+    dungeon_bias: "Hyrule Castle"
+    intensity: 3
+    door_type_mode: big
+
+    flute_mode: active
+    experimental: true
+
