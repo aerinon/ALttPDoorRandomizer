@@ -1,0 +1,32 @@
+meta:
+  algorithm: district
+  seed: 1115
+settings:
+  1:
+    goal: pedestal
+    #    mode: standard
+
+    pottery: keys
+    dropshuffle: keys
+
+    door_shuffle: crossed
+    intensity: 3
+    door_type_mode: big
+
+    flute_mode: active
+    experimental: true
+doors:
+  1:
+    #    lobbies:
+    #    doors:
+#    intensity:
+#      normal: vertical
+#      edges: vertical
+#      spiral: false
+
+    intensity:
+      normal: horizontal
+      edges: horizontal
+      straight: false
+      ladder: false
+
