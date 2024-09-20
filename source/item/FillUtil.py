@@ -20,6 +20,7 @@ class ItemPoolConfig(object):
         self.reserved_locations = defaultdict(set)
         self.restricted = {}
         self.preferred = {}
+        self.strict = {}
         self.verify = {}
         self.verify_count = 0
         self.verify_target = 0
@@ -456,6 +457,9 @@ def filter_locations(item_to_place, locations, world, vanilla_skip=False, potion
     if (item_name, item_to_place.player) in config.preferred:
         locs = config.preferred[(item_name, item_to_place.player)]
         return sorted(locations, key=lambda l: 0 if l.name in locs else 1)
+    if (item_name, item_to_place.player) in config.strict:
+        locs = config.strict[(item_name, item_to_place.player)]
+        return [l for l in locations if l.name in locs]
     if (item_name, item_to_place.player) in config.verify:
         locs = config.verify[(item_name, item_to_place.player)].keys()
         return sorted(locations, key=lambda l: 0 if l.name in locs else 1)
@@ -571,7 +575,6 @@ vanilla_mapping = {
                     'Swamp Palace - West Chest', 'Swamp Palace - Flooded Room - Left', 'Swamp Palace - Waterfall Room',
                     'Swamp Palace - Flooded Room - Right', "Thieves' Town - Ambush Chest",
                     'Turtle Rock - Eye Bridge - Bottom Right', 'Ganons Tower - Compass Room - Bottom Left',
-                    'Swamp Palace - Flooded Room - Right', "Thieves' Town - Ambush Chest",
                     'Ganons Tower - DMs Room - Bottom Left', 'Ganons Tower - DMs Room - Bottom Right'],
     'Rupees (50)': ["Sahasrahla's Hut - Left", "Sahasrahla's Hut - Right", 'Spiral Cave', 'Superbunny Cave - Bottom',
                     'Hookshot Cave - Top Right', 'Hookshot Cave - Top Left', 'Hookshot Cave - Bottom Right',

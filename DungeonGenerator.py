@@ -97,7 +97,10 @@ type_map = {
     Hook.North: Hook.South,
     Hook.South: Hook.North,
     Hook.West: Hook.East,
-    Hook.East: Hook.West
+    Hook.East: Hook.West,
+    Hook.PitWarp: Hook.Landing,
+    Hook.Landing: Hook.PitWarp,
+    Hook.NormalPortal: Hook.NormalPortal
 }
 
 

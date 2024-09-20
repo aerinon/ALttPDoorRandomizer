@@ -45,6 +45,9 @@ def determine_entrance_regions(builder, flags, world, player):
     std_flag = world.mode[player] == 'standard'
     hc_flag = std_flag and builder.name == 'Hyrule Castle'
     rupee_bow_flag = hc_flag and world.bow_mode[player].startswith('retro')  # rupee bow
+    bk_shuffle = (world.bigkeyshuffle[player]  # big key can be anywhere
+                  or world.pottery[player] not in ['none', 'cave'] # pottery item can have the big key
+                  or world.door_type_mode in ['big', 'all', 'chaos'])  # big key doors are shuffled
 
     single_entrance_flag = False
     if len(builder_portals) == 1:  # only one access
@@ -61,15 +64,17 @@ def determine_entrance_regions(builder, flags, world, player):
                 master_door_list.append(d)
 
     # primary candidates
-    primary_candidates = find_portal_candidates(master_door_list, v_traps, standard=hc_flag, rupee_bow=rupee_bow_flag)
+    primary_candidates = find_portal_candidates(master_door_list, v_traps, standard=hc_flag, rupee_bow=rupee_bow_flag, bk_shuffle=bk_shuffle)
     # destination portals
     for portal in destination_portals:
         if not portal.assigned:
-            candidates = find_portal_candidates(master_door_list, v_traps, True, True, standard=std_flag, rupee_bow=rupee_bow_flag)
+            # destination portals can ignore bk_shuffle reqs
+            candidates = find_portal_candidates(master_door_list, v_traps, True, True, standard=std_flag, rupee_bow=rupee_bow_flag, bk_shuffle=True)
             if len(primary_candidates) == 1:
                 candidates = [x for x in candidates if x not in primary_candidates]
             # possible todo: check for transitivity using primary_candidates minus the chosen destination candidate
             assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, flags, False)
+            primary_candidates = [x for x in primary_candidates if x != portal.door]
 
     # primary portal
     primary_candidates = [p for p in non_destination_portals if p.dependent is None]
@@ -81,7 +86,7 @@ def determine_entrance_regions(builder, flags, world, player):
         primary_portal = primary_candidates[0]
     non_destination_portals.remove(primary_portal)
     if not primary_portal.assigned:
-        candidates = find_portal_candidates(master_door_list, v_traps, standard=hc_flag, rupee_bow=rupee_bow_flag)
+        candidates = find_portal_candidates(master_door_list, v_traps, standard=hc_flag, rupee_bow=rupee_bow_flag, bk_shuffle=bk_shuffle)
         assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, primary_portal, flags, check_transitive=True)
     else:
         record_entrance_regions(entrance_regions, primary_portal)
@@ -89,8 +94,10 @@ def determine_entrance_regions(builder, flags, world, player):
     # dead-end-able portals
     for portal in non_destination_portals:
         if not portal.assigned:
-            candidates = find_portal_candidates(master_door_list, v_traps, False, True, standard=hc_flag, rupee_bow=rupee_bow_flag)
-            candidate = assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, flags)
+            candidates = find_portal_candidates(master_door_list, v_traps, False, True,
+                                                standard=hc_flag, rupee_bow=rupee_bow_flag, bk_shuffle=bk_shuffle)
+            candidate = assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, flags,
+                                                check_transitive=True)
             if candidate.deadEnd:
                 if candidate.passage:
                     portal.destination = True
@@ -118,13 +125,14 @@ def determine_entrance_regions(builder, flags, world, player):
     return entrance_regions
 
 
-def assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, flags, record_portal=True, check_transitive=False):
+def assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, flags, record_portal=True,
+                            check_transitive=False):
     if len(candidates) == 0:
         raise GenerationException(f'No valid portal candidates for {builder.name}')
     logger = logging.getLogger('')
     candidate = random.choice(candidates)
     if check_transitive:
-        while not do_transitivity_check(builder.sectors, flags, [candidate]):
+        while not do_transitivity_check(builder, builder.sectors, flags, [candidate]):
             candidates.remove(candidate)
             if len(candidates) == 0:
                 raise GenerationException(f'No valid portal candidates for {builder.name}')
@@ -136,7 +144,7 @@ def assign_portal_candidate(builder, candidates, entrance_regions, master_door_l
     if record_portal and portal.dependent is None:
         entrance_regions.append(candidate.entrance.parent_region)
     clean_up_outstanding_doors(builder, portal.door)
-    clean_up_outstanding_doors(builder, candidate)
+    clean_up_outstanding_portal_doors(builder, candidate, portal)
     portal.change_door(candidate)
     portal.assigned = True
     if portal.door.blocked:
@@ -155,9 +163,18 @@ def clean_up_outstanding_doors(builder, door):
             sector.outstanding_doors = [d for d in sector.outstanding_doors if d != door]
 
 
-def find_portal_candidates(door_list, vanilla_traps, need_passage=False, dead_end_allowed=False, standard=False, rupee_bow=False):
+def clean_up_outstanding_portal_doors(builder, door, portal):
+    for sector in builder.sectors:
+        if door in sector.outstanding_doors:
+            sector.outstanding_doors = [d for d in sector.outstanding_doors if d != door]
+            sector.portals.append(portal)
+
+
+def find_portal_candidates(door_list, vanilla_traps, need_passage=False, dead_end_allowed=False, standard=False, rupee_bow=False, bk_shuffle=False):
     ret = [x for x in door_list if not vanilla_traps or not x.blocked or is_boss_trap(x)]
-    # todo: bk_shuffle for desert tiles 2
+    # bk_shuffle for desert tiles 2
+    if not bk_shuffle:
+        ret = [x for x in ret if not x.bk_shuffle_req]
     if need_passage:
         ret = [x for x in ret if x.passage]
     if not dead_end_allowed:
@@ -166,6 +183,8 @@ def find_portal_candidates(door_list, vanilla_traps, need_passage=False, dead_en
         ret = [x for x in ret if not x.standard_restricted]
     if rupee_bow:
         ret = [x for x in ret if not x.rupee_bow_restricted]
+    if len(ret) == 0 and len(door_list) == 1:
+        return door_list
     return ret
 
 
@@ -204,7 +223,7 @@ def generate_dungeon_find_proposal(builder, flags, world, player):
             hash_code = proposal_hash(doors_to_connect, proposed_map)
         if hash_code not in hash_code_set:
             hash_code_set.add(hash_code)
-            explored_state = explore_proposal(name, entrance_regions, all_regions, proposed_map, doors_to_connect,
+            explored_state = explore_proposal(builder, entrance_regions, all_regions, proposed_map, doors_to_connect,
                                               bk_special, world, player)
             if check_valid(name, explored_state, proposed_map, doors_to_connect, all_regions,
                            paths, entrance_regions, bk_special, world, player):
@@ -339,9 +358,9 @@ def modify_proposal(proposed_map, explored_state, doors_to_connect, hash_code_se
     return proposed_map, hash_code
 
 
-def explore_proposal(name, entrance_regions, all_regions, proposed_map, valid_doors, bk_special, world, player):
-    start = ExplorationState(dungeon=name)
-    bk_relevant = (world.door_type_mode[player] == 'original' and not world.bigkeyshuffle[player]) or bk_special
+def explore_proposal(builder, entrance_regions, all_regions, proposed_map, valid_doors, bk_special, world, player):
+    start = ExplorationState(dungeon=builder.name)
+    bk_relevant = (world.door_type_mode[player] == 'original' and not world.bigkeyshuffle[player] and not builder.split_flag) or bk_special
     start.big_key_special = bk_special
     original_state = extend_reachable_state_lenient(entrance_regions, start, proposed_map,
                                                     all_regions, valid_doors, bk_relevant, world, player)
@@ -440,14 +459,18 @@ def determine_paths_for_dungeon(world, player, all_regions, name):
             non_hole_portals.append(portal.door.entrance.parent_region.name)
             if portal.destination:
                 paths.append(portal.door.entrance.parent_region.name)
-    if world.mode[player] == 'standard' and name == 'Hyrule Castle Dungeon':
-        paths.append('Hyrule Dungeon Cellblock')
-        paths.append(('Hyrule Dungeon Cellblock', 'Hyrule Castle Throne Room'))
-        entrance = next(x for x in world.dungeon_portals[player] if x.name == 'Hyrule Castle South')
-        # todo: in non-er, we can use the other portals too
-        paths.append(('Hyrule Dungeon Cellblock', entrance.door.entrance.parent_region.name))
-        paths.append(('Hyrule Castle Throne Room', [entrance.door.entrance.parent_region.name,
-                                                    'Hyrule Dungeon Cellblock']))
+    if world.mode[player] == 'standard':
+        if name == 'Hyrule Castle':
+            paths.append(('Hyrule Dungeon Cellblock', 'Sanctuary'))  # note difference here
+        if name == 'Hyrule Castle Dungeon':
+            paths.append(('Hyrule Dungeon Cellblock', 'Hyrule Castle Throne Room'))
+        if name in ['Hyrule Castle', 'Hyrule Castle Dungeon']:
+            paths.append('Hyrule Dungeon Cellblock')
+            entrance = next(x for x in world.dungeon_portals[player] if x.name == 'Hyrule Castle South')
+            # todo: in non-er, we can use the other portals too
+            paths.append(('Hyrule Dungeon Cellblock', entrance.door.entrance.parent_region.name))
+            paths.append(('Hyrule Castle Throne Room', [entrance.door.entrance.parent_region.name,
+                                                        'Hyrule Dungeon Cellblock']))
     if world.doorShuffle[player] in ['basic'] and name == 'Thieves Town':
         paths.append('Thieves Attic Window')
     elif 'Thieves Attic Window' in all_r_names:
