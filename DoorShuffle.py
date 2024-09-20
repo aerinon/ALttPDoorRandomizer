@@ -779,7 +779,7 @@ def assign_portal_helper(candidate, portal, world, player):
             if other_portal.door == candidate:
                 other_portal.door = None
                 break
-    old_door = portal.default_door
+    old_door = portal.door
     if old_door:
         old_door.entranceFlag = False
         if old_door.name not in ['Hyrule Castle Lobby S', 'Sanctuary S', 'Hera Lobby S']:
