@@ -1666,6 +1666,7 @@ class Hook(Enum):
     Stairs = 4
     PitWarp = 5
     NormalPortal = 6
+    Landing = 7
 
     def __lt__(self, other):
         return self.value < other.value

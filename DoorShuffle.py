@@ -13,7 +13,6 @@ from Dungeons import dungeon_regions, region_starts, standard_starts, split_regi
 from Dungeons import dungeon_bigs, dungeon_hints
 from Items import ItemFactory
 from RoomData import DoorKind, PairedDoor, reset_rooms
-# from source.dungeon.DungeonGen3 import create_dungeon_builders_prototype
 from source.dungeon.DungeonGenLocalSearch import create_dungeon_builders_prototype, DoorFlags
 from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
 from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
@@ -4678,11 +4677,48 @@ def prep_world_for_doors_prototype(world, player):
         fix_big_key_doors_with_ugly_smalls(world, player)
     else:
         unmark_ugly_smalls(world, player)
+    if world.doorShuffle[player] == 'vanilla':
+        find_inaccessible_regions(world, player)
+        for entrance, ext in open_edges:
+            connect_two_way(world, entrance, ext, player)
+        for entrance, ext in straight_staircases:
+            connect_two_way(world, entrance, ext, player)
+        for exitName, regionName in vanilla_logical_connections:
+            connect_simple_door(world, exitName, regionName, player)
+        for entrance, ext in spiral_staircases:
+            connect_two_way(world, entrance, ext, player)
+        for entrance, ext in ladders:
+            connect_two_way(world, entrance, ext, player)
+        for entrance, ext in default_door_connections:
+            connect_two_way(world, entrance, ext, player)
+        for ent, ext in default_one_way_connections:
+            connect_one_way(world, ent, ext, player)
+
+        mirror_route = world.get_entrance('Sanctuary Mirror Route', player)
+        mr_door = mirror_route.door
+        sanctuary = mirror_route.parent_region
+        if mirror_route in sanctuary.exits:
+            sanctuary.exits.remove(mirror_route)
+        world.remove_entrance(mirror_route, player)
+        world.remove_door(mr_door, player)
+
+        if world.mode[player] == 'standard':
+            world.get_portal('Sanctuary', player).destination = True
+        world.get_portal('Desert East', player).destination = True
+        if world.mode[player] == 'inverted':
+            world.get_portal('Desert West', player).destination = True
+        else:
+            world.get_portal('Skull 2 West', player).destination = True
+            world.get_portal('Turtle Rock Lazy Eyes', player).destination = True
+            world.get_portal('Turtle Rock Eye Bridge', player).destination = True
+        for portal in world.dungeon_portals[player]:
+            connect_portal(portal, world, player)
+
+        vanilla_key_logic(world, player)
 
 
 def main_dungeon_pool_prototype(dungeon_pool, world, player):
     find_inaccessible_regions(world, player)
-    add_inaccessible_doors(world, player)
     entrances_map, potentials, connections = determine_entrance_list(world, player)
     dungeon_builders = {}
     door_type_pools = []
@@ -4694,30 +4730,18 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
     handle_intensity_settings(flags, world, player)
     connect_custom(world, player)
     customize_lobbies(world, player)
+    add_inaccessible_doors(world, player)  # must be done after lobbies are connected if not shuffled
 
+    analyze_portals(world, player)  # see below todos
     for pool, region_list in dungeon_pool:
-        if len(pool) == 1:
-            dungeon_key = next(iter(pool))
-            sector_pool = convert_to_sectors(region_list, world, player)
-            merge_sectors(sector_pool, world, player)
-            dungeon_builders[dungeon_key] = simple_dungeon_builder(dungeon_key, sector_pool)
-            # todo: figure this out for basic I guess
-            # dungeon_builders[dungeon_key].entrance_list = list(entrances_map[dungeon_key])
-        else:
-            sectors = convert_to_sectors(region_list, world, player)
-            merge_sectors(sectors, world, player)
-            sector_pool, portal_pool = [], []
-            for sector in sectors:
-                if len(sector.outstanding_doors) == 0 and any(not p.assigned for p in sector.portals):
-                    portal_pool.append(sector)
-                else:
-                    sector_pool.append(sector)
-            # todo: analyze not based on inaccessible regions
-            # todo: do it based on which dungeon are in this pool
-            analyze_portals(world, player)
-            dungeon_builders.update(create_dungeon_builders_prototype(pool, sector_pool, portal_pool, world, player))
-        door_type_pools.append((pool, DoorTypePool(pool, world, player)))
+        sectors = convert_to_sectors(region_list, world, player)
+        merge_sectors(sectors, world, player)
+        sector_pool, portal_pool = sector_portal_pools(sectors)
+        # todo: analyze portal not based on inaccessible regions
+        # todo: do it based on which dungeon are in this pool
 
+        dungeon_builders.update(create_dungeon_builders_prototype(pool, sector_pool, portal_pool, world, player))
+        door_type_pools.append((pool, DoorTypePool(pool, world, player)))
     update_forced_keys(dungeon_builders, entrances_map, world, player)
 
     main_dungeon_generation_prototype(dungeon_builders, flags, world, player)
@@ -4725,30 +4749,40 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
     finish_dungeon_setup(door_type_pools, world, player)
 
 
+def sector_portal_pools(sectors):
+    sector_pool, portal_pool = [], []
+    for sector in sectors:
+        if len(sector.outstanding_doors) == 0 and any(not p.assigned for p in sector.portals):
+            portal_pool.append(sector)
+        else:
+            sector_pool.append(sector)
+    return sector_pool, portal_pool
+
+
 def handle_intensity_settings(flags, world, player):
-    if flags.normal != 'none':
-        both_flag = flags.normal == 'both'
+    if flags.normal != 'both':
+        none_flag = flags.normal == 'none'
         v_flag = flags.normal == 'vertical'
         h_flag = flags.normal == 'horizontal'
         for entrance, ext in default_door_connections:
-            if (not both_flag
+            if (none_flag
                or (v_flag and world.get_door(entrance, player).direction in [Direction.East, Direction.West])
                or (h_flag and world.get_door(entrance, player).direction in [Direction.North, Direction.South])):
                 connect_two_way(world, entrance, ext, player)
         for ent, ext in default_one_way_connections:
-            if (not both_flag
+            if (none_flag
                or (v_flag and world.get_door(ent, player).direction in [Direction.East, Direction.West])
                or (h_flag and world.get_door(ent, player).direction in [Direction.North, Direction.South])):
                 connect_one_way(world, ent, ext, player)
     if not flags.spiral:
         for entrance, ext in spiral_staircases:
             connect_two_way(world, entrance, ext, player)
-    if flags.edges != 'none':
-        both_flag = flags.edges == 'both'
+    if flags.edges != 'both':
+        none_flag = flags.edges == 'none'
         v_flag = flags.edges == 'vertical'
         h_flag = flags.edges == 'horizontal'
         for entrance, ext in open_edges:
-            if (not both_flag
+            if (none_flag
                or (v_flag and world.get_door(entrance, player).direction in [Direction.East, Direction.West])
                or (h_flag and world.get_door(entrance, player).direction in [Direction.North, Direction.South])):
                 connect_two_way(world, entrance, ext, player)
@@ -4835,18 +4869,24 @@ def main_dungeon_generation_prototype(dungeon_builders, flags, world, player):
         b2 = dungeon_builders.pop('Skull Woods Back')
         b1.master_sector.regions.extend(b2.master_sector.regions)
         b1.name = 'Skull Woods'
+        b1.location_set.update(b2.location_set)
+        b1.location_cnt += b2.location_cnt
         dungeon_builders['Skull Woods'] = b1
     if 'Desert Palace Front' in dungeon_builders:
         b1 = dungeon_builders.pop('Desert Palace Front')
         b2 = dungeon_builders.pop('Desert Palace Back')
         b1.master_sector.regions.extend(b2.master_sector.regions)
         b1.name = 'Desert Palace'
+        b1.location_set.update(b2.location_set)
+        b1.location_cnt += b2.location_cnt
         dungeon_builders['Desert Palace'] = b1
     if 'Hyrule Castle Dungeon' in dungeon_builders:
         b1 = dungeon_builders.pop('Hyrule Castle Dungeon')
         b2 = dungeon_builders.pop('Hyrule Castle Sewers')
         b1.master_sector.regions.extend(b2.master_sector.regions)
         b1.name = 'Hyrule Castle'
+        b1.location_set.update(b2.location_set)
+        b1.location_cnt += b2.location_cnt
         dungeon_builders['Hyrule Castle'] = b1
         sewer_door = world.get_door('Enter HC (Sewers)', player)
         throne_door = world.get_door('Hyrule Castle Throne Room N', player)

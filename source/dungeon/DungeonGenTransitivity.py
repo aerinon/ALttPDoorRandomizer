@@ -7,9 +7,10 @@ from collections import deque, defaultdict, Counter
 from enum import Enum
 
 from BaseClasses import CrystalBarrier, Hook, Direction
+from MultiClient import connect
 from Utils import flatten
 
-from source.dungeon.DungeonGenerationCommon import hanger_from_door, hook_from_door, is_boss_trap
+from source.dungeon.DungeonGenerationCommon import hanger_from_door, hook_from_door, is_boss_trap, GenerationException
 from source.dungeon.DungeonGenSectorDesc import CrystalConstraint
 
 logger = logging.getLogger('tlogger')
@@ -20,14 +21,14 @@ logger = logging.getLogger('tlogger')
 # logger.addHandler(handler)
 
 
-def do_transitivity_check(sector_list, flags, limited_starting_points=None):
-    greed_success = do_transitivity_check_main(sector_list, flags, limited_starting_points=limited_starting_points, greedy=True)
+def do_transitivity_check(builder, sector_list, flags, limited_starting_points=None):
+    greed_success = do_transitivity_check_main(builder, sector_list, flags, limited_starting_points=limited_starting_points, greedy=True)
     if greed_success:
         return True
-    return do_transitivity_check_main(sector_list, flags, limited_starting_points=limited_starting_points)
+    return do_transitivity_check_main(builder, sector_list, flags, limited_starting_points=limited_starting_points)
 
 
-def do_transitivity_check_main(sector_list, flags, limited_starting_points=None, greedy=False):
+def do_transitivity_check_main(builder, sector_list, flags, limited_starting_points=None, greedy=False):
     start_time = time.process_time()
     if limited_starting_points is None:
         limited_starting_points = []
@@ -38,7 +39,7 @@ def do_transitivity_check_main(sector_list, flags, limited_starting_points=None,
         return True
 
     # clear out neutral constraints - a n/s neutral might be needed as a portal (todo: could result in a false negative)
-    c_info = ConstraintInfo(sector_list, flags)
+    c_info = ConstraintInfo(builder, sector_list, flags)
     neutral_constraints = [x for x in c_info.constraints if x.type == ConstraintType.Neutral]
     neutral_checks = []
     for c in neutral_constraints:
@@ -75,6 +76,8 @@ def do_transitivity_check_main(sector_list, flags, limited_starting_points=None,
     iterations = 0
     while queue:
         iterations += 1
+        if iterations > 20000:
+            raise GenerationException("Transitivity check took more than 20k iteration.")
         priority_prev, ignored, current = heapq.heappop(queue)
         # logger.debug(f'TStats: Iteration {iterations}, Priority {priority_prev}, Depth {len(current.door_path)}, Constraints {len(current.unsatisfied_constraints)}')
         new_options = current.find_connectable_doors(c_info)
@@ -101,7 +104,7 @@ def do_transitivity_check_main(sector_list, flags, limited_starting_points=None,
 
 
 class ConstraintInfo:
-    def __init__(self, sector_list, flags):
+    def __init__(self, builder, sector_list, flags):
         self.constraints = []
         self.switch_doors = []
         self.init_portals = []
@@ -109,6 +112,7 @@ class ConstraintInfo:
         self.door_sector_map = {}
         self.shape_map = {}
         self.flags = flags
+        self.builder = builder
         for s in sector_list:
             if (s.portals and any(not p.destination for p in s.portals)) or 'Sewer Access Portal' in s.region_set():
                 if s.portals and all(p.dependent for p in s.portals):
@@ -127,29 +131,30 @@ class ConstraintInfo:
                     self.switch_doors.append(d)
             if s.descriptor.must_enter_reqs:
                 for req in s.descriptor.must_enter_reqs:
-                    if isinstance(req, tuple):
+                    if isinstance(req, tuple) and all(d in s.outstanding_doors for d in req):
                         self.constraints.append(Constraint(ConstraintType.MustEnter, list(req), None))
-                    else:
+                    elif req in s.outstanding_doors:
                         self.constraints.append(Constraint(ConstraintType.MustEnter, [req], None))
             # special constraint (we can formulate as must enter for now, the trick is for the ice cross - no traps allowed)
             if s.descriptor.special_reqs:
                 participants = flatten(s.descriptor.special_reqs)
                 self.constraints.append(Constraint(ConstraintType.Special, participants, None))
             if s.descriptor.crystal_reqs:
-                c_req = s.descriptor.crystal_reqs
-                if c_req.type == 'any':
-                    participants = flatten(c_req.must_have_color_access)
-                    if c_req.must_enter_reqs:
-                        participants += flatten(c_req.must_enter_reqs)
-                    self.constraints.append(Constraint(ConstraintType.Crystal, participants, c_req))
-                else:
-                    for req in c_req.must_have_color_access:
-                        new_req = CrystalConstraint()
-                        new_req.must_have_color_access.append(req)
-                        self.constraints.append(Constraint(ConstraintType.Crystal, flatten(req), new_req))
-            if s.descriptor.dead_end and all(not d.traversal_only for d in s.outstanding_doors):
+                for c_req in s.descriptor.crystal_reqs:
+                    if c_req.type == 'any':
+                        participants = flatten(c_req.must_have_color_access)
+                        if c_req.must_enter_reqs:
+                            participants += flatten(c_req.must_enter_reqs)
+                        self.constraints.append(Constraint(ConstraintType.Crystal, participants, c_req))
+                    else:
+                        for req in c_req.must_have_color_access:
+                            new_req = CrystalConstraint()
+                            new_req.color = c_req.color
+                            new_req.must_have_color_access.append(req)
+                            self.constraints.append(Constraint(ConstraintType.Crystal, flatten(req), new_req))
+            if s.descriptor.dead_end and s.outstanding_doors and all(not d.traversal_only for d in s.outstanding_doors):
                 self.constraints.append(Constraint(ConstraintType.DeadEnd, s.outstanding_doors, None))
-            if s.descriptor.is_neutral:
+            if s.descriptor.is_neutral and not s.portals:
                 self.constraints.append(Constraint(ConstraintType.Neutral, s.outstanding_doors, None))
 
         self.door_constraint_map = defaultdict(list)
@@ -169,14 +174,14 @@ class ConstraintInfo:
                 potential_is_must_enter = potential_match in self.door_constraint_map and any(c.type == ConstraintType.MustEnter and potential_match in c.doors and len(c.doors) == 1 for c in self.door_constraint_map[potential_match])
 
                 if d.traversal_only:
-                    if potential_match.traversal_only or not valid_portal(potential_match, flags):
+                    if potential_match.traversal_only or not valid_portal(potential_match, d, self):
                         continue
                     if (self.door_sector_map[d].portals and all(p.destination for p in self.door_sector_map[d].portals)
                             and (potential_is_dead_end or potential_is_must_enter)):
                         continue
 
                 if potential_match.traversal_only:
-                    if d.traversal_only or not valid_portal(d, flags):
+                    if d.traversal_only or not valid_portal(d, potential_match, self):
                         continue
                     if (self.door_sector_map[potential_match].portals and all(p.destination for p in self.door_sector_map[potential_match].portals)
                             and (d_is_dead_end or d_is_must_enter)):
@@ -191,8 +196,16 @@ class ConstraintInfo:
                 self.door_matches[d].append(potential_match)
 
 
-def valid_portal(door, flags):
-    return door.portalAble and (not flags.vanilla_traps or not door.blocked or is_boss_trap(door))
+def valid_portal(door, match_door, c_info):
+    builder = c_info.builder
+    hc_flag = c_info.flags.std_flag and 'Hyrule Castle' in builder.name
+    rupee_bow_flag = hc_flag and c_info.flags.rupee_bow_flag
+    dest_portal = all(p.destination for p in c_info.door_sector_map[match_door].portals)
+    return (door.portalAble
+            and (not c_info.flags.vanilla_traps or not door.blocked or is_boss_trap(door))
+            and (dest_portal or ((not hc_flag or not door.standard_restricted)
+                                and (not rupee_bow_flag or not door.rupee_bow_restricted)
+                                and (c_info.flags.bk_shuffle_flag or not door.bk_shuffle_req))))
 
 
 class ConstraintType(Enum):
@@ -275,12 +288,12 @@ class Transitivity:
                 if available == d:  # might allow self-connecting spirals someday here, not too important for logic though
                     continue
                 if available.traversal_only:
-                    if (valid_portal(d, c_info.flags)
+                    if (valid_portal(d, available, c_info)
                        and (available not in c_info.dependent_portals or available in self.unconnected_doors)
                        and (not self.limited_starting_points or d in self.limited_starting_points)):
                         connectable_doors.append((d, available))
                 elif d.traversal_only:
-                    if (valid_portal(available, c_info.flags)
+                    if (valid_portal(available, d, c_info)
                        and (d not in c_info.dependent_portals or d in self.unconnected_doors)
                        and (not self.limited_starting_points or available in self.limited_starting_points)):
                         connectable_doors.append((d, available))
@@ -317,7 +330,7 @@ class Transitivity:
         for door in self.unconnected_doors:
             reachability = c_info.door_sector_map[door].descriptor.reachability
             if door in reachability:
-                reach_key = tuple(sorted({d.name: c for d, c in reachability[door]}.items()))  # Convert dict to tuple for hashing
+                reach_key = tuple(sorted({d.name: (c, f) for d, c, f in reachability[door]}.items()))  # Convert dict to tuple for hashing
             else:
                 reach_key = ()
             unique_dict[(hook_from_door(door), self.unconnected_doors[door]) + reach_key] = door
@@ -342,16 +355,18 @@ class Transitivity:
         if constraint.type == ConstraintType.Crystal:
             if constraint.constraint.contains_color_access(connection[0]):
                 crystal = self.unconnected_doors[connection[1]]
-                if crystal in [CrystalBarrier.Blue, CrystalBarrier.Either, CrystalBarrier.Both]:
+                color = constraint.constraint.color
+                if crystal in [CrystalBarrier.Either, CrystalBarrier.Both] or (color == 'blue' and crystal == CrystalBarrier.Blue) or (color == 'orange' and crystal == CrystalBarrier.Orange):
                     return 2
                 return 0  # if it's not fulfilling a requirement, it's not a high priority
             if constraint.constraint.contains_color_access(connection[1]) and connection[0] in self.unconnected_doors:
                 crystal = self.unconnected_doors[connection[0]]
-                if crystal in [CrystalBarrier.Blue, CrystalBarrier.Either, CrystalBarrier.Both]:
+                color = constraint.constraint.color
+                if crystal in [CrystalBarrier.Either, CrystalBarrier.Both] or (color == 'blue' and crystal == CrystalBarrier.Blue) or (color == 'orange' and crystal == CrystalBarrier.Orange):
                     return 2
                 return 0
             return 2
-        if constraint.type == ConstraintType.DeadEnd:
+        if constraint.type in [ConstraintType.DeadEnd, ConstraintType.Portal]:
             return 1
         return 0
 
@@ -419,8 +434,12 @@ class Transitivity:
                 if self_hook and self_hook[1] == CrystalBarrier.Either:
                     crystal_prop = self_hook[1]
         reachability = c_info.door_sector_map[hanger].descriptor.reachability
-        for pair in reachability[hanger]:
-            reachable, new_crystal = pair
+        for triple in reachability[hanger]:
+            reachable, new_crystal, crystal_req = triple
+            if crystal_req == CrystalBarrier.Blue and crystal_prop in [CrystalBarrier.Orange, CrystalBarrier.Null]:
+                continue  # can't cross here
+            if crystal_req == CrystalBarrier.Orange and crystal_prop == CrystalBarrier.Blue:
+                continue  # can't cross here
             new_crystal = new_crystal if CrystalBarrier.Null != new_crystal else crystal_prop
             # todo: decoupled doors? algorithm could be made more flexibile in that case? not sure it matters much
             if reachable != hanger and reachable in t.remaining_doors:  # second condition mean it hasn't been seen yet
@@ -433,8 +452,8 @@ class Transitivity:
         # special handling for ice cross and similar cases
         if not hanger.blocked:
             reachability = c_info.door_sector_map[hook].descriptor.reachability
-            for pair in reachability[hook]:
-                reachable, new_crystal = pair
+            for triple in reachability[hook]:
+                reachable, new_crystal, crystal_req = triple
                 if reachable != hook and reachable in t.remaining_doors:
                     new_crystal = new_crystal if CrystalBarrier.Null != new_crystal else crystal_prop
                     t.unconnected_doors[reachable] = new_crystal
@@ -443,8 +462,8 @@ class Transitivity:
         while backprop_queue:
             backprop_door, new_crystal = backprop_queue.pop()
             reachability = c_info.door_sector_map[backprop_door].descriptor.reachability
-            for pair in reachability[backprop_door]:
-                reachable, c_prop = pair
+            for triple in reachability[backprop_door]:
+                reachable, c_prop, c_req = triple
                 if reachable != backprop_door:
                     if reachable in t.unconnected_doors:
                         if t.unconnected_doors[reachable] not in [CrystalBarrier.Either, CrystalBarrier.Both] and new_crystal in [CrystalBarrier.Either, CrystalBarrier.Both]:
@@ -465,8 +484,9 @@ class Transitivity:
                 if constraint.type in [ConstraintType.MustEnter, ConstraintType.Special, ConstraintType.DeadEnd]:
                     t.satisfied_constraints.append(constraint)
                 elif constraint.type == ConstraintType.Crystal:
+                    needed_color = CrystalBarrier.Blue if constraint.constraint.color == 'blue' else CrystalBarrier.Orange
                     if (not constraint.constraint.contains_color_access(hanger)
-                            or crystal_prop in [CrystalBarrier.Blue, CrystalBarrier.Either, CrystalBarrier.Both]):
+                            or crystal_prop in [needed_color, CrystalBarrier.Either, CrystalBarrier.Both]):
                         t.satisfied_constraints.append(constraint)
                     else:
                         new_unsatisfied_constraints.append(constraint)
@@ -475,8 +495,9 @@ class Transitivity:
             # fulfill color required by back propagation
             elif hook in constraint.doors:
                 if constraint.type == ConstraintType.Crystal:
+                    needed_color = CrystalBarrier.Blue if constraint.constraint.color == 'blue' else CrystalBarrier.Orange
                     if (constraint.constraint.contains_color_access(hook)
-                            and crystal_prop in [CrystalBarrier.Blue, CrystalBarrier.Either, CrystalBarrier.Both]):
+                            and crystal_prop in [needed_color, CrystalBarrier.Either, CrystalBarrier.Both]):
                         t.satisfied_constraints.append(constraint)
                     else:
                         new_unsatisfied_constraints.append(constraint)
@@ -507,6 +528,11 @@ class Transitivity:
                     total_needed_per_type[hanger_from_door(forced_door)].append(forced_door)
                     forced_set.add(forced_door)
             elif constraint.type == ConstraintType.Crystal:
+                if all(d not in self.remaining_doors for d in c_info.switch_doors):
+                    if constraint.constraint.color == 'blue' and all(c == CrystalBarrier.Orange for d, c in self.unconnected_doors.items()):
+                        return True
+                    if constraint.constraint.color == 'orange' and all(c == CrystalBarrier.Blue for d, c in self.unconnected_doors.items()):
+                        return True
                 if all(d not in remaining_set and d not in self.unconnected_doors for d in constraint.doors):
                     return True
             elif constraint.type == ConstraintType.DeadEnd:
@@ -571,7 +597,7 @@ class Transitivity:
                 for d in new_available[hanger]:
                     reachability = c_info.door_sector_map[d].descriptor.reachability[d]
                     if len(reachability) == 2 and not all(r[0] in self.unconnected_doors for r in reachability):
-                        potentials = [a for a, b in reachability if a != d and (a in new_available[hook_from_door(a)] or a in new_total_needed[hanger_from_door(a)])]
+                        potentials = [a for a, b, c in reachability if a != d and (a in new_available[hook_from_door(a)] or a in new_total_needed[hanger_from_door(a)])]
                         if len(potentials) == 1:
                             removals.append((hanger, d))
                             removals.append((hook_from_door(potentials[0]), potentials[0]))
