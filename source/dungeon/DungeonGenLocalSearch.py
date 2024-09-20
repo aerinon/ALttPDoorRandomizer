@@ -1,4 +1,5 @@
 import RaceRandom as random
+import itertools
 import logging
 import os
 from collections import defaultdict, deque
@@ -10,14 +11,11 @@ from Utils import clear_file
 from source.dungeon.DungeonGenerationCommon import DungeonBuilder, GenerationException, define_sector_features, dungeon_portals
 from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector, assign_sector_helper, hanger_from_door, hook_from_door
 from source.dungeon.DungeonGenSectorDesc import create_sector_descriptors
-# from source.dungeon.DungeonGenTransitivity import do_transitivity_check as do_transitivity_check_new
 from source.dungeon.DungeonGenTransitivity import do_transitivity_check as do_transitivity_check_new
 
 # ------------------------------ #
 #         Main Algorithm
 # ------------------------------ #
-
-
 def create_dungeon_builders_prototype(dungeon_pool, sector_pool, portal_pool, world, player):
     generation_log_name = ['data', 'gen', 'gen.log.txt']
     clear_file(generation_log_name)
@@ -89,7 +87,8 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
         # the rest go in front
         for portal in assignments:
             portal_assignments['Skull Woods Front'].append(portal)
-    if 'Desert Palace' in dungeon_pool:  # a strict split will prevent this from being a cross-world connector inadvertently
+    # a strict split will prevent this from being a cross-world connector inadvertently
+    if 'Desert Palace' in dungeon_pool and len(portal_assignments['Desert Palace']) > 1:
         dungeon_pool.append('Desert Palace Back')
         dungeon_pool.append('Desert Palace Front')
         dungeon_pool.remove('Desert Palace')
@@ -124,10 +123,11 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
             portal_assignments[paired].append(portal)
 
     all_sectors = sector_pool + portal_pool
-    info = DungeonGenInfo(gen_log, all_sectors, flags)
+    info = DungeonGenInfo(gen_log, all_sectors, flags, dungeon_map)
 
     for key in dungeon_pool:
         current_dungeon = dungeon_map[key] = DungeonBuilder(key)
+        current_dungeon.split_flag = key not in dungeon_aliases
         # handle special assignments
         for sector in portal_assignments[key]:
             propose_sector(current_dungeon, sector, info, True)
@@ -444,9 +444,14 @@ def fix_branching_balance(target, balance_map, info):
     candidates = {k: v for k, v in balance_map.items() if k != target}
     candidates = sorted(list(candidates.items()), key=lambda item: (item[1].branches, unlocked_cnt[item[0]]))
     # todo: this needs to consider sending out dead ends to fix branching issue via swapping provider/target
-    provider, best = find_min_charge_sector(target, candidates, info)
-    perform_move(info, best, provider, target)
-    info.gen_log.debug(f'Moved {best.sector_key()} from {provider} to {target} for branching balance')
+    provider, best, swap = find_min_charge_sector(target, candidates, info)
+    if swap:
+        perform_move(info, best, target, provider)
+        info.gen_log.debug(f'Moved {best.sector_key()} from {target} to {provider} for branching balance')
+    else:
+        perform_move(info, best, provider, target)
+        info.gen_log.debug(f'Moved {best.sector_key()} from {provider} to {target} for branching balance')
+
 
 
 def fix_parity_balance(target, balance_map, info):
@@ -494,51 +499,75 @@ def fix_transitivity(target, balance_map, info):
     unlocked_cnt = {id: sum(1 for sector in info.proposal[id] if not sector.locked) for id in balance_map}
     candidates = sorted(list(balance_map.items()), key=lambda item: unlocked_cnt[item[0]])
 
-    provider, best, best_charge, swap = None, None, None, False
+    provider, best, swap = None, None, False
     while best is None:
+        if len(candidates) == 0:
+            raise GenerationException(f'No transitivity solution found during fix_transitivity step for "{target}"')
         provider, balance_info = candidates.pop()
         if provider == target:
             continue
-        for sector in info.proposal[provider]:
-            if not valid_for_move(sector, target, info):
-                continue
-            target_balance = Balance(target, info)
-            target_balance.extend([x for x in info.proposal[target]])
-            target_balance.append(sector)
-            if not target_balance.transitive():
-                continue
-            bal = Balance(provider, info)
-            bal.extend([x for x in info.proposal[provider] if x != sector])
-            if not bal.transitive():
-                continue
-            charge = bal.charge()
-            if best is None or charge < best_charge:
-                best = sector
-                best_charge = charge
-                swap = False
-        if best is None:
-            for sector in info.proposal[target]:
-                if not valid_for_move(sector, provider, info):
-                    continue
+        best, swap = find_valid_move_for_trans(provider, target, info)
+    if swap:
+        provider, target = target, provider
+    for s in best:
+        perform_move(info, s, provider, target)
+        info.gen_log.debug(f'Moved {s.sector_key()} from {provider} to {target} for transitivity')
+
+
+def find_valid_move_for_trans(provider, target, info):
+    max_combination_length = 4
+
+    valid_provider_moves = [sector for sector in info.proposal[provider] if valid_for_move(sector, target, info)]
+    valid_target_moves = [sector for sector in info.proposal[target] if valid_for_move(sector, provider, info)]
+
+    best, best_charge, swap = None, None, False
+    for length in range(1, max_combination_length + 1):
+        for provider_combination in itertools.combinations(valid_provider_moves, length):
+            if best_charge == 0:
+                break
+            if check_combination_balance(provider_combination, info):
                 target_balance = Balance(target, info)
-                target_balance.extend([x for x in info.proposal[target] if x != sector])
+                target_balance.extend([x for x in info.proposal[target]])
+                target_balance.extend(provider_combination)
                 if not target_balance.transitive():
                     continue
                 bal = Balance(provider, info)
-                bal.extend([x for x in info.proposal[provider]])
-                bal.append(sector)
+                bal.extend([x for x in info.proposal[provider] if x not in provider_combination])
                 if not bal.transitive():
                     continue
                 charge = bal.charge()
                 if best is None or charge < best_charge:
-                    best = sector
+                    best = provider_combination
                     best_charge = charge
-                    swap = True
+                    swap = False
+        if best is None:
+            for target_combination in itertools.combinations(valid_target_moves, length):
+                if best_charge == 0:
+                    break
+                if check_combination_balance(target_combination, info):
+                    target_balance = Balance(target, info)
+                    target_balance.extend([x for x in info.proposal[target] if x not in target_combination])
+                    if not target_balance.transitive():
+                        continue
+                    bal = Balance(provider, info)
+                    bal.extend([x for x in info.proposal[provider]])
+                    bal.extend(target_combination)
+                    if not bal.transitive():
+                        continue
+                    charge = bal.charge()
+                    if best is None or charge < best_charge:
+                        best = target_combination
+                        best_charge = charge
+                        swap = True
+        if best is not None:
+            return best, swap
+    return None, False
 
-    if swap:
-        provider, target = target, provider
-    perform_move(info, best, provider, target)
-    info.gen_log.debug(f'Moved {best.sector_key()} from {provider} to {target} for transitivity')
+
+def check_combination_balance(sectors, info):
+    bal = Balance('temp', info)
+    bal.extend(sectors)
+    return bal.polarity_balanced()
 
 
 # losing the sector that will cause the least amt of harm
@@ -549,17 +578,36 @@ def find_min_charge_sector(target, candidates, info):
         for sector in info.proposal[provider]:
             if not valid_for_move(sector, target, info):
                 continue
-            bal = Balance(provider, info)
-            bal.extend([x for x in info.proposal[provider] if x != sector])
-            charge = bal.charge(False)
+            charge = calc_combo_charge_for_move(sector, provider, target, info)
             if len(best_choices) == 0 or charge < best_charge:
                 best_choices.clear()
-                best_choices.append(sector)
+                best_choices.append((sector, False))
                 best_charge = charge
             elif charge == best_charge:
-                best_choices.append(sector)
-    best = random.choice(best_choices)
-    return provider, best
+                best_choices.append((sector, False))
+        for sector in info.proposal[target]:
+            if not valid_for_move(sector, provider, info):
+                continue
+            charge = calc_combo_charge_for_move(sector, target, provider, info)
+            if len(best_choices) == 0 or charge < best_charge:
+                best_choices.clear()
+                best_choices.append((sector, True))
+                best_charge = charge
+            elif charge == best_charge:
+                best_choices.append((sector, True))
+    best, swap = random.choice(best_choices)
+    return provider, best, swap
+
+
+def calc_combo_charge_for_move(sector, provider, target, info):
+    bal = Balance(provider, info)
+    bal.extend([x for x in info.proposal[provider] if x != sector])
+    charge = bal.charge(False)
+    bal2 = Balance(target, info)
+    bal2.extend([x for x in info.proposal[target]])
+    bal2.append(sector)
+    total_charge = charge + bal2.charge(False)
+    return total_charge
 
 
 def valid_for_move(sector, dest, info):
@@ -603,7 +651,7 @@ def create_bridge_door(world, player, bridge_name, region_name, target_region):
 
 class DungeonGenInfo:
 
-    def __init__(self, gen_log, all_sectors, flags):
+    def __init__(self, gen_log, all_sectors, flags, dungeon_map):
         self.proposal = defaultdict(list)
         self.gen_log = gen_log
         self.global_pole = GlobalPolarity(all_sectors)
@@ -611,6 +659,7 @@ class DungeonGenInfo:
         self.flags = flags
         self.transitive_db = {}
         self.recent_moves = deque(maxlen=2)
+        self.dungeon_map = dungeon_map
 
 
 class DoorFlags:
@@ -628,6 +677,11 @@ class DoorFlags:
         self.cave_interiors: bool = False  # NotYetImplemented
         self.intratile: bool = False   # NotYetImplemented
 
+        self.std_flag: bool = False
+        self.rupee_bow_flag: bool = False
+        self.bk_shuffle_flag: bool = False
+
+
     def from_world(self, world, player):
         self.vanilla_traps = world.trap_door_mode[player] == 'vanilla'
         self.stair_loops = world.door_self_loops[player]
@@ -641,6 +695,11 @@ class DoorFlags:
             self.edges = 'both'
         if world.intensity[player] >= 3:
             self.lobbies = True
+        self.std_flag = world.mode[player] == 'standard'
+        self.rupee_bow_flag = world.bow_mode[player].startswith('retro')  # rupee bow
+        self.bk_shuffle_flag = (world.bigkeyshuffle[player]  # big key can be anywhere
+                                or world.pottery[player] not in ['none', 'cave'] # pottery item can have the big key
+                                or world.door_type_mode in ['big', 'all', 'chaos'])  # big key doors can be shuffled
         return self
 
     def from_custom(self, intensity):
@@ -713,16 +772,17 @@ class Balance:
                     if portal.destination:
                         self.destination_portals += 1
 
-        if sector.portals and any(not p.destination for p in sector.portals):
-            self.branches += 1  # non-destination portals represent a new branch
-        else:
-            best_access = max((len(access) for d, access in sector.descriptor.reachability.items()), default=0)
-            missing_doors = len(sector.outstanding_doors) - best_access
-            branches = best_access - 2 - missing_doors  # negative number represents dead ends
-            if branches > 0:
-                self.branches += branches
-            elif branches < 0:
-                self.dead_ends -= branches
+
+        adj = 0 if sector.portals and any(not p.destination for p in sector.portals) else 2
+        best_access = max((len(access) for d, access in sector.descriptor.reachability.items() if d is not None), default=0)
+        if sector.portals and any(not p.destination for p in sector.portals) and len(sector.outstanding_doors) > 0:
+            best_access = max(best_access, 1)  # at least one branch for portal only sectors
+        missing_doors = len(sector.outstanding_doors) - best_access
+        branches = best_access - adj - missing_doors  # negative number represents dead ends
+        if branches > 0:
+            self.branches += branches
+        elif branches < 0:
+            self.dead_ends -= branches
 
         if sector.blue_barrier and not sector.c_switch:
             self.crystal_needed += 1
@@ -778,6 +838,18 @@ class Balance:
             return False
         return True
 
+    def non_transitive_balanced(self):
+        if not self.polarity_balanced():
+            return False
+        if self.branches < self.dead_ends:
+            return False
+        if self.crystal_needed > 0 and self.crystal_provided == 0:
+            return False
+        if not self.portal_balanced():
+            return False
+        return True
+
+
     def pol_sum(self):
         return (self.north - self.south, self.east - self.west, 0 if self.stair_balanced() else 1)
 
@@ -823,6 +895,8 @@ class Balance:
         return self.portal_needed <= self.portal_options
 
     def transitive(self):
+        if not self.non_transitive_balanced():  # short-circuit expensive transitivity calls
+            return False
         if self.transitive_init:
             return self.transitive_flag
         # neutral_sectors = [s for s in self.sectors if is_sector_neutral(s)]
@@ -833,7 +907,7 @@ class Balance:
             self.transitive_init = True
             return self.transitive_flag
         # new transitivity calc
-        transitivity = do_transitivity_check_new(self.sectors, self.info.flags)
+        transitivity = do_transitivity_check_new(self.info.dungeon_map[self.name], self.sectors, self.info.flags)
         self.info.transitive_db[db_key] = transitivity
         self.transitive_flag = transitivity
         self.transitive_init = True
@@ -1002,7 +1076,7 @@ class Transitivity:
         self.current_hooks[hook_to_use] -= 1
         self.explored_doors.add(door)
         # todo: I think decoupled doors has diff logic here
-        new_doors = {d for d, c in sector.descriptor.reachability[door] if d != door and d not in self.explored_doors}
+        new_doors = {d for d, c, f in sector.descriptor.reachability[door] if d != door and d not in self.explored_doors}
         self.explored_doors.update(new_doors)
         for d in new_doors:
             if d.type != DoorType.Logical:
