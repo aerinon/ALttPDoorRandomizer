@@ -898,7 +898,7 @@ class Balance:
             self.append(s)
 
     def complete(self):
-        return self.balanced() and self.connectables == 0
+        return self.connectables == 0 and self.balanced()
 
     def balanced(self):
         if not self.polarity_balanced():
