@@ -172,7 +172,7 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
         # randomly choose which portal will not be portalAble for this seed
         for dungeon, choices_list in portal_choices.items():
             # only needed if crossing, could restore later if they happen to be in the same dungeon
-            if dungeon in pool and len(pool) > 1:
+            if dungeon in pool:
                 for needed_choice in choices_list:
                     needed_choice = [c for c in needed_choice if world.get_door(c, player).dest is None]
                     if len(needed_choice) > 1:
@@ -277,6 +277,10 @@ def proposal_balance(info):
 
 
 def balance_move_sector(unbalanced, balance_map, info):
+    if info.random_moves > 0:
+        do_a_random_move(info, unbalanced, balance_map)
+        return
+
     # crystal first
     crystal_problems = [dungeon for dungeon, balance in balance_map.items() if balance.need_crystal()]
     if crystal_problems:
@@ -300,39 +304,54 @@ def balance_move_sector(unbalanced, balance_map, info):
         return
 
     # parity next
-    parity_needs = [dungeon for dungeon, balance in balance_map.items() if balance.need_parity()]
-    if len(parity_needs):
-        target = random.choice(parity_needs)
-        fixed = fix_parity_balance(target, balance_map, info)
-        if fixed:  # otherwise look at polarity to solve issue
-            return
+    # parity_needs = [dungeon for dungeon, balance in balance_map.items() if balance.need_parity()]
+    # if len(parity_needs):
+    #     target = random.choice(parity_needs)
+    #     fixed = fix_parity_balance(target, balance_map, info)
+    #     if fixed:  # otherwise look at polarity to solve issue
+    #         return
 
     # polarity next
     polarity_problems = [dungeon for dungeon, balance in unbalanced.items() if not balance.polarity_balanced()]
     if polarity_problems:
-        best_choices = []
+        best_choices, combo_len = [], 1
         while len(best_choices) == 0:
             if len(polarity_problems) == 0:
-                raise GenerationException('A More serious generation error has occured, no valid moves for polarity')
+                combo_len += 1
+                if combo_len > 4:
+                    info.random_moves = 10
+                    info.gen_log.debug(f'Problem with polarity balance, resorting to random moves')
+                    return
+                polarity_problems = [dungeon for dungeon, balance in unbalanced.items() if not balance.polarity_balanced()]
             weights = [unbalanced[d].charge(False) for d in polarity_problems]
             target = random.choices(polarity_problems, weights, k=1)[0]
             polarity_problems.remove(target)
             unlocked_cnt = {id: sum(1 for sector in info.proposal[id] if not sector.locked) for id in balance_map}
-            candidates = {k: v for k, v in unbalanced.items() if not v.polarity_balanced() and k != target}
-            candidates = sorted(list(candidates.items()), key=lambda item: (item[1].branches, unlocked_cnt[item[0]]))
+            candidates = {k: v for k, v in balance_map.items() if k != target}
+            candidates = sorted(list(candidates.items()), key=lambda item: ((0 if item[1].polarity_balanced() else 1), item[1].branches, unlocked_cnt[item[0]]))
 
             provider, best_choices, best_charge = None, [], None
             while len(best_choices) == 0 and len(candidates) > 0:
                 provider, balance_info = candidates.pop()
-                best_choices, best_charge = find_a_good_polarity_shift(provider, target, unbalanced, info)
-                swap_choices, swap_charge = find_a_good_polarity_shift(target, provider, unbalanced, info)
+                best_choices, best_charge = find_a_good_polarity_shift(provider, target, balance_map, info, combo_len)
+                swap_choices, swap_charge = find_a_good_polarity_shift(target, provider, balance_map, info, combo_len)
                 if swap_charge is not None and (best_charge is None or swap_charge > best_charge):
                     best_choices = swap_choices
                     provider, target = target, provider
+                if not best_choices and combo_len == 1:
+                    trade = find_a_polarity_trade(provider, target, balance_map, info)
+                    if trade is not None:
+                        move_a, move_b = trade
+                        perform_move(info, move_a, provider, target)
+                        info.gen_log.debug(f'Traded {move_a.sector_key()} from {provider} to {target} for polarity balance')
+                        perform_move(info, move_b, target, provider)
+                        info.gen_log.debug(f'Traded {move_b.sector_key()} from {target} to {provider} for polarity balance')
+                        return
         best = random.choice(best_choices)
-        # do the move
-        perform_move(info, best, provider, target)
-        info.gen_log.debug(f'Moved {best.sector_key()} from {provider} to {target} for polarity balance')
+        # do the moves
+        for sector in best:
+            perform_move(info, sector, provider, target)
+            info.gen_log.debug(f'Moved {sector.sector_key()} from {provider} to {target} for polarity balance')
         return
 
     # transitivity last
@@ -343,29 +362,71 @@ def balance_move_sector(unbalanced, balance_map, info):
         # return
 
 
-def find_a_good_polarity_shift(provider, target, unbalanced, info):
+def do_a_random_move(info, unbalanced, balance_map):
+    move_to_unbalanced = random.choice([True, False])
+    targets = [dungeon for dungeon, balance in unbalanced.items()]
+    target = random.choice(targets)
+    provider = random.choice([dungeon for dungeon in balance_map if dungeon != target])
+    if move_to_unbalanced:
+        possible_moves = [s for s in info.proposal[provider] if valid_for_move(s, target, info) and not is_sector_neutral(s)]
+        if len(possible_moves) == 0:
+            return  # just skip this time
+        move = random.choice(possible_moves)
+        perform_move(info, move, provider, target)
+        info.gen_log.debug(f'Moved {move.sector_key()} from {provider} to {target} randomly')
+    else:
+        possible_moves = [s for s in info.proposal[target] if valid_for_move(s, provider, info) and not is_sector_neutral(s)]
+        if len(possible_moves) == 0:
+            return  # just skip this time
+        move = random.choice(possible_moves)
+        perform_move(info, move, target, provider)
+        info.gen_log.debug(f'Moved {move.sector_key()} from {target} to {provider} randomly')
+    info.random_moves -= 1
+
+def find_a_good_polarity_shift(provider, target, balance_map, info, combination_length=1):
     best_choices, best_charge = [], None
-    for sector in info.proposal[provider]:
-        if not valid_for_move(sector, target, info) or is_sector_neutral(sector):
-            continue
-        target_charge = unbalanced[target].charge(False)
+    possible_moves = [s for s in info.proposal[provider] if valid_for_move(s, target, info) and not is_sector_neutral(s)]
+    for sector_combo in itertools.combinations(possible_moves, combination_length):
+        target_charge = balance_map[target].charge(False)
         target_balance = Balance(target, info)
         target_balance.extend([x for x in info.proposal[target]])
-        target_balance.append(sector)
-        target_change = target_charge - target_balance.charge(False)
-        # if not target_balance.need_parity():
-        curr_charge = unbalanced[provider].charge(False)
+        target_balance.extend(sector_combo)
+        new_target_charge = target_balance.charge(False)
+        target_change = target_charge - new_target_charge
+        # calc provider charge
+        curr_charge = balance_map[provider].charge(False)
         provider_balance = Balance(provider, info)
-        provider_balance.extend([x for x in info.proposal[provider] if x != sector])
-        provider_change = curr_charge - provider_balance.charge(False)
+        provider_balance.extend([x for x in info.proposal[provider] if x not in sector_combo])
+        new_provider_charge = provider_balance.charge(False)
+        provider_change = curr_charge - new_provider_charge
+        # no progressing change
+        if new_target_charge >= target_charge and new_provider_charge >= curr_charge:
+            continue
+        # if the target is polarity balanced, then we want to maximize the charge difference
         charge_diff = provider_change + target_change
         if len(best_choices) == 0 or charge_diff > best_charge:
             best_choices.clear()
-            best_choices.append(sector)
+            best_choices.append(sector_combo)
             best_charge = charge_diff
         elif charge_diff == best_charge:
-            best_choices.append(sector)
+            best_choices.append(sector_combo)
     return best_choices, best_charge
+
+
+def find_a_polarity_trade(builder_a, builder_b, balance_map, info):
+    a_moves = [s for s in info.proposal[builder_a] if not is_sector_neutral(s) and valid_for_move(s, builder_b, info)]
+    a_charge_orig = balance_map[builder_a].charge(False)
+    b_moves = [s for s in info.proposal[builder_b] if not is_sector_neutral(s) and valid_for_move(s, builder_a, info)]
+    b_charge_orig = balance_map[builder_b].charge(False)
+    for a_sector, b_sector in itertools.product(range(len(a_moves)), range(len(b_moves))):
+        a = a_moves[a_sector]
+        b = b_moves[b_sector]
+        a_charge = calc_charge_for_trade(b, a, builder_a, info)
+        b_charge = calc_charge_for_trade(a, b, builder_b, info)
+        if ((a_charge < a_charge_orig and b_charge <= b_charge_orig)
+           or (b_charge < b_charge_orig and a_charge <= a_charge_orig)):
+            return a, b
+    return None
 
 
 def fix_crystal_balance(target, balance_map, info):
@@ -388,8 +449,7 @@ def fix_crystal_balance(target, balance_map, info):
                 best_charge = charge
     if best is not None:
         # do the move
-        info.proposal[provider].remove(best)
-        info.proposal[target].append(best)
+        perform_move(info, best, provider, target)
         info.gen_log.debug(f'Moved {best.sector_key()} from {provider} to {target} for crystal balance')
         return
     # if none, then need to move the crystal needed elsewhere
@@ -435,16 +495,14 @@ def fix_portal_balance(target, balance_map, info):
             if best_charge == 0:
                 break
     perform_move(info, best, provider, target)
-    best.locked = True
-    info.gen_log.debug(f'Moved and locked {best.sector_key()} from {provider} to {target} for portal balance')
+    info.gen_log.debug(f'Moved {best.sector_key()} from {provider} to {target} for portal balance')
 
 
 def fix_branching_balance(target, balance_map, info):
     unlocked_cnt = {id: sum(1 for sector in info.proposal[id] if valid_for_move(sector, target, info)) for id in balance_map}
     candidates = {k: v for k, v in balance_map.items() if k != target}
     candidates = sorted(list(candidates.items()), key=lambda item: (item[1].branches, unlocked_cnt[item[0]]))
-    # todo: this needs to consider sending out dead ends to fix branching issue via swapping provider/target
-    provider, best, swap = find_min_charge_sector(target, candidates, info)
+    provider, best, swap = find_branching_solution(target, candidates, balance_map, info)
     if swap:
         perform_move(info, best, target, provider)
         info.gen_log.debug(f'Moved {best.sector_key()} from {target} to {provider} for branching balance')
@@ -570,31 +628,40 @@ def check_combination_balance(sectors, info):
     return bal.polarity_balanced()
 
 
-# losing the sector that will cause the least amt of harm
-def find_min_charge_sector(target, candidates, info):
+def find_branching_solution(target, candidates, balance_map, info):
     provider, best_choices, best_charge = None, [], None
+    current_t_charge = balance_map[target].charge(False)
+    curr_branch_score = balance_map[target].branch_score()
     while len(best_choices) == 0:
+        if len(candidates) == 0:
+            raise GenerationException(f'No branching solution found during find_branching_solution step for "{target}"')
         provider, balance_info = candidates.pop()
+        charge_to_beat = current_t_charge + balance_map[provider].charge(False)
         for sector in info.proposal[provider]:
             if not valid_for_move(sector, target, info):
                 continue
-            charge = calc_combo_charge_for_move(sector, provider, target, info)
-            if len(best_choices) == 0 or charge < best_charge:
-                best_choices.clear()
-                best_choices.append((sector, False))
-                best_charge = charge
-            elif charge == best_charge:
-                best_choices.append((sector, False))
-        for sector in info.proposal[target]:
-            if not valid_for_move(sector, provider, info):
+            charge, p_bal, t_bal = calc_combo_charge_for_move(sector, provider, target, info)
+            if charge >= charge_to_beat and (t_bal.branch_score() >= curr_branch_score or p_bal.need_branches()):
                 continue
-            charge = calc_combo_charge_for_move(sector, target, provider, info)
             if len(best_choices) == 0 or charge < best_charge:
                 best_choices.clear()
-                best_choices.append((sector, True))
+                best_choices.append((sector, False))
                 best_charge = charge
             elif charge == best_charge:
-                best_choices.append((sector, True))
+                best_choices.append((sector, False))
+        if len(best_choices) == 0:
+            for sector in info.proposal[target]:
+                if not valid_for_move(sector, provider, info):
+                    continue
+                charge, t_bal, p_bal = calc_combo_charge_for_move(sector, target, provider, info)
+                if charge >= charge_to_beat and (p_bal.need_branches() or t_bal.branch_score() >= curr_branch_score):
+                    continue
+                if len(best_choices) == 0 or charge < best_charge:
+                    best_choices.clear()
+                    best_choices.append((sector, True))
+                    best_charge = charge
+                elif charge == best_charge:
+                    best_choices.append((sector, True))
     best, swap = random.choice(best_choices)
     return provider, best, swap
 
@@ -607,11 +674,18 @@ def calc_combo_charge_for_move(sector, provider, target, info):
     bal2.extend([x for x in info.proposal[target]])
     bal2.append(sector)
     total_charge = charge + bal2.charge(False)
-    return total_charge
+    return total_charge, bal, bal2
+
+
+def calc_charge_for_trade(sector_inc, sector_del, target, info):
+    bal = Balance(target, info)
+    bal.extend([x for x in info.proposal[target] if x != sector_del])
+    bal.append(sector_inc)
+    return bal.charge(False)
 
 
 def valid_for_move(sector, dest, info):
-    return (not sector.locked and sector not in info.recent_moves
+    return (not sector.locked and (sector not in info.recent_moves)
             and (sector.restrict_list is None or dest in sector.restrict_list)
             and (sector.exclude_list is None or dest not in sector.exclude_list))
 
@@ -660,6 +734,7 @@ class DungeonGenInfo:
         self.transitive_db = {}
         self.recent_moves = deque(maxlen=2)
         self.dungeon_map = dungeon_map
+        self.random_moves = 0
 
 
 class DoorFlags:
@@ -773,7 +848,7 @@ class Balance:
                         self.destination_portals += 1
 
 
-        adj = 0 if sector.portals and any(not p.destination for p in sector.portals) else 2
+        adj = 0 if (sector.portals and any(not p.destination for p in sector.portals)) or 'Sewer Access Portal' == sector.sector_key() else 2
         best_access = max((len(access) for d, access in sector.descriptor.reachability.items() if d is not None), default=0)
         if sector.portals and any(not p.destination for p in sector.portals) and len(sector.outstanding_doors) > 0:
             best_access = max(best_access, 1)  # at least one branch for portal only sectors
@@ -870,6 +945,10 @@ class Balance:
     def need_branches(self):
         return self.branches < self.dead_ends
 
+    # <= 0 indicates enough branches
+    def branch_score(self):
+        return self.dead_ends - self.branches
+
     def need_parity(self):
         return sum(x for x in self.pol_sum()) % 2 == 1
 
@@ -921,7 +1000,7 @@ class Balance:
         charge += 0 if self.crystal_needed == 0 or self.crystal_provided > 0 else self.crystal_needed
         charge += 0 if self.branches >= self.dead_ends else self.dead_ends
         charge += 0 if self.portal_balanced() else 1
-        charge += 0 if not self.need_parity() else 1  # penalty for disturbing parity
+        # charge += 0 if not self.need_parity() else .5  # penalty for disturbing parity
         # only run the transitivity check here if everything else is already good
         # otherwise it's likely not going to work
         charge += 0 if charge == 0 and include_t and self.transitive() else 1

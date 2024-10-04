@@ -86,9 +86,9 @@ def determine_paths_for_dungeon(world, player, all_regions, name):
         paths.append('Thieves Boss')
         if world.get_dungeon("Thieves Town", player).boss.enemizer_name == 'Blind':
             paths.append(('Thieves Blind\'s Cell', 'Thieves Boss'))
-    for drop_check in drop_path_checks:
-        if drop_check in all_r_names:
-            paths.append((drop_check, non_hole_portals))
+    # for drop_check in drop_path_checks:
+    #     if drop_check in all_r_names:
+    #         paths.append((drop_check, non_hole_portals))
     return paths
 
 
