@@ -692,6 +692,56 @@ def analyze_portals(world, player):
             sanc = world.get_portal('Sanctuary', player)
             sanc.destination = True
         for target_region, possible_portals in info.required_passage.items():
+            if len(possible_portals) == 1:
+                world.get_portal(possible_portals[0], player).destination = True
+            elif len(possible_portals) > 1:
+                dest_portal = random.choice(possible_portals)
+                access_portal = world.get_portal(dest_portal, player)
+                access_portal.destination = True
+                for other_portal in possible_portals:
+                    if other_portal != dest_portal:
+                        world.get_portal(dest_portal, player).dependent = access_portal
+
+
+def analyze_portals_altered(world, player):
+    info_map = {}
+    for dungeon, portal_list in dungeon_portals.items():
+        info = DungeonInfo(dungeon)
+        region_map = defaultdict(list)
+        reachable_portals = []
+        inaccessible_portals = []
+        for portal in portal_list:
+            placeholder = world.get_region(portal + ' Portal', player)
+            portal_region = placeholder.exits[0].connected_region
+            name = portal_region.name
+            if portal_region.type == RegionType.LightWorld:
+                world.get_portal(portal, player).light_world = True
+            if name in world.inaccessible_regions[player]:
+                name_key = 'Desert Ledge' if name == 'Desert Ledge Keep' else name
+                region_map[name_key].append(portal)
+                inaccessible_portals.append(portal)
+            else:
+                reachable_portals.append(portal)
+        info.total = len(portal_list)
+        info.required_passage = region_map
+        if len(reachable_portals) == 0:
+            if len(inaccessible_portals) == 1:
+                info.sole_entrance = inaccessible_portals[0]
+                info.required_passage.clear()
+            else:
+                raise Exception(f'No reachable entrances for {dungeon}')
+        if len(reachable_portals) == 1:
+            info.sole_entrance = reachable_portals[0]
+        if world.intensity[player] < 2 and world.doorShuffle[player] == 'basic' and dungeon == 'Desert Palace':
+            if len(inaccessible_portals) == 1 and inaccessible_portals[0] == 'Desert Back':
+                info.required_passage.clear()  # can't make a passage at this intensity level, something else must exit
+        info_map[dungeon] = info
+
+    for dungeon, info in info_map.items():
+        if dungeon == 'Hyrule Castle' and world.mode[player] == 'standard':
+            sanc = world.get_portal('Sanctuary', player)
+            sanc.destination = True
+        for target_region, possible_portals in info.required_passage.items():
             if 'Skull 3' in possible_portals and len(possible_portals) > 1:
                 possible_portals.remove('Skull 3')
             if 'Desert Back' in possible_portals and len(possible_portals) > 1:
@@ -2303,11 +2353,7 @@ def check_required_paths_with_traps(paths, proposal, dungeon_name, start_regions
                 if cached_initial_state and any(not cached_initial_state.visited_at_all(r) for r in start_regions):
                     return False, None  # can't start processing the initial state because start regs aren't reachable
                 init = determine_init_crystal(initial, cached_initial_state, start_regions)
-                state = ExplorationState2(init, dungeon_name)
-                for region in start_regions:
-                    state.visit_region(region)
-                    state.add_all_doors_check_proposed_traps(region, proposal, world, player)
-                explore_state_proposed_traps(state, proposal, world, player)
+                state = explore_state_with_proposal(dungeon_name, start_regions, init, proposal, world, player)
                 if initial and cached_initial_state is None:
                     cached_initial_state = state
             else:
@@ -2318,7 +2364,19 @@ def check_required_paths_with_traps(paths, proposal, dungeon_name, start_regions
                 valid, bad_region = check_if_all_regions_visited(state, check_paths)
             if not valid:
                 return False, None
+    if cached_initial_state is None:
+        init = determine_init_crystal(True, None, start_regions)
+        cached_initial_state = explore_state_with_proposal(dungeon_name, start_regions, init, proposal, world, player)
     return True, cached_initial_state
+
+
+def explore_state_with_proposal(dungeon_name, start_regions, init_crystal, proposal, world, player):
+    state = ExplorationState2(init_crystal, dungeon_name)
+    for region in start_regions:
+        state.visit_region(region)
+        state.add_all_doors_check_proposed_traps(region, proposal, world, player)
+    explore_state_proposed_traps(state, proposal, world, player)
+    return state
 
 
 def reassign_trap_doors(trap_map, world, player):
@@ -3614,6 +3672,7 @@ logical_connections = [
     ('PoD Arena Main to Landing Barrier - Blue', 'PoD Arena Landing'),
     ('PoD Arena Main to Landing Bypass', 'PoD Arena Landing'),
     ('PoD Arena Main to Right Bypass', 'PoD Arena Right'),
+    ('PoD Arena Main to North Bypass', 'PoD Arena North'),
     ('PoD Arena Main Ranged Crystal Exit', 'PoD Arena Main'),
     ('PoD Arena Bridge to Ranged Crystal', 'PoD Arena Bridge - Ranged Crystal'),
     ('PoD Arena Bridge Ranged Crystal Exit', 'PoD Arena Bridge'),
@@ -3707,6 +3766,14 @@ logical_connections = [
     ('Thieves Hellway Crystal Orange Barrier', 'Thieves Hellway'),
     ('Thieves Hellway Blue Barrier', 'Thieves Hellway N Crystal'),
     ('Thieves Hellway Crystal Blue Barrier', 'Thieves Hellway'),
+    ('Thieves Triple Bypass North to East', 'Thieves Triple Bypass East'),
+    ('Thieves Triple Bypass North to West', 'Thieves Triple Bypass West'),
+    ('Thieves Triple Bypass South to East', 'Thieves Triple Bypass East'),
+    ('Thieves Triple Bypass South to West', 'Thieves Triple Bypass West'),
+    ('Thieves Triple Bypass West to North', 'Thieves Triple Bypass North'),
+    ('Thieves Triple Bypass West to South', 'Thieves Triple Bypass South'),
+    ('Thieves Triple Bypass East to North', 'Thieves Triple Bypass North'),
+    ('Thieves Triple Bypass East to South', 'Thieves Triple Bypass South'),
     ('Thieves Attic Orange Barrier', 'Thieves Attic Hint'),
     ('Thieves Attic Blue Barrier', 'Thieves Attic Switch'),
     ('Thieves Attic Hint Orange Barrier', 'Thieves Attic'),
@@ -4732,7 +4799,7 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
     customize_lobbies(world, player)
     add_inaccessible_doors(world, player)  # must be done after lobbies are connected if not shuffled
 
-    analyze_portals(world, player)  # see below todos
+    analyze_portals_altered(world, player)  # see below todos
     for pool, region_list in dungeon_pool:
         sectors = convert_to_sectors(region_list, world, player)
         merge_sectors(sectors, world, player)

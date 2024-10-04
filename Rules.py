@@ -671,6 +671,7 @@ def global_rules(world, player):
     set_rule(world.get_entrance('PoD Arena Main to Ranged Crystal', player), lambda state: True) # Can always throw pots here
     set_rule(world.get_entrance('PoD Arena Main to Landing Bypass', player), lambda state: state.can_use_bombs(player) or state.has('Cane of Somaria', player))
     set_rule(world.get_entrance('PoD Arena Main to Right Bypass', player), lambda state: state.can_use_bombs(player) or state.has('Cane of Somaria', player))
+    set_rule(world.get_entrance('PoD Arena Main to North Bypass', player), lambda state: state.can_use_bombs(player) or state.has('Cane of Somaria', player))
     set_rule(world.get_entrance('PoD Arena Bridge to Ranged Crystal', player), lambda state: state.can_shoot_arrows(player) or state.has('Red Boomerang', player) or state.has('Fire Rod', player) or state.has('Ice Rod', player) or state.has('Cane of Somaria', player)) # or state.has_beam_sword(player)
     set_rule(world.get_entrance('PoD Arena Right to Ranged Crystal', player), lambda state: False) # (state.has('Cane of Somaria', player) and state.has_Boots(player))
     set_rule(world.get_entrance('PoD Arena Ledge to Ranged Crystal', player), lambda state: False) # state.has('Cane of Somaria', player) or state.has_beam_sword(player)
@@ -700,9 +701,14 @@ def global_rules(world, player):
     set_rule(world.get_entrance('Thieves Hellway Orange Barrier', player), lambda state: state.can_reach_orange(world.get_region('Thieves Hellway', player), player))
     set_rule(world.get_entrance('Thieves Hellway Crystal Blue Barrier', player), lambda state: state.can_reach_blue(world.get_region('Thieves Hellway N Crystal', player), player))
     set_rule(world.get_entrance('Thieves Hellway Crystal Orange Barrier', player), lambda state: state.can_reach_orange(world.get_region('Thieves Hellway S Crystal', player), player))
-    set_rule(world.get_entrance('Thieves Triple Bypass SE', player), lambda state: state.can_reach_blue(world.get_region('Thieves Triple Bypass', player), player))
-    set_rule(world.get_entrance('Thieves Triple Bypass WN', player), lambda state: state.can_reach_blue(world.get_region('Thieves Triple Bypass', player), player))
-    set_rule(world.get_entrance('Thieves Triple Bypass EN', player), lambda state: state.can_reach_blue(world.get_region('Thieves Triple Bypass', player), player))
+    set_rule(world.get_entrance('Thieves Triple Bypass South to West', player), lambda state: state.can_reach_blue(world.get_region('Thieves Triple Bypass South', player), player))
+    set_rule(world.get_entrance('Thieves Triple Bypass South to East', player), lambda state: state.can_reach_blue(world.get_region('Thieves Triple Bypass South', player), player))
+    set_rule(world.get_entrance('Thieves Triple Bypass North to West', player), lambda state: state.can_reach_blue(world.get_region('Thieves Triple Bypass North', player), player))
+    set_rule(world.get_entrance('Thieves Triple Bypass North to East', player), lambda state: state.can_reach_blue(world.get_region('Thieves Triple Bypass North', player), player))
+    set_rule(world.get_entrance('Thieves Triple Bypass West to North', player), lambda state: state.can_reach_blue(world.get_region('Thieves Triple Bypass West', player), player))
+    set_rule(world.get_entrance('Thieves Triple Bypass West to South', player), lambda state: state.can_reach_blue(world.get_region('Thieves Triple Bypass West', player), player))
+    set_rule(world.get_entrance('Thieves Triple Bypass East to North', player), lambda state: state.can_reach_blue(world.get_region('Thieves Triple Bypass East', player), player))
+    set_rule(world.get_entrance('Thieves Triple Bypass East to South', player), lambda state: state.can_reach_blue(world.get_region('Thieves Triple Bypass East', player), player))
 
     set_rule(world.get_entrance('Ice Crystal Right Blue Hole', player), lambda state: state.can_reach_blue(world.get_region('Ice Crystal Right', player), player))
     set_rule(world.get_entrance('Ice Crystal Right Orange Barrier', player), lambda state: state.can_reach_orange(world.get_region('Ice Crystal Right', player), player))
@@ -2280,7 +2286,10 @@ bunny_impassible_doors = {
     'Skull Pot Circle WN', 'Skull Pot Circle Star Path', 'Skull Pull Switch S', 'Skull Big Chest N',
     'Skull Big Chest Hookpath', 'Skull 2 East Lobby NW', 'Skull Back Drop Star Path', 'Skull 2 West Lobby NW',
     'Skull 3 Lobby EN', 'Skull Star Pits SW', 'Skull Star Pits ES', 'Skull Torch Room WN', 'Skull Vines NW',
-    'Thieves Conveyor Maze EN', 'Thieves Triple Bypass EN', 'Thieves Triple Bypass SE', 'Thieves Triple Bypass WN',
+    'Thieves Conveyor Maze EN', 'Thieves Triple Bypass South to West', 'Thieves Triple Bypass South to East',
+    'Thieves Triple Bypass North to West', 'Thieves Triple Bypass North to East',
+    'Thieves Triple Bypass East to North', 'Thieves Triple Bypass East to South',
+    'Thieves Triple Bypass West to North', 'Thieves Triple Bypass West to South',
     'Thieves Hellway Blue Barrier', 'Thieves Hellway Crystal Blue Barrier', 'Thieves Attic ES',
     'Thieves Basement Block Path', 'Thieves Blocked Entry Path', 'Thieves Conveyor Bridge Block Path',
     'Thieves Conveyor Block Path', 'Ice Lobby WS', 'Ice Cross Left Push Block', 'Ice Cross Bottom Push Block Left',

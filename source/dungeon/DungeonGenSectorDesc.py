@@ -40,6 +40,7 @@ class SectorDescriptor:
         self.reachability = defaultdict(list)
         self.blue_reachability = defaultdict(list)
         self.orange_reachability = defaultdict(list)
+        self.state_cache = {}
         self.crystal_switch_doors = []
         self.constraints = {}  # disjunction of optional constraints, indexed by Hooks consumed
         self.parity_id = ''
@@ -94,6 +95,7 @@ class SectorDescriptor:
                     continue
                 # crystal = self.resolve_crystal_prop(explorable.crystal, state.visited_map[explorable.door.entrance.parent_region])
                 self.reachability[door].append((explorable.door, explorable.crystal, explorable.flag))
+            self.state_cache[door] = state
 
         for door, reach_list in self.reachability.items():
             ctr = Counter([(hook_from_door(d), number, flag) for d, number, flag in reach_list if hook_from_door(d) is not None])
@@ -148,7 +150,99 @@ class SectorDescriptor:
         if all(len(reach_list) == total_needed for source, reach_list in self.reachability.items()):
             if self.is_sector_neutral():
                 self.is_neutral = True
+        if all(portal.destination for portal in self.sector.portals):
+            self.classify_crystals_new()
 
+    def classify_crystals_new(self):
+        blue_region_set = {r for d, state in self.state_cache.items() for r, reqs in state.visited_map.items() if reqs[1] == CrystalBarrier.Blue}
+        if blue_region_set:
+            reqs = {}
+            for region in blue_region_set:
+                need_color, can_reach = set(), set()
+                for d, state in self.state_cache.items():
+                    if region in state.visited_map:
+                        (need_color if state.visited_map[region][1] != CrystalBarrier.Null else can_reach).add(d)
+                reqs[region] = (need_color, can_reach)
+            reduced_reqs = self.reduce_region_requirements(reqs)
+            region_reqs = self.reduce_again(reduced_reqs)
+            if len(region_reqs) > 0:
+                constraint = CrystalConstraint()
+                if len(region_reqs) > 1 and all(len(opt[1]) == 0 for opt in region_reqs.values()):
+                    constraint.type = 'all'
+                for regions, option in region_reqs.items():
+                    if option[0]:
+                        constraint.must_have_color_access.append(tuple(option[0]))
+                    if option[1]:
+                        constraint.must_enter_reqs.append(tuple(option[1]))
+                self.crystal_reqs.append(constraint)
+
+        orange_region_set = {r for d, state in self.state_cache.items() for r, reqs in state.visited_map.items() if reqs[1] == CrystalBarrier.Orange}
+        if orange_region_set:
+            reqs = {}
+            for region in orange_region_set:
+                need_color, can_reach = set(), set()
+                for d, state in self.state_cache.items():
+                    if region in state.visited_map:
+                        (need_color if state.visited_map[region][1] != CrystalBarrier.Null else can_reach).add(d)
+                reqs[region] = (need_color, can_reach)
+            reduced_reqs = self.reduce_region_requirements(reqs)
+            region_reqs = self.reduce_again(reduced_reqs)
+            if len(region_reqs) > 0:
+                constraint = CrystalConstraint()
+                constraint.color = 'orange'
+                if len(region_reqs) > 1 and all(len(opt[1]) == 0 for opt in region_reqs.values()):
+                    constraint.type = 'all'
+                for regions, option in region_reqs.items():
+                    if option[0]:
+                        constraint.must_have_color_access.append(tuple(option[0]))
+                    if option[1]:
+                        constraint.must_enter_reqs.append(tuple(option[1]))
+                self.crystal_reqs.append(constraint)
+
+
+    def reduce_region_requirements(self, reqs):
+        region_reqs = {}
+        for need, options in reqs.items():
+            need_color, can_reach = options
+            is_subset = False
+            for need2, options2 in region_reqs.items():
+                need_color2, can_reach2 = options2
+                if set(need_color) <= set(need_color2) and set(can_reach) <= set(can_reach2):
+                    is_subset = True
+                    new_key = (need2 + (need,) if isinstance(need2, tuple) else (need2, need))
+                    region_reqs[new_key] = options
+                    del region_reqs[need2]
+                    break
+                if set(need_color2) <= set(need_color) and set(can_reach2) <= set(can_reach):
+                    is_subset = True
+                    break
+            if not is_subset:
+                region_reqs[need] = options
+        region_reqs = {k: v for k, v in region_reqs.items() if len(v) > 0}
+        return region_reqs
+
+    def reduce_again(self, reqs):
+        if all(len(opt[1]) == 0 for opt in reqs.values()):
+            return reqs
+        region_reqs = {}
+        for need, options in reqs.items():
+            need_color, can_reach = options
+            is_subset = False
+            for need2, options2 in region_reqs.items():
+                need_color2, can_reach2 = options2
+                if can_reach.union(can_reach2) <= need_color.union(need_color2):
+                    is_subset = True
+                    new_key = (need2 + (need,) if isinstance(need2, tuple) else (need2, need))
+                    region_reqs[new_key] = (need_color.union(need_color2), set())
+                    del region_reqs[need2]
+                    break
+            if not is_subset:
+                region_reqs[need] = options
+        region_reqs = {k: v for k, v in region_reqs.items() if len(v) > 0}
+        return region_reqs
+
+
+    def classify_crystals_old_option(self):
         # check for crystal options
         blue_crystal_needed = {ext.parent_region for r in self.sector.regions for ext in r.exits if ext.door and ext.door.crystal == CrystalBarrier.Blue}
         if blue_crystal_needed:
@@ -164,12 +258,15 @@ class SectorDescriptor:
 
             crystal_needs = [tuple(d for d in s if d not in self.crystal_switch_doors) for s in doors_to_check
                              if any(d not in self.crystal_switch_doors for d in s)]
+            honorary_cs_doors = [d for s in doors_to_check for d in s if
+                                 all(r in self.state_cache[d].visited_map
+                                     and self.state_cache[d].visited_map[r][0] in {CrystalBarrier.Either, CrystalBarrier.Both} for r in blue_crystal_needed)]
             if crystal_needs:
                 constraint = CrystalConstraint()
-                constraint.must_enter_reqs = [tuple(d for d in s if d in self.crystal_switch_doors) for s in doors_to_check
-                                              if any(d in self.crystal_switch_doors for d in s)]
+                constraint.must_enter_reqs = [tuple(d for d in s if d in self.crystal_switch_doors or d in honorary_cs_doors) for s in doors_to_check
+                                              if any(d in self.crystal_switch_doors or d in honorary_cs_doors for d in s)]
 
-                reqs = {r: [k for k, v in self.blue_reachability.items() if r in v] for r in blue_crystal_needed}
+                reqs = {r: [k for k, v in self.blue_reachability.items() if r in v and k not in honorary_cs_doors] for r in blue_crystal_needed}
                 reqs = {k: v for k, v in reqs.items() if len(v) > 0}
                 region_reqs = {}
                 for need, options in reqs.items():
@@ -206,12 +303,15 @@ class SectorDescriptor:
                 doors_to_check.append(tuple(self.sector.outstanding_doors))
             crystal_needs = [tuple(d for d in s if d not in self.crystal_switch_doors) for s in doors_to_check
                              if any(d not in self.crystal_switch_doors for d in s)]
+            honorary_cs_doors = [d for s in doors_to_check for d in s if
+                                 all(r in self.state_cache[d].visited_map
+                                     and self.state_cache[d].visited_map[r][0] in {CrystalBarrier.Either, CrystalBarrier.Both} for r in orange_crystal_needed)]
             if crystal_needs:
                 constraint = CrystalConstraint()
                 constraint.color = 'orange'
-                constraint.must_enter_reqs = [tuple(d for d in s if d in self.crystal_switch_doors) for s in doors_to_check
-                                              if any(d in self.crystal_switch_doors for d in s)]
-                reqs = {r: [k for k, v in self.orange_reachability.items() if r in v] for r in orange_crystal_needed}
+                constraint.must_enter_reqs = [tuple(d for d in s if d in self.crystal_switch_doors or d in honorary_cs_doors) for s in doors_to_check
+                                              if any(d in self.crystal_switch_doors or d in honorary_cs_doors for d in s)]
+                reqs = {r: [k for k, v in self.orange_reachability.items() if r in v and k not in honorary_cs_doors] for r in orange_crystal_needed}
                 reqs = {k: v for k, v in reqs.items() if len(v) > 0}
                 region_reqs = {}
                 for need, options in reqs.items():
@@ -367,7 +467,10 @@ class SimpleExplorationState:
         elif self.crystal == CrystalBarrier.Null or self.visited_map[region][0] == CrystalBarrier.Null:
             self.visited_map[region] = CrystalBarrier.Null, self.crystal_forced
         elif self.crystal != self.visited_map[region][0]:
-            self.visited_map[region] = CrystalBarrier.Both, self.crystal_forced   # both blue and orange visited
+            self.crystal = CrystalBarrier.Both
+            if self.crystal_forced != self.visited_map[region][1]:
+                self.crystal_forced = CrystalBarrier.Null
+            self.visited_map[region] = self.crystal, self.crystal_forced  # both blue and orange visited
         else:
             self.visited_map[region] = self.crystal, self.crystal_forced  # we're visiting as a specific color, not sure this is reachable
         if region.type == RegionType.Dungeon:
@@ -386,12 +489,16 @@ class SimpleExplorationState:
                 if not door.blocked if self.respect_traps else self.can_traverse_ignore_traps(door):
                     if door.controller is not None:
                         door = door.controller
+                        connect_region = door.entrance.parent_region
+                        if connect_region is not None and not self.visited(connect_region):
+                            self.visit_region(connect_region)
+                        self.append_door_to_list(door, self.avail_doors, False)
                     if door.dest is None and door.name != 'Sanctuary Mirror Route':
                         self.append_door_to_list(door, self.unattached_doors)
                     elif door.req_event is not None and door.req_event not in self.events:
                         self.append_door_to_list(door, self.event_doors)
                     else:
-                        self.append_door_to_list(door, self.avail_doors)
+                        self.append_door_to_list(door, self.avail_doors, False)
 
     # Visited Truth Table
     # Note: self.crystal or state.crystal should never be "Both", this indicates a forcing thing
@@ -470,18 +577,23 @@ class SimpleExplorationState:
                 return d
         return None
 
-    def append_door_to_list(self, door, door_list):
+    def append_door_to_list(self, door, door_list, collapse=True):
         existing_exp_door = self.find_door_in_list(door, door_list)
         existing_exp_doors = [d for d in door_list if d.door == door]
-        if len(existing_exp_doors) > 1:
+        if len(existing_exp_doors) > 1 and collapse:
             raise Exception('append_door_to_list in DungeonGenSectorDesc needs a refactor')
-        if existing_exp_door is None:
+        if existing_exp_door is None or not collapse:
             if door.crystal != CrystalBarrier.Null:
                 if door.crystal == CrystalBarrier.Either:
                     door_list.append(ExplorableDoor(door, door.crystal, self.crystal_forced))
                 elif self.crystal == CrystalBarrier.Either:
                     door_list.append(ExplorableDoor(door, door.crystal, self.crystal_forced))
-                elif self.crystal == CrystalBarrier.Null:
+                elif self.crystal == CrystalBarrier.Both:
+                    if self.crystal_forced == CrystalBarrier.Null:
+                        door_list.append(ExplorableDoor(door, door.crystal, door.crystal))
+                    else:
+                        door_list.append(ExplorableDoor(door, door.crystal, self.crystal_forced))
+                elif self.crystal in [CrystalBarrier.Null, CrystalBarrier.Both]:
                     door_list.append(ExplorableDoor(door, door.crystal, door.crystal))
                 elif self.crystal == door.crystal:
                     door_list.append(ExplorableDoor(door, door.crystal, self.crystal_forced))
@@ -498,7 +610,7 @@ class SimpleExplorationState:
                     force_adj = self.crystal_forced
                 elif existing_exp_door.crystal != CrystalBarrier.Null and self.crystal != CrystalBarrier.Null:
                     crystal_adj = CrystalBarrier.Both
-                    force_adj = self.crystal_forced
+                    force_adj = CrystalBarrier.Null
                 existing_exp_door.crystal = crystal_adj
                 existing_exp_door.flag = force_adj
             if existing_exp_door.flag in [CrystalBarrier.Blue, CrystalBarrier.Orange]:
@@ -506,3 +618,5 @@ class SimpleExplorationState:
                     existing_exp_door.flag = self.crystal_forced
                 elif existing_exp_door.crystal == door.crystal:
                     existing_exp_door.flag = self.crystal_forced
+                if self.crystal_forced == CrystalBarrier.Null:
+                    existing_exp_door.flag = CrystalBarrier.Null

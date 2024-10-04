@@ -8,6 +8,7 @@ from BaseClasses import hook_from_door, flooded_keys
 from Regions import dungeon_events, flooded_keys_reverse
 from source.dungeon.DungeonGenLocalSearch import default_lobby_drops
 from source.dungeon.DungeonGenTransitivity import do_transitivity_check
+from source.dungeon.DungeonGenSectorDesc import SectorDescriptor
 
 
 def create_dungeon(builder, flags, world, player):
@@ -87,7 +88,7 @@ def determine_entrance_regions(builder, flags, world, player):
     non_destination_portals.remove(primary_portal)
     if not primary_portal.assigned:
         candidates = find_portal_candidates(master_door_list, v_traps, standard=hc_flag, rupee_bow=rupee_bow_flag, bk_shuffle=bk_shuffle)
-        assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, primary_portal, flags, check_transitive=True)
+        assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, primary_portal, flags)
     else:
         record_entrance_regions(entrance_regions, primary_portal)
 
@@ -96,8 +97,7 @@ def determine_entrance_regions(builder, flags, world, player):
         if not portal.assigned:
             candidates = find_portal_candidates(master_door_list, v_traps, False, True,
                                                 standard=hc_flag, rupee_bow=rupee_bow_flag, bk_shuffle=bk_shuffle)
-            candidate = assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, flags,
-                                                check_transitive=True)
+            candidate = assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, flags)
             if candidate.deadEnd:
                 if candidate.passage:
                     portal.destination = True
@@ -125,18 +125,16 @@ def determine_entrance_regions(builder, flags, world, player):
     return entrance_regions
 
 
-def assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, flags, record_portal=True,
-                            check_transitive=False):
+def assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, flags, record_portal=True):
     if len(candidates) == 0:
         raise GenerationException(f'No valid portal candidates for {builder.name}')
     logger = logging.getLogger('')
     candidate = random.choice(candidates)
-    if check_transitive:
-        while not do_transitivity_check(builder, builder.sectors, flags, [candidate]):
-            candidates.remove(candidate)
-            if len(candidates) == 0:
-                raise GenerationException(f'No valid portal candidates for {builder.name}')
-            candidate = random.choice(candidates)
+    while not do_transitivity_check(builder, builder.sectors, flags, [(candidate, portal.door)]):
+        candidates.remove(candidate)
+        if len(candidates) == 0:
+            raise GenerationException(f'No valid portal candidates for {builder.name}')
+        candidate = random.choice(candidates)
     master_door_list.remove(candidate)
     master_door_list[:] = [x for x in master_door_list if x.roomIndex != candidate.roomIndex]
     logger.debug(f' Portal Link {portal.name} <-> {candidate.name}')
@@ -144,7 +142,7 @@ def assign_portal_candidate(builder, candidates, entrance_regions, master_door_l
     if record_portal and portal.dependent is None:
         entrance_regions.append(candidate.entrance.parent_region)
     clean_up_outstanding_doors(builder, portal.door)
-    clean_up_outstanding_portal_doors(builder, candidate, portal)
+    clean_up_outstanding_portal_doors(builder, candidate, portal, flags.vanilla_traps)
     portal.change_door(candidate)
     portal.assigned = True
     if portal.door.blocked:
@@ -163,11 +161,12 @@ def clean_up_outstanding_doors(builder, door):
             sector.outstanding_doors = [d for d in sector.outstanding_doors if d != door]
 
 
-def clean_up_outstanding_portal_doors(builder, door, portal):
+def clean_up_outstanding_portal_doors(builder, door, portal, v_trap_flag):
     for sector in builder.sectors:
         if door in sector.outstanding_doors:
             sector.outstanding_doors = [d for d in sector.outstanding_doors if d != door]
             sector.portals.append(portal)
+            sector.descriptor = SectorDescriptor(sector, v_trap_flag)
 
 
 def find_portal_candidates(door_list, vanilla_traps, need_passage=False, dead_end_allowed=False, standard=False, rupee_bow=False, bk_shuffle=False):
@@ -225,7 +224,7 @@ def generate_dungeon_find_proposal(builder, flags, world, player):
             hash_code_set.add(hash_code)
             explored_state = explore_proposal(builder, entrance_regions, all_regions, proposed_map, doors_to_connect,
                                               bk_special, world, player)
-            if check_valid(name, explored_state, proposed_map, doors_to_connect, all_regions,
+            if check_valid(builder, explored_state, proposed_map, doors_to_connect, all_regions,
                            paths, entrance_regions, bk_special, world, player):
                 finished = True
             else:
@@ -367,14 +366,14 @@ def explore_proposal(builder, entrance_regions, all_regions, proposed_map, valid
     return original_state
 
 
-def check_valid(name, exploration_state, proposed_map, doors_to_connect, all_regions,
+def check_valid(builder, exploration_state, proposed_map, doors_to_connect, all_regions,
                 paths, entrance_regions, bk_special, world, player):
     all_visited = set()
     all_visited.update(exploration_state.visited_blue)
     all_visited.update(exploration_state.visited_orange)
     if len(all_regions.difference(all_visited)) > 0:
         return False
-    if not valid_paths(name, paths, entrance_regions, doors_to_connect, all_regions, proposed_map,
+    if not valid_paths(builder, paths, entrance_regions, doors_to_connect, all_regions, proposed_map,
                        bk_special, world, player):
         return False
     return True
@@ -398,7 +397,7 @@ def check_for_special(regions):
     return False
 
 
-def valid_paths(name, paths, entrance_regions, valid_doors, all_regions, proposed_map, bk_special, world, player):
+def valid_paths(builder, paths, entrance_regions, valid_doors, all_regions, proposed_map, bk_special, world, player):
     for path in paths:
         if type(path) is tuple:
             target = path[1]
@@ -410,13 +409,13 @@ def valid_paths(name, paths, entrance_regions, valid_doors, all_regions, propose
         else:
             target = path
             start_regions = entrance_regions
-        if not valid_path(name, start_regions, target, valid_doors, proposed_map, all_regions,
+        if not valid_path(builder, start_regions, target, valid_doors, proposed_map, all_regions,
                           bk_special, world, player):
             return False
     return True
 
 
-def valid_path(name, starting_regions, target, valid_doors, proposed_map, all_regions, bk_special, world, player):
+def valid_path(builder, starting_regions, target, valid_doors, proposed_map, all_regions, bk_special, world, player):
     target_regions = set()
     if type(target) is not list:
         for region in all_regions:
@@ -428,8 +427,8 @@ def valid_path(name, starting_regions, target, valid_doors, proposed_map, all_re
             if region.name in target:
                 target_regions.add(region)
 
-    start = ExplorationState(dungeon=name)
-    bk_relevant = (world.door_type_mode[player] == 'original' and not world.bigkeyshuffle[player]) or bk_special
+    start = ExplorationState(dungeon=builder.name)
+    bk_relevant = (world.door_type_mode[player] == 'original' and not world.bigkeyshuffle[player] and not builder.split_flag) or bk_special
     start.big_key_special = bk_special
     original_state = extend_reachable_state_lenient(starting_regions, start, proposed_map, all_regions,
                                                     valid_doors, bk_relevant, world, player)
@@ -482,9 +481,10 @@ def determine_paths_for_dungeon(world, player, all_regions, name):
         paths.append('Thieves Boss')
         if world.get_dungeon("Thieves Town", player).boss.enemizer_name == 'Blind':
             paths.append(('Thieves Blind\'s Cell', 'Thieves Boss'))
-    for drop_check in drop_path_checks:
-        if drop_check in all_r_names:
-            paths.append((drop_check, non_hole_portals))
+    # Needs support in the transitivity algorithm - otherwise portals like Bob's chest are valid and these always fail
+    # for drop_check in drop_path_checks:
+    #     if drop_check in all_r_names:
+    #         paths.append((drop_check, non_hole_portals))
     return paths
 
 

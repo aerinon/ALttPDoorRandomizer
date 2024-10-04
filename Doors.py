@@ -395,6 +395,7 @@ def create_doors(world, player):
         create_door(player, 'PoD Arena Main to Landing Barrier - Blue', Lgcl),
         create_door(player, 'PoD Arena Main to Landing Bypass', Lgcl),
         create_door(player, 'PoD Arena Main to Right Bypass', Lgcl),
+        create_door(player, 'PoD Arena Main to North Bypass', Lgcl),
         create_door(player, 'PoD Arena Main Ranged Crystal Exit', Lgcl),
         create_door(player, 'PoD Arena Bridge to Ranged Crystal', Lgcl),
         create_door(player, 'PoD Arena Bridge Ranged Crystal Exit', Lgcl),
@@ -691,6 +692,14 @@ def create_doors(world, player):
         create_door(player, 'Thieves Triple Bypass SE', Intr).dir(So, 0xbb, Right, High).pos(3),
         create_door(player, 'Thieves Hellway Crystal EN', Intr).dir(Ea, 0xbb, Top, High).pos(1),
         create_door(player, 'Thieves Triple Bypass WN', Intr).dir(We, 0xbb, Top, High).pos(1),
+        create_door(player, 'Thieves Triple Bypass North to West', Lgcl),
+        create_door(player, 'Thieves Triple Bypass North to East', Lgcl),
+        create_door(player, 'Thieves Triple Bypass South to East', Lgcl),
+        create_door(player, 'Thieves Triple Bypass South to West', Lgcl),
+        create_door(player, 'Thieves Triple Bypass East to South', Lgcl),
+        create_door(player, 'Thieves Triple Bypass East to North', Lgcl),
+        create_door(player, 'Thieves Triple Bypass West to North', Lgcl),
+        create_door(player, 'Thieves Triple Bypass West to South', Lgcl),
         create_door(player, 'Thieves Spike Switch SW', Nrml).dir(So, 0xab, Left, High).pos(1).portal(Z, 0x00),
         create_door(player, 'Thieves Spike Switch Up Stairs', Sprl).dir(Up, 0xab, 0, HTH).ss(Z, 0x1a, 0x6c, True, True).small_key().pos(0),
         create_door(player, 'Thieves Attic Down Stairs', Sprl).dir(Dn, 0x64, 0, HTH).ss(Z, 0x11, 0x80, True, True),
@@ -1326,6 +1335,7 @@ def create_doors(world, player):
     world.get_door('PoD Arena Main to Landing Barrier - Blue', player).barrier(CrystalBarrier.Blue)
     world.get_door('PoD Arena Main to Landing Bypass', player).barrier(CrystalBarrier.Orange)
     world.get_door('PoD Arena Main to Right Bypass', player).barrier(CrystalBarrier.Orange)
+    world.get_door('PoD Arena Main to North Bypass', player).barrier(CrystalBarrier.Orange)
     world.get_door('PoD Arena Main Ranged Crystal Exit', player).c_switch()
     world.get_door('PoD Arena Bridge Ranged Crystal Exit', player).c_switch()
     world.get_door('PoD Arena Landing to Main Barrier - Blue', player).barrier(CrystalBarrier.Blue)
@@ -1369,9 +1379,14 @@ def create_doors(world, player):
     world.get_door('Thieves Attic ES', player).barrier(CrystalBarrier.Blue)
     world.get_door('Thieves Hellway Blue Barrier', player).barrier(CrystalBarrier.Blue)
     world.get_door('Thieves Hellway Crystal Blue Barrier', player).barrier(CrystalBarrier.Blue)
-    world.get_door('Thieves Triple Bypass SE', player).barrier(CrystalBarrier.Blue)
-    world.get_door('Thieves Triple Bypass WN', player).barrier(CrystalBarrier.Blue)
-    world.get_door('Thieves Triple Bypass EN', player).barrier(CrystalBarrier.Blue)
+    world.get_door('Thieves Triple Bypass South to East', player).barrier(CrystalBarrier.Blue)
+    world.get_door('Thieves Triple Bypass South to West', player).barrier(CrystalBarrier.Blue)
+    world.get_door('Thieves Triple Bypass North to West', player).barrier(CrystalBarrier.Blue)
+    world.get_door('Thieves Triple Bypass North to East', player).barrier(CrystalBarrier.Blue)
+    world.get_door('Thieves Triple Bypass East to North', player).barrier(CrystalBarrier.Blue)
+    world.get_door('Thieves Triple Bypass East to South', player).barrier(CrystalBarrier.Blue)
+    world.get_door('Thieves Triple Bypass West to South', player).barrier(CrystalBarrier.Blue)
+    world.get_door('Thieves Triple Bypass West to North', player).barrier(CrystalBarrier.Blue)
     world.get_door('Thieves Hellway Orange Barrier', player).barrier(CrystalBarrier.Orange)
     world.get_door('Thieves Hellway Crystal Orange Barrier', player).barrier(CrystalBarrier.Orange)
     world.get_door('Thieves Attic Orange Barrier', player).barrier(CrystalBarrier.Orange)
@@ -1542,6 +1557,12 @@ def create_doors(world, player):
 
     set_special_dungeon_links(world, player)
 
+    world.get_door('Eastern Boss SE', player).dungeonLink = 'Not Valid for Old Algorithm'
+    world.get_door('PoD Boss SE', player).dungeonLink = 'Not Valid for Old Algorithm'
+    world.get_door('Swamp Boss SW', player).dungeonLink = 'Not Valid for Old Algorithm'
+    world.get_door('Thieves Boss SE', player).dungeonLink = 'Not Valid for Old Algorithm'
+    world.get_door('Mire Boss SW', player).dungeonLink = 'Not Valid for Old Algorithm'
+    world.get_door('GT Agahnim 2 SW', player).dungeonLink = 'Not Valid for Old Algorithm'
     # "glitch" logical transitions
     world.get_door('PoD Arena Right to Ranged Crystal', player).barred('CrystalSwitchTricks')
     world.get_door('PoD Arena Ledge to Ranged Crystal', player).barred('CrystalSwitchTricks')
