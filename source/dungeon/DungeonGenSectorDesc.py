@@ -1,14 +1,11 @@
-import logging
-import RaceRandom as random
 from collections import defaultdict, deque, Counter
-from itertools import combinations
 
-from BaseClasses import Direction, RegionType, CrystalBarrier, DoorType, Door, flooded_keys
+from BaseClasses import Direction, RegionType, CrystalBarrier, DoorType, flooded_keys
 from BaseClasses import hook_from_door
 from Regions import dungeon_events, flooded_keys_reverse
 from Utils import append_to_yaml, clear_file
-from source.dungeon.DungeonGenerationCommon import DungeonBuilder, define_sector_features, hanger_from_door, dungeon_portals
-from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector, GenerationException, is_boss_trap
+from source.dungeon.DungeonGenerationCommon import hanger_from_door
+from source.dungeon.DungeonGenerationCommon import GenerationException, is_boss_trap
 from source.dungeon.DungeonStitcher import ExplorableDoor
 
 
@@ -74,7 +71,14 @@ class SectorDescriptor:
         if self.sector.portals and any(not p.destination for p in self.sector.portals):
             for p in self.sector.portals:
                 if not p.destination:
-                    self.reachability[None].append((p.door, CrystalBarrier.Orange, CrystalBarrier.Null))
+                    state = SimpleExplorationState(v_trap_flag)
+                    state.extend_reachable_state(p.door, cs_override=CrystalBarrier.Orange)
+                    self.state_cache[p.door] = state
+                    for explorable in state.unattached_doors:
+                        if explorable.door == DoorType.Logical or explorable.door not in self.sector.outstanding_doors:
+                                continue
+                        self.reachability[p.door].append((explorable.door, explorable.crystal, explorable.flag))
+                    # self.reachability[None].append((p.door, CrystalBarrier.Orange, CrystalBarrier.Null))
                     skip_doors.add(p.door)
             # todo: dependent portals
         # which outstanding doors are reachable from which outstanding doors
@@ -99,13 +103,11 @@ class SectorDescriptor:
 
         for door, reach_list in self.reachability.items():
             ctr = Counter([(hook_from_door(d), number, flag) for d, number, flag in reach_list if hook_from_door(d) is not None])
-            if door is None:
-                valid_portal = any(d.portalAble and not (d.blocked or is_boss_trap(d)) for d in skip_doors)
-                for d in skip_doors:
-                    self.shape_construct[d] = (valid_portal,) + tuple(sorted((ctr.items())))
-            else:
-                valid_portal = door.portalAble and not (door.blocked or is_boss_trap(door))
-                self.shape_construct[door] = (valid_portal,) + tuple(sorted((ctr.items())))
+            valid_portal = door.portalAble and not (door.blocked or is_boss_trap(door))
+            has_portal = 'test' if self.sector.portals else 'no'
+            if has_portal == 'test':
+                has_portal = 'src' if all(not p.destination for p in self.sector.portals) else 'dest'
+            self.shape_construct[door] = (valid_portal,has_portal) + tuple(sorted((ctr.items())))
 
         self.classify()
 
@@ -114,7 +116,7 @@ class SectorDescriptor:
         unreached = set(self.sector.outstanding_doors)
         if total_needed == 1 and not self.sector.portals:
             self.dead_end = True
-        elif not self.sector.portals or all(p.destination for p in self.sector.portals):
+        else: #elif not self.sector.portals or all(p.destination for p in self.sector.portals):
             if 'Ice Cross Left' in self.sector.r_name_set and any('Ice Cross ' in d.name for d in self.reachability):
                 specials = []
                 for source, dest_list in self.reachability.items():
@@ -442,9 +444,9 @@ class SimpleExplorationState:
 
         self.found_locations = []
 
-    def extend_reachable_state(self, start_door):
+    def extend_reachable_state(self, start_door, cs_override=None):
         start_region = start_door.entrance.parent_region
-        self.append_door_to_list(start_door, self.unattached_doors)  # always counts for oneself
+        self.append_door_to_list(start_door, self.unattached_doors, cs_override=cs_override)  # always counts for oneself
         self.visit_region(start_region)
         while len(self.avail_doors) > 0:
             explorable_door = self.next_avail_door()
@@ -577,7 +579,7 @@ class SimpleExplorationState:
                 return d
         return None
 
-    def append_door_to_list(self, door, door_list, collapse=True):
+    def append_door_to_list(self, door, door_list, collapse=True, cs_override=None):
         existing_exp_door = self.find_door_in_list(door, door_list)
         existing_exp_doors = [d for d in door_list if d.door == door]
         if len(existing_exp_doors) > 1 and collapse:
@@ -599,7 +601,10 @@ class SimpleExplorationState:
                     door_list.append(ExplorableDoor(door, door.crystal, self.crystal_forced))
                 # otherwise we can't go through this door this way
             else:  # nothing forcing
-                door_list.append(ExplorableDoor(door, self.crystal, self.crystal_forced))
+                if cs_override:
+                    door_list.append(ExplorableDoor(door, cs_override, cs_override))
+                else:
+                    door_list.append(ExplorableDoor(door, self.crystal, self.crystal_forced))
         else:
             # door must not specify and the crystal must be different
             if door.crystal == CrystalBarrier.Null and existing_exp_door.crystal != self.crystal:
