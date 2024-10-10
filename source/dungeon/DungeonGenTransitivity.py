@@ -638,7 +638,7 @@ class Transitivity:
         # this is sector loop detection where all doors in a sector can only connect to another set of sectors
         # which can only connect back to the first
         for sector in c_info.sector_list:
-            if all(d in remaining_set for d in sector.outstanding_doors):
+            if sector.outstanding_doors and all(d in remaining_set for d in sector.outstanding_doors):
                 init_match = [m for d in sector.outstanding_doors for m in c_info.door_matches[d]]
                 if all(m not in self.unconnected_doors for m in init_match):
                     possible_sectors = {c_info.door_sector_map[m] for m in init_match if m in remaining_set}
