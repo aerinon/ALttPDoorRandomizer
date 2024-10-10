@@ -142,11 +142,11 @@ def assign_portal_candidate(builder, candidates, entrance_regions, master_door_l
     if record_portal and portal.dependent is None:
         entrance_regions.append(candidate.entrance.parent_region)
     clean_up_outstanding_doors(builder, portal.door)
-    clean_up_outstanding_portal_doors(builder, candidate, portal, flags.vanilla_traps)
     portal.change_door(candidate)
     portal.assigned = True
     if portal.door.blocked:
         portal.door.blocked = False
+    clean_up_outstanding_portal_doors(builder, candidate, portal, flags.vanilla_traps)
     return candidate
 
 
