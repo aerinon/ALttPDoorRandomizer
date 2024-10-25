@@ -1,0 +1,5 @@
+settings:
+  1:
+    goal: crystals
+    shuffle: crossed
+    keysanity: true
