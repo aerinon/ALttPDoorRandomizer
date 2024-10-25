@@ -182,14 +182,14 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
     possible_builders = list(dungeon_map.keys())
     balance_map = proposal_balance(info)
     possible_builders = [b for b in possible_builders if not balance_map[b].complete()]
-    weights = determine_weights(possible_builders, world, player)
+    weights = determine_weights(possible_builders, info, world, player)
     choices = random.choices(possible_builders, weights, k=len(info.sector_pool))
     for idx, sector in enumerate(info.sector_pool):
         if valid_for_move(sector, choices[idx], info):
             propose_sector(dungeon_map[choices[idx]], sector, info)
         else:
             options = [b for b in possible_builders if valid_for_move(sector, b, info)]
-            weights = determine_weights(options, world, player)
+            weights = determine_weights(options, info, world, player)
             choice = random.choices(options, weights, k=1)
             propose_sector(dungeon_map[choice[0]], sector, info)
     if world.dungeon_shuffle_algorithm[player] == 'biased':
@@ -237,11 +237,15 @@ def do_custom_exclusions(info, world, player):
                 exclude_sector(sector, info, sum((dungeon_aliases[d] for d in dungeon_list), []))
 
 
-def determine_weights(builders, world, player):
+def determine_weights(builders, info, world, player):
     if world.dungeon_shuffle_algorithm[player] == 'biased':
         bias_present = any(world.dungeon_bias[player] in b for b in builders)
         if bias_present:
             return [(weight_map[builder] if world.dungeon_bias[player] in builder else 0) for builder in builders]
+        else:
+            balance_map = proposal_balance(info)
+            unbalanced = {dungeon: balance for dungeon, balance in balance_map.items() if not balance.balanced()}
+            return [(weight_map[builder] if builder in unbalanced else 0) for builder in builders]
     return [weight_map[builder] for builder in builders]
 
 
@@ -1017,7 +1021,7 @@ def seed_biased_builders(info, world, player):
         candidates = [s for s in info.proposal[provider] if valid_for_move(s, seedling, info)]
         best, best_score = None, None
         for _ in range(400):
-            amt = random.randint(1, 5)
+            amt = random.randint(1, 4)
             cluster = random.sample(candidates, k=amt)
             bal = Balance(seedling, info)
             bal.extend(info.proposal[seedling])
