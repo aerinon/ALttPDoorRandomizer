@@ -614,7 +614,7 @@ class Transitivity:
             if self.detect_forced_loop(d, remaining_set, c_info):
                 forced_loop_doors.append(d)
         for sector in c_info.sector_list:
-            if all(d in remaining_set for d in sector.outstanding_doors) and not sector.descriptor.dead_end:
+            if all(d in remaining_set for d in sector.outstanding_doors) and not sector.descriptor.dead_end and not all(p.dependent for p in sector.portals):
                 doors_to_access = [d for d in sector.outstanding_doors if d not in forced_loop_doors and d in remaining_set]
                 if len(doors_to_access) == 1 and doors_to_access[0] not in forced_set:
                     access_door = doors_to_access[0]
@@ -660,6 +660,9 @@ class Transitivity:
                 missing_doors = len(doors) - best
                 forced_doors = 0
                 for d in sector.outstanding_doors:
+                    if d in self.unconnected_doors:
+                        continue  # can't be forced if already reached
+                    # if all the things that a door could connect to are already connected or in the sector itself
                     if all(d in self.connection_map or d in sector.outstanding_doors for d in c_info.door_matches[d]):
                         forced_doors += 1
                 balance += best - 2 - missing_doors - forced_doors
@@ -731,7 +734,8 @@ class Transitivity:
                         return True
                 for d in new_available[hanger]:
                     reachability = c_info.door_sector_map[d].descriptor.reachability[d]
-                    if len(reachability) == 2 and not all(r[0] in self.unconnected_doors for r in reachability):
+                    reach_me_count = sum(1 if any(triple[0]==d for triple in triple_list) else 0 for r, triple_list in c_info.door_sector_map[d].descriptor.reachability.items())
+                    if reach_me_count == 2 and not all(r[0] in self.unconnected_doors for r in reachability):
                         potentials = [a for a, b, c in reachability if a != d and (a in new_available[hook_from_door(a)] or a in new_total_needed[hanger_from_door(a)])]
                         if len(potentials) == 1:
                             new_forced = potentials[0]
