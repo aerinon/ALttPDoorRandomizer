@@ -218,15 +218,22 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
 
 def do_custom_sectors(dungeon_map, info, world, player):
     if world.customizer and world.customizer.get_dungeon_sectors(player):
-        for region, dungeon in world.customizer.get_dungeon_sectors(player).items():
+        for region, dungeons in world.customizer.get_dungeon_sectors(player).items():
             sector = find_sector(region, info.sector_pool)
             if sector:
-                if dungeon in dungeon_map:
-                    builder = dungeon_map[dungeon]
-                else:
-                    choices = [dungeon_map[d] for d in dungeon_aliases[dungeon] if d in dungeon_map]
-                    builder = random.choice(choices)
-                propose_sector(builder, sector, info, False, restrict_list=dungeon_aliases[dungeon])
+                if not isinstance(dungeons, list):
+                    dungeons = [dungeons]
+                builders = []
+                restrict_list = []
+                for dungeon in dungeons:
+                    if dungeon in dungeon_map:
+                        builders.append(dungeon_map[dungeon])
+                        restrict_list.append(dungeon)
+                    else:
+                        builders.extend([dungeon_map[d] for d in dungeon_aliases[dungeon] if d in dungeon_map])
+                        restrict_list.extend([d for d in dungeon_aliases[dungeon] if d in dungeon_map])
+                builder = random.choice(builders)
+                propose_sector(builder, sector, info, False, restrict_list=restrict_list)
 
 
 def do_custom_exclusions(info, world, player):
