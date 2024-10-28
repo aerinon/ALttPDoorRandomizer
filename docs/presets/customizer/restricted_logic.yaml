@@ -1,0 +1,99 @@
+settings:
+  1:
+    goal: crystals
+
+    pottery: keys
+    dropshuffle: keys
+
+    dungeon_shuffle_algorithm: experimental
+    door_shuffle: crossed
+    intensity: 3
+    door_type_mode: big
+    trap_door_mode: optional
+
+doors:
+  1:
+    sectors:
+      # Dark Rooms
+      Sewers Behind Tapestry: [Hyrule Castle, Eastern Palace, Agahnims Tower, Palace of Darkness, Misery Mire, Turtle Rock]
+      Sewers Rope Room: [Hyrule Castle, Eastern Palace, Agahnims Tower, Palace of Darkness, Misery Mire, Turtle Rock]
+      Sewers Dark Cross: [Hyrule Castle, Eastern Palace, Agahnims Tower, Palace of Darkness, Misery Mire, Turtle Rock]
+      Sewers Water: [Hyrule Castle, Eastern Palace, Agahnims Tower, Palace of Darkness, Misery Mire, Turtle Rock]
+      Sewers Dark Aquabats: [Hyrule Castle, Eastern Palace, Agahnims Tower, Palace of Darkness, Misery Mire, Turtle Rock]
+      Eastern Dark Square: [Hyrule Castle, Eastern Palace, Agahnims Tower, Palace of Darkness, Misery Mire, Turtle Rock]
+      Eastern Darkness: [Hyrule Castle, Eastern Palace, Agahnims Tower, Palace of Darkness, Misery Mire, Turtle Rock]
+      Tower Dark Maze: [Hyrule Castle, Eastern Palace, Agahnims Tower, Palace of Darkness, Misery Mire, Turtle Rock]
+      Tower Dark Pits: [Hyrule Castle, Eastern Palace, Agahnims Tower, Palace of Darkness, Misery Mire, Turtle Rock]
+      PoD Dark Maze: [Hyrule Castle, Eastern Palace, Agahnims Tower, Palace of Darkness, Misery Mire, Turtle Rock]
+      PoD Dark Basement: [Hyrule Castle, Eastern Palace, Agahnims Tower, Palace of Darkness, Misery Mire, Turtle Rock]
+      Mire Tall Dark and Roomy: [Hyrule Castle, Eastern Palace, Agahnims Tower, Palace of Darkness, Misery Mire, Turtle Rock]
+
+      # Bow logic
+      Eastern Single Eyegore: [Eastern Palace, Palace of Darkness, Ganons Tower]
+      PoD Mimics 1: [Eastern Palace, Palace of Darkness, Ganons Tower]
+      PoD Mimics 2: [Eastern Palace, Palace of Darkness, Ganons Tower]
+      GT Mimics 1: [Eastern Palace, Palace of Darkness, Ganons Tower]
+
+      # Boots logic
+      Desert Bonk Torch: [Desert Palace, Misery Mire, Ganons Tower]
+      
+      # Torch Puzzles
+      Desert Wall Slide: [Desert Palace, Tower of Hera, Skull Woods, Misery Mire, Ganons Tower]
+      Hera Tile Room: [Desert Palace, Tower of Hera, Skull Woods, Misery Mire, Ganons Tower]
+      Skull Torch Room: [Desert Palace, Tower of Hera, Skull Woods, Misery Mire, Ganons Tower]
+      Mire Tile Room: [Desert Palace, Tower of Hera, Skull Woods, Misery Mire, Ganons Tower]
+      Mire Torches Top: [Desert Palace, Tower of Hera, Skull Woods, Misery Mire, Ganons Tower]
+      GT Speed Torch: [Desert Palace, Tower of Hera, Skull Woods, Misery Mire, Ganons Tower]
+      GT Torch Cross: [Desert Palace, Tower of Hera, Skull Woods, Misery Mire, Ganons Tower]
+
+      # Strong Fire
+      Ice Lobby: [Ice Palace]
+      Ice Freezors: [Ice Palace]
+
+      # Hammer Logic
+      PoD Map Balcony: [Palace of Darkness, Swamp Palace, Thieves Town, Ice Palace]
+      Thieves Big Chest Room: [Palace of Darkness, Swamp Palace, Thieves Town, Ice Palace]
+
+      # Hammer + Dark
+      PoD Dark Pegs Landing: [Palace of Darkness]
+
+      # Flippers (Should let these be in Ice?)
+      Swamp Entrance: [Swamp Palace]
+      Swamp Trench 1 Approach: [Swamp Palace]
+      Swamp Trench 2 Pots: [Swamp Palace]
+      Swamp Waterway: [Swamp Palace]
+
+      # Hookshot
+      Swamp Hub: [Swamp Palace, Ice Palace, Misery Mire, Ganons Tower]
+      Ice Hookshot Ledge: [Swamp Palace, Ice Palace, Misery Mire, Ganons Tower]
+      GT Firesnake Room: [Swamp Palace, Ice Palace, Misery Mire, Ganons Tower]
+      GT Moldorm: [Swamp Palace, Ice Palace, Misery Mire, Ganons Tower]
+
+      # Hookshot OR Boots
+      Mire Lobby: [Desert Palace, Swamp Palace, Ice Palace, Misery Mire, Ganons Tower]
+      Mire Failure Bridge: [Desert Palace, Swamp Palace, Ice Palace, Misery Mire, Ganons Tower]
+
+      # Somaria + Dark
+      Mire Dark Shooters: [Misery Mire, Turtle Rock]
+      TR Dark Ride: [Misery Mire, Turtle Rock]
+        
+      # Somaria
+      TR Main Lobby: [Misery Mire, Turtle Rock, Ganons Tower]
+      TR Hub: [Misery Mire, Turtle Rock, Ganons Tower]
+      TR Final Abyss Balcony: [Misery Mire, Turtle Rock, Ganons Tower]
+        
+      # Somaria + Torches:
+      TR Torches: [Misery Mire, Turtle Rock]
+        
+      # Boots AND Somaria        
+      GT Hope Room: [Ganons Tower]  
+
+
+
+
+
+
+      
+        
+
+
