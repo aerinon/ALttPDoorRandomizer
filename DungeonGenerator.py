@@ -179,6 +179,7 @@ def connect_simple_door(exit_door, region):
 
 
 special_big_key_doors = ['Hyrule Dungeon Cellblock Door', "Thieves Blind's Cell Door"]
+# this might be bad - we're assuming we can get zelda if we have the big key, may not always be the case
 std_special_big_key_doors = ['Hyrule Castle Throne Room Tapestry'] + special_big_key_doors
 
 
@@ -402,12 +403,12 @@ class ExplorationState(object):
                 if door in key_door_proposal and door not in self.opened_doors:
                     if not self.in_door_list(door, self.small_doors):
                         self.append_door_to_list(door, self.small_doors)
-                elif (door.bigKey or door.name in special_big_key_doors) and not self.big_key_opened:
-                    if not self.in_door_list(door, self.big_doors):
-                        self.append_door_to_list(door, self.big_doors)
                 elif door.req_event is not None and door.req_event not in self.events:
                     if not self.in_door_list(door, self.event_doors):
                         self.append_door_to_list(door, self.event_doors)
+                elif (door.bigKey or door.name in special_big_key_doors) and not self.big_key_opened:
+                    if not self.in_door_list(door, self.big_doors):
+                        self.append_door_to_list(door, self.big_doors)
                 elif not self.in_door_list(door, self.avail_doors):
                     self.append_door_to_list(door, self.avail_doors)
 

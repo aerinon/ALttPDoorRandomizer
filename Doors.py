@@ -1686,5 +1686,5 @@ def ugly_door(door):
 
 
 def create_portal(world, player, name, door, ent, ext, boss_exit_idx=-1):
-    door.entranceFlag = not world.experimental[player]
+    door.entranceFlag = not world.experimental[player]  # todo: what is this?
     return Portal(player, name, door, ent, ext, boss_exit_idx)
