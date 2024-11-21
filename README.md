@@ -560,7 +560,7 @@ In an effort to reduce annoying Skull Woods layouts, several new options have be
 - Original: Skull woods shuffles classically amongst itself unless insanity is the mode. This should mimic prior behavior.
 - Restricted (Vanilla Drops, Entrances Restricted): Skull woods drops are vanilla. Skull woods entrances stay in skull woods and are shuffled.
 - Loose (Vanilla Drops, Entrances use Shuffle): Skull woods drops are vanilla. The main ER mode's pool determines how to handle.
-- Followlinked (Follow Linked Drops Setting): This looks at the new linked drop settings. If linked drops are turned on, then two new pairs of linked drop down and holes are formed. Skull front and the hole near the big chest form a pair. The east entrance to Skull 2 and th hole in the back of skull woods form another pair. If the mode is not a cross-world shuffle, then these 2 new drop-down pairs are limited to the dark world. The other drop-down in skull woods, the front two holes will be vanilla. If linked drops are off, then the mode determines how to handle the holes and entrances.
+- Followlinked (Follow Linked Drops Setting): This looks at the new linked drop settings. If linked drops are turned on, then two new pairs of linked drop down and holes are formed. Skull front and the hole near the big chest form a pair. The east entrance to Skull 2 and the hole in the back of skull woods form another pair. If the mode is not a cross-world shuffle, then these 2 new drop-down pairs are limited to the dark world. The other drop-down in skull woods, the front two holes will be vanilla. If linked drops are off, then the mode determines how to handle the holes and entrances.
 
 ### Linked Drops Override
 

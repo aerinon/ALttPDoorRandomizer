@@ -17,6 +17,7 @@ from source.dungeon.DungeonGenLocalSearch import create_dungeon_builders_prototy
 from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
 from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
 from source.dungeon.DungeonStitcherV2 import create_dungeon
+from source.dungeon.SmallKeyDoorShuffle import shuffle_small_key_doors as shuffle_small_key_doors_v2
 from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths, drop_entrances
 from DungeonGenerator import create_dungeon_builders, split_dungeon_builder, simple_dungeon_builder, default_dungeon_entrances
 from DungeonGenerator import dungeon_portals, dungeon_drops, connect_doors, count_reserved_locations
@@ -991,8 +992,10 @@ def finish_dungeon_setup(door_type_pools, world, player):
         for name in pool:
             builder = world.dungeon_layouts[player][name]
             region_set = builder.master_sector.region_set()
+            new_logic = world.key_logic[player][name].new_logic
             builder.bk_required = (builder.bk_door_proposal or any(x in region_set for x in special_bk_regions)
-                                   or len(world.key_logic[player][name].bk_chests) > 0)
+                                   or len(world.key_logic[player][name].bk_chests) > 0
+                                   or (new_logic and (new_logic.bk_locations or new_logic.bk_regions)))
             dungeon = world.get_dungeon(name, player)
             if not builder.bk_required or builder.bk_provided:
                 dungeon.big_key = None
@@ -1851,7 +1854,10 @@ def shuffle_door_types(door_type_pools, paths, world, player):
     # big keys
     used_doors = shuffle_big_key_doors(door_type_pools, used_doors, start_regions_map, all_custom, world, player)
     # small keys
-    used_doors = shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_custom, world, player)
+    if world.dungeon_shuffle_algorithm[player] != 'classic':
+        used_doors = shuffle_small_key_doors_v2(door_type_pools, used_doors, start_regions_map, all_custom, world, player)
+    else:
+        used_doors = shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_custom, world, player)
     # bombable / dashable
     used_doors = shuffle_bomb_dash_doors(door_type_pools, used_doors, start_regions_map, all_custom, world, player)
     # handle paired list

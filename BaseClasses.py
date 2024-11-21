@@ -636,8 +636,9 @@ class CollectionState(object):
                     rrp[new_region] = new_crystal_state
                     for conn in new_region.exits:
                         door = conn.door
-                        if door is not None and not door.blocked:
-                            if self.valid_crystal(door, new_crystal_state):
+                        if door is not None:
+                            blocked = door.controller.blocked if door.controller is not None else door.blocked
+                            if not blocked and self.valid_crystal(door, new_crystal_state):
                                 door_crystal_state = door.crystal if door.crystal else new_crystal_state
                                 bc[conn] = door_crystal_state
                                 queue.append((conn, door_crystal_state))

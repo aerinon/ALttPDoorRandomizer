@@ -63,6 +63,7 @@ class KeyLogic(object):
         self.dungeon = dungeon_name
         self.sm_doors = {}
         self.prize_location = None
+        self.new_logic = None
 
     def check_placement(self, unplaced_keys, wild_keys, reached_keys, self_locking_keys,
                         big_key_loc=None, prize_loc=None, cr_count=7):
@@ -2097,6 +2098,8 @@ def val_rule(rule, skn, allow=False, loc=None, askn=None, setCheck=None):
 def validate_key_placement(key_layout, world, player):
     if world.keyshuffle[player] == 'universal' or world.accessibility[player] == 'none':
         return True  # Can't keylock in retro.  Expected if beatable only.
+    if key_layout.key_counters is None:
+        return True  # can't use this method for key locks
     max_counter = find_max_counter(key_layout)
     keys_outside = 0
     big_key_outside = False

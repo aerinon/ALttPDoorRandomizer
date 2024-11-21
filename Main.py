@@ -30,7 +30,7 @@ from ItemList import generate_itempool, difficulties, fill_prizes, customize_sho
 from UnderworldGlitchRules import connect_hmg_entrances_regions, create_hmg_entrances_regions
 from Utils import output_path, parse_player_names
 
-from source.item.FillUtil import create_item_pool_config, massage_item_pool, district_item_pool_config, verify_item_pool_config
+from source.item.FillUtil import create_item_pool_config, massage_item_pool, district_item_pool_config, verify_item_pool_config, standard_reservation
 from source.overworld.EntranceShuffle2 import link_entrances_new
 from source.tools.BPS import create_bps_from_data
 from source.classes.CustomSettings import CustomSettings
@@ -323,6 +323,7 @@ def main(args, seed=None, fish=None):
         world.settings.record_item_pool(world)
     logger.info(world.fish.translate("cli", "cli", "placing.dungeon.prizes"))
 
+    standard_reservation(world)
     fill_prizes(world)
 
     logger.info(world.fish.translate("cli","cli","placing.dungeon.items"))
@@ -334,6 +335,7 @@ def main(args, seed=None, fish=None):
     else:
         promote_dungeon_items(world)
 
+    # todo: replace or delete this check
     for player in range(1, world.players+1):
         if world.logic[player] != 'nologic':
             for key_layout in world.key_layout[player].values():
