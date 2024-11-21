@@ -3,7 +3,7 @@ import logging
 from collections import defaultdict
 
 from source.item.District import resolve_districts
-from BaseClasses import PotItem, PotFlags, LocationType
+from BaseClasses import PotItem, PotFlags, LocationType, CollectionState
 from DoorShuffle import validate_vanilla_reservation
 from Dungeons import dungeon_table
 from Items import item_table, ItemFactory
@@ -169,6 +169,8 @@ def create_item_pool_config(world):
         for player in range(1, world.players + 1):
             config.item_pool[player] = determine_major_items(world, player)
             config.location_groups[0].locations = set(dungeon_set)
+            if world.mode[player] == 'standard':
+                config.location_groups[0].locations.update(std_dungeon_only_additions)
 
 
 def district_item_pool_config(world):
@@ -355,6 +357,37 @@ def validate_reservation(location, dungeon, world, player):
 
 def count_major_items(config, world, player):
     return sum(1 for x in world.itempool if x.name in config.item_pool[player] and x.player == player)
+
+
+def standard_reservation(world):
+    for player in range(1, world.players + 1):
+        if world.mode[player] == 'standard' and world.doorShuffle[player] not in ['vanilla', 'basic']:
+
+            state = CollectionState(world)
+            state.sweep_for_events()
+            unfilled_locations = [loc for r in state.reachable_regions[player] for loc in r.locations
+                                  if loc.item is None and state.can_reach(loc) and loc.player == player and loc.parent_region.dungeon and loc.parent_region.dungeon.name == 'Hyrule Castle']
+            number_of_smalls = len(world.key_layout[player]['Hyrule Castle'].proposal)
+            to_reserve = number_of_smalls // 5
+            to_choose = min(to_reserve, len(unfilled_locations))
+            locations_to_reserve = random.choices(unfilled_locations, k=to_choose)
+            to_reserve -= to_choose
+
+            logic = world.key_logic[player]['Hyrule Castle'].new_logic
+            if logic is not None and to_reserve > 0:
+                potential_regions = {r for r in world.dungeon_layouts[player]['Hyrule Castle'].master_sector.regions}
+                key_locked_regions = {k for k, v in logic.region_key_reqs.items() if v > 0}
+                potential_regions -= key_locked_regions
+                unlocked_loc = [loc for region in potential_regions for loc in region.locations if loc not in locations_to_reserve and loc.item is None]
+                # must be consistent so random.choices is predictable with seed
+                unlocked_loc.sort(key=lambda loc: loc.name)
+                to_choose = min(to_reserve, len(unlocked_loc))
+                locations_to_reserve += random.choices(unlocked_loc, k=to_choose)
+                to_reserve -= to_choose
+                if to_reserve > 0:
+                    logging.getLogger('').warning(f'Could not reserve locations for player {player} needed {to_reserve} more')
+            world.item_pool_config.reserved_locations[player].update([l.name for l in locations_to_reserve])
+
 
 
 def determine_major_items(world, player):
@@ -822,6 +855,8 @@ mode_grouping = {
         'Take-Any #2 Item 2', 'Take-Any #3 Item 1', 'Take-Any #3 Item 2','Take-Any #4 Item 1', 'Take-Any #4 Item 2'
     ]
 }
+
+std_dungeon_only_additions = ["Link's Uncle", 'Secret Passage']
 
 vanilla_fallback_dungeon_set = set(mode_grouping['Dungeon Trash'] + mode_grouping['Big Keys'] +
                                    mode_grouping['GT Trash'] + mode_grouping['Small Keys'] +

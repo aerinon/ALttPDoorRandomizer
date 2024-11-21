@@ -713,9 +713,9 @@ class ExplorationState(object):
 
     def add_all_doors_check_proposed_traps(self, region, proposed_traps, world, player):
         for door in get_doors(world, region, player):
+            if door.controller is not None:
+                door = door.controller
             if self.can_traverse_ignore_traps(door) and door not in proposed_traps:
-                if door.controller is not None:
-                    door = door.controller
                 if door.req_event is not None and door.req_event not in self.events and not self.in_door_list(door,
                                                                                                                 self.event_doors):
                     self.append_door_to_list(door, self.event_doors, False)

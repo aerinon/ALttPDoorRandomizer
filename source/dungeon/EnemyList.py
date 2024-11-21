@@ -301,7 +301,7 @@ def init_enemy_stats():
         EnemySprite.Moblin: EnemyStats(EnemySprite.Moblin, False, True, 1, health=4, dmg=5),
         EnemySprite.MiniHelmasaur: EnemyStats(EnemySprite.MiniHelmasaur, False, True, 7, health=4, dmg=3),
         EnemySprite.ThievesTownGrate: EnemyStats(EnemySprite.ThievesTownGrate, True, dmg=0, dmask=0x40),
-        EnemySprite.AntiFairy: EnemyStats(EnemySprite.AntiFairy, False, False, dmg=4),
+        EnemySprite.AntiFairy: EnemyStats(EnemySprite.AntiFairy, False, False, ignore=True, dmg=4),
         EnemySprite.Wiseman: EnemyStats(EnemySprite.Wiseman, True, dmg=0),
         EnemySprite.Hoarder: EnemyStats(EnemySprite.Hoarder, False, True, health=2, dmg=2),
         EnemySprite.MiniMoldorm: EnemyStats(EnemySprite.MiniMoldorm, False, True, 2, health=3, dmg=3),

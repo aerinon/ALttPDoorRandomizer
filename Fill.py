@@ -212,6 +212,8 @@ def valid_key_placement(item, location, key_pool, collection_state, world):
         if world.logic[item.player] == 'hybridglitches' and dungeon.name in ['Tower of Hera', 'Swamp Palace'] and dungeon.name in item.name:
             return True
         key_logic = world.key_logic[item.player][dungeon.name]
+        if key_logic.new_logic:  # shouldn't need to check in this case?
+            return True
         unplaced_keys = len([x for x in key_pool if x.name == key_logic.small_key_name and x.player == item.player])
         prize_loc = None
         if key_logic.prize_location:

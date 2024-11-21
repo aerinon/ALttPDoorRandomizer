@@ -307,6 +307,13 @@ def balance_move_sector(unbalanced, balance_map, info):
         fix_portal_balance(target, balance_map, info)
         return
 
+    # location balance?
+    location_needs = [dungeon for dungeon, balance in balance_map.items() if not balance.location_balanced()]
+    if location_needs:
+        target = random.choice(location_needs)
+        fix_location_balance(target, balance_map, info)
+        return
+
     # dead ends next
     branching_needs = [dungeon for dungeon, balance in balance_map.items() if balance.need_branches()]
     if branching_needs:
@@ -507,6 +514,27 @@ def fix_portal_balance(target, balance_map, info):
                 break
     perform_move(info, best, provider, target)
     info.gen_log.debug(f'Moved {best.sector_key()} from {provider} to {target} for portal balance')
+
+
+def fix_location_balance(target, balance_map, info):
+    candidates = {k: v for k, v in balance_map.items() if k != target and v.non_bk_locations > 1}
+    candidates = sorted(list(candidates.items()), key=lambda item: item[1].non_bk_locations)
+    provider, best, best_charge = None, None, None
+    while best is None:
+        provider, balance_info = candidates.pop()
+        for sector in info.proposal[provider]:
+            if not valid_for_move(sector, target, info) or cnt_non_bk_locations(sector) == 0:
+                continue
+            bal = Balance(provider, info)
+            bal.extend([x for x in info.proposal[provider] if x != sector])
+            charge = bal.charge(False)
+            if best is None or charge < best_charge:
+                best = sector
+                best_charge = charge
+            if best_charge == 0:
+                break
+    perform_move(info, best, provider, target)
+    info.gen_log.debug(f'Moved {best.sector_key()} from {provider} to {target} for location balance')
 
 
 def fix_branching_balance(target, balance_map, info):
@@ -811,6 +839,14 @@ def score_door(item):
         score += 100
     return score
 
+def cnt_non_bk_locations(sector):
+    count = 0
+    for region in sector.regions:
+        for loc in region.locations:
+            if '- Big Chest' not in loc.name and loc.parent_region.name not in ["Thieves Blind's Cell Interior", 'Hyrule Dungeon Cell', 'Thieves Boss']:
+                count += 1
+    return count
+
 
 class Balance:
     def __init__(self, name, info, sector=None):
@@ -839,6 +875,9 @@ class Balance:
         self.both_pass_non_dead = 0  # unless not all passable portals are non-dead-end
         self.portal_options = 0  # total available
 
+        self.bk_required = False
+        self.non_bk_locations = 0
+
         self.sectors = []
         self.transitive_flag = False
         self.transitive_init = False
@@ -858,7 +897,6 @@ class Balance:
                     if portal.destination:
                         self.destination_portals += 1
 
-
         adj = 0 if (sector.portals and any(not p.destination for p in sector.portals)) or 'Sewer Access Portal' == sector.sector_key() else 2
         best_access = max((len(access) for d, access in sector.descriptor.reachability.items() if d is not None), default=0)
         if sector.portals and any(not p.destination for p in sector.portals) and len(sector.outstanding_doors) > 0:
@@ -869,6 +907,13 @@ class Balance:
             self.branches += branches
         elif branches < 0:
             self.dead_ends -= branches
+
+        for region in sector.regions:
+            for loc in region.locations:
+                if '- Big Chest' in loc.name or loc.parent_region.name in ["Thieves Blind's Cell Interior", 'Hyrule Dungeon Cell', 'Thieves Boss']:
+                    self.bk_required = True
+                else:
+                    self.non_bk_locations += 1
 
         if sector.blue_barrier and not sector.c_switch:
             self.crystal_needed += 1
@@ -912,6 +957,8 @@ class Balance:
         return self.connectables == 0 and self.balanced()
 
     def balanced(self):
+        if not self.location_balanced():
+            return False
         if not self.polarity_balanced():
             return False
         if self.branches < self.dead_ends:
@@ -938,6 +985,11 @@ class Balance:
 
     def pol_sum(self):
         return (self.north - self.south, self.east - self.west, 0 if self.stair_balanced() else 1)
+
+    def location_balanced(self):
+        if self.bk_required and self.non_bk_locations == 0:
+            return False
+        return True
 
     def polarity_balanced(self):
         if self.north != self.south:
