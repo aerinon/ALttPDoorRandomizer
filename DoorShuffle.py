@@ -17,13 +17,16 @@ from source.dungeon.DungeonGenLocalSearch import create_dungeon_builders_prototy
 from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
 from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
 from source.dungeon.DungeonStitcherV2 import create_dungeon
+from source.dungeon.NewKeyLogic import analyze_dungeon as analyze_dungeon_new
 from source.dungeon.SmallKeyDoorShuffle import shuffle_small_key_doors as shuffle_small_key_doors_v2
+
 from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths, drop_entrances
 from DungeonGenerator import create_dungeon_builders, split_dungeon_builder, simple_dungeon_builder, default_dungeon_entrances
 from DungeonGenerator import dungeon_portals, dungeon_drops, connect_doors, count_reserved_locations
 from DungeonGenerator import valid_region_to_explore
 from KeyDoorShuffle import analyze_dungeon, build_key_layout, validate_key_layout, determine_prize_lock
 from KeyDoorShuffle import validate_bk_layout, DoorRules
+
 from Utils import ncr, kth_combination
 
 
@@ -263,7 +266,8 @@ def vanilla_key_logic(world, player):
             builder.key_door_proposal = doors
             if player not in world.key_logic.keys():
                 world.key_logic[player] = {}
-            analyze_dungeon(key_layout, world, player)
+            # analyze_dungeon(key_layout, world, player)
+            analyze_dungeon_new(key_layout, world, player)
             world.key_logic[player][builder.name] = key_layout.key_logic
             world.key_layout[player][builder.name] = key_layout
             log_key_logic(builder.name, key_layout.key_logic)

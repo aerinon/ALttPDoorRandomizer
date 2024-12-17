@@ -226,6 +226,7 @@ class KeyCounter(object):
         self.important_locations = {}
         self.prize_doors_opened = False
         self.prize_received = False
+        self.state_ref = None
 
     def used_smalls_loc(self, reserve=0):
         return max(self.used_keys + reserve - len(self.key_only_locations), 0)
@@ -1121,24 +1122,6 @@ def location_is_bk_locked(loc, key_logic):
     return loc in key_logic.bk_chests or loc in key_logic.bk_locked
 
 
-# todo: verfiy this code is defunct
-# def prize_or_event(loc):
-#     return loc.name in dungeon_events or '- Prize' in loc.name or loc.name in ['Agahnim 1', 'Agahnim 2']
-#
-#
-# def reserved_location(loc, world, player):
-#     return loc in world.item_pool.config.reserved_locations[player]
-#
-#
-# def blind_boss_unavail(loc, state, world, player):
-#     if loc.name == "Thieves' Town - Boss":
-#         return (loc.parent_region.dungeon.boss.name == 'Blind' and
-#                 (not any(x for x in state.found_locations if x.name == 'Suspicious Maiden') or
-#                  (world.get_region('Thieves Attic Window', player).dungeon.name == 'Thieves Town' and
-#                   not any(x for x in state.found_locations if x.name == 'Attic Cracked Floor'))))
-#     return False
-
-
 # counts free locations for keys - hence why reserved locations don't count
 def count_free_locations(state, world, player):
     cnt = 0
@@ -1796,6 +1779,7 @@ def create_key_counter(state, key_layout, world, player):
         key_counter.prize_doors_opened = True
     if any(x for x in key_counter.important_locations if '- Prize' in x.name):
         key_counter.prize_received = True
+    key_counter.state_ref = state
     return key_counter
 
 
