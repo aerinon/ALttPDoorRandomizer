@@ -1,11 +1,14 @@
-from collections import deque
+from collections import deque, defaultdict
+from typing import Optional, Deque, Tuple
 
 from BaseClasses import DoorType
 from DungeonGenerator import ExplorationState
+from KeyDoorShuffle import KeyCounter
 from KeyDoorShuffle import find_big_chest_locations, dungeon_table, open_a_door, important_location
-from KeyDoorShuffle import find_outside_connection, prize_relevance, expand_key_state
+from KeyDoorShuffle import find_outside_connection, prize_relevance, expand_key_state, create_key_counters
 from Regions import dungeon_events
 from Rules import check_is_dark_world
+from dungeon.DungeonStitcherV2 import special_big_key_doors
 
 
 class NewKeyLogic(object):
@@ -16,6 +19,26 @@ class NewKeyLogic(object):
         self.bk_restricted = set()
         self.region_key_reqs = {}
         self.location_key_reqs = {}
+
+        self.key_spheres = defaultdict(list)   # number of keys to a list of spheres accessible by the amt of keys
+        self.sphere_map = {}
+        self.segment_map = {}   # segment id to segment object
+
+class KeySphere(object):
+
+    def __init__(self, code):
+        self.code = code
+        self.segment_set = set()  # segments that make up this sphere, their codes
+        self.key_counter = None
+        self.child_sphere = []
+        self.bk_child_sphere = None
+
+class KeySegment(object):
+    def __init__(self, id):
+        self.id = id  # segment id
+        self.regions = []  # regions in this segment
+        self.locations = []  # locations in this segment
+
 
 def analyze_dungeon(key_layout, world, player):
     key_layout.key_logic.reset()
@@ -41,8 +64,8 @@ def analyze_dungeon(key_layout, world, player):
         determine_small_key_logic_fast(key_layout, start_state, world, player)
 
     else:
-        # todo: this will be more granular and accurate - for lower key counts
-        determine_small_key_logic_fast(key_layout, start_state, world, player)
+        # this is more granular and accurate - for lower key counts
+        determine_small_key_logic_exhaustive(key_layout, world, player)
 
 
 def determine_big_key_logic(key_layout, world, player):
@@ -130,6 +153,92 @@ def calc_extras(amount_needed, dungeon_name, world, player):
             and world.doorShuffle[player] not in ['vanilla', 'basic']):
         extras = amount_needed // 5
     return extras
+
+
+def determine_small_key_logic_exhaustive(key_layout, world, player):
+    if key_layout.key_counters is None:
+        key_layout.key_counters = create_key_counters(key_layout, world, player)
+    counters = key_layout.key_counters
+    key_logic = key_layout.key_logic
+    new_logic = key_logic.new_logic
+    seg_id_gen = letter_generator()
+    visited_region_dict = {}
+    code, root = next((code, key_counter) for code, key_counter in key_layout.key_counters.items()
+                       if key_counter.used_keys == 0 and not key_counter.big_key_opened)
+    queue: Deque[Tuple[str, KeyCounter, Optional[KeySphere]]] = deque([(code, root, None)])
+    # build key segments
+    while len(queue) > 0:
+        code, key_counter, parent_sphere = queue.popleft()
+        # child spheres?
+        segment_regions = set(key_counter.state_ref.visited_orange + key_counter.state_ref.visited_blue)
+        if parent_sphere:
+            parent_regions = {region for seg_code in parent_sphere.segment_set for region in new_logic.segment_map[seg_code].regions}
+            segment_regions.difference_update(parent_regions)
+        seg_regions = frozenset(segment_regions)
+        if len(seg_regions) <= 0:
+            segment = None
+        elif seg_regions in visited_region_dict:
+            segment = visited_region_dict[seg_regions]
+        else:
+            segment = KeySegment(next(seg_id_gen))
+            segment.locations = [loc for region in segment_regions for loc in region.locations]
+            segment.regions = list(segment_regions)
+            new_logic.segment_map[segment.id] = segment
+            visited_region_dict[seg_regions] = segment
+
+        if code in new_logic.sphere_map:
+            sphere = new_logic.sphere_map[code]
+        else:
+            sphere = KeySphere(code)
+            sphere.key_counter = key_counter
+            segment_set = set() if segment is None else {segment.id}
+            if parent_sphere:
+                segment_set.update(parent_sphere.segment_set)
+            sphere.segment_set = segment_set
+            new_logic.sphere_map[code] = sphere
+            new_logic.key_spheres[key_counter.used_keys].append(sphere)
+
+        if parent_sphere:
+            if not parent_sphere.key_counter.big_key_opened and key_counter.big_key_opened:
+                parent_sphere.bk_child_sphere = sphere
+            elif parent_sphere.key_counter.used_keys < key_counter.used_keys:
+                parent_sphere.child_sphere.append(sphere)
+
+        bk_checked = key_counter.big_key_opened
+        open_door_set = set(key_counter.open_doors)
+        for child_door in key_counter.child_doors:
+            if not bk_checked and (child_door.bigKey or child_door.name in special_big_key_doors):
+                bk_code = '1' + code[1:]
+                if bk_code in counters:
+                    bk_checked = True
+                    queue.append((bk_code, counters[bk_code], sphere))
+            elif child_door.smallKey:
+                if child_door.dest in key_layout.flat_prop and child_door.type != DoorType.SpiralStairs:
+                    child_open_set = open_door_set.union({child_door, child_door.dest})
+                else:
+                    child_open_set = open_door_set.union({child_door})
+                small_code = segment_id(key_counter.big_key_opened, child_open_set, key_layout.flat_prop)
+                if small_code in counters:
+                    queue.append((small_code, counters[small_code], sphere))
+            # prize doors? - ignore for now I guess
+
+def segment_id(bk_flag, open_door_set, flat_proposal, use_prize=False, prize_flag=False):
+    s_id = '1' if bk_flag else '0'
+    for d in flat_proposal:
+        s_id += '1' if d in open_door_set else '0'
+    if use_prize:
+        s_id += '1' if prize_flag else '0'
+    return s_id
+
+
+def letter_generator():
+    current = ord('A')
+    while current <= ord('Z'):
+        yield chr(current)
+        current += 1
+    yield 'Z'
+
+
 
 
 
