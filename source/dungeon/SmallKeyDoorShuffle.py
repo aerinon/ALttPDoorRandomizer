@@ -16,6 +16,7 @@ from Items import ItemFactory
 from KeyDoorShuffle import build_key_layout, check_bk_special, count_key_drops, expand_key_state, flatten_pair_list, open_a_door, reduce_rules
 from KeyDoorShuffle import find_outside_connection, prize_relevance_sig2, count_free_locations, prize_or_event, reserved_location, blind_boss_unavail
 from KeyDoorShuffle import count_small_key_only_locations, cnt_avail_big_locations
+from KeyDoorShuffle import create_key_counters, create_exhaustive_placement_rules
 from RoomData import DoorKind, PairedDoor
 from Utils import ncr, kth_combination
 
@@ -276,6 +277,8 @@ def find_valid_combination(builder, target, start_regions, world, player, drop_k
         combinations = ncr(len(key_door_pool), key_doors_needed)
         proposal = kth_combination(random.randint(0, combinations), key_door_pool, key_doors_needed)
         proposal.extend(custom_key_doors)
+    elif world.key_logic_algorithm[player] != 'strict' and key_doors_needed <= 8:
+        proposal = exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, start_regions, event_starts, custom_key_doors, world, player)
     else:
         proposal = monte_carlo_algorithm(builder, key_door_pool, key_doors_needed, start_regions, event_starts, custom_key_doors, world, player)
     key_layout = build_key_layout(builder, start_regions, proposal, event_starts, world, player)
@@ -447,93 +450,6 @@ def flatten_to_list(element):
         return list(element)
     else:
         return [element]
-
-def candidate_elimination_algorithm(builder, key_door_pool, key_doors_needed, start_regions, event_starts, world, player):
-    # how many non-reserved locations are reachable
-    flat_prop = flatten_pair_list(key_door_pool)
-    state = ExplorationState(dungeon=builder.name)
-    state.init_zelda_event_doors(event_starts, player)
-    state.key_locations = key_doors_needed - count_key_drops(builder.master_sector)
-    state.big_key_special = check_bk_special(builder.master_sector.regions, world, player)
-    for region in start_regions:
-        dungeon_entrance, portal_door = find_outside_connection(region)
-        prize_relevant_flag = prize_relevance_sig2(start_regions, builder.name, dungeon_entrance, world.is_atgt_swapped(player))
-        if prize_relevant_flag:
-            state.append_door_to_list(portal_door, state.prize_doors)
-            state.prize_door_set[portal_door] = dungeon_entrance
-        else:
-            state.visit_region(region, key_checks=True)
-            state.add_all_doors_check_keys(region, flat_prop, world, player)
-    locations = [world.get_location(loc, player) for loc in builder.location_set]
-    all_small_key_only_locations = sum(1 for loc in locations if loc.forced_item and loc.item.smallkey)
-    queue = []
-    visited = set()
-    tiebreaker = itertools.count()
-    best_solution: Tuple[Optional[int], Optional[list], Optional[list]] = (None, None, None)
-    solution_list = [] # there could be multiple equally good solutions
-    heapq.heappush(queue, (ce_priority(state, [], world, player), -next(tiebreaker), (state, [], key_door_pool)))
-    while queue:
-        priority, ignored, (current_state, eliminated, current_pool) = heapq.heappop(queue)
-        current_flat = flatten_pair_list(current_pool)
-        expand_key_state(current_state, current_flat, world, player)
-        if state.big_key_special and current_state.found_forced_bk():
-            current_state.big_key_opened = True
-            current_state.avail_doors.extend(current_state.big_doors)
-            current_state.opened_doors.extend(set([d.door for d in current_state.big_doors]))
-            current_state.big_doors.clear()
-            expand_key_state(current_state, current_flat, world, player)
-
-        found_smalls = count_small_key_only_locations(current_state)
-        ttl_locations = count_free_locations(current_state, world, player)
-        if current_state.big_key_opened:
-            ttl_locations -= (0 if current_state.big_key_special else 1)
-        else:
-            locs_sans_big = count_locations_exclude_big_chest(current_state.found_locations, world, player)
-            ttl_locations = locs_sans_big if current_state.big_key_special else max(ttl_locations - 1, locs_sans_big)
-        # note I'm looking for one more ttl_location than needed to account for big key shenanigans
-        if found_smalls >= all_small_key_only_locations and (ttl_locations > key_doors_needed or ttl_locations > len(current_pool)):
-            if (best_solution[0] is None
-               or (ttl_locations >= best_solution[0] and len(eliminated) < len(best_solution[1]))):
-                best_solution = (ttl_locations, eliminated, current_pool)
-                solution_list.clear()
-                solution_list.append(best_solution)
-            else:
-                solution_list.append((ttl_locations, eliminated, current_pool))
-        else:
-            # stop checking if no better solution could be potentially found on this branch
-            if best_solution[0] is not None and len(eliminated) >= len(best_solution[1]):
-                continue
-            # otherwise explore possibilities
-            if len(current_state.small_doors) == 0:
-                avail_bigs = cnt_avail_big_locations(ttl_locations, current_state, world, player)
-                if not current_state.big_key_opened and len(current_state.big_doors) > 0 and avail_bigs > 0:
-                    open_a_door(current_state.big_doors[0].door, current_state, current_pool, world, player)
-                    priority = ce_priority(current_state, eliminated, world, player)
-                    heapq.heappush(queue, priority, -next(tiebreaker), (current_state, eliminated, current_pool))
-            else:
-                for exp_door in current_state.small_doors:
-                    next_elim = eliminated + [exp_door.door]
-                    visited_key = frozenset(next_elim)
-                    if visited_key not in visited:
-                        visited.add(visited_key)
-                        next_pool = [x for x in current_pool if x != exp_door.door and (not isinstance(x, tuple) or exp_door.door not in x)]
-                        child_state = current_state.copy()
-                        open_a_door(exp_door.door, child_state, current_pool, world, player)
-                        priority = ce_priority(child_state, next_elim, world, player)
-                        heapq.heappush(queue, (priority, -next(tiebreaker), (child_state, next_elim, next_pool)))
-    if len(solution_list) > 1:
-        return random.choice(solution_list)
-    else:
-        return best_solution
-
-
-def ce_priority(state, elimination_set, world, player):
-    priority = 0
-    found_smalls = count_small_key_only_locations(state)
-    priority += found_smalls * 100
-    priority += count_free_locations(state, world, player)
-    priority -= len(elimination_set)
-    return -priority
 
 
 def count_locations_exclude_big_chest(locations, world, player):
@@ -734,5 +650,30 @@ def log_key_logic(d_name, key_logic):
                         logger.debug(f'Locations with {key_value} keys(s): {",".join([x.name for x in locs])}')
                     if regions:
                         logger.debug(f'Regions with {key_value} keys(s): {",".join([x.name for x in regions])}')
+
+
+
+def exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, start_regions, event_starts, custom, world, player):
+
+    combinations = ncr(len(key_door_pool), key_doors_needed)
+    sample_list = build_sample_list(combinations, 10000)
+    itr = 0
+    proposal = kth_combination(sample_list[itr], key_door_pool, key_doors_needed)
+    proposal.extend(custom)
+
+    key_layout = build_key_layout(builder, start_regions, proposal, event_starts, world, player)
+    key_layout.key_logic.reset()
+    key_layout.key_counters = create_key_counters(key_layout, world, player)
+    for counter in key_layout.key_counters.values():
+        key_layout.all_chest_locations.update(counter.free_locations)
+        key_layout.item_locations.update(counter.free_locations)
+        key_layout.item_locations.update(counter.key_only_locations)
+        key_layout.all_locations.update(key_layout.item_locations)
+        key_layout.all_locations.update(counter.other_locations)
+    create_exhaustive_placement_rules(key_layout, world, player)
+    # if any contradictions, then we need to try again
+
+    return proposal
+
 
 
