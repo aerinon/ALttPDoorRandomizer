@@ -11,7 +11,7 @@ mirehera_spots = [("Mire to Hera Clip", "Mire Torches Top", "Hera Portal")]
 
 heraswamp_spots = [("Hera to Swamp Clip", "Mire Torches Top", "Swamp Portal")]
 
-icepalace_spots = [("Ice Lobby Clip", "Ice Portal", "Ice Bomb Drop - Top")]
+icepalace_spots = [("Ice Lobby Clip", "Ice Lobby", "Ice Bomb Drop - Top")]
 
 thievesdesert_spots = [
     ("Thieves to Desert West Clip", "Thieves Attic", "Desert West Portal"),
