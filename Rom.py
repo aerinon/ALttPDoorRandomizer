@@ -556,7 +556,7 @@ def patch_rom(world, rom, player, team, is_mystery=False):
     if world.mirrorscroll[player] or world.doorShuffle[player] != 'vanilla':
         dr_flags |= DROptions.Town_Portal
     if world.doorShuffle[player] == 'vanilla':
-        dr_flags |= DROptions.Eternal_Mini_Bosses 
+        dr_flags |= DROptions.Eternal_Mini_Bosses
     if world.doorShuffle[player] not in  ['vanilla', 'basic']:
         dr_flags |= DROptions.Map_Info
     if ((world.collection_rate[player] or world.goal[player] == 'completionist')
