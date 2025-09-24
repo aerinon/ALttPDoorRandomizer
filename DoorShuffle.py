@@ -266,13 +266,16 @@ def vanilla_key_logic(world, player):
             builder.key_door_proposal = doors
             if player not in world.key_logic.keys():
                 world.key_logic[player] = {}
-            # analyze_dungeon(key_layout, world, player)
-            analyze_dungeon_new(key_layout, world, player)
+            if world.key_logic_algorithm[player] != 'experimental':
+                 analyze_dungeon(key_layout, world, player)
+            else:
+                analyze_dungeon_new(key_layout, world, player)
             world.key_logic[player][builder.name] = key_layout.key_logic
             world.key_layout[player][builder.name] = key_layout
-            log_key_logic(builder.name, key_layout.key_logic)
+            if world.key_logic_algorithm[player] != 'experimental':
+                log_key_logic(builder.name, key_layout.key_logic)
     # special adjustments for vanilla
-    if world.keyshuffle[player] != 'universal':
+    if world.keyshuffle[player] != 'universal' and world.key_logic_algorithm[player] != 'experimental':
         if world.mode[player] != 'standard' and world.dropshuffle[player] == 'none':
             # adjust hc doors
             def adjust_hc_door(door_rule):

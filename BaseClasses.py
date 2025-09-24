@@ -1485,6 +1485,10 @@ class RegionType(Enum):
         """Shorthand for checking if Cave or Dungeon"""
         return self in (RegionType.Cave, RegionType.Dungeon)
 
+    @property
+    def is_overworld(self):
+        return self in (RegionType.LightWorld, RegionType.DarkWorld)
+
 
 class Region(object):
 
@@ -3166,7 +3170,7 @@ bow_mode = {'progressive': 0, 'silvers': 1, 'retro': 2, 'retro_silvers': 3}
 # byte 12: POOT TKKK (mirrorscroll, pseudoboots, overworld_map, trap_door_mode, key_logic_algo)
 overworld_map_mode = {'default': 0, 'compass': 1, 'map': 2}
 trap_door_mode = {'vanilla': 0, 'optional': 1, 'boss': 2, 'oneway': 3}
-key_logic_algo = {'dangerous': 0, 'partial': 1, 'strict': 2}
+key_logic_algo = {'dangerous': 0, 'partial': 1, 'strict': 2, 'experimental': 3}
 
 # byte 13: SSDD M??? (skullwoods, linked_drops, mirrorscroll, ??? = 3 free bytes)
 skullwoods_mode = {'original': 0, 'restricted': 1, 'loose': 2, 'followlinked': 3}

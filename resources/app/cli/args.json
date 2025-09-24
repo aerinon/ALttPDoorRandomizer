@@ -218,7 +218,8 @@
     "choices": [
       "dangerous",
       "partial",
-      "strict"
+      "strict",
+      "experimental"
     ]
   },
   "decoupledoors": {

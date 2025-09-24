@@ -4,7 +4,7 @@ from collections import deque
 
 import OverworldGlitchRules
 from BaseClasses import CollectionState, RegionType, DoorType, Entrance, CrystalBarrier, KeyRuleType, LocationType
-from BaseClasses import PotFlags
+from BaseClasses import PotFlags, Door
 from Dungeons import dungeon_table
 from RoomData import DoorKind
 from OverworldGlitchRules import overworld_glitches_rules
@@ -2405,11 +2405,37 @@ def new_key_logic(key_logic, world, player):
         if len(logic.bk_regions) == 0 and len(logic.bk_locations) == 1 and world.accessibility[player] != 'locations':
             big_chest = next(iter(logic.bk_locations))
             set_always_allow(big_chest, allow_big_key_in_big_chest(d_logic.bk_name, player))
-        for sk_region, value in logic.region_key_reqs.items():
-            for ent in sk_region.entrances:
-                add_rule(ent, create_key_rule(d_logic.small_key_name, player, value))
-        for sk_loc, value in logic.location_key_reqs.items():
-            add_rule(sk_loc, create_key_rule(d_logic.small_key_name, player, value))
+        if logic.fast_logic:
+            for sk_region, value in logic.region_key_reqs.items():
+                for ent in sk_region.entrances:
+                    add_rule(ent, create_key_rule(d_logic.small_key_name, player, value))
+            for sk_loc, value in logic.location_key_reqs.items():
+                add_rule(sk_loc, create_key_rule(d_logic.small_key_name, player, value))
+        else:
+            regions, locations = logic.get_relevant_regions_and_locations()
+            for key, islands in logic.crystal_switch_reachable.items():
+                for island in islands:
+                    for ent in island.blue_barriers:
+                        # create a bypass that only follows key logic, not crystal switch logic
+                        bypass = Entrance(player, ent.name + ' (Barrier Bypass)', ent.parent_region)
+                        ent.parent_region.exits.append(bypass)
+                        bypass.connect(ent.connected_region)
+                        # should we create a logical door? Let try it
+                        bypass_door = Door(player, bypass.name, DoorType.Logical)
+                        bypass_door.entrance = bypass
+                        bypass.door = bypass_door
+                        world.doors.append(bypass_door)
+            # do I need to clear and re-populate the entrance/door caches?
+            # thinking not for now
+
+            # Small Key Logic
+            for region in regions:
+                for ent in region.entrances:
+                    add_rule(ent, create_rule_for_key_access(ent, d_logic, logic, player))
+            for location in locations:
+                add_rule(location, create_rule_for_key_access_location(location, d_logic, logic, player))
+
+
         for location in logic.bk_restricted:
             if not location.forced_item:
                 forbid_item(location, d_logic.bk_name, player)
@@ -2525,6 +2551,14 @@ def create_rule(item_name, player):
 
 def create_key_rule(small_key_name, player, keys):
     return lambda state: state.has_sm_key(small_key_name, player, keys)
+
+
+def create_rule_for_key_access(entrance, key_logic, new_logic, player):
+    return lambda state: new_logic.can_reach(entrance, state, key_logic, player)
+
+
+def create_rule_for_key_access_location(location, key_logic, new_logic, player):
+    return lambda state: new_logic.can_reach_location(location, state, key_logic, player)
 
 
 def create_key_rule_allow_small(small_key_name, player, keys, location):
