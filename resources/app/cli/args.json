@@ -219,7 +219,8 @@
       "dangerous",
       "partial",
       "strict",
-      "static"
+      "static",
+      "experimental"
     ]
   },
   "decoupledoors": {

@@ -141,6 +141,11 @@ def fill_restrictive(world, base_state, locations, itempool, key_pool=None, sing
                     item_locations = [l for l in item_locations if valid_dungeon_placement(item_to_place, l, world)]
                 verify(item_to_place, item_locations, maximum_exploration_state, single_player_placement,
                        perform_access_check, key_pool, world)
+                if item_to_place.bigkey or item_to_place.smallkey:
+                    valid_locations = [l.name for l in item_locations if verify_spot_to_fill(l, item_to_place, maximum_exploration_state, single_player_placement, perform_access_check, key_pool, world)]
+                    location_list = "\n".join(valid_locations)
+                    logging.getLogger('').info(f'{item_to_place.name} can be placed at {len(valid_locations)}:')
+                    logging.getLogger('').info(f'{location_list}')
                 for location in item_locations:
                     spot_to_fill = verify_spot_to_fill(location, item_to_place, maximum_exploration_state,
                                                        single_player_placement, perform_access_check, key_pool, world)
@@ -184,18 +189,20 @@ def verify_spot_to_fill(location, item_to_place, max_exp_state, single_player_pl
         test_state.stale[item_to_place.player] = True
     else:
         test_state = max_exp_state
+    verified_location = None
     if not single_player_placement or location.player == item_to_place.player:
+        test_state.placing_items = [item_to_place]
         test_state.sweep_for_events()
         if location.can_fill(test_state, item_to_place, perform_access_check):
             if valid_key_placement(item_to_place, location, key_pool, test_state, world):
                 if item_to_place.crystal or valid_dungeon_placement(item_to_place, location, world):
-                    return location
+                    verified_location = location
     if item_to_place.smallkey or item_to_place.bigkey:
         location.item = None
         location.event = False
         if item_to_place.smallkey:
             key_pool.append(item_to_place)
-    return None
+    return verified_location
 
 
 def valid_key_placement(item, location, key_pool, collection_state, world):
