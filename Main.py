@@ -336,19 +336,20 @@ def main(args, seed=None, fish=None):
         promote_dungeon_items(world)
 
     # todo: replace or delete this check
-    for player in range(1, world.players+1):
-        if world.logic[player] != 'nologic':
-            for key_layout in world.key_layout[player].values():
-                if not validate_key_placement(key_layout, world, player):
-                    raise RuntimeError(
-                      "%s: %s (%s %d)" %
-                      (
-                        world.fish.translate("cli", "cli", "keylock.detected"),
-                        key_layout.sector.name,
-                        world.fish.translate("cli", "cli", "player"),
-                        player
-                      )
-                    )
+    if world.key_logic_algorithm[player] != 'experimental':
+        for player in range(1, world.players+1):
+            if world.logic[player] != 'nologic':
+                for key_layout in world.key_layout[player].values():
+                    if not validate_key_placement(key_layout, world, player):
+                        raise RuntimeError(
+                          "%s: %s (%s %d)" %
+                          (
+                            world.fish.translate("cli", "cli", "keylock.detected"),
+                            key_layout.sector.name,
+                            world.fish.translate("cli", "cli", "player"),
+                            player
+                          )
+                        )
 
     logger.info(world.fish.translate("cli","cli","fill.world"))
 
@@ -551,6 +552,12 @@ def copy_world(world):
         create_dungeons(ret, player)
         if world.logic[player] in ('owglitches', 'hybridglitches', 'nologic'):
             create_owg_connections(ret, player)
+        if world.dynamic_entrances:
+            for ent in world.dynamic_entrances:
+                copy_parent = ret.get_region(ent.parent_region.name, ent.parent_region.player)
+                new_ent = Entrance(ent.player, ent.name, copy_parent)
+                copy_parent.exits.append(new_ent)
+                ret.dynamic_entrances.append(new_ent)
 
 
     # there are region references here they must be migrated to preserve integrity

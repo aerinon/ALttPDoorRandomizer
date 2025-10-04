@@ -2425,6 +2425,7 @@ def new_key_logic(key_logic, world, player):
                         bypass_door.entrance = bypass
                         bypass.door = bypass_door
                         world.doors.append(bypass_door)
+                        world.dynamic_entrances.append(bypass)
             # do I need to clear and re-populate the entrance/door caches?
             # thinking not for now
 
