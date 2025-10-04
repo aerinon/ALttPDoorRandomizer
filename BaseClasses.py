@@ -67,6 +67,7 @@ class World(object):
         self.hints = hints.copy()
         self.dynamic_regions = []
         self.dynamic_locations = []
+        self.dynamic_entrances = []
         self.spoiler_mode = spoiler_mode
         self.spoiler = Spoiler(self)
         self.doors = []

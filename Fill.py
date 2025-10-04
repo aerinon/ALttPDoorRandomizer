@@ -141,11 +141,12 @@ def fill_restrictive(world, base_state, locations, itempool, key_pool=None, sing
                     item_locations = [l for l in item_locations if valid_dungeon_placement(item_to_place, l, world)]
                 verify(item_to_place, item_locations, maximum_exploration_state, single_player_placement,
                        perform_access_check, key_pool, world)
-                if item_to_place.bigkey or item_to_place.smallkey:
-                    valid_locations = [l.name for l in item_locations if verify_spot_to_fill(l, item_to_place, maximum_exploration_state, single_player_placement, perform_access_check, key_pool, world)]
-                    location_list = "\n".join(valid_locations)
-                    logging.getLogger('').info(f'{item_to_place.name} can be placed at {len(valid_locations)}:')
-                    logging.getLogger('').info(f'{location_list}')
+                # Debug code to look at all possible placements for keys
+                # if item_to_place.bigkey or item_to_place.smallkey:
+                #     valid_locations = [l.name for l in item_locations if verify_spot_to_fill(l, item_to_place, maximum_exploration_state, single_player_placement, perform_access_check, key_pool, world)]
+                #     location_list = "\n".join(valid_locations)
+                #     logging.getLogger('').info(f'{item_to_place.name} can be placed at {len(valid_locations)}:')
+                #     logging.getLogger('').info(f'{location_list}')
                 for location in item_locations:
                     spot_to_fill = verify_spot_to_fill(location, item_to_place, maximum_exploration_state,
                                                        single_player_placement, perform_access_check, key_pool, world)
@@ -180,6 +181,8 @@ def fill_restrictive(world, base_state, locations, itempool, key_pool=None, sing
 def verify_spot_to_fill(location, item_to_place, max_exp_state, single_player_placement, perform_access_check,
                         key_pool, world):
     if item_to_place.smallkey or item_to_place.bigkey:  # a better test to see if a key can go there
+        if not valid_dungeon_placement(item_to_place, location, world):  # short circuit state copy
+            return None
         location.item = item_to_place
         location.event = True
         if item_to_place.smallkey:

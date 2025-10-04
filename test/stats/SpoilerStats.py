@@ -24,10 +24,11 @@ def process_file(file_path):
 def process_directory(directory_path):
     all_items_at_locations = collections.defaultdict(list)
     for file_name in os.listdir(directory_path):
-        file_path = os.path.join(directory_path, file_name)
-        items_at_locations = process_file(file_path)
-        for location, items in items_at_locations.items():
-            all_items_at_locations[location].extend(items)
+        if file_name.endswith('.txt'):
+            file_path = os.path.join(directory_path, file_name)
+            items_at_locations = process_file(file_path)
+            for location, items in items_at_locations.items():
+                all_items_at_locations[location].extend(items)
     return all_items_at_locations
 
 
@@ -42,11 +43,13 @@ def write_to_csv(items_at_locations, csv_file_path):
         # Write a row for each location
         for location in sorted(items_at_locations.keys()):
             item_counts = collections.Counter(items_at_locations[location])
-            # Write a column for each item
-            row = [location] + [item_counts.get(item, 0) for item in sorted(all_items)]
+            # Only write non-zero counts
+            row = [location]
+            for item in sorted(all_items):
+                count = item_counts.get(item, 0)
+                row.append(count if count > 0 else '')  # Empty string instead of 0
             writer.writerow(row)
 
-
 if __name__ == '__main__':
-    items_at_locations = process_directory(os.path.join('..', '..', 'analysis2'))
-    write_to_csv(items_at_locations, os.path.join('..', '..', 'analysis2', 'output.csv'))
+    items_at_locations = process_directory(os.path.join('..', '..', 'test_games', 'stats'))
+    write_to_csv(items_at_locations, os.path.join('..', '..', 'test_games', 'stats', 'output.csv'))
