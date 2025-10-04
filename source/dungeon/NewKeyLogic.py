@@ -129,7 +129,7 @@ class NewKeyLogic(object):
             # check if there are small keys in accessible locations
             # need to account for keys found in previous iteration to not double count keys
             smalls_to_grab = [loc for loc in small_locations_left if loc in accessible_locations]
-            can_spend_key = unspent_keys > 0 or len(smalls_to_grab) > 0
+            can_spend_key = unspent_keys + len(smalls_to_grab) > 0
             if can_spend_key and sphere.child_sphere:
                 next_sphere_list = [n for n in sphere.child_sphere
                                     if (n.key_counter.big_key_opened == current_big
@@ -146,13 +146,29 @@ class NewKeyLogic(object):
                 continue  # even if no spheres are added, we don't continue processing it
 
             # if we can't spend a key, possible to place in a self-locking sphere?
-            if placing_dungeon_key:
-                if sphere.self_locking_child_spheres:  # no longer terminal if we can place a key in a self-locking sphere
-                    for next_sphere in sphere.self_locking_child_spheres:
-                        if (next_sphere, current_big) in visited_spheres:  # skip visited ones
-                            continue
+            if placing_dungeon_key and unspent_keys == 0:  # we can't do this twice so only we have exactly zero keys
+                next_unspent_keys = unspent_keys - 1  # we are "spending" a key we don't have here (can't open up more doors with it)
+                valid_spheres = []
+                for next_sphere in sphere.self_locking_child_spheres:
+                    # Skip if already visited
+                    if (next_sphere, current_big) in visited_spheres:
+                        continue
+
+                    # Get the unique self-locking location
+                    self_locking_locations = next_sphere.locations.difference(sphere.locations)
+                    if len(self_locking_locations) != 1:
+                        continue
+
+                    self_locking_location = next(iter(self_locking_locations))
+                    # Skip if non-small key item has been placed
+                    if self_locking_location.item is not None and not self_locking_location.item.smallkey:
+                        continue
+
+                    valid_spheres.append(next_sphere)
+                if valid_spheres:
+                    for next_sphere in valid_spheres:
                         visited_spheres.add((next_sphere, current_big))
-                        queue.append((next_sphere, unspent_keys, current_big, small_locations_left))
+                        queue.append((next_sphere, next_unspent_keys, current_big, small_locations_left))
                     continue
 
             # can't advance - terminal
@@ -465,6 +481,7 @@ def determine_small_key_logic_exhaustive(key_layout, world, player):
     new_logic.door_minimums = [door.name for door in key_layout.flat_prop]
     complete_region_set = set()
     complete_location_set = set()
+    self_locking_doors = set()
 
     code, root = next((code, key_counter) for code, key_counter in key_layout.key_counters.items()
                        if key_counter.used_keys == 0 and not key_counter.big_key_opened)
@@ -475,7 +492,7 @@ def determine_small_key_logic_exhaustive(key_layout, world, player):
         if code in new_logic.sphere_map:
             sphere = new_logic.sphere_map[code]
             if world.accessibility[player] != 'locations':
-                detect_self_locks(sphere, parent_sphere, key_layout)
+                self_locking_doors.update(detect_self_locks(sphere, parent_sphere, key_layout))
         else:
             sphere = KeySphere(code)
             sphere.key_counter = key_counter
@@ -490,7 +507,7 @@ def determine_small_key_logic_exhaustive(key_layout, world, player):
             complete_location_set.update(sphere.locations)
 
             if world.accessibility[player] != 'locations':
-                detect_self_locks(sphere, parent_sphere, key_layout)
+                self_locking_doors.update(detect_self_locks(sphere, parent_sphere, key_layout))
 
             # bk_restricted zones, obviously only important if both big and small keys aren't shuffled
             possible_key_locs = set(sphere.locations)
@@ -541,19 +558,21 @@ def determine_small_key_logic_exhaustive(key_layout, world, player):
 
     new_logic.relevant_regions = list(complete_region_set)
     new_logic.relevant_locations = list(complete_location_set)
+    new_logic.door_minimums = [d for d in new_logic.door_minimums if all(d != self_locking.name for self_locking in self_locking_doors)]
 
 
 def detect_self_locks(sphere, parent_sphere, key_layout):
+    self_locking_doors = []
     # detect self-locking spheres
     if not parent_sphere:
-        return
+        return self_locking_doors
     child_door_diff = [d for d in sphere.key_counter.child_doors if d not in parent_sphere.key_counter.child_doors]
     if len(child_door_diff) == 0:
         child_only_locs = sphere.locations.difference(parent_sphere.locations)
         other_locations = set(sphere.key_counter.other_locations.keys()).difference(parent_sphere.key_counter.other_locations.keys())
         if len(other_locations) > 0:
             # if the child sphere has other locations, it can't be self-locking
-            return
+            return self_locking_doors
         child_only_locs = {loc for loc in child_only_locs if loc.forced_item is None}
         if len(child_only_locs) == 1:
             # must only be one door small key door difference
@@ -563,6 +582,8 @@ def detect_self_locks(sphere, parent_sphere, key_layout):
                                     or (isinstance(dp, Door) and dp in door_diff)))
             if door_diff_cnt == 1 and sphere not in parent_sphere.self_locking_child_spheres:
                 parent_sphere.self_locking_child_spheres.append(sphere)
+                self_locking_doors.extend(door_diff)
+    return self_locking_doors
 
 
 def sphere_id(bk_flag, open_door_set, flat_proposal, use_prize=False, prize_flag=False):
