@@ -7,7 +7,7 @@ from KeyDoorShuffle import KeyCounter
 from KeyDoorShuffle import find_big_chest_locations, dungeon_table, open_a_door, important_location
 from KeyDoorShuffle import find_outside_connection, prize_relevance, expand_key_state, create_key_counters
 from Regions import dungeon_events
-from dungeon.DungeonStitcherV2 import special_big_key_doors
+from source.dungeon.DungeonStitcherV2 import special_big_key_doors
 
 
 class NewKeyLogic(object):
@@ -546,7 +546,7 @@ def determine_small_key_logic_exhaustive(key_layout, world, player):
                 if bk_code in counters:
                     bk_checked = True
                     queue.append((bk_code, counters[bk_code], sphere))
-            elif child_door.smallKey:
+            elif child_door in key_layout.flat_prop:
                 if child_door.dest in key_layout.flat_prop and child_door.type != DoorType.SpiralStairs:
                     child_open_set = open_door_set.union({child_door, child_door.dest})
                 else:

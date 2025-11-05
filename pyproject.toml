@@ -1,0 +1,34 @@
+[project]
+name = "alttp-dungeon-randomizer"
+version = "1.0.0"
+description = "A Legend of Zelda: A Link to the Past Dungeon Randomizer"
+requires-python = ">=3.10"
+dependencies = [
+    "aenum",
+    "aioconsole",
+    "colorama",
+    "distro",
+    "fast-enum",
+    "python-bps-continued",
+    "pyyaml",
+    "websockets"
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = [".", "source"]
+include = ["source*"]
+
+[tool.setuptools]
+py-modules = ["Gui", "DungeonRandomizer", "Main", "CLI", "Adjuster", "AdjusterMain", "BaseClasses", "Bosses", "Doors",
+    "DoorShuffle", "DungeonGenerator", "Dungeons", "Fill", "GuiUtils", "InitialSram", "ItemList", "Items",
+    "KeyDoorShuffle", "OverworldGlitchRules", "OverworldShuffle", "PotShuffle", "RaceRandom", "Regions", "Rom",
+    "RoomData", "Rules", "Tables", "Text", "UnderworldGlitchRules", "Utils"]
+
+[project.scripts]
+dr-gui = "Gui:main"
+dr-cli = "DungeonRandomizer:main"
+# Add more entry points as needed,

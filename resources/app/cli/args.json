@@ -183,6 +183,7 @@
       "paired",
       "partitioned",
       "crossed",
+      "door_type_only",
       "vanilla"
     ]
   },

@@ -27,6 +27,9 @@ from Main import __version__ as ESVersion
 from source.classes.BabelFish import BabelFish
 from source.classes.Empty import Empty
 
+def main():
+    args = parse_cli(None)
+    guiMain(args)
 
 def check_python_version(fish):
     import sys
