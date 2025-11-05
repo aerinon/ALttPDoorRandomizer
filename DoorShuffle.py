@@ -140,7 +140,7 @@ def create_dungeon_pool(world, player):
     if world.customizer and world.customizer.get_custom_pools(player):
         pool_config = world.customizer.get_custom_pools(player)
         pool = [(group, list(chain.from_iterable([dungeon_regions[d] for d in group]))) for group in pool_config]
-    elif world.doorShuffle[player] == 'basic':
+    elif world.doorShuffle[player] in ['basic', 'door_type_only']:
         pool = [([name], regions) for name, regions in dungeon_regions.items()]
     elif world.doorShuffle[player] == 'paired':
         dungeon_pool = list(dungeon_regions.keys())
@@ -4944,30 +4944,11 @@ def main_dungeon_generation_prototype(dungeon_builders, flags, world, player):
     handle_special_portal_cases(world, player)
 
     # combine builders
-    if 'Skull Woods Front' in dungeon_builders:
-        b1 = dungeon_builders.pop('Skull Woods Front')
-        b2 = dungeon_builders.pop('Skull Woods Back')
-        b1.master_sector.regions.extend(b2.master_sector.regions)
-        b1.name = 'Skull Woods'
-        b1.location_set.update(b2.location_set)
-        b1.location_cnt += b2.location_cnt
-        dungeon_builders['Skull Woods'] = b1
-    if 'Desert Palace Front' in dungeon_builders:
-        b1 = dungeon_builders.pop('Desert Palace Front')
-        b2 = dungeon_builders.pop('Desert Palace Back')
-        b1.master_sector.regions.extend(b2.master_sector.regions)
-        b1.name = 'Desert Palace'
-        b1.location_set.update(b2.location_set)
-        b1.location_cnt += b2.location_cnt
-        dungeon_builders['Desert Palace'] = b1
+    combine_builders(dungeon_builders, 'Skull Woods Front', 'Skull Woods Back', 'Skull Woods')
+    combine_builders(dungeon_builders, 'Desert Palace Front', 'Desert Palace Back', 'Desert Palace')
+
     if 'Hyrule Castle Dungeon' in dungeon_builders:
-        b1 = dungeon_builders.pop('Hyrule Castle Dungeon')
-        b2 = dungeon_builders.pop('Hyrule Castle Sewers')
-        b1.master_sector.regions.extend(b2.master_sector.regions)
-        b1.name = 'Hyrule Castle'
-        b1.location_set.update(b2.location_set)
-        b1.location_cnt += b2.location_cnt
-        dungeon_builders['Hyrule Castle'] = b1
+        combine_builders(dungeon_builders, 'Hyrule Castle Dungeon', 'Hyrule Castle Sewers', 'Hyrule Castle')
         sewer_door = world.get_door('Enter HC (Sewers)', player)
         throne_door = world.get_door('Hyrule Castle Throne Room N', player)
         connect_two_way(world, sewer_door.dest.name, throne_door.name, player)
@@ -4982,6 +4963,30 @@ def main_dungeon_generation_prototype(dungeon_builders, flags, world, player):
         builder.master_sector.name = builder.name
     world.dungeon_layouts[player] = dungeon_builders
 
+
+def combine_builders(dungeon_builders, primary_name, secondary_name, final_name):
+    """
+    Combines two builders by merging their sectors, locations, and counts.
+    """
+    if primary_name not in dungeon_builders:
+        return None
+    primary_builder = dungeon_builders.pop(primary_name)
+    secondary_builder = dungeon_builders.pop(secondary_name)
+    # Merge regions
+    primary_builder.master_sector.regions.extend(secondary_builder.master_sector.regions)
+
+    # Update name
+    primary_builder.name = final_name
+
+    # Merge location data
+    primary_builder.location_set.update(secondary_builder.location_set)
+    primary_builder.location_cnt += secondary_builder.location_cnt
+    primary_builder.key_drop_cnt += secondary_builder.key_drop_cnt
+
+    # Store back with final name
+    dungeon_builders[final_name] = primary_builder
+
+    return primary_builder
 
 
 

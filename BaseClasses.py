@@ -3113,7 +3113,7 @@ class Pot(object):
 
 
 # byte 0: DDDE EEEE (DR, ER)
-dr_mode = {"basic": 1, "crossed": 2, "vanilla": 0, "partitioned": 3, 'paired': 4}
+dr_mode = {"basic": 1, "crossed": 2, "vanilla": 0, "partitioned": 3, 'paired': 4, 'door_type_only': 5}
 er_mode = {"vanilla": 0, "simple": 1, "restricted": 2, "full": 3, "crossed": 4, "insanity": 5, 'lite': 8,
            'lean': 9, "dungeonsfull": 7, "dungeonssimple": 6, 'swapped': 10}
 

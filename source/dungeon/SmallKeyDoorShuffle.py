@@ -1,10 +1,7 @@
-import heapq
 import itertools
 import logging
 
 from functools import reduce
-from os import remove
-from typing import Optional, Tuple
 
 import RaceRandom as random
 
@@ -16,7 +13,8 @@ from Items import ItemFactory
 from KeyDoorShuffle import build_key_layout, check_bk_special, count_key_drops, expand_key_state, flatten_pair_list, open_a_door, reduce_rules
 from KeyDoorShuffle import find_outside_connection, prize_relevance_sig2, count_free_locations, prize_or_event, reserved_location, blind_boss_unavail
 from KeyDoorShuffle import count_small_key_only_locations, cnt_avail_big_locations
-from KeyDoorShuffle import create_key_counters, create_exhaustive_placement_rules
+from KeyDoorShuffle import create_key_counters, PlacementRule, prize_relevance, find_big_chest_locations
+from Regions import dungeon_events
 from RoomData import DoorKind, PairedDoor
 from Utils import ncr, kth_combination
 
@@ -620,15 +618,7 @@ def log_key_logic(d_name, key_logic):
             if rule.alternate_small_key is not None:
                 for loc in rule.alternate_big_key_loc:
                     logger.debug('---BK Loc %s', loc.name)
-        if key_logic.placement_rules:
-            logger.debug('Placement rules for %s', d_name)
-            for rule in key_logic.placement_rules:
-                logger.debug('*Rule for %s:', rule.door_reference)
-                if rule.bk_conditional_set:
-                    logger.debug('**BK Checks %s', ','.join([x.name for x in rule.bk_conditional_set]))
-                    logger.debug('**BK Blocked (%s) : %s', rule.needed_keys_wo_bk, ','.join([x.name for x in rule.check_locations_wo_bk]))
-                if rule.needed_keys_w_bk:
-                    logger.debug('**BK Available (%s) : %s', rule.needed_keys_w_bk, ','.join([x.name for x in rule.check_locations_w_bk]))
+        log_placement_rules(d_name, key_logic, logger)
         if key_logic.new_logic:
             if key_logic.new_logic.bk_locations:
                 logger.debug(f'BK Locked Locations: {",".join([x.name for x in key_logic.new_logic.bk_locations])}')
@@ -652,28 +642,486 @@ def log_key_logic(d_name, key_logic):
                         logger.debug(f'Regions with {key_value} keys(s): {",".join([x.name for x in regions])}')
 
 
+def log_placement_rules(d_name, key_logic, logger):
+    if key_logic.placement_rules:
+        logger.debug('Placement rules for %s', d_name)
+        for rule in key_logic.placement_rules:
+            logger.debug('*Rule for %s:', rule.door_reference)
+            if rule.bk_conditional_set:
+                logger.debug('**BK Checks %s', ','.join([x.name for x in rule.bk_conditional_set]))
+                logger.debug('**BK Blocked (%s) : %s', rule.needed_keys_wo_bk, ','.join([x.name for x in rule.check_locations_wo_bk]))
+            if rule.needed_keys_w_bk:
+                logger.debug(f'**BK Available ({rule.needed_keys_w_bk}) Relevant? ({rule.bk_relevant}) : {",".join([x.name for x in rule.check_locations_w_bk])}')
+
+
 
 def exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, start_regions, event_starts, custom, world, player):
-
     combinations = ncr(len(key_door_pool), key_doors_needed)
     sample_list = build_sample_list(combinations, 10000)
     itr = 0
-    proposal = kth_combination(sample_list[itr], key_door_pool, key_doors_needed)
-    proposal.extend(custom)
+    contradiction_exists = True
+    proposal = list(custom)  # base case
 
-    key_layout = build_key_layout(builder, start_regions, proposal, event_starts, world, player)
-    key_layout.key_logic.reset()
-    key_layout.key_counters = create_key_counters(key_layout, world, player)
-    for counter in key_layout.key_counters.values():
-        key_layout.all_chest_locations.update(counter.free_locations)
-        key_layout.item_locations.update(counter.free_locations)
-        key_layout.item_locations.update(counter.key_only_locations)
-        key_layout.all_locations.update(key_layout.item_locations)
-        key_layout.all_locations.update(counter.other_locations)
-    create_exhaustive_placement_rules(key_layout, world, player)
-    # if any contradictions, then we need to try again
+    bk_restrictions = None
 
+    while contradiction_exists and itr < len(sample_list):
+        contradiction_exists = False
+        proposal = kth_combination(sample_list[itr], key_door_pool, key_doors_needed)
+        proposal.extend(custom)
+
+        key_layout = build_key_layout(builder, start_regions, proposal, event_starts, world, player)
+        key_layout.key_logic.reset()
+        key_layout.key_counters = create_key_counters(key_layout, world, player)
+        for counter in key_layout.key_counters.values():
+            key_layout.all_chest_locations.update(counter.free_locations)
+            key_layout.item_locations.update(counter.free_locations)
+            key_layout.item_locations.update(counter.key_only_locations)
+            key_layout.all_locations.update(key_layout.item_locations)
+            key_layout.all_locations.update(counter.other_locations)
+        if bk_restrictions is None:
+            bk_restrictions = determine_big_key_logic(key_layout, world, player)
+
+        create_exhaustive_placement_rules(key_layout, bk_restrictions, world, player)
+
+
+        # first we can sanity check the rules to ensure one is not always bad
+        total_available_keys = key_layout.max_chests + key_layout.max_drops
+        for rule in key_layout.key_logic.placement_rules:
+            if rule.bk_conditional_set:
+                if rule.needed_keys_wo_bk > total_available_keys:
+                    contradiction_exists = True
+                    break
+                # Check rule without big key
+                available_keys = min(key_layout.max_chests, sum(1 for loc in rule.check_locations_wo_bk if not loc.forced_item))
+                key_drops = sum(1 for loc in rule.check_locations_wo_bk if loc.forced_item and loc.item.smallkey)
+                if rule.needed_keys_wo_bk > available_keys + key_drops:
+                    bk_restrictions.update(rule.bk_conditional_set)  ## this indicates the big key cannot be in these locations
+            else:
+                if rule.needed_keys_w_bk > total_available_keys:
+                    contradiction_exists = True
+                    break
+                available_keys = min(key_layout.max_chests, sum(1 for loc in rule.check_locations_w_bk if not loc.forced_item))
+                key_drops = sum(1 for loc in rule.check_locations_w_bk if loc.forced_item and loc.item.smallkey)
+                if rule.needed_keys_w_bk > available_keys + key_drops:
+                    contradiction_exists = True
+                    break
+
+        if not contradiction_exists:
+            if not is_key_door_layout_satisfiable(key_layout, bk_restrictions):
+                contradiction_exists = True
+        if not contradiction_exists:
+            log_placement_rules(builder.name, key_layout.key_logic, logging.getLogger(''))
+        itr += 1  # pre for next iteration if any
+
+    # base case is where we find no cases
     return proposal
 
 
+def is_key_door_layout_satisfiable(key_layout, bk_restrictions):
+    # determine locations the big key could be assigned to, or is it already assigned
+    bk_assignment_needed, bk_location = True, None
+    possible_bk_locations = []
+    if key_layout.big_key_special:
+        bk_assignment_needed = False
+    elif any(loc.item and loc.item.name == key_layout.key_logic.bk_name for loc in key_layout.item_locations):
+        bk_assignment_needed = False
+        bk_location = next(loc for loc in key_layout.item_locations if loc.item and loc.item.bigkey)
+    else:
+        candidates = {loc for loc in key_layout.item_locations if not loc.item}
+        possible_bk_locations.extend(candidates.difference(bk_restrictions))
+        if len(possible_bk_locations) == 0:
+            return False
+        # we could try to be more efficient by choosing a smart order here
+        possible_bk_locations.sort(key = lambda loc: loc.name)
 
+    looking_for_satisfaction = True
+    while looking_for_satisfaction:
+        if bk_assignment_needed:
+            bk_location = possible_bk_locations.pop()
+        rules_to_check = [r for r in key_layout.key_logic.placement_rules if not r.bk_conditional_set or bk_location in r.bk_conditional_set]
+        if not rules_to_check:
+            logging.getLogger('').debug(f'Potential solution found: Small Keys: Anywhere.'
+                                        f' Big Key at {bk_location.name if bk_location else "Special"}')
+            return True  # no rules to check, so satisfied
+        satisfying_key_set = find_contradiction_in_rules(rules_to_check, key_layout.max_chests)
+        if satisfying_key_set is None:
+            if not possible_bk_locations:
+                looking_for_satisfaction = False  # no more options - fail this layout
+        else:
+
+            logging.getLogger('').debug(f'Potential solution found: Small Keys: {", ".join([loc.name for loc in satisfying_key_set]) if satisfying_key_set else "Empty Set"}.'
+                                        f' Big Key at {bk_location.name if bk_location else "Special"}')
+            return True  # found a satisfying set
+    return False
+
+
+def find_contradiction_in_rules(rules, num_to_choose):
+    all_locations = set()
+    for r in rules:
+        if r.bk_conditional_set:
+            all_locations.update(r.check_locations_wo_bk)
+        else:
+            all_locations.update(r.check_locations_w_bk)
+    starter_set = {loc for loc in all_locations if (loc.forced_item and loc.forced_item.smallkey)}
+    number_allowed = num_to_choose + len(starter_set)
+    already_assigned =  {loc for loc in all_locations if loc.item}
+    all_locations.difference_update(already_assigned)
+    all_locations = list(all_locations)
+
+    frequency = {loc: 0 for loc in all_locations}
+    for r in rules:
+        check_set = r.check_locations_wo_bk if r.bk_conditional_set else r.check_locations_w_bk
+        for loc in check_set:
+            if loc in frequency:
+                frequency[loc] += 1
+
+    all_locations = sorted(all_locations, key=lambda loc: frequency[loc], reverse=True)
+
+    def can_satisfy(chosen_set, remaining_set):
+        """Check if any extension of mask can satisfy constraints"""
+        if len(chosen_set) > number_allowed:
+            return False
+
+        for r in rules:
+            check_set = r.check_locations_wo_bk if r.bk_conditional_set else r.check_locations_w_bk
+            check_amt = r.needed_keys_wo_bk if r.bk_conditional_set else r.needed_keys_w_bk
+
+            # Already satisfied in this constraint
+            chosen_met = chosen_set.intersection(check_set)
+
+            # Remaining unassigned locations in this constraint
+            remaining_left = remaining_set.intersection(check_set)
+
+            # Can't satisfy this constraint
+            if len(chosen_met) + len(remaining_set) < check_amt:
+                return False
+
+        return True
+
+    def search(var_idx, chosen_set, left_to_choose):
+        if var_idx == len(all_locations):
+            # is everything satisfied?
+            for r in rules:
+                check_set = r.check_locations_wo_bk if r.bk_conditional_set else r.check_locations_w_bk
+                check_amt = r.needed_keys_wo_bk if r.bk_conditional_set else r.needed_keys_w_bk
+                if len(check_set.intersection(chosen_set)) < check_amt:
+                    return None
+            return chosen_set
+
+        # pruning step, check if we can still satisfy all rules
+        remaining_set = set(all_locations[var_idx:])
+        if not can_satisfy(chosen_set, remaining_set):
+            return None
+
+        # Prefer fewer chosen locations
+        result = search(var_idx + 1, chosen_set, left_to_choose)
+        if result is not None:
+            return result
+
+        # Try choosing this location if we have any left
+        if left_to_choose > 0:
+            result = search(var_idx + 1, chosen_set.union({all_locations[var_idx]}), left_to_choose - 1)
+            if result is not None:
+                return result
+
+        # No solution found
+        return None
+
+    return search(0, starter_set, num_to_choose)
+
+
+def create_exhaustive_placement_rules(key_layout, bk_restrictions, world, player):
+    key_logic = key_layout.key_logic
+    max_ctr = find_max_counter(key_layout)
+    for code, key_counter in key_layout.key_counters.items():
+        if skip_key_counter_due_to_prize(key_layout, key_counter):
+            continue  # we have the prize, we are not concerned about this case
+        accessible_loc = set()
+        accessible_loc.update(key_counter.free_locations)
+        accessible_loc.update(key_counter.key_only_locations)
+        blocked_loc = key_layout.item_locations.difference(accessible_loc)
+        valid_rule = True
+        # Only add 1 if there are small key doors that need to be opened
+        has_small_key_doors = any(door in key_layout.flat_prop for door in key_counter.child_doors)
+        min_keys = key_counter.used_keys + (1 if has_small_key_doors else 0)
+        if len(blocked_loc) > 0:
+            rule = PlacementRule()
+            rule.door_reference = code
+            rule.small_key = key_logic.small_key_name
+            if key_counter.big_key_opened or not big_key_progress(key_counter):
+                rule.needed_keys_w_bk = min_keys
+                rule.bk_relevant = key_counter.big_key_opened
+                placement_self_lock_adjustment(rule, max_ctr, blocked_loc, key_counter, world, player)
+                rule.check_locations_w_bk = accessible_loc
+                if key_layout.big_key_special:
+                    rule.special_bk_avail = forced_big_key_avail(key_counter.important_locations) is not None
+                    # check_sm_restriction_needed(key_layout, max_ctr, rule, blocked_loc)
+            else:
+                if big_key_progress(key_counter) and only_sm_doors(key_counter):
+                    create_inclusive_rule(key_layout, max_ctr, code, key_counter, blocked_loc, accessible_loc, min_keys, world, player)
+                conditional_set = blocked_loc.difference(bk_restrictions)
+                if len(conditional_set) == 0:
+                    valid_rule = False  # the big key can't be blocked at this point
+                rule.bk_conditional_set = conditional_set
+                rule.needed_keys_wo_bk = min_keys
+                rule.check_locations_wo_bk = set(filter_big_chest(accessible_loc))
+                rule.prize_relevance = key_layout.prize_relevant if rule_prize_relevant(key_counter) else None
+            if valid_rule:
+                key_logic.placement_rules.append(rule)
+                adjust_locations_rules(key_logic, rule, accessible_loc, key_layout, key_counter, max_ctr)
+    refine_placement_rules(key_layout, max_ctr)
+
+
+def skip_key_counter_due_to_prize(key_layout, key_counter):
+    return key_layout.prize_relevant and key_counter.prize_received and not key_counter.prize_doors_opened
+
+
+def find_counter_hint(opened_doors, bk_hint, key_layout, prize_flag):
+    cid = counter_id(opened_doors, bk_hint, key_layout.flat_prop, key_layout.prize_relevant, prize_flag)
+    if cid in key_layout.key_counters.keys():
+        return key_layout.key_counters[cid]
+    if not bk_hint:
+        cid = counter_id(opened_doors, True, key_layout.flat_prop, key_layout.prize_relevant, prize_flag)
+        if cid in key_layout.key_counters.keys():
+            return key_layout.key_counters[cid]
+    return None
+
+
+def find_max_counter(key_layout):
+    max_counter = find_counter_hint(dict.fromkeys(key_layout.found_doors), False, key_layout, True)
+    if max_counter is None:
+        raise Exception("Max Counter is none - something is amiss")
+    if len(max_counter.child_doors) > 0:
+        max_counter = find_counter_hint(dict.fromkeys(key_layout.found_doors), True, key_layout, True)
+    return max_counter
+
+
+def counter_id(opened_doors, bk_unlocked, flat_proposal, prize_relevant, prize_flag):
+    s_id = '1' if bk_unlocked else '0'
+    for d in flat_proposal:
+        s_id += '1' if d in opened_doors.keys() else '0'
+    if prize_relevant:
+        s_id += '1' if prize_flag else '0'
+    return s_id
+
+
+def big_key_progress(key_counter):
+    return not only_sm_doors(key_counter) or exist_big_chest(key_counter)
+
+def only_sm_doors(key_counter):
+    for door in key_counter.child_doors:
+        if getattr(door, 'bigKey', False):
+            return False
+    return True
+
+def exist_big_chest(key_counter):
+    for loc in getattr(key_counter, 'free_locations', []):
+        if '- Big Chest' in getattr(loc, 'name', ''):
+            return True
+    return False
+
+def placement_self_lock_adjustment(rule, max_ctr, blocked_loc, ctr, world, player):
+    if len(blocked_loc) == 1 and world.accessibility[player] != 'locations':
+        blocked_others = set(getattr(max_ctr, 'other_locations', {})).difference(set(getattr(ctr, 'other_locations', {})))
+        important_found = False
+        for loc in blocked_others:
+            if important_location(loc, world, player):
+                important_found = True
+                break
+        if not important_found:
+            rule.needed_keys_w_bk -= 1
+
+def important_location(loc, world, player):
+    return '- Prize' in loc.name or loc.name in imp_locations_factory(world, player) or (loc.forced_big_key())
+
+imp_locations = None
+
+def imp_locations_factory(world, player):
+    global imp_locations
+    if imp_locations:
+        return imp_locations
+    imp_locations = ['Agahnim 1', 'Agahnim 2', 'Attic Cracked Floor', 'Suspicious Maiden']
+    if world.mode[player] == 'standard':
+        imp_locations.append('Zelda Pickup')
+        imp_locations.append('Zelda Drop Off')
+    return imp_locations
+
+def forced_big_key_avail(locations):
+    for loc in locations:
+        if getattr(loc, 'forced_big_key', lambda: False)():
+            return loc
+    return None
+
+def filter_big_chest(locations):
+    return [x for x in locations if '- Big Chest' not in getattr(x, 'name', '')]
+
+def rule_prize_relevant(key_counter):
+    return not getattr(key_counter, 'prize_doors_opened', False) and not getattr(key_counter, 'prize_received', False)
+
+def create_inclusive_rule(key_layout, max_ctr, code, key_counter, blocked_loc, accessible_loc, min_keys, world, player):
+    key_logic = key_layout.key_logic
+    rule = PlacementRule()
+    rule.door_reference = code
+    rule.small_key = key_logic.small_key_name
+    rule.needed_keys_w_bk = min_keys
+    if key_counter.big_key_opened and rule.needed_keys_w_bk + 1 > len(accessible_loc):
+        key_logic.bk_restricted.update(set(accessible_loc).difference(getattr(max_ctr, 'key_only_locations', {})))
+    else:
+        placement_self_lock_adjustment(rule, max_ctr, blocked_loc, key_counter, world, player)
+        rule.check_locations_w_bk = accessible_loc
+        rule.special_bk_avail = forced_big_key_avail(getattr(key_counter, 'important_locations', [])) is not None
+        key_logic.placement_rules.append(rule)
+        adjust_locations_rules(key_logic, rule, accessible_loc, key_layout, key_counter, max_ctr)
+
+def adjust_locations_rules(key_logic, rule, accessible_loc, key_layout, key_counter, max_ctr):
+    if rule.bk_conditional_set:
+        test_set = (rule.bk_conditional_set - getattr(key_logic, 'bk_locked', set())) - set(getattr(max_ctr, 'key_only_locations', {}))
+        needed = rule.needed_keys_wo_bk if test_set else 0
+    else:
+        test_set = None
+        needed = rule.needed_keys_w_bk
+    if needed > 0:
+        all_accessible = set(accessible_loc)
+        all_accessible.update(getattr(key_counter, 'other_locations', {}))
+        blocked_loc = getattr(key_layout, 'all_locations', set()) - all_accessible
+        for location in blocked_loc:
+            if location not in getattr(key_logic, 'location_rules', {}):
+                loc_rule = LocationRule()
+                key_logic.location_rules[location] = loc_rule
+            else:
+                loc_rule = key_logic.location_rules[location]
+            if test_set:
+                if location not in getattr(key_logic, 'bk_locked', set()):
+                    cond_rule = None
+                    for other in getattr(loc_rule, 'conditional_sets', []):
+                        if getattr(other, 'conditional_set', None) == test_set:
+                            cond_rule = other
+                            break
+                    if not cond_rule:
+                        cond_rule = ConditionalLocationRule(test_set)
+                        loc_rule.conditional_sets.append(cond_rule)
+                    cond_rule.small_key_num = max(needed, getattr(cond_rule, 'small_key_num', 0))
+            else:
+                loc_rule.small_key_num = max(needed, getattr(loc_rule, 'small_key_num', 0))
+
+class LocationRule(object):
+    def __init__(self):
+        self.small_key_num = 0
+        self.conditional_sets = []
+
+class ConditionalLocationRule(object):
+    def __init__(self, conditional_set):
+        self.conditional_set = conditional_set
+        self.small_key_num = 0
+
+def refine_placement_rules(key_layout, max_ctr):
+    key_logic = key_layout.key_logic
+    changed = True
+    while changed:
+        changed = False
+        rules_to_remove = {}
+        for rule in key_logic.placement_rules:
+            if rule.check_locations_w_bk:
+                rule.check_locations_w_bk.difference_update(getattr(key_logic, 'sm_restricted', set()))
+            if rule.bk_conditional_set:
+                rule.bk_conditional_set.difference_update(getattr(key_logic, 'bk_restricted', set()))
+            if rule.check_locations_wo_bk:
+                rule.check_locations_wo_bk.difference_update(getattr(key_logic, 'sm_restricted', set()))
+        for rule_a, rule_b in itertools.combinations([x for x in key_logic.placement_rules if x not in rules_to_remove], 2):
+            if rule_b.bk_conditional_set and rule_a.check_locations_w_bk:
+                temp = rule_a
+                rule_a = rule_b
+                rule_b = temp
+            if rule_a.bk_conditional_set and rule_b.check_locations_w_bk:
+                common_needed = min(rule_a.needed_keys_wo_bk, rule_b.needed_keys_w_bk)
+                common_locs = len(rule_b.check_locations_w_bk & rule_a.check_locations_wo_bk)
+                if (common_needed - common_locs) * 2 > key_layout.max_chests:
+                    key_logic.bk_restricted.update(rule_a.bk_conditional_set)
+                    rules_to_remove[rule_a] = None
+                    changed = True
+                    break
+        equivalent_rules = []
+        for rule in key_logic.placement_rules:
+            for rule2 in key_logic.placement_rules:
+                if rule != rule2 and rule not in rules_to_remove and rule2 not in rules_to_remove:
+                    if rule.check_locations_w_bk and rule2.check_locations_w_bk:
+                        if rule2.check_locations_w_bk == rule.check_locations_w_bk and rule2.needed_keys_w_bk > rule.needed_keys_w_bk:
+                            rules_to_remove[rule] = None
+                        elif rule2.needed_keys_w_bk == rule.needed_keys_w_bk and rule2.check_locations_w_bk < rule.check_locations_w_bk:
+                            rules_to_remove[rule] = None
+                        elif rule2.check_locations_w_bk == rule.check_locations_w_bk and rule2.needed_keys_w_bk == rule.needed_keys_w_bk:
+                            equivalent_rules.append((rule, rule2))
+                    if rule.check_locations_wo_bk and rule2.check_locations_wo_bk and rule.bk_conditional_set == rule2.bk_conditional_set:
+                        if rule2.check_locations_wo_bk == rule.check_locations_wo_bk and rule2.needed_keys_wo_bk > rule.needed_keys_wo_bk:
+                            rules_to_remove[rule] = None
+                        elif rule2.needed_keys_wo_bk == rule.needed_keys_wo_bk and rule2.check_locations_wo_bk < rule.check_locations_wo_bk:
+                            rules_to_remove[rule] = None
+                        elif rule2.check_locations_wo_bk == rule.check_locations_wo_bk and rule2.needed_keys_wo_bk == rule.needed_keys_wo_bk:
+                            equivalent_rules.append((rule, rule2))
+        if len(rules_to_remove) > 0:
+            key_logic.placement_rules = [x for x in key_logic.placement_rules if x not in rules_to_remove]
+            equivalent_rules = [x for x in equivalent_rules if x[0] not in rules_to_remove and x[1] not in rules_to_remove]
+        if len(equivalent_rules) > 0:
+            removed_rules = {}
+            for r1, r2 in equivalent_rules:
+                if r1 in removed_rules.keys():
+                    r1 = removed_rules[r1]
+                if r2 in removed_rules.keys():
+                    r2 = removed_rules[r2]
+                if r1 != r2:
+                    r1.door_reference += ','+r2.door_reference
+                    key_logic.placement_rules.remove(r2)
+                    removed_rules[r2] = r1
+
+
+def determine_big_key_logic(key_layout, world, player):
+    bk_restrictions = set()
+    key_layout.found_doors.clear()
+    flat_proposal = key_layout.flat_prop
+    state = ExplorationState(dungeon=key_layout.sector.name)
+    state.init_zelda_event_doors(key_layout.event_starts, player)
+    if world.doorShuffle[player] == 'vanilla':
+        builder = world.dungeon_layouts[player][key_layout.sector.name]
+        state.key_locations = len(builder.key_door_proposal) - builder.key_drop_cnt
+    else:
+        builder = world.dungeon_layouts[player][key_layout.sector.name]
+        state.key_locations = max(0, builder.total_keys - builder.key_drop_cnt)
+    state.big_key_special = False
+    for region in key_layout.sector.regions:
+        for location in region.locations:
+            if location.forced_big_key():
+                state.big_key_special = True
+    for region in key_layout.start_regions:
+        dungeon_entrance, portal_door = find_outside_connection(region)
+        prize_relevant_flag = prize_relevance(key_layout, dungeon_entrance, world.is_atgt_swapped(player))
+        if prize_relevant_flag:
+            state.append_door_to_list(portal_door, state.prize_doors)
+            state.prize_door_set[portal_door] = dungeon_entrance
+            key_layout.prize_relevant = prize_relevant_flag
+        else:
+            state.visit_region(region, key_checks=True)
+            state.add_all_doors_check_keys(region, flat_proposal, world, player)
+    expand_key_state(state, flat_proposal, world, player)
+    start_state = state.copy()
+
+    # expand the state without opening big key doors
+    while len(state.small_doors) > 0:
+        door = state.small_doors[-1]  # this is because open_a_door removes it from the list
+        open_a_door(door.door, state, flat_proposal, world, player)
+        expand_key_state(state, flat_proposal, world, player)
+
+    # determine which regions & locations are locked by the big key
+    big_chest_allowed_big_key = world.accessibility[player] != 'locations'
+    for region in key_layout.sector.regions:
+        key_layout.all_locations.update(region.locations)
+        free_locations = {l: None for l in region.locations if not important_location(l, world, player)
+                          and not l.forced_item and l.name not in dungeon_events}
+        key_layout.all_chest_locations.update(free_locations)
+        if not state.visited_at_all(region):
+            for loc in region.locations:
+                bk_restrictions.add(loc)
+                if important_location(loc, world, player):
+                    big_chest_allowed_big_key = False
+    if not big_chest_allowed_big_key:
+        bk_restrictions.update(find_big_chest_locations(key_layout.all_chest_locations))
+    return bk_restrictions
