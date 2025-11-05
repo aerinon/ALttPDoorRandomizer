@@ -183,7 +183,7 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
     balance_map = proposal_balance(info)
     possible_builders = [b for b in possible_builders if not balance_map[b].complete()]
     weights = determine_weights(possible_builders, info, world, player)
-    choices = random.choices(possible_builders, weights, k=len(info.sector_pool))
+    choices = random.choices(possible_builders, weights, k=len(info.sector_pool)) if info.sector_pool else []
     for idx, sector in enumerate(info.sector_pool):
         if valid_for_move(sector, choices[idx], info):
             propose_sector(dungeon_map[choices[idx]], sector, info)
@@ -800,15 +800,16 @@ class DoorFlags:
         self.vanilla_traps = world.trap_door_mode[player] == 'vanilla'
         self.stair_loops = world.door_self_loops[player]
         self.decoupled = world.decoupledoors[player]
-        if world.intensity[player] >= 1:
-            self.normal = 'both'
-            self.spiral = True
-        if world.intensity[player] >= 2:
-            self.straight = True
-            self.ladder = True
-            self.edges = 'both'
-        if world.intensity[player] >= 3:
-            self.lobbies = True
+        if world.doorShuffle[player] != 'door_type_only':
+            if world.intensity[player] >= 1:
+                self.normal = 'both'
+                self.spiral = True
+            if world.intensity[player] >= 2:
+                self.straight = True
+                self.ladder = True
+                self.edges = 'both'
+            if world.intensity[player] >= 3:
+                self.lobbies = True
         self.std_flag = world.mode[player] == 'standard'
         self.rupee_bow_flag = world.bow_mode[player].startswith('retro')  # rupee bow
         self.bk_shuffle_flag = (world.bigkeyshuffle[player]  # big key can be anywhere
