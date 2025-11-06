@@ -687,7 +687,7 @@ def exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, sta
         # first we can sanity check the rules to ensure one is not always bad
         total_available_keys = key_layout.max_chests + key_layout.max_drops
         for rule in key_layout.key_logic.placement_rules:
-            if rule.bk_conditional_set:
+            if rule.bk_conditional_set is not None:
                 if rule.needed_keys_wo_bk > total_available_keys:
                     contradiction_exists = True
                     break

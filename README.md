@@ -185,8 +185,9 @@ Determines how small key door logic works.
 * Strict: For those would like to glitch and be protected from yourselves. Small keys door require all small keys to be available to be in logic.
 * Dangerous: Assumes you never use keys out of logic. This is the most dangerous setting and not recommend for use.
 * Static: The entrance randomizer's hand-written key rules, counting chest keys only. Requires vanilla doors and unshuffled key drops and key pots; entrance shuffle is fine.
+* Experimental: New algorithm under development. Not fully tested yet. Intended to be like partial protection but with more advanced logic for multiple paths.
 
-CLI: `--key_logic [partial|strict|dangerous|static]`
+CLI: `--key_logic [partial|strict|dangerous|static|experimental]`
 
 ### Decouple Doors
 
