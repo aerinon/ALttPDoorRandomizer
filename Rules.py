@@ -2433,8 +2433,6 @@ def new_key_logic(key_logic, world, player):
             for region in regions:
                 for ent in region.entrances:
                     add_rule(ent, create_rule_for_key_access(ent, d_logic, logic, player))
-            for location in locations:
-                add_rule(location, create_rule_for_key_access_location(location, d_logic, logic, player))
 
 
         for location in logic.bk_restricted:
@@ -2556,10 +2554,6 @@ def create_key_rule(small_key_name, player, keys):
 
 def create_rule_for_key_access(entrance, key_logic, new_logic, player):
     return lambda state: new_logic.can_reach(entrance, state, key_logic, player)
-
-
-def create_rule_for_key_access_location(location, key_logic, new_logic, player):
-    return lambda state: new_logic.can_reach_location(location, state, key_logic, player)
 
 
 def create_key_rule_allow_small(small_key_name, player, keys, location):

@@ -184,8 +184,9 @@ Determines how small key door logic works.
 * Partial Protection: Assumes you always have full inventory and worse case usage. This should account for dark room and bunny revival glitches.
 * Strict: For those would like to glitch and be protected from yourselves. Small keys door require all small keys to be available to be in logic.
 * Dangerous: Assumes you never use keys out of logic. This is the most dangerous setting and not recommend for use.
+* Experimental: New algorithm under development. Not fully tested yet. Intended to be like partial protection but with more advanced logic for multiple paths.
 
-CLI: `--key_logic [partial|strict|dangerous]`
+CLI: `--key_logic [partial|strict|dangerous|experimental]`
 
 ### Decouple Doors
 

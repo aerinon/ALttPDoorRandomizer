@@ -180,6 +180,9 @@ def fill_restrictive(world, base_state, locations, itempool, key_pool=None, sing
 
 def verify_spot_to_fill(location, item_to_place, max_exp_state, single_player_placement, perform_access_check,
                         key_pool, world):
+    if world.key_logic_algorithm[item_to_place.player] == 'experimental':
+        return verify_spot_to_fill_v2(location, item_to_place, max_exp_state, single_player_placement,
+                                      perform_access_check, key_pool, world)
     if item_to_place.smallkey or item_to_place.bigkey:  # a better test to see if a key can go there
         if not valid_dungeon_placement(item_to_place, location, world):  # short circuit state copy
             return None
@@ -206,6 +209,16 @@ def verify_spot_to_fill(location, item_to_place, max_exp_state, single_player_pl
         if item_to_place.smallkey:
             key_pool.append(item_to_place)
     return verified_location
+
+
+def verify_spot_to_fill_v2(location, item_to_place, max_exp_state, single_player_placement, perform_access_check,
+                        key_pool, world):
+    if not single_player_placement or location.player == item_to_place.player:
+        if location.can_fill(max_exp_state, item_to_place, perform_access_check):
+            if valid_key_placement(item_to_place, location, key_pool, max_exp_state, world):
+                if item_to_place.crystal or valid_dungeon_placement(item_to_place, location, world):
+                    return location
+    return None
 
 
 def valid_key_placement(item, location, key_pool, collection_state, world):

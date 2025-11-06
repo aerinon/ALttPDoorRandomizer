@@ -25,6 +25,10 @@ class NewKeyLogic(object):
         self.sphere_map = {}
         self.door_minimums = []
 
+        self.blind_boss_restriction = False
+        self.attic_required = False
+        self.maiden_required = False
+
         # Calculated or cached data
         self.relevant_regions = []
         self.relevant_locations = []
@@ -93,14 +97,6 @@ class NewKeyLogic(object):
         # and it must not be a locked door or they must have at least one key to waste
         # this may not be sufficient consider vanilla GT
         return entrance.connected_region in reachable_regions and (entrance.name not in self.door_minimums or cache_key[0] > 0)
-
-    def can_reach_location(self, location, state, dungeon_logic, player):
-        cache_key, small_locations, big_location = self.build_cache_key(state, dungeon_logic, player)
-        # given the key, have we calculated this already?
-        if cache_key not in self.can_reach_cache:
-            self.calculate_reachability(cache_key, small_locations, big_location)
-        reachable_regions, reachable_locations = self.can_reach_cache[cache_key]
-        return location in reachable_locations
 
     # notes, smalls_in_hand can include some of the small_locations, small_locations may have been checked already - this affects cache_key
     # perhaps we should always start at the root sphere, skipping ahead can be problematic if you have enough keys, but not the big key to reach those later spheres
@@ -183,8 +179,26 @@ class NewKeyLogic(object):
             reachable_regions.intersection_update(sphere.regions)
             reachable_locations.intersection_update(sphere.locations)
 
+        self.restrict_blind(reachable_regions, reachable_locations)
+
         # cache the result
         self.can_reach_cache[cache_key] = (reachable_regions, reachable_locations)
+
+
+    def restrict_blind(self, reachable_regions, reachable_locations):
+        if self.blind_boss_restriction:
+            # remove regions and locations that require attic or maiden if not met
+            restricted_locations = [loc for loc in reachable_locations if loc.name in ["Thieves' Town - Boss", "Thieves' Town - Prize"]]
+            if restricted_locations:
+                attic_missing, maiden_missing = False, False
+                if self.attic_required:
+                    attic_missing = not any(r.name == "Thieves Attic Window" for r in reachable_regions)
+                if self.maiden_required:
+                    maiden_missing = not any(r.name == "Thieves Blind's Cell Interior" for r in reachable_regions)
+                if attic_missing or maiden_missing:
+                    for loc in restricted_locations:
+                        if loc in reachable_locations:
+                            reachable_locations.remove(loc)
 
     # analyze crystal switch bypasses
     def detect_crystal_switch_bypass(self, key_layout, world, player):
@@ -559,6 +573,15 @@ def determine_small_key_logic_exhaustive(key_layout, world, player):
     new_logic.relevant_regions = list(complete_region_set)
     new_logic.relevant_locations = list(complete_location_set)
     new_logic.door_minimums = [d for d in new_logic.door_minimums if all(d != self_locking.name for self_locking in self_locking_doors)]
+
+    if key_layout.sector.name == "Thieves Town":
+        blind_boss = world.get_dungeon("Thieves Town", player).boss.name == 'Blind'
+        if blind_boss:
+            new_logic.blind_boss_restriction = True
+            if "Thieves Attic Window" in key_layout.sector.region_set():
+                new_logic.attic_required = True
+            if "Thieves Blind's Cell Interior" in key_layout.sector.region_set():
+                new_logic.maiden_required = True
 
 
 def detect_self_locks(sphere, parent_sphere, key_layout):
