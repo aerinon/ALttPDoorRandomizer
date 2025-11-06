@@ -23,6 +23,8 @@ class CustomSettings(object):
 
     def load_yaml(self, file):
         self.file_source = load_yaml(file)
+        if not self.file_source:
+            raise Exception(f'File path not valid: {file}')
         head, filename = os.path.split(file)
         self.relative_dir = head
         if 'version' in self.file_source and self.file_source['version'].startswith('2'):
