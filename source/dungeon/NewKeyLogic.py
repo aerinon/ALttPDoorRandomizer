@@ -524,21 +524,22 @@ def determine_small_key_logic_exhaustive(key_layout, world, player):
                 self_locking_doors.update(detect_self_locks(sphere, parent_sphere, key_layout))
 
             # bk_restricted zones, obviously only important if both big and small keys aren't shuffled
-            possible_key_locs = set(sphere.locations)
-            potential_doors = 0
-            for door_pair in key_layout.proposal:
-                if isinstance(door_pair, tuple):
-                    if (door_pair[0] in key_counter.child_doors or door_pair[1] in key_counter.child_doors
-                            or door_pair[0] in key_counter.open_doors or door_pair[1] in key_counter.open_doors):
+            if not key_counter.big_key_opened:
+                possible_key_locs = set(sphere.locations)
+                potential_doors = 0
+                for door_pair in key_layout.proposal:
+                    if isinstance(door_pair, tuple):
+                        if (door_pair[0] in key_counter.child_doors or door_pair[1] in key_counter.child_doors
+                                or door_pair[0] in key_counter.open_doors or door_pair[1] in key_counter.open_doors):
+                            potential_doors += 1
+                    elif door_pair in key_counter.child_doors or door_pair in key_counter.open_doors:
                         potential_doors += 1
-                elif door_pair in key_counter.child_doors or door_pair in key_counter.open_doors:
-                    potential_doors += 1
-            extras = calc_extras(potential_doors, key_layout.key_logic.dungeon, world, player)
-            key_locs_sans_bk = possible_key_locs.difference(new_logic.bk_locations)
-            big_chests_in_range = len(possible_key_locs.intersection(new_logic.bk_locations)) > 0
-            big_doors_accessible = any(d for d in key_counter.open_doors if d.bigKey or d.name in special_big_key_doors)
-            if not big_doors_accessible and len(key_locs_sans_bk) + big_chests_in_range <= potential_doors + extras:
-                new_logic.bk_restricted.update(sphere.locations)
+                extras = calc_extras(potential_doors, key_layout.key_logic.dungeon, world, player)
+                key_locs_sans_bk = possible_key_locs.difference(new_logic.bk_locations)
+                big_chests_in_range = len(possible_key_locs.intersection(new_logic.bk_locations))
+                big_doors_accessible = any(d for d in key_counter.child_doors if d.bigKey or d.name in special_big_key_doors)
+                if not big_doors_accessible and len(key_locs_sans_bk) + big_chests_in_range <= potential_doors + extras:
+                    new_logic.bk_restricted.update(sphere.locations)
 
         skip = False
         if parent_sphere:

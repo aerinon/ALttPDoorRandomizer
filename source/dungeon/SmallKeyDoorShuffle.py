@@ -656,65 +656,77 @@ def log_placement_rules(d_name, key_logic, logger):
 
 
 def exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, start_regions, event_starts, custom, world, player):
-    combinations = ncr(len(key_door_pool), key_doors_needed)
-    sample_list = build_sample_list(combinations, 10000)
-    itr = 0
-    contradiction_exists = True
-    proposal = list(custom)  # base case
+    while key_doors_needed >= 0:
+        combinations = ncr(len(key_door_pool), key_doors_needed)
+        sample_list = build_sample_list(combinations, 10000)
+        itr = 0
+        contradiction_exists = True
+        proposal = list(custom)  # base case
 
-    bk_restrictions = None
+        bk_restrictions = None
 
-    while contradiction_exists and itr < len(sample_list):
-        contradiction_exists = False
-        proposal = kth_combination(sample_list[itr], key_door_pool, key_doors_needed)
-        proposal.extend(custom)
+        while contradiction_exists and itr < len(sample_list):
+            contradiction_exists = False
+            proposal = kth_combination(sample_list[itr], key_door_pool, key_doors_needed)
+            proposal.extend(custom)
 
-        key_layout = build_key_layout(builder, start_regions, proposal, event_starts, world, player)
-        key_layout.key_logic.reset()
-        key_layout.key_counters = create_key_counters(key_layout, world, player)
-        for counter in key_layout.key_counters.values():
-            key_layout.all_chest_locations.update(counter.free_locations)
-            key_layout.item_locations.update(counter.free_locations)
-            key_layout.item_locations.update(counter.key_only_locations)
-            key_layout.all_locations.update(key_layout.item_locations)
-            key_layout.all_locations.update(counter.other_locations)
-        if bk_restrictions is None:
-            bk_restrictions = determine_big_key_logic(key_layout, world, player)
+            key_layout = _key_layout_setup(builder, event_starts, player, proposal, start_regions, world)
+            if bk_restrictions is None:
+                bk_restrictions = determine_big_key_logic(key_layout, world, player)
+            proposed_bk_restrictions = bk_restrictions.copy()
 
-        create_exhaustive_placement_rules(key_layout, bk_restrictions, world, player)
+            create_exhaustive_placement_rules(key_layout, proposed_bk_restrictions, world, player)
 
+            contradiction_exists = _sanity_check_placement_rules(key_layout, proposed_bk_restrictions)
 
-        # first we can sanity check the rules to ensure one is not always bad
-        total_available_keys = key_layout.max_chests + key_layout.max_drops
-        for rule in key_layout.key_logic.placement_rules:
-            if rule.bk_conditional_set is not None:
-                if rule.needed_keys_wo_bk > total_available_keys:
+            if not contradiction_exists:
+                if not is_key_door_layout_satisfiable(key_layout, proposed_bk_restrictions):
                     contradiction_exists = True
-                    break
-                # Check rule without big key
-                available_keys = min(key_layout.max_chests, sum(1 for loc in rule.check_locations_wo_bk if not loc.forced_item))
-                key_drops = sum(1 for loc in rule.check_locations_wo_bk if loc.forced_item and loc.item.smallkey)
-                if rule.needed_keys_wo_bk > available_keys + key_drops:
-                    bk_restrictions.update(rule.bk_conditional_set)  ## this indicates the big key cannot be in these locations
-            else:
-                if rule.needed_keys_w_bk > total_available_keys:
-                    contradiction_exists = True
-                    break
-                available_keys = min(key_layout.max_chests, sum(1 for loc in rule.check_locations_w_bk if not loc.forced_item))
-                key_drops = sum(1 for loc in rule.check_locations_w_bk if loc.forced_item and loc.item.smallkey)
-                if rule.needed_keys_w_bk > available_keys + key_drops:
-                    contradiction_exists = True
-                    break
+            if not contradiction_exists:
+                log_placement_rules(builder.name, key_layout.key_logic, logging.getLogger(''))
+            itr += 1  # pre for next iteration if any
 
-        if not contradiction_exists:
-            if not is_key_door_layout_satisfiable(key_layout, bk_restrictions):
-                contradiction_exists = True
-        if not contradiction_exists:
-            log_placement_rules(builder.name, key_layout.key_logic, logging.getLogger(''))
-        itr += 1  # pre for next iteration if any
+        if not contradiction_exists and itr < len(sample_list):
+            # found a good proposal
+            return proposal
+        key_doors_needed -= 1  # lower the key door count and try agin
+    raise Exception(f'No valid key door layout found for {builder.name} with {key_doors_needed} key doors')
 
-    # base case is where we find no cases
-    return proposal
+
+
+def _key_layout_setup(builder, event_starts, player, proposal, start_regions, world):
+    key_layout = build_key_layout(builder, start_regions, proposal, event_starts, world, player)
+    key_layout.key_logic.reset()
+    key_layout.key_counters = create_key_counters(key_layout, world, player)
+    for counter in key_layout.key_counters.values():
+        key_layout.all_chest_locations.update(counter.free_locations)
+        key_layout.item_locations.update(counter.free_locations)
+        key_layout.item_locations.update(counter.key_only_locations)
+        key_layout.all_locations.update(key_layout.item_locations)
+        key_layout.all_locations.update(counter.other_locations)
+    return key_layout
+
+
+def _sanity_check_placement_rules(key_layout, proposed_bk_restrictions):
+    # first we can sanity check the rules to ensure one is not always bad
+    total_available_keys = key_layout.max_chests + key_layout.max_drops
+    for rule in key_layout.key_logic.placement_rules:
+        if rule.bk_conditional_set is not None:
+            if rule.needed_keys_wo_bk > total_available_keys:
+                return True
+            # Check rule without big key
+            available_keys = min(key_layout.max_chests, sum(1 for loc in rule.check_locations_wo_bk if not loc.forced_item))
+            key_drops = sum(1 for loc in rule.check_locations_wo_bk if loc.forced_item and loc.item.smallkey)
+            if rule.needed_keys_wo_bk > available_keys + key_drops:
+                proposed_bk_restrictions.update(rule.bk_conditional_set)  ## this indicates the big key cannot be in these locations
+        else:
+            if rule.needed_keys_w_bk > total_available_keys:
+                return True
+            available_keys = min(key_layout.max_chests, sum(1 for loc in rule.check_locations_w_bk if not loc.forced_item))
+            key_drops = sum(1 for loc in rule.check_locations_w_bk if loc.forced_item and loc.item.smallkey)
+            if rule.needed_keys_w_bk > available_keys + key_drops:
+                return True
+    return False
 
 
 def is_key_door_layout_satisfiable(key_layout, bk_restrictions):
@@ -743,7 +755,7 @@ def is_key_door_layout_satisfiable(key_layout, bk_restrictions):
             logging.getLogger('').debug(f'Potential solution found: Small Keys: Anywhere.'
                                         f' Big Key at {bk_location.name if bk_location else "Special"}')
             return True  # no rules to check, so satisfied
-        satisfying_key_set = find_contradiction_in_rules(rules_to_check, key_layout.max_chests)
+        satisfying_key_set = find_contradiction_in_rules(rules_to_check, key_layout.max_chests, bk_location)
         if satisfying_key_set is None:
             if not possible_bk_locations:
                 looking_for_satisfaction = False  # no more options - fail this layout
@@ -755,13 +767,17 @@ def is_key_door_layout_satisfiable(key_layout, bk_restrictions):
     return False
 
 
-def find_contradiction_in_rules(rules, num_to_choose):
+def find_contradiction_in_rules(rules, num_to_choose, bk_location):
     all_locations = set()
     for r in rules:
         if r.bk_conditional_set:
             all_locations.update(r.check_locations_wo_bk)
         else:
             all_locations.update(r.check_locations_w_bk)
+
+    if bk_location:
+        all_locations.discard(bk_location)
+
     starter_set = {loc for loc in all_locations if (loc.forced_item and loc.forced_item.smallkey)}
     number_allowed = num_to_choose + len(starter_set)
     already_assigned =  {loc for loc in all_locations if loc.item}
@@ -869,7 +885,7 @@ def create_exhaustive_placement_rules(key_layout, bk_restrictions, world, player
             if valid_rule:
                 key_logic.placement_rules.append(rule)
                 adjust_locations_rules(key_logic, rule, accessible_loc, key_layout, key_counter, max_ctr)
-    refine_placement_rules(key_layout, max_ctr)
+    refine_placement_rules(key_layout, bk_restrictions)
 
 
 def skip_key_counter_due_to_prize(key_layout, key_counter):
@@ -1014,7 +1030,7 @@ class ConditionalLocationRule(object):
         self.conditional_set = conditional_set
         self.small_key_num = 0
 
-def refine_placement_rules(key_layout, max_ctr):
+def refine_placement_rules(key_layout, bk_restrictions):
     key_logic = key_layout.key_logic
     changed = True
     while changed:
@@ -1036,7 +1052,7 @@ def refine_placement_rules(key_layout, max_ctr):
                 common_needed = min(rule_a.needed_keys_wo_bk, rule_b.needed_keys_w_bk)
                 common_locs = len(rule_b.check_locations_w_bk & rule_a.check_locations_wo_bk)
                 if (common_needed - common_locs) * 2 > key_layout.max_chests:
-                    key_logic.bk_restricted.update(rule_a.bk_conditional_set)
+                    bk_restrictions.update(rule_a.bk_conditional_set)
                     rules_to_remove[rule_a] = None
                     changed = True
                     break
