@@ -305,13 +305,15 @@ def recovery_placement(item_to_place, locations, world, state, base_state, itemp
                        key_pool=None, single_player_placement=False):
     logging.getLogger('').debug(f'Could not place {item_to_place} attempting recovery')
     if world.algorithm in ['balanced', 'equitable']:
-        return last_ditch_placement(item_to_place, locations, world, state, base_state, itempool, key_pool,
+        new_spot, swap_spot = last_ditch_placement(item_to_place, locations, world, state, base_state, itempool, key_pool,
                                     single_player_placement)
+        return new_spot
     elif world.algorithm == 'vanilla_fill':
         if item_to_place.type == 'Crystal':
             possible_swaps = [x for x in state.locations_checked if x.item.type == 'Crystal']
-            return try_possible_swaps(possible_swaps, item_to_place, locations, world, base_state, itempool,
+            new_spot, swap_spot = try_possible_swaps(possible_swaps, item_to_place, locations, world, base_state, itempool,
                                       key_pool, single_player_placement)
+            return new_spot
         else:
             i, config = 0, world.item_pool_config
             tried = set(attempted)
@@ -341,8 +343,16 @@ def recovery_placement(item_to_place, locations, world, state, base_state, itemp
                 if spot_to_fill:
                     return spot_to_fill
             return None
+    elif world.algorithm == 'dungeon_only':
+        dungeon_only_locations = [l for l in locations if l.parent_region.dungeon]
+        new_spot, swap_spot = last_ditch_placement(item_to_place, dungeon_only_locations, world, state, base_state, itempool,
+                                    key_pool, single_player_placement)
+        if new_spot:
+            locations.remove(swap_spot)
+            locations.append(new_spot)
+        return new_spot
     # explicitly fail these cases
-    elif world.algorithm in ['dungeon_only', 'major_only', 'district']:
+    elif world.algorithm in ['major_only', 'district']:
         raise FillError(f'Rare placement for {world.algorithm} detected. {item_to_place} unable to be placed.'
                         f' Try a different seed')
     # I don't think any algorithm uses fallback placement anymore, vanilla is special. Others simply fail.
@@ -396,12 +406,12 @@ def try_possible_swaps(swap_locations, item_to_place, locations, world, base_sta
                 swap_spot.event = True
                 locations.remove(swap_spot)
                 locations.append(new_spot)
-                return new_spot
+                return new_spot, swap_spot
             else:
                 new_spot.item = restore_item
         else:
             location.item = old_item
-    return None
+    return None, None
 
 
 def find_spot_for_item(item_to_place, locations, world, base_state, pool,

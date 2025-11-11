@@ -75,6 +75,12 @@
         "padx": [20,0]
       }
     },
+    "smaller_dungeon_gen": {
+      "type": "checkbox",
+      "config": {
+        "padx": [20,0]
+      }
+    },
     "decoupledoors": {
       "type": "checkbox",
       "config": {

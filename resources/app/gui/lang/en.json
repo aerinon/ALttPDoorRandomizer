@@ -78,6 +78,8 @@
     "randomizer.dungeon.dungeonintensity.3": "3: Dungeon Lobbies",
     "randomizer.dungeon.dungeonintensity.random": "Random",
 
+    "randomizer.dungeon.smaller_dungeon_gen": "Smaller Dungeon Generation",
+
     "randomizer.dungeon.door_type_mode": "Door Types to Shuffle",
     "randomizer.dungeon.door_type_mode.original": "Small Key Doors, Bomb Doors, Dash Doors",
     "randomizer.dungeon.door_type_mode.big": "Adds Big Key Doors",
