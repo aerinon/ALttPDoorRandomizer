@@ -686,7 +686,7 @@ def exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, sta
                 log_placement_rules(builder.name, key_layout.key_logic, logging.getLogger(''))
             itr += 1  # pre for next iteration if any
 
-        if not contradiction_exists and itr < len(sample_list):
+        if not contradiction_exists:
             # found a good proposal
             return proposal
         key_doors_needed -= 1  # lower the key door count and try agin

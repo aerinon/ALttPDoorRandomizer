@@ -121,6 +121,7 @@ def roll_settings(weights):
     ret.door_type_mode = get_choice('door_type_mode')
     ret.trap_door_mode = get_choice('trap_door_mode')
     ret.key_logic_algorithm = get_choice('key_logic_algorithm')
+    ret.smaller_dungeon_gen = get_choice_bool('smaller_dungeon_gen')
     ret.decoupledoors = get_choice_bool('decoupledoors')
     ret.door_self_loops = get_choice_bool('door_self_loops')
     ret.experimental = get_choice_bool('experimental')
