@@ -9,6 +9,31 @@ It is based on the Entrance Randomizer ([KevinCathcart's Project](https://github
 
 - **Dungeon Door Shuffle**: Multiple algorithms and modes for shuffling dungeon doors, including cross-dungeon and partitioned shuffles.
 - **Key Logic Algorithms**: Advanced logic for small key placement and usage, with several protection and strictness levels.
+---
+
+## Key Logic Algorithm Summary
+
+There are four main algorithms for key logic in this randomizer. Each has different safety and gameplay properties:
+
+**Dangerous:**  
+Simulates all possible ways a player could use keys in a dungeon, testing every scenario. Most realistic, but does not account for minor glitches and can create unwinnable situations in multiplayer. Not minor glitch safe.
+
+**Partial:**  
+Uses a set of rules to decide key placement. Safe even if most minor glitches are used, since these are treated as having a full inventory. Balances safety and flexibility. Minor glitch safe.
+
+**Strict:**  
+Assumes every key door requires all small keys to open. Safest and simplest; always safe even with minor glitches, but least dynamic. No progress can be made until all keys are collected. Minor glitch safe.
+
+**Experimental:**  
+A work-in-progress hybrid that combines strict and partial logic. Acts like strict in dungeons with many key doors to avoid performance issues, but uses more advanced logic in smaller dungeons. Designed for future extensibility and optimization.
+
+**Note:**  
+No algorithm is safe from Hybrid Major Glitches (HMG), where players use keys from one dungeon in another to break intended logic.
+
+For technical details and code paths, see:
+- [Key Logic Architecture Deep Dive](topics/key_logic_architecture_deep_dive.md)
+- [Key Logic Edge Cases Deep Dive](topics/key_logic_edge_cases_deep_dive.md)
+- [Door and Dungeon Shuffling Deep Dive](topics/door_and_dungeon_shuffling_deep_dive.md)
 - **Trap Door and Door Type Shuffling**: Options for shuffling or removing trap doors and randomizing door types.
 - **Pottery and Enemy Drop Expansion**: Adds pots and enemy drops as item locations, with dynamic and legacy modes.
 - **Item Pool Expansions**: New items (Bombbag, Pseudo Boots, Mirror Scroll, etc.), shopsanity, and custom item pools.

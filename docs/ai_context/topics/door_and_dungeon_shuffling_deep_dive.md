@@ -1,5 +1,15 @@
 # Door and Dungeon Shuffling - Deep Dive
 
+---
+
+## Glitch Safety and Real-World Implications
+
+- **Partial and Strict algorithms are minor glitch safe**: Partial treats most minor glitches as equivalent to having a full inventory, and strict always requires all keys, so neither can be broken by minor glitches.
+- **Dangerous algorithm is NOT minor glitch safe**: It does not account for minor glitches, so players can use glitches to spend keys out of order and break logic. It also has a known multiplayer bug that can create unwinnable seeds.
+- **No algorithm is safe from Hybrid Major Glitches (HMG)**: In HMG, players can use keys from one dungeon in another, breaking all intended logic.
+- **Practical guidance**: Use partial or strict for safety and competitive play. Dangerous is only for advanced analysis and is discouraged for most use cases. Experimental is under development and adapts logic based on dungeon complexity.
+
+See the summary in [topics.md](topics.md#key-logic-algorithm-summary) for a plain-language overview.
 This document provides an algorithmic deep-dive into the door and dungeon shuffling systems of the dungeon randomizer, covering sphere construction, self-locking logic, placement rule contradictions, and the sophisticated algorithms used for door placement and dungeon layout generation.
 
 ## Core Components
