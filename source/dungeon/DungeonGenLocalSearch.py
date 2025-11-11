@@ -9,7 +9,7 @@ from BaseClasses import Direction, CrystalBarrier, DoorType, Door, Hook, Entranc
 from Regions import create_dungeon_region
 from Utils import clear_file
 from source.dungeon.DungeonGenerationCommon import DungeonBuilder, GenerationException, define_sector_features, dungeon_portals
-from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector, assign_sector_helper, hanger_from_door, hook_from_door
+from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector, assign_sector_helper, hanger_from_door, hook_from_door, sum_polarity
 from source.dungeon.DungeonGenSectorDesc import create_sector_descriptors
 from source.dungeon.DungeonGenTransitivity import do_transitivity_check as do_transitivity_check_new
 
@@ -65,6 +65,7 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
         throne_room.outstanding_doors.remove(world.get_door('Hyrule Castle Throne Room N', player))
 
     define_sector_features(sector_pool)
+    cut_empty_sectors(sector_pool, world, player)
     create_sector_descriptors(sector_pool + portal_pool, world, player)
 
     dungeon_map = {}
@@ -214,6 +215,52 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
         for sector in sector_list:
             assign_sector_helper(sector, dungeon_map[d_name])
     return dungeon_map
+
+
+# ------------------------------ #
+#     Sector Cutting Utility
+# ------------------------------ #
+def is_sector_cuttable(sector):
+    return (
+        all(len(r.locations) == 0 for r in sector.regions)
+        and not sector.portals
+        # trying to eliminate more sectors
+        # and not sector.c_switch
+        # and not sector.blue_barrier
+        # and not sector.orange_barrier
+        and 'Boss' not in sector.item_logic
+    )
+
+ #--- Smaller Dungeon Gen: Remove neutral, empty sectors before descriptor creation ---#
+def cut_empty_sectors(sector_pool, world, player):
+    if world.smaller_dungeon_gen[player]:
+        cuttable_sectors = [s for s in sector_pool if is_sector_cuttable(s)]
+        removed_sectors = {s for s in cuttable_sectors if s.polarity().is_neutral()}
+        cuttable_sectors[:] = [s for s in cuttable_sectors if s not in removed_sectors]
+        cuttable_sectors.sort(key=lambda s: s.sector_key())  # sort for consistency in shuffle
+        random.shuffle(cuttable_sectors) # randomize order to find different combinations based on seed
+        while True:
+            # Only consider sectors not already removed
+            candidates = [s for s in cuttable_sectors if s not in removed_sectors]
+            if not candidates:
+                break
+            # Try all combinations, smallest first, to find a neutral polarity set
+            found = False
+            for r in range(2, len(candidates) + 1):
+                for combo in itertools.combinations(candidates, r):
+                    pol = sum_polarity(combo)
+                    if pol.is_neutral():
+                        for s in combo:
+                            removed_sectors.add(s)
+                        found = True
+                        break
+                if found:
+                    break
+            if not found:
+                break
+        # Remove found sectors from sector_pool
+        for s in removed_sectors:
+            sector_pool.remove(s)
 
 
 def do_custom_sectors(dungeon_map, info, world, player):

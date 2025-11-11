@@ -109,6 +109,7 @@ SETTINGSTOPROCESS = {
       "dungeonintensity": "intensity",
       "door_type_mode": "door_type_mode",
       "trap_door_mode": "trap_door_mode",
+      "smaller_dungeon_gen": "smaller_dungeon_gen",
       "decoupledoors": "decoupledoors",
       "door_self_loops": "door_self_loops",
       "experimental": "experimental",

@@ -153,6 +153,7 @@ class World(object):
 
             set_player_attr('dungeon_shuffle_algorithm', 'classic')
             set_player_attr('dungeon_bias', 'Hyrule Castle')
+            set_player_attr('smaller_dungeon_gen', False)
             set_player_attr('decoupledoors', False)
             set_player_attr('door_self_loops', False)
             set_player_attr('door_type_mode', 'original')

@@ -41,6 +41,18 @@ def define_sector_features(sectors):
                 sector.item_logic.add('Bow')
             if region.name in ['Swamp Lobby', 'Swamp Entrance']:
                 sector.item_logic.add('Open Floodgate')
+            # these are not exhaustive right now, just ones that matter for sector pruning
+            if region.name in ['TR Final Abyss Ledge', 'TR Dark Ride Ledges', 'TR Hub', 'TR Torches',
+                               'Mire Dark Shooters', 'TR Main Lobby']:
+                sector.item_logic.add('Somaria')
+            if region.name in ['Ice Hookshot Balcony', 'Mire Lobby']:
+                sector.item_logic.add('Hookshot')
+            if region.name in ['Skull Torch Room']:
+                sector.item_logic.add('Fire Rod')
+            if region.name in ['Sewers Water', 'Sewers Rope Room']:
+                sector.item_logic.add('Lamp')
+            if region.name in ['GT Lanmolas 2']:
+                sector.item_logic.add('Boss')
         for door in sector.outstanding_doors:
             if door.portalAble:
                 if len(sector.outstanding_doors) == 1 and not is_boss_trap(door):

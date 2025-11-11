@@ -251,6 +251,7 @@
       "3:       And shuffles dungeon lobbies",
       "random:  Picks one of those at random"
     ],
+    "smaller_dungeon_gen" : [ "Enable smaller dungeon generation to reduce door density. (default: %(default)s)" ],
     "door_type_mode" : [
       "Door Types to Shuffle (default: %(default)s)",
       "original: Shuffles key doors, bombable, and dashable doors",
