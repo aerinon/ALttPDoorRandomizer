@@ -228,6 +228,7 @@ def is_sector_cuttable(sector):
         # and not sector.c_switch
         # and not sector.blue_barrier
         # and not sector.orange_barrier
+        # and not sector.item_logic
         and 'Boss' not in sector.item_logic
     )
 

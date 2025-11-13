@@ -446,6 +446,11 @@ def determine_big_key_logic(key_layout, world, player):
                 key_layout.key_logic.new_logic.bk_locations.add(loc)
                 if important_location(loc, world, player):
                     big_chest_allowed_big_key = False
+
+    if world.accessibility[player] != 'none':
+        bk_restricted_set = key_layout.key_logic.new_logic.bk_locations.union(find_big_chest_locations(key_layout.all_chest_locations))
+        if len(bk_restricted_set) > 1:
+            big_chest_allowed_big_key = False
     if not big_chest_allowed_big_key:
         key_layout.key_logic.new_logic.bk_locations.update(find_big_chest_locations(key_layout.all_chest_locations))
     return start_state
