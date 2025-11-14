@@ -1,4 +1,5 @@
 import os
+import sys
 import csv
 import collections
 
@@ -51,5 +52,8 @@ def write_to_csv(items_at_locations, csv_file_path):
             writer.writerow(row)
 
 if __name__ == '__main__':
-    items_at_locations = process_directory(os.path.join('..', '..', 'test_games', 'stats'))
-    write_to_csv(items_at_locations, os.path.join('..', '..', 'test_games', 'stats', 'output.csv'))
+    input_dir = sys.argv[1] if len(sys.argv) > 1 else os.path.join('..', '..', 'test_games', 'stats')
+    output_path = os.path.join(input_dir, 'output.csv')
+
+    items_at_locations = process_directory(input_dir)
+    write_to_csv(items_at_locations, output_path)
