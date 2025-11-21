@@ -267,7 +267,7 @@ def find_valid_combination(builder, target, start_regions, world, player, drop_k
         builder.key_doors_num -= key_doors_needed - len(key_door_pool)  # reduce number of key doors
         key_doors_needed = len(key_door_pool)
         logger.info('%s: %s', world.fish.translate("cli", "cli", "lowering.keys.candidates"), builder.name)
-    proposal = None
+    proposal, proposed_bk_restrictions = None, None
     start_regions, event_starts = filter_start_regions(builder, start_regions, world, player)
     # todo: figure out prize lock issues
     if is_key_layout_agnostic(builder, world, player):
@@ -276,10 +276,10 @@ def find_valid_combination(builder, target, start_regions, world, player, drop_k
         proposal = kth_combination(random.randint(0, combinations), key_door_pool, key_doors_needed)
         proposal.extend(custom_key_doors)
     elif world.key_logic_algorithm[player] != 'strict' and key_doors_needed <= 8:
-        proposal = exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, start_regions, event_starts, custom_key_doors, world, player)
+        proposal, proposed_bk_restrictions = exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, start_regions, event_starts, custom_key_doors, world, player)
     else:
         proposal = monte_carlo_algorithm(builder, key_door_pool, key_doors_needed, start_regions, event_starts, custom_key_doors, world, player)
-    key_layout = build_key_layout(builder, start_regions, proposal, event_starts, world, player)
+    key_layout = build_key_layout(builder, start_regions, proposal, event_starts, world, player, proposed_bk_restrictions)
     if player not in world.key_logic.keys():
         world.key_logic[player] = {}
     analyze_dungeon(key_layout, world, player)
@@ -656,12 +656,13 @@ def log_placement_rules(d_name, key_logic, logger):
 
 
 def exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, start_regions, event_starts, custom, world, player):
+    logging.getLogger('').debug(f'Exhaustive: {builder.name}. {key_doors_needed} key doors')
     while key_doors_needed >= 0:
         combinations = ncr(len(key_door_pool), key_doors_needed)
         sample_list = build_sample_list(combinations, 10000)
         itr = 0
         contradiction_exists = True
-        proposal = list(custom)  # base case
+        proposal, proposed_bk_restrictions = list(custom), None  # base case
 
         bk_restrictions = None
 
@@ -688,7 +689,7 @@ def exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, sta
 
         if not contradiction_exists:
             # found a good proposal
-            return proposal
+            return proposal, proposed_bk_restrictions
         key_doors_needed -= 1  # lower the key door count and try agin
     raise Exception(f'No valid key door layout found for {builder.name} with {key_doors_needed} key doors')
 
@@ -761,7 +762,8 @@ def is_key_door_layout_satisfiable(key_layout, bk_restrictions):
                 looking_for_satisfaction = False  # no more options - fail this layout
         else:
 
-            logging.getLogger('').debug(f'Potential solution found: Small Keys: {", ".join([loc.name for loc in satisfying_key_set]) if satisfying_key_set else "Empty Set"}.'
+            logging.getLogger('').debug(f'Potential solution found:'
+                                        f' Small Keys: {", ".join([loc.name for loc in satisfying_key_set]) if satisfying_key_set else "Empty Set"}.'
                                         f' Big Key at {bk_location.name if bk_location else "Special"}')
             return True  # found a satisfying set
     return False
@@ -1118,7 +1120,6 @@ def determine_big_key_logic(key_layout, world, player):
             state.visit_region(region, key_checks=True)
             state.add_all_doors_check_keys(region, flat_proposal, world, player)
     expand_key_state(state, flat_proposal, world, player)
-    start_state = state.copy()
 
     # expand the state without opening big key doors
     while len(state.small_doors) > 0:
@@ -1138,6 +1139,11 @@ def determine_big_key_logic(key_layout, world, player):
                 bk_restrictions.add(loc)
                 if important_location(loc, world, player):
                     big_chest_allowed_big_key = False
+
+    if world.accessibility[player] != 'none':
+        bk_restricted_set = bk_restrictions.union(find_big_chest_locations(key_layout.all_chest_locations))
+        if len(bk_restricted_set) > 1:
+            big_chest_allowed_big_key = False
     if not big_chest_allowed_big_key:
         bk_restrictions.update(find_big_chest_locations(key_layout.all_chest_locations))
     return bk_restrictions
