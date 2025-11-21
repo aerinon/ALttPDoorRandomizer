@@ -124,6 +124,7 @@ class CustomSettings(object):
                 args.standardize_palettes[p] = get_setting(settings['standardize_palettes'],
                                                            args.standardize_palettes[p])
                 args.dungeon_shuffle_algorithm[p] = get_setting(settings['dungeon_shuffle_algorithm'], args.dungeon_shuffle_algorithm[p])
+                args.smaller_dungeon_gen[p] = get_setting(settings['smaller_dungeon_gen'], args.smaller_dungeon_gen[p])
                 args.intensity[p] = get_setting(settings['intensity'], args.intensity[p])
                 args.door_type_mode[p] = get_setting(settings['door_type_mode'], args.door_type_mode[p])
                 args.trap_door_mode[p] = get_setting(settings['trap_door_mode'], args.trap_door_mode[p])
