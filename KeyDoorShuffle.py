@@ -16,6 +16,7 @@ class KeyLayout(object):
         self.start_regions = starts
         self.event_starts = []
         self.proposal = proposal
+        self.proposed_bk_restrictions = None
         self.key_logic = KeyLogic(name)
 
         self.key_counters = None
@@ -232,9 +233,10 @@ class KeyCounter(object):
         return max(self.used_keys + reserve - len(self.key_only_locations), 0)
 
 
-def build_key_layout(builder, start_regions, proposal, event_starts, world, player):
+def build_key_layout(builder, start_regions, proposal, event_starts, world, player, proposed_bk_restrictions=None):
     key_layout = KeyLayout(builder.name, builder.master_sector, start_regions, proposal)
     key_layout.flat_prop = flatten_pair_list(key_layout.proposal)
+    key_layout.proposed_bk_restrictions = proposed_bk_restrictions
     key_layout.max_drops = count_key_drops(key_layout.sector)
     key_layout.max_chests = calc_max_chests(builder, key_layout, world, player)
     key_layout.big_key_special = check_bk_special(key_layout.sector.region_set(), world, player)

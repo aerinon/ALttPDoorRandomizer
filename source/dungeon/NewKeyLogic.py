@@ -16,6 +16,7 @@ class NewKeyLogic(object):
         self.bk_regions = set()
         self.bk_locations = set()
         self.bk_restricted = set()
+        self.bk_doors = set()
 
         self.fast_logic = False
         self.region_key_reqs = {}
@@ -144,12 +145,8 @@ class NewKeyLogic(object):
             # if we can't spend a key, possible to place in a self-locking sphere?
             if placing_dungeon_key and unspent_keys == 0:  # we can't do this twice so only we have exactly zero keys
                 next_unspent_keys = unspent_keys - 1  # we are "spending" a key we don't have here (can't open up more doors with it)
-                valid_spheres = []
+                valid_spheres, non_terminal = [], False
                 for next_sphere in sphere.self_locking_child_spheres:
-                    # Skip if already visited
-                    if (next_sphere, current_big) in visited_spheres:
-                        continue
-
                     # Get the unique self-locking location
                     self_locking_locations = next_sphere.locations.difference(sphere.locations)
                     if len(self_locking_locations) != 1:
@@ -160,11 +157,18 @@ class NewKeyLogic(object):
                     if self_locking_location.item is not None and not self_locking_location.item.smallkey:
                         continue
 
+                    # Valid but not visited, mean this sphere is non-terminal
+                    if (next_sphere, current_big) in visited_spheres:
+                        non_terminal = True
+                        continue
+
                     valid_spheres.append(next_sphere)
                 if valid_spheres:
                     for next_sphere in valid_spheres:
                         visited_spheres.add((next_sphere, current_big))
                         queue.append((next_sphere, next_unspent_keys, current_big, small_locations_left))
+                    continue
+                if non_terminal:
                     continue
 
             # can't advance - terminal
@@ -314,9 +318,11 @@ class NewKeyLogic(object):
                     barrier_set.update(island.blue_barriers)
                     unknown_refs = [r for r in island.unknown_regions if r != region and r not in islands_to_merge]
                     unknown_set.update(unknown_refs)
-                    candidate_islands.remove(island)
+                    if island in candidate_islands:
+                        candidate_islands.remove(island)
                     for r in unknown_refs:
-                        unknown_region_map[r].remove(island)
+                        if island in unknown_region_map[r]:
+                            unknown_region_map[r].remove(island)
                 new_island = BlueIsland(list(region_set), list(barrier_set), list(unknown_set))
                 candidate_islands.append(new_island)
                 for r in region_set:
@@ -446,6 +452,10 @@ def determine_big_key_logic(key_layout, world, player):
                 key_layout.key_logic.new_logic.bk_locations.add(loc)
                 if important_location(loc, world, player):
                     big_chest_allowed_big_key = False
+        for ext in region.exits:
+            if ext.door and ext.door.bigKey:
+                key_layout.key_logic.new_logic.bk_doors.add(ext)
+
 
     if world.accessibility[player] != 'none':
         bk_restricted_set = key_layout.key_logic.new_logic.bk_locations.union(find_big_chest_locations(key_layout.all_chest_locations))
@@ -453,6 +463,9 @@ def determine_big_key_logic(key_layout, world, player):
             big_chest_allowed_big_key = False
     if not big_chest_allowed_big_key:
         key_layout.key_logic.new_logic.bk_locations.update(find_big_chest_locations(key_layout.all_chest_locations))
+
+    if key_layout.proposed_bk_restrictions is not None:
+        key_layout.key_logic.new_logic.bk_restricted.update(key_layout.proposed_bk_restrictions)
     return start_state
 
 
@@ -462,8 +475,7 @@ def determine_small_key_logic_fast(key_layout, start_state, world, player):
 
     # expand the state without opening small key doors
     while len(state.big_doors) > 0:
-        exp_door = state.big_doors.pop()
-        open_a_door(exp_door.door, state, key_layout.flat_prop, world, player)
+        open_a_door(state.big_doors[0].door, state, key_layout.flat_prop, world, player)
         expand_key_state(state, key_layout.flat_prop, world, player)
 
     # determine which regions & locations are locked by small keys

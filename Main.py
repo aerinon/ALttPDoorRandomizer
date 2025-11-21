@@ -172,7 +172,7 @@ def main(args, seed=None, fish=None):
     world.finish_init()
 
     # custom settings - these haven't been promoted to full settings yet
-    in_progress_settings = ['force_enemy', 'free_lamp_cone', 'dungeon_bias']
+    in_progress_settings = ['force_enemy', 'free_lamp_cone', 'dungeon_bias', 'smaller_dungeon_gen']
     for player in range(1, world.players + 1):
         for setting in in_progress_settings:
             if world.customizer and world.customizer.has_setting(player, setting):

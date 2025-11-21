@@ -2402,6 +2402,8 @@ def new_key_logic(key_logic, world, player):
                 add_rule(ent, create_rule(d_logic.bk_name, player))
         for bk_location in logic.bk_locations:
             add_rule(bk_location, create_rule(d_logic.bk_name, player))
+        for bk_door in logic.bk_doors:
+            add_rule(bk_door, create_rule(d_logic.bk_name, player))
         if len(logic.bk_regions) == 0 and len(logic.bk_locations) == 1 and world.accessibility[player] != 'locations':
             big_chest = next(iter(logic.bk_locations))
             set_always_allow(big_chest, allow_big_key_in_big_chest(d_logic.bk_name, player))

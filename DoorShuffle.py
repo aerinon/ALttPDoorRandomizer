@@ -1072,6 +1072,8 @@ def cross_dungeon_clean_up(world, player):
                 break
             if not portal.destination and not portal.deadEnd:
                 possible_portals.append(portal)
+        if len(possible_portals) == 0:
+            raise GenerationException('No possible portals for sanctuary mirror route - bad dungeon')
         if len(possible_portals) == 1:
             world.sanc_portal[player] = possible_portals[0]
         else:
@@ -1084,7 +1086,10 @@ def cross_dungeon_clean_up(world, player):
                 explore_state(state, world, player)
                 if state.visited_at_all(sanctuary):
                     reachable_portals.append(portal)
-            world.sanc_portal[player] = random.choice(reachable_portals)
+            if len(reachable_portals) > 0:
+                world.sanc_portal[player] = random.choice(reachable_portals)
+            else:
+                world.sanc_portal[player] = random.choice(possible_portals)
     if world.intensity[player] >= 3:
         if player in world.sanc_portal:
             portal = world.sanc_portal[player]
