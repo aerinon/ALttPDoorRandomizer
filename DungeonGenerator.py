@@ -512,7 +512,7 @@ def reserved_location(loc, world, player):
 
 
 def blind_boss_unavail(loc, locations, world, player):
-    if loc.name == "Thieves' Town - Boss":
+    if loc.name in {"Thieves' Town - Boss", "Thieves' Town - Prize"}:
         return (loc.parent_region.dungeon.boss.name == 'Blind' and
                 (not any(x for x in locations if x.name == 'Suspicious Maiden') or
                  (world.get_region('Thieves Attic Window', player).dungeon.name == 'Thieves Town' and
