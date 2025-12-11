@@ -488,7 +488,7 @@ class Transitivity:
                 continue  # can't cross here
             if crystal_req == CrystalBarrier.Orange and crystal_prop == CrystalBarrier.Blue:
                 continue  # can't cross here
-            new_crystal = new_crystal if CrystalBarrier.Null != new_crystal else crystal_prop
+            new_crystal = new_crystal if new_crystal not in [CrystalBarrier.Null, CrystalBarrier.Both] else crystal_prop
             # todo: decoupled doors? algorithm could be made more flexibile in that case? not sure it matters much
             if reachable != hanger and reachable in t.remaining_doors:  # second condition mean it hasn't been seen yet
                 t.unconnected_doors[reachable] = new_crystal
@@ -502,8 +502,12 @@ class Transitivity:
             reachability = c_info.door_sector_map[hook].descriptor.reachability
             for triple in reachability[hook]:
                 reachable, new_crystal, crystal_req = triple
+                if crystal_req == CrystalBarrier.Blue and crystal_prop in [CrystalBarrier.Orange, CrystalBarrier.Null]:
+                    continue  # can't cross here
+                if crystal_req == CrystalBarrier.Orange and crystal_prop == CrystalBarrier.Blue:
+                    continue  # can't cross here
                 if reachable != hook and reachable in t.remaining_doors:
-                    new_crystal = new_crystal if CrystalBarrier.Null != new_crystal else crystal_prop
+                    new_crystal = new_crystal if new_crystal not in [CrystalBarrier.Null, CrystalBarrier.Both] else crystal_prop
                     t.unconnected_doors[reachable] = new_crystal
                     t.remaining_doors.remove(reachable)
 

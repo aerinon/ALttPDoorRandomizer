@@ -43,6 +43,13 @@ class KeyLayout(object):
         self.item_locations = set()
         self.prize_relevant = None
 
+    def print_proposal(self, logger):
+        for door in self.proposal:
+            if isinstance(door, tuple):
+                logger.debug(f'Key Door: {door[0].name} <-> {door[1].name} ({door[0].dungeon_name()})')
+            else:
+                logger.debug(f'Key Door: {door.name} ({door.dungeon_name()})')
+
 
 class KeyLogic(object):
 
@@ -1770,7 +1777,7 @@ def create_key_counter(state, key_layout, world, player):
             key_counter.key_only_locations[loc] = None
         elif loc.forced_item and loc.item.name == key_layout.key_logic.bk_name:
             key_counter.other_locations[loc] = None
-        elif loc.name not in dungeon_events:
+        elif loc.name not in dungeon_events and not blind_boss_unavail(loc, state.found_locations, world, player):
             key_counter.free_locations[loc] = None
         else:
             key_counter.other_locations[loc] = None
