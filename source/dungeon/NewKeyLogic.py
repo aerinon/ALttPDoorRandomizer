@@ -2,7 +2,7 @@ from collections import deque, defaultdict
 from typing import Optional, Deque, Tuple
 
 from BaseClasses import DoorType, Door, CrystalBarrier
-from DungeonGenerator import ExplorationState
+from DungeonGenerator import ExplorationState, blind_boss_unavail
 from KeyDoorShuffle import KeyCounter
 from KeyDoorShuffle import find_big_chest_locations, dungeon_table, open_a_door, important_location
 from KeyDoorShuffle import find_outside_connection, prize_relevance, expand_key_state, create_key_counters
@@ -92,7 +92,7 @@ class NewKeyLogic(object):
         cache_key, small_locations, big_location = self.build_cache_key(state, dungeon_logic, player)
         # given the key, have we calculated this already?
         if cache_key not in self.can_reach_cache:
-            self.calculate_reachability(cache_key, small_locations, big_location)
+            self.calculate_reachability(cache_key, small_locations, big_location, dungeon_logic, player)
         reachable_regions, reachable_locations = self.can_reach_cache[cache_key]
         # the entrances connected region must be in the reachable regions
         # and it must not be a locked door or they must have at least one key to waste
@@ -101,7 +101,7 @@ class NewKeyLogic(object):
 
     # notes, smalls_in_hand can include some of the small_locations, small_locations may have been checked already - this affects cache_key
     # perhaps we should always start at the root sphere, skipping ahead can be problematic if you have enough keys, but not the big key to reach those later spheres
-    def calculate_reachability(self, cache_key, small_locations, big_location):
+    def calculate_reachability(self, cache_key, small_locations, big_location, dungeon_logic, player):
         smalls_in_hand, big_in_hand, small_loc_name_set, big_loc_name, placing_dungeon_key = cache_key
         sphere_list = self.key_spheres[0] # start at root sphere
         # filter to those applicable for current big key status
@@ -154,7 +154,9 @@ class NewKeyLogic(object):
 
                     self_locking_location = next(iter(self_locking_locations))
                     # Skip if non-small key item has been placed
-                    if self_locking_location.item is not None and not self_locking_location.item.smallkey:
+                    if self_locking_location.item is not None and (not self_locking_location.item.smallkey
+                                                                   or self_locking_location.item.name != dungeon_logic.small_key_name
+                                                                   or self_locking_location.item.player != player):
                         continue
 
                     # Valid but not visited, mean this sphere is non-terminal
@@ -218,7 +220,7 @@ class NewKeyLogic(object):
         crystal_cache_key = (key_count, big_key_state)
 
         # Get normally reachable regions with this key count
-        normal_regions = self._get_reachable_regions_with_keys(key_count, big_key_state)
+        normal_regions = self._get_reachable_regions_with_keys(key_count, big_key_state, key_layout, player)
 
         # Find crystal switches in reachable regions
         crystal_switches = self._find_crystal_switches_in_regions(normal_regions)
@@ -236,12 +238,12 @@ class NewKeyLogic(object):
             self.crystal_switch_reachable[crystal_cache_key] = blue_islands
 
     # Get regions reachable with a specific number of keys and big key state.
-    def _get_reachable_regions_with_keys(self, key_count, big_key_state):
+    def _get_reachable_regions_with_keys(self, key_count, big_key_state, key_layout, player):
         # Build a cache key similar to normal reachability
         cache_key = (key_count, big_key_state, frozenset(), None, False)
 
         # Use existing reachability logic but with empty small locations
-        self.calculate_reachability(cache_key, [], None)
+        self.calculate_reachability(cache_key, [], None, key_layout.key_logic, player)
 
         reachable_regions, _ = self.can_reach_cache[cache_key]
         return reachable_regions
@@ -446,6 +448,8 @@ def determine_big_key_logic(key_layout, world, player):
         free_locations = {l: None for l in region.locations if not important_location(l, world, player)
                           and not l.forced_item and l.name not in dungeon_events}
         key_layout.all_chest_locations.update(free_locations)
+        blind_restricted = [loc for loc in free_locations.keys() if blind_boss_unavail(loc, state.found_locations, world, player)]
+        key_layout.key_logic.new_logic.bk_locations.update(blind_restricted)
         if not state.visited_at_all(region):
             key_layout.key_logic.new_logic.bk_regions.add(region)
             for loc in region.locations:
