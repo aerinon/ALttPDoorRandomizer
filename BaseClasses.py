@@ -1070,6 +1070,27 @@ class CollectionState(object):
                     self.events.append((event.name, event.player))
                     self.collect(event.item, True, event)
                     new_locations = True
+            # only doing this if placing a small key
+            if not new_locations and self.placing_items and any(i.smallkey for i in self.placing_items) and self.check_for_isolated_regions():
+                new_locations = True
+
+    def check_for_isolated_regions(self):
+        isolated_reachable_regions = False
+        for player, logic_map in self.world.key_logic.items():
+            # small keys for this player aren't shuffled and we have experimental key logic on
+            if self.world.key_logic_algorithm[player] == 'experimental' and self.world.keyshuffle[player] == 'none':
+                for dungeon, logic in logic_map.items():
+                    # one of the placing items is a small key for this dungeon and player
+                    if all(i.dungeon != dungeon or i.player != player for i in self.placing_items):
+                        continue
+                    if logic.new_logic and not logic.new_logic.fast_logic and any(region.dungeon and region.dungeon.name == dungeon for region in self.reachable_regions[player]):
+                        detected_regions, detected_locations = logic.new_logic.query_reachability(self, logic, player)
+                        unvisited_regions = {r for r in detected_regions if r not in self.reachable_regions[player]}
+                        if unvisited_regions:
+                            isolated_reachable_regions = True
+                            self.reachable_regions[player].update({r: CrystalBarrier.Null for r in unvisited_regions})
+                            logging.getLogger('').debug(f'Detected isolated reachable regions in {dungeon}: {", ".join([r.name for r in unvisited_regions])}')
+        return isolated_reachable_regions
 
     def can_reach_blue(self, region, player):
         return region in self.reachable_regions[player] and self.reachable_regions[player][region] in [CrystalBarrier.Blue, CrystalBarrier.Either]

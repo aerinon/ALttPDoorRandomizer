@@ -6,6 +6,7 @@ from DungeonGenerator import ExplorationState, blind_boss_unavail
 from KeyDoorShuffle import KeyCounter
 from KeyDoorShuffle import find_big_chest_locations, dungeon_table, open_a_door, important_location
 from KeyDoorShuffle import find_outside_connection, prize_relevance, expand_key_state, create_key_counters
+from source.dungeon.KeyPlacement import create_exhaustive_placement_rules
 from Regions import dungeon_events
 from source.dungeon.DungeonStitcherV2 import special_big_key_doors
 
@@ -99,6 +100,13 @@ class NewKeyLogic(object):
         # this may not be sufficient consider vanilla GT
         return entrance.connected_region in reachable_regions and (entrance.name not in self.door_minimums or cache_key[0] > 0)
 
+    def query_reachability(self, state, dungeon_logic, player):
+        cache_key, small_locations, big_location = self.build_cache_key(state, dungeon_logic, player)
+        # given the key, have we calculated this already?
+        if cache_key not in self.can_reach_cache:
+            self.calculate_reachability(cache_key, small_locations, big_location, dungeon_logic, player)
+        return self.can_reach_cache[cache_key]
+
     # notes, smalls_in_hand can include some of the small_locations, small_locations may have been checked already - this affects cache_key
     # perhaps we should always start at the root sphere, skipping ahead can be problematic if you have enough keys, but not the big key to reach those later spheres
     def calculate_reachability(self, cache_key, small_locations, big_location, dungeon_logic, player):
@@ -143,8 +151,9 @@ class NewKeyLogic(object):
                 continue  # even if no spheres are added, we don't continue processing it
 
             # if we can't spend a key, possible to place in a self-locking sphere?
-            if placing_dungeon_key and unspent_keys == 0:  # we can't do this twice so only we have exactly zero keys
-                next_unspent_keys = unspent_keys - 1  # we are "spending" a key we don't have here (can't open up more doors with it)
+            total_unspent_keys = unspent_keys + len(smalls_to_grab)
+            if placing_dungeon_key and total_unspent_keys == 0:  # we can't do this twice so only we have exactly zero keys
+                next_unspent_keys = total_unspent_keys - 1  # we are "spending" a key we don't have here (can't open up more doors with it)
                 valid_spheres, non_terminal = [], False
                 for next_sphere in sphere.self_locking_child_spheres:
                     # Get the unique self-locking location
@@ -405,6 +414,10 @@ def analyze_dungeon(key_layout, world, player):
         # Analyze crystal switch bypass opportunities after exhaustive key spheres are built
         key_logic.new_logic.detect_crystal_switch_bypass(key_layout, world, player)
 
+        bk_restrictions = key_layout.key_logic.new_logic.bk_restricted
+        # newest algo
+        create_exhaustive_placement_rules(key_layout, bk_restrictions, world, player)
+
 
 def determine_big_key_logic(key_layout, world, player):
     key_layout.found_doors.clear()
@@ -559,7 +572,9 @@ def determine_small_key_logic_exhaustive(key_layout, world, player):
                 key_locs_sans_bk = possible_key_locs.difference(new_logic.bk_locations)
                 big_chests_in_range = len(possible_key_locs.intersection(new_logic.bk_locations))
                 big_doors_accessible = any(d for d in key_counter.child_doors if d.bigKey or d.name in special_big_key_doors)
-                if not big_doors_accessible and len(key_locs_sans_bk) + big_chests_in_range <= potential_doors + extras:
+                if (not big_doors_accessible
+                        and (len(key_locs_sans_bk) + big_chests_in_range < potential_doors + extras  # strictly less
+                             or (len(key_locs_sans_bk) + big_chests_in_range == potential_doors + extras and big_chests_in_range == 0))):  # exactly enough but no big chests
                     new_logic.bk_restricted.update(sphere.locations)
 
         skip = False
