@@ -14,6 +14,7 @@ from source.dungeon.DungeonGenSectorDesc import SectorDescriptor
 def create_dungeon(builder, flags, world, player):
     proposed_map = generate_dungeon_find_proposal(builder, flags, world, player)
     builder.valid_proposal = proposed_map
+    logging.getLogger('').debug(f'Final Connections: {builder.name}')
     queue = collections.deque(proposed_map.items())
     while len(queue) > 0:
         a, b = queue.popleft()
@@ -554,6 +555,7 @@ def connect_two_way(entrance, ext):
 
     entrance.connect(ext.parent_region)
     ext.connect(entrance.parent_region)
+    logging.getLogger('').debug(f'Conn: {entrance.name} <-> {ext.name}')
     if entrance.parent_region.dungeon:
         ext.parent_region.dungeon = entrance.parent_region.dungeon
     x = entrance.door
@@ -571,6 +573,7 @@ def connect_one_way(entrance, ext):
         entrance.connected_region.entrances.remove(entrance)
 
     entrance.connect(ext.parent_region)
+    logging.getLogger('').debug(f'Con: {entrance.name} -> {ext.parent_region.name}')
     if entrance.parent_region.dungeon:
         ext.parent_region.dungeon = entrance.parent_region.dungeon
     x = entrance.door

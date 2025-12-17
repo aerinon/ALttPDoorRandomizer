@@ -9,6 +9,7 @@ from contextlib import suppress
 from BaseClasses import CollectionState, FillError, LocationType
 from Items import ItemFactory
 from Regions import shop_to_location_table, retro_shops
+from dungeon.SmallKeyDoorShuffle import is_key_door_layout_satisfiable
 from source.item.FillUtil import filter_locations, classify_major_items, replace_trash_item, vanilla_fallback
 from source.item.FillUtil import filter_special_locations, valid_pot_items
 
@@ -216,8 +217,9 @@ def verify_spot_to_fill_v2(location, item_to_place, max_exp_state, single_player
     if not single_player_placement or location.player == item_to_place.player:
         if location.can_fill(max_exp_state, item_to_place, perform_access_check):
             if valid_key_placement(item_to_place, location, key_pool, max_exp_state, world):
-                if item_to_place.crystal or valid_dungeon_placement(item_to_place, location, world):
-                    return location
+                if valid_bk_placement(location, item_to_place, world):
+                    if item_to_place.crystal or valid_dungeon_placement(item_to_place, location, world):
+                        return location
     return None
 
 
@@ -254,6 +256,17 @@ def valid_key_placement(item, location, key_pool, collection_state, world):
                                          location if item.bigkey else None,  prize_loc, cr_count)
     else:
         return not item.is_inside_dungeon_item(world)
+
+
+def valid_bk_placement(location, item_to_place, world):
+    if world.keyshuffle[item_to_place.player] == 'none' and item_to_place.bigkey and item_to_place.player == location.player:
+        loc_dungeon = location.parent_region.dungeon
+        if loc_dungeon and loc_dungeon.name == item_to_place.dungeon:
+            # need to check if there's a valid solution
+            key_layout = world.key_layout[item_to_place.player][item_to_place.dungeon]
+            bk_restrictions = set(key_layout.all_chest_locations.keys()) - {location}
+            return is_key_door_layout_satisfiable(key_layout, bk_restrictions, True,False)
+    return True
 
 
 def valid_reserved_placement(item, location, world):

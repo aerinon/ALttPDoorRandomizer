@@ -584,3 +584,5 @@ dungeon_portals = {
     'Turtle Rock': ['Turtle Rock Main', 'Turtle Rock Lazy Eyes', 'Turtle Rock Chest', 'Turtle Rock Eye Bridge'],
     'Ganons Tower': ['Ganons Tower']
 }
+
+special_bk_regions = ['Hyrule Dungeon Cellblock', "Thieves Blind's Cell"]
