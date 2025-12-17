@@ -971,7 +971,7 @@ class Balance:
             for loc in region.locations:
                 if '- Big Chest' in loc.name or loc.parent_region.name in ["Thieves Blind's Cell Interior", 'Hyrule Dungeon Cell', 'Thieves Boss']:
                     self.bk_required = True
-                else:
+                elif not loc.forced_item or loc.forced_item.bigkey:
                     self.non_bk_locations += 1
 
         if sector.blue_barrier and not sector.c_switch:
