@@ -710,6 +710,7 @@ def _key_layout_setup(builder, event_starts, player, proposal, start_regions, wo
         key_layout.all_chest_locations.update(counter.free_locations)
         key_layout.item_locations.update(counter.free_locations)
         key_layout.item_locations.update(counter.key_only_locations)
+        key_layout.item_locations.update([l for l in counter.other_locations if l.forced_big_key()])
         key_layout.all_locations.update(key_layout.item_locations)
         key_layout.all_locations.update(counter.other_locations)
     return key_layout
@@ -748,6 +749,7 @@ def is_key_door_layout_satisfiable(key_layout, bk_restrictions, bk_needed=True, 
         bk_assignment_needed = False
     elif key_layout.big_key_special:
         bk_assignment_needed = False
+        bk_location = next(loc for loc in key_layout.all_locations if loc.forced_item and loc.forced_item.bigkey)
     elif any(loc.item and loc.item.name == key_layout.key_logic.bk_name for loc in key_layout.item_locations):
         bk_assignment_needed = False
         bk_location = next(loc for loc in key_layout.item_locations if loc.item and loc.item.bigkey)
