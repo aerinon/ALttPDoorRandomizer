@@ -882,7 +882,7 @@ class Transitivity:
                         # see what can reach it
                         accessors = c_info.door_sector_map[match].descriptor.reachability
                         for r, triples in accessors.items():
-                            if any(d == match for d, c, f in triples) and r not in visited and r != match:
+                            if any(d == match for d, c, f in triples) and r not in c_info.restricted_doors and r not in visited and r != match:
                                 if r in self.unconnected_doors:
                                     connected = True
                                     break

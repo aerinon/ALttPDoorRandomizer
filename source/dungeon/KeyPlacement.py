@@ -14,6 +14,7 @@ def create_exhaustive_placement_rules(key_layout, bk_restrictions, world, player
         accessible_loc = set()
         accessible_loc.update(key_counter.free_locations)
         accessible_loc.update(key_counter.key_only_locations)
+        accessible_loc.update([l for l in key_counter.important_locations if l.forced_big_key()])
         blocked_loc = key_layout.item_locations.difference(accessible_loc)
         valid_rule = True
         # Only add 1 if there are small key doors that need to be opened
