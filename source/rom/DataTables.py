@@ -29,6 +29,11 @@ class DataTables:
         self.ow_enemy_table = None
         self.pot_secret_table = None
         self.overworld_sprite_sheets = None
+        self.pointer_addresses = {
+            # table: [data_start, data_size, pointer_table, references]
+            'ow_sprites': [ 0x09CB41, None, (0x09C881, 0x09C901, 0x09CA21), None ],
+            'uw_sprites': [ 0x09D92E, None, 0x09D62E, 0x09C298 ],
+        }
 
         # associated data
         self.sprite_requirements = None
@@ -77,13 +82,6 @@ class DataTables:
         # bank 0A uses 372A bytes
         # bank 1F uses 77CE bytes: total is about a bank and a half
         # probably should reuse bank 1F if writing all the rooms out
-        for sheet in self.sprite_sheets.values():
-            sheet.write_to_rom(rom, snes_to_pc(0x00DB97))  # bank 00, SheetsTable_AA3
-        if self.uw_enemy_table.size() > 0x2800:
-            raise Exception('Sprite table is too big for current area')
-        self.uw_enemy_table.write_sprite_data_to_rom(rom)
-        self.uw_enemy_table.check_special_bitmasks_size()
-        self.uw_enemy_table.write_special_bitmask_table(rom)
         for area_id, sheet in self.overworld_sprite_sheets.items():
             if area_id in [0x80, 0x81]:
                 offset = area_id - 0x80  # 02E575 for special areas?
@@ -95,7 +93,14 @@ class DataTables:
             # _00FAC1 is LW post-aga
             # _00FB01 is DW
             # _00FA41 is rain state
+        for sheet in self.sprite_sheets.values():
+            sheet.write_to_rom(rom, snes_to_pc(0x00DB97))  # bank 00, SheetsTable_AA3
         self.write_ow_sprite_data_to_rom(rom)
+        if self.uw_enemy_table.size() > 0x2800:
+            raise Exception('Sprite table is too big for current area')
+        self.uw_enemy_table.write_sprite_data_to_rom(rom, self.pointer_addresses)
+        self.uw_enemy_table.check_special_bitmasks_size()
+        self.uw_enemy_table.write_special_bitmask_table(rom)
         for sprite, stats in self.enemy_stats.items():
             # write health to rom
             if stats.health is not None:
@@ -133,13 +138,13 @@ class DataTables:
 
     def write_ow_sprite_data_to_rom(self, rom):
         # calculate how big this table is going to be?
-        # bytes = sum(1+len(x)*3 for x in self.ow_enemy_table.values() if len(x) > 0)+1
+        bytes = sum(1+len(x)*3 for x in self.ow_enemy_table.values() if len(x) > 0)+1
+        self.pointer_addresses['ow_sprites'][1] = bytes
         # ending_byte = 0x09CB3B + bytes
-        max_per_state = {0: 0x40, 1: 0x90, 2: 0x8B}  # dropped max on state 2 to steal space for a couple extra sprites (Murahdahla, extra tutorial guard)
+        max_per_state = {0: 0x40, 1: 0x90, 2: 0x90}
 
-        pointer_address = snes_to_pc(0x09C881)
-        # currently borrowed 10 bytes, used 9 (2xMurah + TutorialGuard)
-        data_pointer = snes_to_pc(0x09CB38)  # was originally 0x09CB41 - stealing space for a couple extra sprites (Murahdahla, extra tutorial guard)
+        pointer_address = snes_to_pc(self.pointer_addresses['ow_sprites'][2][0])
+        data_pointer = snes_to_pc(self.pointer_addresses['ow_sprites'][0])
         empty_pointer = pc_to_snes(data_pointer) & 0xFFFF
         rom.write_byte(data_pointer, 0xff)
         cached_dark_world = {}

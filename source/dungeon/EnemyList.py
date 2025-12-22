@@ -2116,8 +2116,13 @@ class EnemyTable:
         self.room_map = defaultdict(list)
         self.special_bitmasks = None
 
-    def write_sprite_data_to_rom(self, rom):
-        pointer_address = snes_to_pc(0x09D62E)
+    def write_sprite_data_to_rom(self, rom, pointer_table):
+        ow_data_end = pointer_table['ow_sprites'][0] + pointer_table['ow_sprites'][1]
+        if ow_data_end > pointer_table['uw_sprites'][2]:
+            # moving pointer table down
+            pointer_table['uw_sprites'][2] = ow_data_end
+            rom.write_bytes(snes_to_pc(pointer_table['uw_sprites'][3]), int16_as_bytes(ow_data_end & 0xFFFF))
+        pointer_address = snes_to_pc(pointer_table['uw_sprites'][2])
         data_pointer = snes_to_pc(0x288000)
         empty_pointer = pc_to_snes(data_pointer) & 0xFFFF
         rom.write_bytes(data_pointer, [0x00, 0xff])
