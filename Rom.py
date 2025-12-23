@@ -557,13 +557,10 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     # patch overworld edges
     inverted_buffer = [0] * 0x82
     owMode = 0
-    if world.owShuffle[player] != 'vanilla' or world.owCrossed[player] not in ['none', 'polar'] or world.owMixed[player]:
-        if world.owShuffle[player] == 'parallel':
-            owMode = 1
-        elif world.owShuffle[player] == 'full':
-            owMode = 2
-
-        if world.owKeepSimilar[player] and (world.owShuffle[player] != 'vanilla' or world.owCrossed[player] == 'unrestricted'):
+    if world.owLayout[player] != 'vanilla' or world.owCrossed[player] not in ['none', 'polar'] or world.owMixed[player]:
+        if world.owLayout[player] != 'vanilla':
+            owMode = 1 if world.owParallel[player] else 2
+        if world.owKeepSimilar[player] and (world.owLayout[player] != 'vanilla' or world.owCrossed[player] == 'unrestricted'):
             owMode |= 0x0100
         if world.owCrossed[player] != 'none' and (world.owCrossed[player] != 'polar' or world.owMixed[player]):
             owMode |= 0x0200
@@ -2393,7 +2390,7 @@ def write_strings(rom, world, player, team):
         if world.is_tile_swapped(0x18, player) or world.flute_mode[player] == 'active':
             items_to_hint.remove(flute_item)
             flute_item = 'Ocarina (Activated)'
-        if world.owShuffle[player] != 'vanilla' or world.owMixed[player]:
+        if world.owLayout[player] != 'vanilla' or world.owMixed[player]:
             # Adding a guaranteed hint for the Flute in overworld shuffle.
             this_location = world.find_items_not_key_only(flute_item, player)
             if this_location and this_location not in hinted_locations:
@@ -2411,7 +2408,7 @@ def write_strings(rom, world, player, team):
         random.shuffle(items_to_hint)
         hint_count = 5 if world.shuffle[player] not in ['vanilla', 'dungeonssimple', 'dungeonsfull', 'district', 'swapped'] else 8
         hint_count += 2 if world.doorShuffle[player] not in ['vanilla', 'basic'] else 0
-        hint_count += 1 if world.owShuffle[player] != 'vanilla' or world.owCrossed[player] != 'none' or world.owMixed[player] else 0
+        hint_count += 1 if world.owLayout[player] != 'vanilla' or world.owCrossed[player] != 'none' or world.owMixed[player] else 0
         while hint_count > 0 and len(items_to_hint) > 0:
             this_item = items_to_hint.pop(0)
             this_location = world.find_items_not_key_only(this_item, player)

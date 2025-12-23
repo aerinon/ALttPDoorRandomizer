@@ -1,13 +1,13 @@
 {
   "topOverworldFrame": {},
   "leftOverworldFrame": {
-    "overworldshuffle": {
+    "layout": {
       "type": "selectbox",
       "default": "vanilla",
       "options": [
         "vanilla",
-        "parallel",
-        "full"
+        "grid",
+        "wild"
       ]
     },
     "crossed": {
@@ -18,7 +18,10 @@
         "grouped",
         "polar",
         "unrestricted"
-      ]
+      ],
+      "config": {
+        "pady": [16,0]
+      }
     },
     "mixed": {
       "type": "checkbox",
@@ -48,19 +51,17 @@
     }
   },
   "rightOverworldFrame": {
+    "parallel": {
+      "type": "checkbox",
+      "default": true
+    },
     "terrain": {
       "type": "checkbox",
-      "default": false,
-      "config": {
-        "pady": [3,0]
-      }
+      "default": false
     },
     "keepsimilar": {
       "type": "checkbox",
-      "default": false,
-      "config": {
-        "pady": [6,0]
-      }
+      "default": false
     }
   }
 }

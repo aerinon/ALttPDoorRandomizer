@@ -234,7 +234,7 @@ You may define a list of items and a list of locations. Those items will be cons
 
 ### ow-edges
 
-This must be defined by player. Each player number should be listed with the appropriate sections and each of these players MUST have either `ow_shuffle` or `ow_crossed` enabled in the `settings` section in order for any values here to take effect. This section has two primary subsections: `two-way` and `groups`.
+This must be defined by player. Each player number should be listed with the appropriate sections and each of these players MUST have either `ow_layout` or `ow_crossed` enabled in the `settings` section in order for any values here to take effect. This section has two primary subsections: `two-way` and `groups`.
 
 #### two-way
 

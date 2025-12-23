@@ -120,8 +120,16 @@ def roll_settings(weights):
     ret.accessibility = get_choice('accessibility')
     ret.restrict_boss_items = get_choice('restrict_boss_items')
 
+    overworld_layout = get_choice('overworld_layout')
+    ret.ow_layout = overworld_layout if overworld_layout != 'none' else 'vanilla'
+    ret.ow_parallel = get_choice_bool('overworld_parallel')
     overworld_shuffle = get_choice('overworld_shuffle')
-    ret.ow_shuffle = overworld_shuffle if overworld_shuffle != 'none' else 'vanilla'
+    if overworld_shuffle == 'parallel':
+        ret.ow_layout = 'wild'
+        ret.ow_parallel = True
+    elif overworld_shuffle == 'full':
+        ret.ow_layout = 'wild'
+        ret.ow_parallel = False
     ret.ow_terrain = get_choice_bool('overworld_terrain')
     valid_options = {'none': 'none', 'polar': 'polar', 'grouped': 'polar', 'chaos': 'unrestricted', 'unrestricted': 'unrestricted'}
     ret.ow_crossed = get_choice('overworld_crossed')

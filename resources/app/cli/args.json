@@ -173,6 +173,22 @@
       "full"
     ]
   },
+  "ow_layout": {
+    "choices": [
+      "vanilla",
+      "grid",
+      "wild"
+    ]
+  },
+  "ow_parallel": {
+    "action": "store_true",
+    "help": "suppress",
+    "type": "bool"
+  },
+  "ow_unparallel": {
+    "action": "store_true",
+    "type": "bool"
+  },
   "ow_terrain": {
     "action": "store_true",
     "type": "bool"

@@ -244,7 +244,7 @@ Ganons Tower - Validation Chest: Nothing
 Ganon: Triforce
 
 # set Overworld connections (lines starting with $, separate edges with =)
-!owShuffle: parallel
+!owLayout: wild
 #!owMixed: true # Mixed OW not supported yet
 !owCrossed: none
 !owKeepSimilar: true

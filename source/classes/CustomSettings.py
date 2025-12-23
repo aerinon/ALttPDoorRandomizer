@@ -89,7 +89,8 @@ class CustomSettings(object):
                     args.mystery = True
                 else:
                     settings = defaultdict(lambda: None, player_setting)
-                args.ow_shuffle[p] = get_setting(settings['ow_shuffle'], args.ow_shuffle[p])
+                args.ow_layout[p] = get_setting(settings['ow_layout'], args.ow_layout[p])
+                args.ow_parallel[p] = get_setting(settings['ow_parallel'], args.ow_parallel[p])
                 args.ow_terrain[p] = get_setting(settings['ow_terrain'], args.ow_terrain[p])
                 args.ow_crossed[p] = get_setting(settings['ow_crossed'], args.ow_crossed[p])
                 if args.ow_crossed[p] == 'chaos':
@@ -134,6 +135,14 @@ class CustomSettings(object):
                         args.bow_mode[p] = 'retro_silvers'
                     args.take_any[p] = 'random' if args.take_any[p] == 'none' else args.take_any[p]
                     args.keyshuffle[p] = 'universal'
+
+                ow_shuffle = get_setting(settings['ow_shuffle'], args.ow_shuffle[p])
+                if ow_shuffle == 'parallel':
+                    args.ow_layout = 'wild'
+                    args.ow_parallel = True
+                elif ow_shuffle == 'full':
+                    args.ow_layout = 'wild'
+                    args.ow_parallel = False
 
                 args.mixed_travel[p] = get_setting(settings['mixed_travel'], args.mixed_travel[p])
                 args.standardize_palettes[p] = get_setting(settings['standardize_palettes'],
@@ -356,7 +365,8 @@ class CustomSettings(object):
             self.world_rep['start_inventory'] = start_inv = {}
         for p in self.player_range:
             settings_dict[p] = {}
-            settings_dict[p]['ow_shuffle'] = world.owShuffle[p]
+            settings_dict[p]['ow_layout'] = world.owLayout[p]
+            settings_dict[p]['ow_parallel'] = world.owParallel[p]
             settings_dict[p]['ow_terrain'] = world.owTerrain[p]
             settings_dict[p]['ow_crossed'] = world.owCrossed[p]
             settings_dict[p]['ow_keepsimilar'] = world.owKeepSimilar[p]

@@ -1,6 +1,7 @@
 settings:
   1:
-    ow_shuffle: full
+    ow_layout: wild
+    ow_parallel: false
     ow_terrain: true
 ow-edges:
   1:

@@ -20,11 +20,12 @@ from source.overworld.EntranceData import door_addresses
 
 class World(object):
 
-    def __init__(self, players, owShuffle, owCrossed, owMixed, shuffle, doorShuffle, logic, mode, swords, difficulty, difficulty_adjustments,
+    def __init__(self, players, owLayout, owParallel, owCrossed, owMixed, shuffle, doorShuffle, logic, mode, swords, difficulty, difficulty_adjustments,
                  timer, progressive, goal, algorithm, accessibility, shuffle_ganon, custom, customitemarray, hints, spoiler_mode):
         self.players = players
         self.teams = 1
-        self.owShuffle = owShuffle.copy()
+        self.owLayout = owLayout.copy()
+        self.owParallel = owParallel.copy()
         self.owTerrain = {}
         self.owKeepSimilar = {}
         self.owMixed = owMixed.copy()
@@ -3041,7 +3042,8 @@ class Spoiler(object):
                          'bow_mode': self.world.bow_mode,
                          'goal': self.world.goal,
                          'custom_goals': self.world.custom_goals,
-                         'ow_shuffle': self.world.owShuffle,
+                         'ow_layout': self.world.owLayout,
+                         'ow_parallel': self.world.owParallel,
                          'ow_terrain': self.world.owTerrain,
                          'ow_crossed': self.world.owCrossed,
                          'ow_keepsimilar': self.world.owKeepSimilar,
@@ -3312,11 +3314,12 @@ class Spoiler(object):
                     outfile.write('Enemy Drop Shuffle:'.ljust(line_width) + '%s\n' % self.metadata['dropshuffle'][player])
                     outfile.write('Take Any Caves:'.ljust(line_width) + '%s\n' % self.metadata['take_any'][player])
                     outfile.write('\n')
-                    outfile.write('Overworld Layout Shuffle:'.ljust(line_width) + '%s\n' % self.metadata['ow_shuffle'][player])
-                    if self.metadata['ow_shuffle'][player] != 'vanilla':
+                    outfile.write('Overworld Layout Shuffle:'.ljust(line_width) + '%s\n' % self.metadata['ow_layout'][player])
+                    if self.metadata['ow_layout'][player] != 'vanilla':
+                        outfile.write('Parallel OW:'.ljust(line_width) + '%s\n' % yn(self.metadata['ow_parallel'][player]))
                         outfile.write('Free Terrain:'.ljust(line_width) + '%s\n' % yn(self.metadata['ow_terrain'][player]))
                     outfile.write('Crossed OW:'.ljust(line_width) + '%s\n' % self.metadata['ow_crossed'][player])
-                    if self.metadata['ow_shuffle'][player] != 'vanilla' or self.metadata['ow_crossed'][player] != 'none':
+                    if self.metadata['ow_layout'][player] != 'vanilla' or self.metadata['ow_crossed'][player] != 'none':
                         outfile.write('Keep Similar OW Edges Together:'.ljust(line_width) + '%s\n' % yn(self.metadata['ow_keepsimilar'][player]))
                     outfile.write('OW Tile Flip (Mixed):'.ljust(line_width) + '%s\n' % yn(self.metadata['ow_mixed'][player]))
                     outfile.write('Whirlpool Shuffle:'.ljust(line_width) + '%s\n' % yn(self.metadata['ow_whirlpool'][player]))
@@ -3728,8 +3731,8 @@ boss_mode = {"none": 0, "simple": 1, "full": 2, "chaos": 3, 'random': 3, 'unique
 
 # byte 10: settings_version
 
-# byte 11: OOOT WCCC (OWR layout, free terrain, whirlpools, OWR crossed)
-or_mode = {"vanilla": 0, "parallel": 1, "full": 2}
+# byte 11: POOT WCCC (parallel, OWR layout, free terrain, whirlpools, OWR crossed)
+orlayout_mode = {"vanilla": 0, "grid": 1, "wild": 2}
 orcrossed_mode = {"none": 0, "polar": 1, "grouped": 2, "unrestricted": 4}
 
 # byte 12: KMBQ FF?? (keep similar, mixed/tile flip, bonk drops, follower quests, flute spots)
@@ -3795,7 +3798,7 @@ class Settings(object):
 
             settings_version,
 
-            (or_mode[w.owShuffle[p]] << 5) | (0x10 if w.owTerrain[p] else 0)
+            (0x80 if w.owParallel[p] else 0) | (orlayout_mode[w.owLayout[p]] << 5) | (0x10 if w.owTerrain[p] else 0)
             | (0x08 if w.owWhirlpoolShuffle[p] else 0) | orcrossed_mode[w.owCrossed[p]],
 
             (0x80 if w.owKeepSimilar[p] else 0) | (0x40 if w.owMixed[p] else 0)
@@ -3877,7 +3880,8 @@ class Settings(object):
             args.algorithm = r(algo_mode)[(settings[9] & 0x38) >> 3]
             args.shufflebosses[p] = r(boss_mode)[(settings[9] & 0x07)]
 
-        args.ow_shuffle[p] = r(or_mode)[(settings[11] & 0xE0) >> 5]
+        args.ow_parallel[p] = True if settings[11] & 0x80 else False
+        args.ow_layout[p] = r(orlayout_mode)[(settings[11] & 0x60) >> 5]
         args.ow_terrain[p] = True if settings[11] & 0x10 else False
         args.ow_whirlpool[p] = True if settings[11] & 0x08 else False
         args.ow_crossed[p] = r(orcrossed_mode)[(settings[11] & 0x07)]
