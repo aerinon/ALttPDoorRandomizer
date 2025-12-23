@@ -87,6 +87,7 @@ class World(object):
         self.owswaps = {}
         self.owcrossededges = {}
         self.owwhirlpools = {}
+        self.owgrid = {}
         self.owflutespots = {}
         self.owsectors = {}
         self.allow_flip_sanc = {}
@@ -119,6 +120,7 @@ class World(object):
             set_player_attr('owswaps', [[],[],[]])
             set_player_attr('owcrossededges', [])
             set_player_attr('owwhirlpools', [])
+            set_player_attr('owgrid', None)
             set_player_attr('owsectors', None)
             set_player_attr('allow_flip_sanc', False)
             set_player_attr('remote_items', False)
@@ -2345,12 +2347,11 @@ class OWEdge(object):
     def __init__(self, player, name, owIndex, direction, terrain, edge_id, owSlotIndex=0xff):
         self.player = player
         self.name = name
-        self.type = DoorType.Open
         self.direction = direction
         self.terrain = terrain
+        self.parallel = None
         self.specialEntrance = False
         self.specialExit = False
-        self.deadEnd = False
 
         # rom properties
         self.owIndex = owIndex
@@ -2381,7 +2382,6 @@ class OWEdge(object):
             self.worldType = WorldType.Dark
 
         # logical properties
-        # self.connected = False  # combine with Dest?
         self.dest = None
         self.dependents = []
         self.dead = False
@@ -2397,9 +2397,6 @@ class OWEdge(object):
 
     def getTarget(self):
         return self.dest.specialID if self.dest.specialExit else self.dest.edge_id
-
-    def dead_end(self):
-        self.deadEnd = True
 
     def coordInfo(self, midpoint, vram_loc):
         self.midpoint = midpoint
@@ -3434,41 +3431,32 @@ class Spoiler(object):
                     outfile.write(f'{fairy}: {bottle}\n')
 
             if self.maps:
+                def write_map(type, title):
+                    for player in range(1, self.world.players + 1):
+                        if (type, player) in self.maps:
+                            outfile.write('\n\n' + title + '\n\n')
+                            break
+                    for player in range(1, self.world.players + 1):
+                        if (type, player) in self.maps:
+                            if self.world.players > 1:
+                                outfile.write(str('(Player ' + str(player) + ')\n')) # player name
+                            outfile.write(self.maps[(type, player)]['text'])
+
                 if 'all' in self.settings or 'flute' in self.settings:
                     # flute shuffle
-                    for player in range(1, self.world.players + 1):
-                        if ('flute', player) in self.maps:
-                            outfile.write('\n\nFlute Spots:\n\n')
-                            break
-                    for player in range(1, self.world.players + 1):
-                        if ('flute', player) in self.maps:
-                            if self.world.players > 1:
-                                outfile.write(str('(Player ' + str(player) + ')\n')) # player name
-                            outfile.write(self.maps[('flute', player)]['text'])
-                
+                    write_map('flute', 'Flute Spots:')
+
                 if 'all' in self.settings or 'overworld' in self.settings:
                     # overworld tile flips
-                    for player in range(1, self.world.players + 1):
-                        if ('swaps', player) in self.maps:
-                            outfile.write('\n\nOW Tile Flips:\n\n')
-                            break
-                    for player in range(1, self.world.players + 1):
-                        if ('swaps', player) in self.maps:
-                            if self.world.players > 1:
-                                outfile.write(str('(Player ' + str(player) + ')\n')) # player name
-                            outfile.write(self.maps[('swaps', player)]['text'])
+                    write_map('swaps', 'OW Tile Flips:')
 
                     # crossed groups
-                    for player in range(1, self.world.players + 1):
-                        if ('groups', player) in self.maps:
-                            outfile.write('\n\nOW Crossed Groups:\n\n')
-                            break
-                    for player in range(1, self.world.players + 1):
-                        if ('groups', player) in self.maps:
-                            if self.world.players > 1:
-                                outfile.write(str('(Player ' + str(player) + ')\n')) # player name
-                            outfile.write(self.maps[('groups', player)]['text'])
-            
+                    write_map('groups', 'OW Crossed Groups:')
+
+                    # grid layout
+                    write_map('layout_grid_lw', 'Light World Layout:')
+                    write_map('layout_grid_dw', 'Dark World Layout:')
+
             if self.overworlds and ('all' in self.settings or 'overworld' in self.settings):
                 outfile.write('\n\nOverworld Edges:\n\n')
                 # overworld transitions

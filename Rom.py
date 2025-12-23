@@ -512,6 +512,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
 
     # patch flute spots
     owFlags = 0
+    owFog = 0
     if world.owFluteShuffle[player] == 'vanilla':
         flute_spots = default_flute_connections
     else:
@@ -553,7 +554,35 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     if world.owWhirlpoolShuffle[player]:
         owFlags |= 0x01
         write_int16s(rom, snes_to_pc(0x02EA5C), world.owwhirlpools[player])
-    
+
+    # set custom overworld map layout and fog
+    if world.owLayout[player] == 'grid':
+        owFlags |= 0x06
+        owFog = 1 if world.owParallel[player] else 2
+        grid = world.owgrid[player]
+        all_rows = grid[0] + grid[1]
+        all_cells = sum(all_rows, [])
+        rom.write_bytes(0x153C80, all_cells)
+        for pos, cell_id in enumerate(sum(grid[0], [])):
+            rom.write_byte(0x153D00 + cell_id % 0x40, pos)
+        for pos, cell_id in enumerate(sum(grid[1], [])):
+            rom.write_byte(0x153D40 + cell_id % 0x40, pos)
+    elif world.owMixed[player]:
+        owFlags |= 0x02
+        owFog = 1
+        large_screen_ids = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35, 0x40, 0x43, 0x45, 0x58, 0x5B, 0x5E, 0x70, 0x75]
+        for cell_id in range(0x80):
+            if cell_id - 0x01 in large_screen_ids:
+                screen_id = cell_id - 0x01
+            elif cell_id - 0x08 in large_screen_ids:
+                screen_id = cell_id - 0x08
+            elif cell_id - 0x09 in large_screen_ids:
+                screen_id = cell_id - 0x09
+            else:
+                screen_id = cell_id
+            world_flag = 0x40 if screen_id in world.owswaps[player][0] else 0x00
+            rom.write_byte(0x153C80 + cell_id, cell_id ^ world_flag)
+
     # patch overworld edges
     inverted_buffer = [0] * 0x82
     owMode = 0
@@ -595,10 +624,11 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
                     rom.write_byte(0x1539B0 + b + 9, world_flag)
 
         for edge in world.owedges:
-            if edge.dest is not None and isinstance(edge.dest, OWEdge) and edge.player == player:
+            if edge.player == player:
                 write_int16(rom, edge.getAddress() + 0x0a, edge.vramLoc)
                 if not edge.specialExit:
-                    rom.write_byte(0x1539A0 + (edge.specialID - 0x80) * 2 if edge.specialEntrance else edge.getAddress() + 0x0e, edge.getTarget())
+                    destination = edge.getTarget() if edge.dest is not None and isinstance(edge.dest, OWEdge) else 0xFF
+                    rom.write_byte(0x1539A0 + (edge.specialID - 0x80) * 2 if edge.specialEntrance else edge.getAddress() + 0x0e, destination)
     
     # patch bonk prizes
     if world.shuffle_bonk_drops[player]:
@@ -627,6 +657,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
 
     write_int16(rom, 0x150002, owMode)
     write_int16(rom, 0x150004, owFlags)
+    write_int16(rom, 0x150008, owFog)
 
     # patch entrance/exits/holes
     for region in world.regions:

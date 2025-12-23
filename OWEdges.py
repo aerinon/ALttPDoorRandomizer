@@ -321,14 +321,22 @@ def create_owedges(world, player):
         create_owedge(player, 'Hobo EC',                     0x80, Ea, Wr, 0x4a)      .coordInfo(0x008c, 0x0020).special_exit(0x81),
         create_owedge(player, 'Zoras Domain SW',             0x81, So, Ld, 0x41, 0x89).coordInfo(0x02a4, 0x1782).special_exit(0x82)
     ]
-        
+
     world.owedges += edges
     world.initialize_owedges(edges)
+    set_parallel_owedge_links(world, player, edges)
 
 def create_owedge(player, name, owIndex, direction, terrain, edge_id, owSlotIndex=0xff):
     if name not in OWExitTypes['OWEdge']:
         OWExitTypes['OWEdge'].append(name)
     return OWEdge(player, name, owIndex, direction, terrain, edge_id, owSlotIndex)
+
+def set_parallel_owedge_links(world, player, edges):
+    for edge in edges:
+        if edge.name in parallel_links:
+            dw_edge = world.get_owedge(parallel_links[edge.name], player)
+            edge.parallel = dw_edge
+            dw_edge.parallel = edge
 
 
 OWEdgeGroups = {
