@@ -1806,7 +1806,9 @@ def standard_rules(world, player):
             add_rule(world.get_location('Central Bonk Rocks Tree', player), lambda state: state.has('Zelda Delivered', player))
 
     if not world.is_premature_copied_world:
-        add_rule(world.get_location('Hyrule Castle Courtyard Tree Pull', player), lambda state: state.has('Zelda Delivered', player))
+        loc = world.get_location_unsafe('Hyrule Castle Courtyard Tree Pull', player)
+        if loc:
+            add_rule(loc, lambda state: state.has('Zelda Delivered', player))
 
     # don't allow bombs to get past here before zelda is rescued
     set_rule(world.get_entrance('GT Hookshot South Entry to Ranged Crystal', player), lambda state: (state.can_use_bombs(player) and state.has('Zelda Delivered', player)) or state.has('Blue Boomerang', player) or state.has('Red Boomerang', player))  # or state.has('Cane of Somaria', player))
