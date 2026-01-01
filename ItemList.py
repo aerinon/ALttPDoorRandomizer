@@ -1695,16 +1695,17 @@ def set_event_item(world, player, location_name, item_name=None):
 
 def shuffle_event_items(world, player):
     if world.shuffle_followers[player]:
+        all_state = world.get_all_state(keys=True)
         available_quests = follower_quests.copy()
         available_pickups = [quests[0] for quests in available_quests.values()]
 
+        # finalize customizer followers first
         for loc_name in follower_quests.keys():
             loc = world.get_location(loc_name, player)
             if loc.item:
                 set_event_item(world, player, loc_name)
                 available_quests.pop(loc_name)
                 available_pickups.remove(loc.item.name)
-            
 
         if world.mode[player] == 'standard' and 'Zelda Herself' in available_pickups:
             zelda_dropoff = 'Zelda Pickup'
@@ -1715,20 +1716,22 @@ def shuffle_event_items(world, player):
             available_pickups.remove(zelda_pickup)
             set_event_item(world, player, zelda_dropoff, zelda_pickup)
 
-        random.shuffle(available_pickups)
+        # randomize the follower pickups, but ensure that the last items are the unrestrictive ones
+        unrestrictive_pickups = [p for p in ['Zelda Herself', 'Sign Vandalized'] if p in available_pickups]
+        restrictive_pickups = [p for p in available_pickups if p not in unrestrictive_pickups]
+        random.shuffle(restrictive_pickups)
+        random.shuffle(unrestrictive_pickups)
+        available_pickups = restrictive_pickups + unrestrictive_pickups
 
-        restricted_pickups = { 'Get Frog': 'Dark Blacksmith Ruins'}
-        for pickup in restricted_pickups:
-            restricted_quests = [q for q in available_quests.keys() if q not in restricted_pickups[pickup]]
-            random.shuffle(restricted_quests)
-            quest = restricted_quests.pop()
-            available_quests.pop(quest)
-            available_pickups.remove(pickup)
-            set_event_item(world, player, quest, pickup)
+        pickup_items = ItemFactory(available_pickups, player)
+        follower_locations = [world.get_location(loc_name, player) for loc_name in available_quests.keys()]
+        random.shuffle(follower_locations)
 
-        for pickup in available_pickups:
-            quest, _ = available_quests.popitem()
-            set_event_item(world, player, quest, pickup)
+        fill_restrictive(world, all_state, follower_locations, pickup_items, single_player_placement=True)
+        for loc_name in available_quests.keys():
+            loc = world.get_location(loc_name, player)
+            if loc.item:
+                set_event_item(world, player, loc_name)
 
 
 def get_item_and_event_flag(item, world, player, dungeon_pool, prize_set, prize_pool):
