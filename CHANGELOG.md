@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.1.8
+- Fixed follower placement and logic
+- Fixed error with HC Courtyard Tree Pull
+
 ## 0.6.1.7
 - \~Merged in DR v1.5.2~
   - Reverted key count update
