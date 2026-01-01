@@ -1686,13 +1686,13 @@ class Entrance(object):
         self.temp_path = []
 
     def can_reach(self, state):
-                                # Destination          Pickup                   OW Only  No Ledges  Can S&Q  Allow Mirror
-        multi_step_locations = { 'Pyramid Crack':     ('Big Bomb',              True,    True,      False,   True),
-                                 'Missing Smith':     ('Frog',                  True,    False,     True,    True),
-                                 'Middle Aged Man':   ('Dark Blacksmith Ruins', True,    False,     True,    True),
-                                 'Dark Palace Button':('Kiki',                  True,    False,     False,   False),
-                                 'Old Man Drop Off':  ('Lost Old Man',          True,    False,     False,   False),
-                                 'Revealing Light':   ('Suspicious Maiden',     False,   False,     False,   False)
+                                # Destination           Pickup                  OW Only  No Ledges  Can S&Q  Allow Mirror
+        multi_step_locations = { 'Pyramid Crack':      ('Pick Up Big Bomb',     True,    True,      False,   True),
+                                 'Missing Smith':      ('Get Frog',             True,    False,     True,    True),
+                                 'Middle Aged Man':    ('Pick Up Purple Chest', True,    False,     True,    True),
+                                 'Dark Palace Button': ('Pick Up Kiki',         True,    False,     False,   False),
+                                 'Old Man Drop Off':   ('Escort Old Man',       True,    False,     False,   False),
+                                 'Revealing Light':    ('Maiden Rescued',       False,   False,     False,   False)
         }
 
         if self.name in multi_step_locations:
@@ -1701,7 +1701,10 @@ class Entrance(object):
                 multi_step_loc = multi_step_locations[self.name]
                 if world.shuffle_followers[self.player]:
                     multi_step_loc = (multi_step_loc[0], self.name == 'Pyramid Crack', multi_step_loc[2], True, True)
-                step_location = world.get_location(multi_step_loc[0], self.player)
+                step_location = world.find_items(multi_step_loc[0], self.player)
+                if len(step_location) == 0:
+                    return False
+                step_location = step_location[0]
                 if step_location.can_reach(state) and self.can_reach_thru(state, step_location, multi_step_loc[1], multi_step_loc[2], multi_step_loc[3], multi_step_loc[4]) and self.access_rule(state):
                     if not self in state.path:
                         path = state.path.get(step_location.parent_region, (step_location.parent_region.name, None))
