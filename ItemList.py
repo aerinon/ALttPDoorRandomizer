@@ -1695,7 +1695,6 @@ def set_event_item(world, player, location_name, item_name=None):
 
 def shuffle_event_items(world, player):
     if world.shuffle_followers[player]:
-        all_state = world.get_all_state(keys=True)
         available_quests = follower_quests.copy()
         available_pickups = [quests[0] for quests in available_quests.values()]
 
@@ -1716,14 +1715,21 @@ def shuffle_event_items(world, player):
             available_pickups.remove(zelda_pickup)
             set_event_item(world, player, zelda_dropoff, zelda_pickup)
 
-        # randomize the follower pickups, but ensure that the last items are the unrestrictive ones
-        unrestrictive_pickups = ItemFactory([p for p in ['Zelda Herself', 'Sign Vandalized'] if p in available_pickups], player)
-        restrictive_pickups = ItemFactory([p for p in available_pickups if p not in unrestrictive_pickups], player)
         follower_locations = [world.get_location(loc_name, player) for loc_name in available_quests.keys()]
 
         attempts = 10
         for attempt in range(attempts):
             try:
+                all_state = world.get_all_state(keys=True)
+                if world.prizeshuffle[player] != 'wild':
+                    from Items import prize_item_table
+                    prizes = ItemFactory(list(prize_item_table.keys()), player)
+                    for prize in prizes:
+                        all_state.collect(prize, True)
+
+                # randomize the follower pickups, but ensure that the last items are the unrestrictive ones
+                unrestrictive_pickups = ItemFactory([p for p in ['Zelda Herself', 'Sign Vandalized'] if p in available_pickups], player)
+                restrictive_pickups = ItemFactory([p for p in available_pickups if p not in unrestrictive_pickups], player)
                 random.shuffle(restrictive_pickups)
                 random.shuffle(unrestrictive_pickups)
                 pickup_items = unrestrictive_pickups + restrictive_pickups
@@ -1736,8 +1742,12 @@ def shuffle_event_items(world, player):
                         set_event_item(world, player, loc_name)
             except FillError as e:
                 logging.getLogger('').info("Failed to place followers (%s). Will retry %s more times", e, attempts - attempt - 1)
+                for loc in follower_locations:
+                    loc.item = None
                 continue
             break
+        else:
+            raise FillError(f'Unable to place followers: {", ".join(list(map(lambda d: d.hint_text, follower_locations)))}')
 
 
 def get_item_and_event_flag(item, world, player, dungeon_pool, prize_set, prize_pool):
