@@ -524,6 +524,13 @@ def determine_small_key_logic_exhaustive(key_layout, world, player):
     if key_layout.key_counters is None:
         key_layout.key_counters = create_key_counters(key_layout, world, player)
     counters = key_layout.key_counters
+    for counter in counters.values():
+        key_layout.all_chest_locations.update(counter.free_locations)
+        key_layout.item_locations.update(counter.free_locations)
+        key_layout.item_locations.update(counter.key_only_locations)
+        key_layout.item_locations.update([l for l in counter.other_locations if l.forced_big_key()])
+        key_layout.all_locations.update(key_layout.item_locations)
+        key_layout.all_locations.update(counter.other_locations)
     key_logic = key_layout.key_logic
     new_logic = key_logic.new_logic
     new_logic.door_minimums = [door.name for door in key_layout.flat_prop]

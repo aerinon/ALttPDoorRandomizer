@@ -28,8 +28,8 @@ def add_shell_to_boss_room(data_tables, dungeon_name, level, shell_id):
     room.layout[0] = 0xF0
     if clear_layer_2:
         room.layer2.clear()
-    y_offset = 0 if shell_id == 0xF95 else -2
-    room.layer2.append(RoomObject.subtype3_factory(shell_x, shell_y + y_offset, shell_id))
+    y_offset = 0 if shell_id == 0x215 else -2
+    room.layer2.append(RoomObject.subtype3_factory(shell_id, shell_x, shell_y + y_offset))
 
 
 def remove_shell_from_boss_room(data_tables, dungeon_name, level, shell_id):
@@ -164,14 +164,14 @@ def boss_writes(world, player, rom):
                 remove_water_tiles(data_tables)
                 water_tiles_on = False
             if boss.name == 'Trinexx' and (dungeon.name != 'Turtle Rock' or level is not None):
-                add_shell_to_boss_room(data_tables, dungeon.name, level, 0xFF2)
+                add_shell_to_boss_room(data_tables, dungeon.name, level, 0x272)
                 data_tables.room_headers[room_id].byte_0 = 0x60
                 data_tables.room_headers[room_id].effect = 4
                 # $2E, $98, $FF (original shell)
                 # disable trinexx ice breath with No-ops if there's a trinexx anywhere outside TR
                 rom.write_bytes(snes_to_pc(0x09B37E), [0xEA, 0xEA, 0xEA, 0xEA])
             if boss.name == 'Kholdstare' and (dungeon.name != 'Ice Palace' or level is not None):
-                add_shell_to_boss_room(data_tables, dungeon.name, level, 0xF95)
+                add_shell_to_boss_room(data_tables, dungeon.name, level, 0x215)
                 data_tables.room_headers[room_id].byte_0 = 0xE0
                 data_tables.room_headers[room_id].effect = 1
             if boss.name != 'Trinexx' and dungeon.name == 'Turtle Rock' and level is None:
