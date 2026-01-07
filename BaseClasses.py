@@ -284,6 +284,16 @@ class World(object):
                     return portal
             raise RuntimeError('No such portal %s for player %d' % (portal_name, player))
 
+    def get_portal_unsafe(self, portal_name, player):
+        if (portal_name, player) in self._portal_cache:
+            return self._portal_cache[(portal_name, player)]
+        else:
+            for portal in self.dungeon_portals[player]:
+                if portal.name == portal_name and portal.player == player:
+                    self._portal_cache[(portal_name, player)] = portal
+                    return portal
+        return None
+
     def is_atgt_swapped(self, player):
         return self.mode[player] == 'inverted'
 
