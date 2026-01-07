@@ -4,8 +4,10 @@ from Utils import snes_to_pc, int24_as_bytes, int16_as_bytes, load_cached_yaml, 
 
 from source.dungeon.EnemyList import EnemyTable, init_vanilla_sprites, vanilla_sprites, init_enemy_stats, EnemySprite
 from source.dungeon.EnemyList import sprite_translation
-from source.dungeon.RoomHeader import init_room_headers
-from source.dungeon.RoomList import Room0127
+from RoomData import Position, DoorKind
+from source.dungeon.RoomHeader import init_room_headers, RoomHeader
+from source.dungeon.RoomList import Room0127, Room
+from source.dungeon.RoomObject import RoomObject, DoorObject
 from source.enemizer.OwEnemyList import init_vanilla_sprites_ow, vanilla_sprites_ow
 from source.enemizer.SpriteSheets import init_sprite_sheets, init_sprite_requirements, SheetChoice
 
@@ -226,4 +228,30 @@ def get_uw_enemy_table():
         for sprite in sprite_list:
             uw_table.room_map[room].append(sprite.copy())
     return uw_table
+
+
+def init_custom_rooms(world, player, custom_rooms):
+    data_tables = world.data_tables[player]
+    for room_id, room_data in custom_rooms.items():
+        room_id = int(room_id, 16)
+        if room_data['header']:
+            data_bytes = [int(x, 16) for x in room_data['header']]
+            data_tables.room_headers[room_id] = RoomHeader(room_id, data_bytes)
+
+        if any(room_data[attr] for attr in ['layout', 'layer1', 'layer2', 'doors']):
+            room = data_tables.room_list[room_id] if room_id in data_tables.room_list else Room([], [], [], [])
+
+            if room_data['layout']:
+                room.layout = [int(x, 16) for x in room_data['layout']]
+            if room_data['layer1']:
+                room.layer1 = [RoomObject.factory(*[int(x, 16) if i != 0 else x for i, x in enumerate(obj)])
+                               for obj in room_data['layer1']]
+            if room_data['layer2']:
+                room.layer2 = [RoomObject.factory(*[int(x, 16) if i != 0 else x for i, x in enumerate(obj)])
+                               for obj in room_data['layer2']]
+            if room_data['doors']:
+                room.doors = [DoorObject(Position[pair[0]], DoorKind[pair[1]]) for pair in room_data['doors']]
+            data_tables.room_list[room_id] = room
+
+
 
