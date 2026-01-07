@@ -234,6 +234,19 @@ class CustomSettings(object):
             return self.file_source['doors']
         return None
 
+    def get_rooms(self):
+        if 'rooms' in self.file_source:
+            return self.file_source['rooms']
+        return None
+
+    def get_custom_rooms(self, player):
+        # these are optionally player specific for now
+        if self.get_rooms():
+            if player in self.get_rooms():
+                return self.get_rooms()[player]
+            else:
+                return self.get_rooms()
+
     def get_custom_pools(self, player):
         if self.get_doors() and 'pools' in self.get_doors()[player]:
             return self.get_doors()[player]['pools']

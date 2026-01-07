@@ -36,7 +36,8 @@ from source.tools.BPS import create_bps_from_data
 from source.classes.CustomSettings import CustomSettings
 from source.enemizer.DamageTables import DamageTable
 from source.enemizer.Enemizer import randomize_enemies
-from source.rom.DataTables import init_data_tables
+from source.limited.LimitedRunCoordinator import adjust_world_for_limited_runs
+from source.rom.DataTables import init_data_tables, init_custom_rooms
 
 version_number = '2.0.0'
 version_branch = '-u'
@@ -256,6 +257,10 @@ def main(args, seed=None, fish=None):
                         world.push_precollected(item)
     if args.print_custom_yaml:
         world.settings.record_info(world)
+
+    for player in range(1, world.players + 1):
+        if world.customizer and world.customizer.get_custom_rooms(player):
+            init_custom_rooms(world, player, world.customizer.get_custom_rooms(player))
 
     if any(world.potshuffle.values()):
         logger.info(world.fish.translate("cli", "cli", "shuffling.pots"))
