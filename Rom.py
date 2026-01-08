@@ -1264,8 +1264,8 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
                 else:
                     goal_bytes += int16_as_bytes(req['target'])
             elif req['condition'] & 0x80 == 0:
-                if req['condition'] & 0x7F == 0x06 or req['condition'] & 0x7F == 0x07:
-                    # agahnims have no target value
+                if req['condition'] & 0x7F in [0x00, 0x06, 0x07]:
+                    # no target value
                     pass
                 elif req['condition'] & 0x7F < 0x08:
                     goal_bytes += [req['target']]
