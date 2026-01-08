@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1.9
+- Fixed follower shuffle placement errors
+- Fixed pseudoboots ability to open Kings Tomb
+- Implemented better accurate coordinates on map check locations
+- Fixed janky icons on zoomed-in map check screen
+
 ## 0.6.1.8
 - Fixed follower placement and logic
 - Fixed error with HC Courtyard Tree Pull
