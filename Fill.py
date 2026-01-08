@@ -1054,6 +1054,8 @@ def balance_money_progression(world):
         return [loc for loc in locations if sphere_state.can_reach(loc) and sphere_state.not_flooding_a_key(sphere_state.world, loc)]
 
     def interesting_item(location, item, world, player):
+        if location.event or location.locked:
+            return True
         if item.advancement:
             return True
         if item.type is not None or item.name.startswith('Rupee'):
