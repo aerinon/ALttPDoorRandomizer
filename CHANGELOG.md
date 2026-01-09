@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.1.10
+- Emergency fix for bonk functionality
+
 ## 0.6.1.9
 - Fixed follower shuffle placement errors
 - Fixed pseudoboots ability to open Kings Tomb

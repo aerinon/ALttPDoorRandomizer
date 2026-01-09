@@ -8,7 +8,7 @@ from OWEdges import OWTileRegions, OWEdgeGroups, OWEdgeGroupsTerrain, OWExitType
 from OverworldGlitchRules import create_owg_connections
 from Utils import bidict
 
-version_number = '0.6.1.9'
+version_number = '0.6.1.10'
 # branch indicator is intentionally different across branches
 version_branch = '-u'
 
