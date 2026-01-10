@@ -584,7 +584,10 @@ def link_overworld(world, player):
                 connect_simple(world, 'Flute Spot ' + str(o + 1), regions[1], player)
     
     if world.owFluteShuffle[player] == 'vanilla':
-        connect_flutes(default_flute_connections)
+        flute_spots = default_flute_connections.copy()
+        sort_flute_spots(world, player, flute_spots)
+        world.owflutespots[player] = flute_spots
+        connect_flutes(flute_spots)
     else:
         flute_spots = 8
         flute_pool = list(flute_data.keys())
@@ -709,9 +712,9 @@ def link_overworld(world, player):
 
             region_total -= sector[0]
             flute_spots -= spots_to_place
-        
+
         # connect new flute spots
-        new_spots.sort()
+        sort_flute_spots(world, player, new_spots)
         world.owflutespots[player] = new_spots
         connect_flutes(new_spots)
 
@@ -1308,6 +1311,15 @@ def adjust_edge_groups(world, trimmed_groups, edges_to_swap, player):
                             groups[key][i].remove(m)
                         groups[(mode, wrld, dir, terrain, parallel, count, group_name)][i].extend(matches)
     return groups
+
+def sort_flute_spots(world, player, flute_spots):
+    if world.owLayout[player] != 'grid':
+        flute_spots.sort(key=lambda id: flute_data[id][1] if id != 0x03 or not world.is_tile_swapped(0x03, player) else 0x04)
+    else:
+        world_layout = world.owgrid[player][0] if world.mode[player] != 'inverted' else world.owgrid[player][1]
+        layout_list = sum(world_layout, [])
+        layout_map = {id & 0xBF: i for i, id in enumerate(layout_list)}
+        flute_spots.sort(key=lambda id: layout_map[flute_data[id][1] if id != 0x03 or not world.is_tile_swapped(0x03, player) else 0x04])
 
 def create_dynamic_flute_exits(world, player):
     flute_in_pool = True if player not in world.customitemarray else any(i for i, n in world.customitemarray[player].items() if i == 'flute' and n > 0)

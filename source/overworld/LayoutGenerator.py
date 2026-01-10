@@ -1387,6 +1387,8 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
                         map_grid[w][(i + 1) % 8][j] = screen_id + 0x08
                         map_grid[w][(i + 1) % 8][(j + 1) % 8] = screen_id + 0x09
         world.owgrid[player] = map_grid
+        world.owlayoutmap_lw[player] = {id & 0xBF: i for i, id in enumerate(sum(map_grid[0], []))}
+        world.owlayoutmap_dw[player] = {id & 0xBF: i for i, id in enumerate(sum(map_grid[1], []))}
 
         world.spoiler.set_map('layout_grid_lw', format_grid_for_spoiler(grid[0]), grid[0], player)
         if not world.owParallel[player]:

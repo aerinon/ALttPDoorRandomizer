@@ -513,14 +513,14 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     # patch flute spots
     owFlags = 0
     owFog = 0
-    if world.owFluteShuffle[player] == 'vanilla':
+    if world.owFluteShuffle[player] == 'vanilla' and world.owLayout[player] != 'grid':
         flute_spots = default_flute_connections
     else:
         flute_spots = world.owflutespots[player]
         owFlags |= 0x0100
         write_int16(rom, snes_to_pc(0x0AB7F7), 0xEAEA)
 
-    flute_writes = sorted([(f, flute_data[f][1]) for f in flute_spots], key = lambda f: f[1])
+    flute_writes = [(f, flute_data[f][1]) for f in flute_spots]
     for o in range(0, len(flute_writes)):
         owid = flute_writes[o][0]
         offset = 0
@@ -545,10 +545,11 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         write_int16(rom, snes_to_pc(0x02E937 + (o * 2)), data[base_index + 8]) # cam X
         write_int16(rom, snes_to_pc(0x02E959 + (o * 2)), data[base_index + 9]) # unknown 1
         write_int16(rom, snes_to_pc(0x02E97B + (o * 2)), data[base_index + 10]) # unknown 2
-        rom.write_byte(snes_to_pc(0x0AB783 + o), data[base_index + 12] & 0xff) # flute menu blip - X low byte
-        rom.write_byte(snes_to_pc(0x0AB78B + o), data[base_index + 12] // 0x100) # flute menu blip - X high byte
-        rom.write_byte(snes_to_pc(0x0AB793 + o), data[base_index + 11] & 0xff) # flute menu blip - Y low byte
-        rom.write_byte(snes_to_pc(0x0AB79B + o), data[base_index + 11] // 0x100) # flute menu blip - Y high byte
+        map_x, map_y = adjust_ow_coordinates_to_layout(world, player, data[base_index + 12], data[base_index + 11], world.mode[player] == 'inverted')
+        rom.write_byte(snes_to_pc(0x0AB783 + o), map_x & 0xff) # flute menu blip - X low byte
+        rom.write_byte(snes_to_pc(0x0AB78B + o), map_x // 0x100) # flute menu blip - X high byte
+        rom.write_byte(snes_to_pc(0x0AB793 + o), map_y & 0xff) # flute menu blip - Y low byte
+        rom.write_byte(snes_to_pc(0x0AB79B + o), map_y // 0x100) # flute menu blip - Y high byte
 
     # patch whirlpools
     if world.owWhirlpoolShuffle[player]:
@@ -1447,10 +1448,14 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
                 y_map_position = [0x06E0, 0x0E50, 0xFF00, 0x0FD0, 0x06E0, 0x0D80, 0x0160, 0x0E80, 0x0130, 0x0840, 0x01B0]
                 idx = ent
             owid = owid_map[idx]
+            map_x = x_map_position[idx]
+            map_y = y_map_position[idx]
             if owid != 0xFF:
                 if (owid < 0x40) == (world.is_tile_swapped(owid, player)):
                     coord_flags |= 0x8000 # world indicator flag
-            return (coord_flags | x_map_position[idx], y_map_position[idx])
+                if coord_flags & 0x4000 == 0:
+                    map_x, map_y = adjust_ow_coordinates_to_layout(world, player, map_x, map_y, coord_flags & 0x8000 != 0)
+            return (coord_flags | map_x, map_y)
         elif type(ent) is Location:
             from OverworldShuffle import OWTileRegions, ow_loc_prize_table
             if ent.name in ow_loc_prize_table:
@@ -1471,8 +1476,10 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
                 coords = (door_addresses[ent.name][1][6], door_addresses[ent.name][1][5])
             else:
                 raise Exception(f"No overworld map coordinates for entrance {ent.name}")
-        coords = ((0x8000 if ent.parent_region.type == RegionType.DarkWorld else 0x0000) | coords[0], coords[1])
+        map_x, map_y = adjust_ow_coordinates_to_layout(world, player, coords[0], coords[1], ent.parent_region.type == RegionType.DarkWorld)
+        coords = ((0x8000 if ent.parent_region.type == RegionType.DarkWorld else 0x0000) | map_x, map_y)
         return coords
+
     if world.overworld_map[player] == 'default':
         # disable HC/AT/GT icons
         if not world.owMixed[player]:
@@ -3023,6 +3030,13 @@ def update_compasses(rom, dungeon_locations, world, player):
     if not provided_dungeon:
         rom.write_byte(0x186FFF, 0xff)
 
+def adjust_ow_coordinates_to_layout(world, player, x, y, dw_flag):
+    if world.owLayout[player] != 'grid':
+        return (x, y)
+    layout_map = world.owlayoutmap_dw[player] if dw_flag else world.owlayoutmap_lw[player]
+    original_slot_id = ((y // 0x0200) % 0x08) * 0x08 + ((x // 0x0200) % 0x08)
+    new_slot_id = layout_map[original_slot_id]
+    return ((new_slot_id % 0x08) * 0x0200 + x % 0x0200, ((new_slot_id // 0x08) % 0x08) * 0x0200 + y % 0x0200)
 
 
 InconvenientDungeonEntrances = {'Turtle Rock': 'Turtle Rock Main',

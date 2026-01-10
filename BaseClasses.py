@@ -88,6 +88,8 @@ class World(object):
         self.owcrossededges = {}
         self.owwhirlpools = {}
         self.owgrid = {}
+        self.owlayoutmap_lw = {}
+        self.owlayoutmap_dw = {}
         self.owflutespots = {}
         self.owsectors = {}
         self.allow_flip_sanc = {}
