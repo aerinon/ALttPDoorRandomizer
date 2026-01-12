@@ -8,7 +8,7 @@ from OverworldShuffle import connect_two_way, validate_layout
 
 ENABLE_KEEP_SIMILAR_SPECIAL_HANDLING = False
 PREVENT_WRAPPED_LARGE_SCREENS = False
-DRAW_IMAGE = True
+DRAW_IMAGE = False
 
 large_screen_ids = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35] + [0x40, 0x43, 0x45, 0x58, 0x5B, 0x5E, 0x70, 0x75]
 
@@ -1330,14 +1330,23 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
     """Main execution function"""
     import time
 
+    horizontal_wrap = False
+    vertical_wrap = False
+    if world.customizer:
+        grid_options = world.customizer.get_owgrid()
+        if grid_options and player in grid_options:
+            grid_options = grid_options[player]
+            horizontal_wrap = 'wrap_horizontal' in grid_options and grid_options['wrap_horizontal'] == True
+            vertical_wrap = 'wrap_vertical' in grid_options and grid_options['wrap_vertical'] == True
+
     first_ignore_bonus = 2
     if not world.owParallel[player]:
         first_ignore_bonus *= 2
         if world.owCrossed[player] == 'unrestricted':
             first_ignore_bonus *= 2
     options = LayoutGeneratorOptions(
-        horizontal_wrap=False,
-        vertical_wrap=False,
+        horizontal_wrap=horizontal_wrap,
+        vertical_wrap=vertical_wrap,
         large_screen_pool=False,
         distortion_chance=0.0,
         random_order=6 if world.owParallel[player] else 12,

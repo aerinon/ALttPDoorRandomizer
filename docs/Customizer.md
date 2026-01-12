@@ -253,6 +253,14 @@ someDescription:
   - Stone Bridge WS*
 ```
 
+### ow-grid
+
+`grid` contains additional options that only have an effect when `ow_layout` is set to `grid`.
+
+#### wrap_horizontal / wrap_vertical
+
+Set these to `true` to allow for overworld edge transitions to wrap from one side of a world to the opposite side. With `wrap_horizontal`, there can be east transitions on the eastern edge of the world map that send the player to the western edge of the world. With `wrap_vertical`, there can be south transitions on the southern edge of the world map that send the player to the northern edge of the world.
+
 ### ow-crossed
 
 This must be defined by player. Each player number should be listed with the appropriate sections and each of these players MUST have `ow_crossed` enabled in the `settings` section in order for any values here to take effect. This section has four primary subsections: `force_crossed`, `force_noncrossed`, `limit_crossed`, and `undefined_chance`. There are also 
