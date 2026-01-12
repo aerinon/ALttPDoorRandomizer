@@ -33,6 +33,7 @@ class World(object):
         self.owCrossed = self.owCrossed if self.owCrossed != 'polar' or self.owMixed else 'none'
         self.owWhirlpoolShuffle = {}
         self.owFluteShuffle = {}
+        self.owFog = {}
         self.shuffle = shuffle.copy()
         self.doorShuffle = doorShuffle.copy()
         self.intensity = {}
@@ -3049,6 +3050,7 @@ class Spoiler(object):
                          'ow_mixed': self.world.owMixed,
                          'ow_whirlpool': self.world.owWhirlpoolShuffle,
                          'ow_fluteshuffle': self.world.owFluteShuffle,
+                         'ow_fog': self.world.owFog,
                          'bonk_drops': self.world.shuffle_bonk_drops,
                          'shuffle_followers': self.world.shuffle_followers,
                          'shuffle': self.world.shuffle,
@@ -3323,6 +3325,8 @@ class Spoiler(object):
                     outfile.write('OW Tile Flip (Mixed):'.ljust(line_width) + '%s\n' % yn(self.metadata['ow_mixed'][player]))
                     outfile.write('Whirlpool Shuffle:'.ljust(line_width) + '%s\n' % yn(self.metadata['ow_whirlpool'][player]))
                     outfile.write('Flute Shuffle:'.ljust(line_width) + '%s\n' % self.metadata['ow_fluteshuffle'][player])
+                    if self.metadata['ow_layout'][player] == 'grid' or self.metadata['ow_mixed'][player]:
+                        outfile.write('Overworld Fog:'.ljust(line_width) + '%s\n' % yn(self.metadata['ow_fog'][player]))
                     outfile.write('\n')
                     outfile.write('Entrance Shuffle:'.ljust(line_width) + '%s\n' % self.metadata['shuffle'][player])
                     if self.metadata['shuffle'][player] != 'vanilla':
@@ -3725,7 +3729,7 @@ boss_mode = {"none": 0, "simple": 1, "full": 2, "chaos": 3, 'random': 3, 'unique
 orlayout_mode = {"vanilla": 0, "grid": 1, "wild": 2}
 orcrossed_mode = {"none": 0, "polar": 1, "grouped": 2, "unrestricted": 4}
 
-# byte 12: KMBQ FF?? (keep similar, mixed/tile flip, bonk drops, follower quests, flute spots)
+# byte 12: KMBQ FFO? (keep similar, mixed/tile flip, bonk drops, follower quests, flute spots, fog)
 flutespot_mode = {"vanilla": 0, "balanced": 1, "random": 2}
 
 # byte 13: FBBB TTPP (flute_mode, bow_mode, take_any, prize shuffle)
@@ -3793,7 +3797,7 @@ class Settings(object):
 
             (0x80 if w.owKeepSimilar[p] else 0) | (0x40 if w.owMixed[p] else 0)
             | (0x20 if w.shuffle_bonk_drops[p] else 0) | (0x10 if w.shuffle_followers[p] else 0)
-            | (flutespot_mode[w.owFluteShuffle[p]] << 4),
+            | (flutespot_mode[w.owFluteShuffle[p]] << 4) | (0x02 if w.owFog[p] else 0),
 
             (flute_mode[w.flute_mode[p]] << 7 | bow_mode[w.bow_mode[p]] << 4
              | take_any_mode[w.take_any[p]] << 2 | prizeshuffle_mode[w.prizeshuffle[p]]),
@@ -3881,6 +3885,7 @@ class Settings(object):
         args.bonk_drops[p] = True if settings[12] & 0x20 else False
         args.shuffle_followers[p] = True if settings[12] & 0x10 else False
         args.ow_fluteshuffle[p] = r(flutespot_mode)[(settings[12] & 0x0C) >> 2]
+        args.ow_fog[p] = True if settings[12] & 0x02 else False
 
         if len(settings) > 13:
             args.flute_mode[p] = r(flute_mode)[(settings[13] & 0x80) >> 7]

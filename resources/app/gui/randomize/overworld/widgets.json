@@ -48,6 +48,13 @@
       "config": {
         "pady": [20,0]
       }
+    },
+    "fog": {
+      "type": "checkbox",
+      "default": true,
+      "config": {
+        "pady": [20,0]
+      }
     }
   },
   "rightOverworldFrame": {

@@ -130,6 +130,9 @@ def parse_cli(argv, no_defaults=False):
         ret.ow_layout = 'wild'
         ret.ow_parallel = False
 
+    if ret.ow_no_fog:
+        ret.ow_fog = False
+
     if player_num:
         defaults = copy.deepcopy(ret)
         for player in range(1, player_num + 1):
@@ -142,7 +145,7 @@ def parse_cli(argv, no_defaults=False):
 
             for name in ['logic', 'mode', 'swords', 'goal', 'difficulty', 'item_functionality', 'ow_shuffle', 'ow_layout',
                          'ow_parallel', 'ow_terrain', 'ow_crossed', 'ow_keepsimilar', 'ow_mixed', 'ow_whirlpool', 'ow_fluteshuffle',
-                         'flute_mode', 'bow_mode', 'take_any', 'boots_hint', 'shuffle_followers',
+                         'ow_fog', 'flute_mode', 'bow_mode', 'take_any', 'boots_hint', 'shuffle_followers',
                          'shuffle', 'door_shuffle', 'intensity', 'crystals_ganon', 'crystals_gt', 'openpyramid',
                          'mapshuffle', 'compassshuffle', 'keyshuffle', 'bigkeyshuffle', 'prizeshuffle', 'startinventory',
                          'usestartinventory', 'bombbag', 'shuffleganon', 'overworld_map', 'restrict_boss_items',
@@ -213,6 +216,8 @@ def parse_settings():
         "ow_mixed": False,
         "ow_whirlpool": False,
         "ow_fluteshuffle": "vanilla",
+        "ow_fog": True,
+        "ow_no_fog": False,
         "shuffle_followers": False,
         "bonk_drops": False,
         "shuffle": "vanilla",

@@ -658,7 +658,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
 
     write_int16(rom, 0x150002, owMode)
     write_int16(rom, 0x150004, owFlags)
-    write_int16(rom, 0x150008, owFog)
+    write_int16(rom, 0x150008, owFog if world.owFog[player] else 0x00)
 
     # patch entrance/exits/holes
     for region in world.regions:

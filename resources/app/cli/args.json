@@ -224,6 +224,15 @@
       "random"
     ]
   },
+  "ow_fog": {
+    "action": "store_true",
+    "help": "suppress",
+    "type": "bool"
+  },
+  "ow_no_fog": {
+    "action": "store_true",
+    "type": "bool"
+  },
   "shuffle": {
     "choices": [
       "vanilla",

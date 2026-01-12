@@ -99,7 +99,8 @@ SETTINGSTOPROCESS = {
       "keepsimilar": "ow_keepsimilar",
       "mixed": "ow_mixed",
       "whirlpool": "ow_whirlpool",
-      "overworldflute": "ow_fluteshuffle"
+      "overworldflute": "ow_fluteshuffle",
+      "fog": "ow_fog"
     },
     "entrance": {
       "entranceshuffle": "shuffle",

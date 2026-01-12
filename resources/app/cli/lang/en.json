@@ -280,6 +280,9 @@
       "                spots from being on any adjacent screen.",
       "Random:         New flute spots will be generated with minimal bias."
     ],
+    "ow_no_fog": [
+      "With OW Grid Layout Shuffle or Mixed, this disables the fog that prevents",
+      "you from seeing unvisited screens on the overworld map." ],
     "door_shuffle": [
       "Select Door Shuffling Algorithm. (default: %(default)s)",
       "Basic:          Doors are mixed within a single dungeon.",

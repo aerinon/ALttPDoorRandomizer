@@ -435,6 +435,12 @@ This gives each OW tile a random chance to be flipped to the opposite world
 For randomizing the flute spots around the overworld
 
 ```
+--ow_no_fog
+```
+
+With OW Grid Layout Shuffle or Mixed, this disables the fog that prevents you from seeing unvisited screens on the overworld map.
+
+```
 --shuffle_followers
 ```
 

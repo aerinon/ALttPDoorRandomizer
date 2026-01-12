@@ -101,6 +101,7 @@ class CustomSettings(object):
                 args.ow_mixed[p] = get_setting(settings['ow_mixed'], args.ow_mixed[p])
                 args.ow_whirlpool[p] = get_setting(settings['ow_whirlpool'], args.ow_whirlpool[p])
                 args.ow_fluteshuffle[p] = get_setting(settings['ow_fluteshuffle'], args.ow_fluteshuffle[p])
+                args.ow_fog[p] = get_setting(settings['ow_fog'], args.ow_fog[p])
                 args.shuffle_followers[p] = get_setting(settings['shuffle_followers'], args.shuffle_followers[p])
                 args.bonk_drops[p] = get_setting(settings['bonk_drops'], args.bonk_drops[p])
                 args.shuffle[p] = get_setting(settings['shuffle'], args.shuffle[p])
@@ -373,6 +374,7 @@ class CustomSettings(object):
             settings_dict[p]['ow_mixed'] = world.owMixed[p]
             settings_dict[p]['ow_whirlpool'] = world.owWhirlpoolShuffle[p]
             settings_dict[p]['ow_fluteshuffle'] = world.owFluteShuffle[p]
+            settings_dict[p]['ow_fog'] = world.owFog[p]
             settings_dict[p]['shuffle_followers'] = world.shuffle_followers[p]
             settings_dict[p]['bonk_drops'] = world.shuffle_bonk_drops[p]
             settings_dict[p]['shuffle'] = world.shuffle[p]
