@@ -175,6 +175,7 @@ def init_sprite_requirements():
     reqs = [
         SpriteRequirement(EnemySprite.Raven).no_drop().sub_group(3, [0x11, 0x19]).exclude(NoFlyingRooms),
         SpriteRequirement(EnemySprite.Vulture).no_drop().sub_group(2, 0x12).exclude(NoFlyingRooms),
+        SpriteRequirement(EnemySprite.CustomSprite).no_drop().skip().ow_skip(),
         SpriteRequirement(EnemySprite.CorrectPullSwitch).affix().sub_group(3, [0x52, 0x53]),
         SpriteRequirement(EnemySprite.WrongPullSwitch).affix().sub_group(3, [0x52, 0x53]),
         SpriteRequirement(EnemySprite.Octorok).aquaphobia().sub_group(2, [0xc, 0x18]),

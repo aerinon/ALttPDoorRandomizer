@@ -7,6 +7,7 @@
 *_custom.yaml
 *_meta.txt
 *.bps
+!data/**/*.bps
 *.pyc
 *.sfc
 *.srm

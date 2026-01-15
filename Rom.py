@@ -47,6 +47,8 @@ from source.enemizer.Enemizer import write_enemy_shuffle_settings
 JAP10HASH = '03a63945398191337e896e5771f77173'
 RANDOMIZERBASEHASH = 'b118695a85b98bb1e59af2f8ae443d6f'
 
+limited_run_hashes = {
+}
 
 class JsonRom(object):
 
@@ -101,13 +103,14 @@ class JsonRom(object):
 
 class LocalRom(object):
 
-    def __init__(self, file, patch=True, name=None, hash=None):
+    def __init__(self, file, patch=True, name=None, hash=None, flag=None):
         self.name = name
         self.hash = hash
         self.orig_buffer = None
         self.file = file
         self.initial_sram = InitialSram()
         self.has_smc_header = False
+        self.flag = flag
         if not os.path.isfile(file):
             raise RuntimeError("Could not find valid local base rom for patching at expected path %s." % file)
         with open(file, 'rb') as stream:
@@ -159,8 +162,15 @@ class LocalRom(object):
         # extend to 2MB
         self.buffer.extend(bytearray([0x00] * (0x200000 - len(self.buffer))))
 
+        if self.flag and self.flag != 'none':
+            baserom_file = f'data/limited/{self.flag}/base2current.bps'
+            base_hash = limited_run_hashes[self.flag]
+        else:
+            baserom_file = 'data/base2current.bps'
+            base_hash = RANDOMIZERBASEHASH
+        
         # load randomizer patches
-        with open(local_path('data/base2current.bps'), 'rb') as stream:
+        with open(local_path(baserom_file), 'rb') as stream:
             bps.apply.apply_to_bytearrays(bps.io.read_bps(stream), orig_buffer, self.buffer)
 
         self.create_json_patch(orig_buffer)
@@ -168,7 +178,7 @@ class LocalRom(object):
         # verify md5
         patchedmd5 = hashlib.md5()
         patchedmd5.update(self.buffer)
-        if RANDOMIZERBASEHASH != patchedmd5.hexdigest():
+        if base_hash != patchedmd5.hexdigest():
             raise RuntimeError('Provided Base Rom unsuitable for patching. Please provide a JAP(1.0) "Zelda no Densetsu - Kamigami no Triforce (Japan).sfc" rom to use as a base.')
 
     def create_json_patch(self, orig_buffer):
@@ -1753,6 +1763,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         world.data_tables[player].write_to_rom(rom, colorize_pots, world.enemy_shuffle[player] == 'random')
 
     write_enemizer_tweaks(rom, world, player)
+    write_limited_data(rom, world, player)
     write_gfx_data(rom, world, player)
     write_strings(rom, world, player, team)
 
@@ -1866,6 +1877,12 @@ def write_enemizer_tweaks(rom, world, player):
     if world.enemy_shuffle[player] != 'none':
         rom.write_byte(snes_to_pc(0x1DF6D8), 0)  # lets enemies walk on water instead of clipping into infinity?
         rom.write_byte(snes_to_pc(0x0DB6B3), 0x82)  # hovers don't need water necessarily?
+
+
+def write_limited_data(rom, world, player):
+    if world.limited_run[player] != 'none':
+        # enable limited
+        rom.write_byte(snes_to_pc(0xB08031), 0x01)
 
 
 def write_gfx_data(rom, world, player):
