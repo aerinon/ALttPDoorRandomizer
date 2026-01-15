@@ -35,6 +35,7 @@ from OverworldShuffle import default_flute_connections, flute_data
 from InitialSram import InitialSram
 
 from source.classes.SFX import randomize_sfx, randomize_sfxinstruments, randomize_songinstruments
+from source.classes.GFX import GFXData
 from source.item.FillUtil import valid_pot_items
 from source.dungeon.EnemyList import EnemySprite, setup_enemy_dungeon_tables
 from source.dungeon.RoomObject import DoorObject
@@ -1751,6 +1752,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         world.data_tables[player].write_to_rom(rom, colorize_pots, world.enemy_shuffle[player] == 'random')
 
     write_enemizer_tweaks(rom, world, player)
+    write_gfx_data(rom, world, player)
     write_strings(rom, world, player, team)
 
     # write initial sram
@@ -1863,6 +1865,39 @@ def write_enemizer_tweaks(rom, world, player):
     if world.enemy_shuffle[player] != 'none':
         rom.write_byte(snes_to_pc(0x1DF6D8), 0)  # lets enemies walk on water instead of clipping into infinity?
         rom.write_byte(snes_to_pc(0x0DB6B3), 0x82)  # hovers don't need water necessarily?
+
+
+def write_gfx_data(rom, world, player):
+    overflow_offset = 0
+    for gfx_data in world.data_tables[player].gfx_data.values():
+        if gfx_data.file_replacement:
+            replacement_path = local_path(gfx_data.file_replacement)
+            if os.path.isfile(replacement_path):
+                with open(replacement_path, "rb") as f:
+                    replacement_data = f.read()
+                    if len(replacement_data) <= gfx_data.size: # check if data fits in original space
+                        # write to original address
+                        rom.write_bytes(snes_to_pc(gfx_data.address), replacement_data)
+                    else:
+                        # write to overflow area
+                        overflow_address = GFXData.OVERFLOW_ADDRESS + overflow_offset
+                        overflow_offset += len(replacement_data)
+                        rom.write_bytes(snes_to_pc(overflow_address), replacement_data)
+                        
+                        # update 24-bit pointer split across three tables
+                        rom.write_byte(snes_to_pc(GFXData.BANK_POINTER + gfx_data.index), 
+                                    (overflow_address >> 16) & 0xFF)
+                        rom.write_byte(snes_to_pc(GFXData.PAGE_POINTER + gfx_data.index), 
+                                    (overflow_address >> 8) & 0xFF)
+                        rom.write_byte(snes_to_pc(GFXData.DATA_POINTER + gfx_data.index), 
+                                    overflow_address & 0xFF)
+                        if gfx_data.shared_gfx:
+                            rom.write_byte(snes_to_pc(GFXData.BANK_POINTER + gfx_data.shared_gfx), 
+                                    (overflow_address >> 16) & 0xFF)
+                            rom.write_byte(snes_to_pc(GFXData.PAGE_POINTER + gfx_data.shared_gfx), 
+                                    (overflow_address >> 8) & 0xFF)
+                            rom.write_byte(snes_to_pc(GFXData.DATA_POINTER + gfx_data.shared_gfx), 
+                                    overflow_address & 0xFF)
 
 
 def hud_format_text(text):

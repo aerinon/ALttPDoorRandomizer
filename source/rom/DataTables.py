@@ -8,6 +8,7 @@ from source.dungeon.RoomHeader import init_room_headers
 from source.dungeon.RoomList import Room0127
 from source.enemizer.OwEnemyList import init_vanilla_sprites_ow, vanilla_sprites_ow
 from source.enemizer.SpriteSheets import init_sprite_sheets, init_sprite_requirements, SheetChoice
+from source.classes.GFX import init_gfx_data
 
 
 def convert_area_id_to_offset(area_id):
@@ -34,6 +35,7 @@ class DataTables:
             'ow_sprites': [ 0x09CB41, None, (0x09C881, 0x09C901, 0x09CA21), None ],
             'uw_sprites': [ 0x09D92E, None, 0x09D62E, 0x09C298 ],
         }
+        self.gfx_data = None
 
         # associated data
         self.sprite_requirements = None
@@ -223,6 +225,7 @@ def init_data_tables(world, player):
             data_tables.ow_enemy_table[area].append(sprite.copy())
     data_tables.enemy_damage = {k: list(v) for k, v in world.damage_table[player].enemy_damage.items()}
     # todo: more denials based on enemy drops
+    data_tables.gfx_data = init_gfx_data()
     return data_tables
 
 
