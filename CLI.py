@@ -146,7 +146,7 @@ def parse_cli(argv, no_defaults=False):
                          'mixed_travel', 'standardize_palettes', 'code', 'reduce_flashing', 'shuffle_sfx', 'shuffle_sfxinstruments',
                          'shuffle_songinstruments', 'msu_resume', 'collection_rate', 'colorizepots', 'decoupledoors', 'door_type_mode',
                          'bonk_drops', 'trap_door_mode', 'key_logic_algorithm', 'door_self_loops', 'any_enemy_logic', 'aga_randomness',
-                         'money_balance']:
+                         'money_balance', 'limited_run']:
                 value = getattr(defaults, name) if getattr(playerargs, name) is None else getattr(playerargs, name)
                 if player == 1:
                     setattr(ret, name, {1: value})
@@ -169,6 +169,7 @@ def parse_settings():
     # set default settings
     settings = {
         "lang": "en",
+        "limited_run": 'none',
         "retro": False,
         "bombbag": False,
         "mode": "open",

@@ -47,6 +47,7 @@ class EnemyStats:
 class EnemySprite(FastEnum):
     Raven = 0x00
     Vulture = 0x01
+    CustomSprite = 0x03
     CorrectPullSwitch = 0x04
     WrongPullSwitch = 0x06
     Octorok = 0x08
@@ -287,6 +288,7 @@ def init_enemy_stats():
     stats = {
         EnemySprite.Raven: EnemyStats(EnemySprite.Raven, False, False, (6, 2), health=(4, 8), dmg=(1, 8), dmask=0x80),
         EnemySprite.Vulture: EnemyStats(EnemySprite.Vulture, False, False, 6, health=6, dmg=3, dmask=0x80),
+        EnemySprite.CustomSprite: EnemyStats(EnemySprite.CustomSprite, True, ignore=True, dmg=0),
         EnemySprite.CorrectPullSwitch: EnemyStats(EnemySprite.CorrectPullSwitch, True, ignore=True, dmg=2),
         EnemySprite.WrongPullSwitch: EnemyStats(EnemySprite.WrongPullSwitch, True, ignore=True, dmg=2),
         EnemySprite.Octorok: EnemyStats(EnemySprite.Octorok, False, True, 2, health=(2, 4), dmg=(3, 5)),
@@ -2334,6 +2336,7 @@ def add_drop_contents(world, player):
 enemy_names = {
     0x00: 'Raven',
     0x01: 'Vulture',
+    0x03: 'CustomSprite',
     0x04: 'CorrectPullSwitch',
     0x06: 'WrongPullSwitch',
     0x08: 'Octorok',
@@ -2680,4 +2683,5 @@ sprite_translation = {
     'Wizzrobe': EnemySprite.Wizzrobe,
     'Zora': EnemySprite.Zora,
     'Zoro': EnemySprite.Zoro,
+    'CustomSprite': EnemySprite.CustomSprite,
 }
