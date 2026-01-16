@@ -42,7 +42,7 @@ from source.enemizer.Enemizer import write_enemy_shuffle_settings
 
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '3f033ac891acfcedce26c00d5cd880ed'
+RANDOMIZERBASEHASH = '794b7cd02f429873c3ad6dc74490279c'
 
 
 class JsonRom(object):
@@ -465,9 +465,9 @@ def patch_rom(world, rom, player, team, is_mystery=False):
                         itemid = 0x5A
 
             if not location.locked and ((location.item.smallkey and world.keyshuffle[player] == 'none') or (
-                location.item.bigkey and world.bigkeyshuffle[player] == 'none') or (
-                location.item.map and world.mapshuffle[player] == 'none') or (
-                location.item.compass and world.compassshuffle[player] == 'none')):
+                    location.item.bigkey and world.bigkeyshuffle[player] == 'none') or (
+                                                location.item.map and world.mapshuffle[player] == 'none') or (
+                                                location.item.compass and world.compassshuffle[player] == 'none')):
                 itemid = handle_native_dungeon(location, itemid)
 
             rom.write_byte(location.address, itemid)
@@ -560,11 +560,11 @@ def patch_rom(world, rom, player, team, is_mystery=False):
     if world.doorShuffle[player] not in  ['vanilla', 'basic']:
         dr_flags |= DROptions.Map_Info
     if ((world.collection_rate[player] or world.goal[player] == 'completionist')
-       and world.goal[player] not in ['triforcehunt', 'trinity', 'ganonhunt']):
+            and world.goal[player] not in ['triforcehunt', 'trinity', 'ganonhunt']):
         dr_flags |= DROptions.Debug
         rom.write_byte(snes_to_pc(0x308039), 1)
-    if world.doorShuffle[player] not in ['vanilla', 'basic'] and world.logic[player] != 'nologic'\
-       and world.mixed_travel[player] == 'prevent':
+    if world.doorShuffle[player] not in ['vanilla', 'basic'] and world.logic[player] != 'nologic' \
+            and world.mixed_travel[player] == 'prevent':
         # PoD Falling Bridge or Hammjump
         # 1FA607: db $2D, $79, $69 ; 0x0069: Vertical Rail ↕ | { 0B, 1E } | Size: 05
         # 1FA60A: db $14, $99, $5D ; 0x005D: Large Horizontal Rail ↔ | { 05, 26 } | Size: 01
@@ -649,7 +649,7 @@ def patch_rom(world, rom, player, team, is_mystery=False):
     if world.doorShuffle[player] == 'basic':
         rom.write_byte(0x138002, 1)
     for door in world.doors:
-        if door.dest is not None and isinstance(door.dest, Door) and\
+        if door.dest is not None and isinstance(door.dest, Door) and \
              not door.entranceFlag and not door.traversal_only and\
              door.player == player and door.type in [DoorType.Normal, DoorType.SpiralStairs,
                                                      DoorType.Open, DoorType.StraightStairs, DoorType.Ladder]:
@@ -1109,7 +1109,7 @@ def patch_rom(world, rom, player, team, is_mystery=False):
 
     gametype = 0x04 # item
     if (world.shuffle[player] != 'vanilla' or world.doorShuffle[player] != 'vanilla'
-       or world.dropshuffle[player] != 'none' or world.pottery[player] != 'none'):
+            or world.dropshuffle[player] != 'none' or world.pottery[player] != 'none'):
         gametype |= 0x02  # entrance/door
     rom.write_byte(0x180211, gametype)  # Game type
 
@@ -1202,8 +1202,18 @@ def patch_rom(world, rom, player, team, is_mystery=False):
                                      | (0x02 if world.compassshuffle[player] else 0x00)
                                      | (0x04 if world.mapshuffle[player] else 0x00)
                                      | (0x08 if world.bigkeyshuffle[player] else 0x00)))  # free roaming item text boxes
-    rom.write_byte(0x18003B, 0x01 if world.mapshuffle[player] else 0x00)  # maps showing crystals on overworld
 
+    map_hud_mode = 0x00
+    if world.dungeon_counters[player] == 'on':
+        map_hud_mode = 0x02  # always on
+    elif world.dungeon_counters[player] == 'off':
+        pass
+    elif world.keyshuffle[player] != 'universal' and (world.mapshuffle[player] != 'none' or world.doorShuffle[player] != 'vanilla'
+                                                      or world.dropshuffle[player] != 'none' or world.pottery[player] not in ['none', 'cave'] or world.dungeon_counters[player] == 'pickup'):
+        map_hud_mode = 0x01  # show on pickup
+    rom.write_byte(0x18003A, map_hud_mode)
+
+    rom.write_byte(0x18003B, 0x01 if world.mapshuffle[player] else 0x00)  # maps showing crystals on overworld
     # compasses showing dungeon count
     compass_mode = 0x00
     if world.clock_mode != 'none' or world.dungeon_counters[player] == 'off':
@@ -1409,7 +1419,7 @@ def patch_rom(world, rom, player, team, is_mystery=False):
     write_enemy_shuffle_settings(world, player, rom)
 
     if (world.doorShuffle[player] != 'vanilla' or world.dropshuffle[player] != 'none'
-       or world.pottery[player] != 'none'):
+            or world.pottery[player] != 'none'):
         for room in world.rooms:
             if room.player == player and room.modified:
                 if room.index in world.data_tables[player].room_list:
@@ -1454,7 +1464,7 @@ def patch_rom(world, rom, player, team, is_mystery=False):
         (hashint >> 10) & 0x1F,
         (hashint >> 5) & 0x1F,
         hashint & 0x1F,
-    ]
+        ]
     rom.write_bytes(0x180215, code)
     rom.hash = code
 
