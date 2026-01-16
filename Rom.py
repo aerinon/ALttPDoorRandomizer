@@ -43,7 +43,7 @@ from source.enemizer.Enemizer import write_enemy_shuffle_settings
 
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = 'b118695a85b98bb1e59af2f8ae443d6f'
+RANDOMIZERBASEHASH = 'b078fd606ee5ec68190a177d977221cf'
 
 
 class JsonRom(object):
@@ -1385,6 +1385,8 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     map_hud_mode = 0x00
     if world.dungeon_counters[player] == 'on':
         map_hud_mode = 0x02  # always on
+    elif world.dungeon_counters[player] == 'off':
+        pass
     elif world.keyshuffle[player] != 'universal' and (world.mapshuffle[player] not in ['none', 'nearby'] or world.doorShuffle[player] != 'vanilla'
           or world.dropshuffle[player] != 'none' or world.pottery[player] not in ['none', 'cave'] or world.dungeon_counters[player] == 'pickup'):
         map_hud_mode = 0x01  # show on pickup
