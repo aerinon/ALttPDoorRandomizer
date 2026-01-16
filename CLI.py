@@ -10,6 +10,7 @@ from source.classes.BabelFish import BabelFish
 
 from Utils import update_deprecated_args
 from source.classes.CustomSettings import CustomSettings
+from source.limited.LimitedRunCoordinator import get_limited_run_args
 
 
 class ArgumentDefaultsHelpFormatter(argparse.RawTextHelpFormatter):
@@ -146,8 +147,10 @@ def parse_cli(argv, no_defaults=False):
                          'mixed_travel', 'standardize_palettes', 'code', 'reduce_flashing', 'shuffle_sfx', 'shuffle_sfxinstruments',
                          'shuffle_songinstruments', 'msu_resume', 'collection_rate', 'colorizepots', 'decoupledoors', 'door_type_mode',
                          'bonk_drops', 'trap_door_mode', 'key_logic_algorithm', 'door_self_loops', 'any_enemy_logic', 'aga_randomness',
-                         'money_balance', 'limited_run']:
+                         'money_balance', 'limited_run', 'limited_run_args']:
                 value = getattr(defaults, name) if getattr(playerargs, name) is None else getattr(playerargs, name)
+                if value and name == 'limited_run_args':
+                    value = get_limited_run_args(value)
                 if player == 1:
                     setattr(ret, name, {1: value})
                 else:
@@ -169,7 +172,8 @@ def parse_settings():
     # set default settings
     settings = {
         "lang": "en",
-        "limited_run": 'none',
+        "limited_run": "none",
+        "limited_run_args": "",
         "retro": False,
         "bombbag": False,
         "mode": "open",

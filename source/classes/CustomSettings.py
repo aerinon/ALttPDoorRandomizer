@@ -58,6 +58,7 @@ class CustomSettings(object):
         return meta['players']
 
     def adjust_args(self, args, resolve_weighted=True):
+        from source.limited.LimitedRunCoordinator import get_limited_run_args
         def get_setting(value: Any, default):
             if value or value == 0:
                 if isinstance(value, dict):
@@ -67,7 +68,7 @@ class CustomSettings(object):
                 else:
                     return value
             return default
-        if 'meta' in self.file_source:
+        if 'meta' in self.file_source and self.file_source['meta']:
             meta = defaultdict(lambda: None, self.file_source['meta'])
             args.multi = get_setting(meta['players'], args.multi)
             args.algorithm = get_setting(meta['algorithm'], args.algorithm)
@@ -80,9 +81,12 @@ class CustomSettings(object):
             args.race = get_setting(meta['race'], args.race)
             args.notes = get_setting(meta['user_notes'], args.notes)
         self.player_range = range(1, args.multi + 1)
-        if 'settings' in self.file_source:
+        if 'settings' in self.file_source and self.file_source['settings']:
             for p in self.player_range:
-                player_setting = self.file_source['settings'][p]
+                if p in self.file_source['settings']:
+                    player_setting = self.file_source['settings'][p]
+                else:
+                    player_setting = self.file_source['settings']
                 if isinstance(player_setting, str):
                     weights = get_weights(os.path.join(self.relative_dir, player_setting))
                     settings = defaultdict(lambda: None, vars(roll_settings(weights)))
@@ -201,6 +205,8 @@ class CustomSettings(object):
                 args.beemizer[p] = get_setting(settings['beemizer'], args.beemizer[p])
                 args.aga_randomness[p] = get_setting(settings['aga_randomness'], args.aga_randomness[p])
                 args.money_balance[p] = get_setting(settings['money_balance'], args.money_balance[p])
+                args.limited_run[p] = get_setting(settings['limited_run'], args.limited_run[p])
+                args.limited_run_args[p] = get_limited_run_args(get_setting(settings['limited_run_args'], args.limited_run_args[p]))
 
                 # mystery usage
                 args.usestartinventory[p] = get_setting(settings['usestartinventory'], args.usestartinventory[p])

@@ -496,6 +496,7 @@ def init_world(args, fish):
     world.aga_randomness = args.aga_randomness.copy()
     world.money_balance = args.money_balance.copy()
     world.limited_run = args.limited_run.copy()
+    world.limited_run_args = args.limited_run_args.copy()
 
     # custom settings - these haven't been promoted to full settings yet
     in_progress_settings = ['force_enemy', 'free_lamp_cone']
@@ -811,6 +812,7 @@ def copy_world(world):
     ret.restrict_boss_items = world.restrict_boss_items.copy()
     ret.inaccessible_regions = world.inaccessible_regions.copy()
     ret.limited_run = world.limited_run.copy()
+    ret.limited_run_args = world.limited_run_args.copy()
     ret.damage_table = world.damage_table
     ret.data_tables = world.data_tables  # can be changed...
     ret.settings = world.settings
@@ -1036,6 +1038,7 @@ def copy_world_premature(world, player, create_flute_exits=True):
     ret.data_tables = world.data_tables  # can be changed...
     ret.key_logic = world.key_logic.copy()
     ret.limited_run = world.limited_run.copy()
+    ret.limited_run_args = world.limited_run_args.copy()
     ret.settings = world.settings
 
     ret.is_premature_copied_world = True

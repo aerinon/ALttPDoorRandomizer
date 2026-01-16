@@ -122,6 +122,7 @@ class World(object):
             set_player_attr('allow_flip_sanc', False)
             set_player_attr('remote_items', False)
             set_player_attr('limited_run', 'none')
+            set_player_attr('limited_run_args', {})
             set_player_attr('required_medallions', ['Ether', 'Quake'])
             set_player_attr('bottle_refills', ['Bottle (Green Potion)', 'Bottle (Green Potion)'])
             set_player_attr('swamp_patch_required', False)
