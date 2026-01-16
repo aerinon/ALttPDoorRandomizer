@@ -449,11 +449,13 @@ def randomize_enemies(world, player):
             custom_uw = {room_id: {i: world.force_enemy[player] for i, s in enumerate(sprite_list)} for room_id, sprite_list in world.data_tables[player].uw_enemy_table.room_map.items()}
         else:
             enemy_map = world.customizer.get_enemies() if world.customizer else None
-            if enemy_map and player in enemy_map:
-                if 'Underworld' in enemy_map[player]:
-                    custom_uw = enemy_map[player]['Underworld']
-                if 'Overworld' in enemy_map[player]:
-                    custom_ow = enemy_map[player]['Overworld']
+            if enemy_map:
+                if player in enemy_map:
+                    enemy_map = enemy_map[player]
+                if 'Underworld' in enemy_map:
+                    custom_uw = enemy_map['Underworld']
+                if 'Overworld' in enemy_map:
+                    custom_ow = enemy_map['Overworld']
         randomize_underworld_sprite_sheets(data_tables.sprite_sheets, data_tables, custom_uw)
         randomize_underworld_rooms(data_tables, world, player, custom_uw)
         randomize_overworld_sprite_sheets(data_tables.sprite_sheets, data_tables, custom_ow)
@@ -540,7 +542,16 @@ def randomize_enemies(world, player):
                 random_zelda()
         else:
             random_zelda()
-    
+    if world.limited_run[player] == '2604':
+        for sprite in world.data_tables[player].ow_enemy_table[0x18]:
+            if sprite.kind in {0x34, 0x3d}:
+                sprite.kind = 0xC4 # snitch thieves
+        pod = world.data_tables[player].ow_enemy_table[0x5E]
+        from source.dungeon.EnemyList import Sprite
+        for x_pos, y_pos in [(0x0F, 0x32), (0x2F, 0x32), (0x12, 0x1B), (0x2D, 0x10)]:
+            sprite = Sprite(0x5E, 0x03, 0, 0, x_pos, y_pos, '', False, None)
+            sprite.static = True
+            pod.append(sprite)
 
 
 def write_enemy_shuffle_settings(world, player, rom):

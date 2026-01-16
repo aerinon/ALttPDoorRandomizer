@@ -35,15 +35,9 @@ def adjust_world_for_limited_runs(world, args):
                     world.customizer.load_yaml(yaml)
                 else:
                     custom_file = load_yaml(yaml)
-                    # TODO: Make this more generic to handle other sections in the future
-                    if 'settings' in custom_file:
-                        if 'settings' in world.customizer.file_source:
-                            world.customizer.file_source['settings'].update(custom_file['settings'])
+                    for section_key, section_value in custom_file.items():
+                        if section_key in world.customizer.file_source:
+                            world.customizer.file_source[section_key].update(section_value)
                         else:
-                            world.customizer.file_source['settings'] = custom_file['settings']
-                    if 'rooms' in custom_file:
-                        if 'rooms' in world.customizer.file_source:
-                            world.customizer.file_source['rooms'].update(custom_file['rooms'])
-                        else:
-                            world.customizer.file_source['rooms'] = custom_file['rooms']
+                            world.customizer.file_source[section_key] = section_value
                 world.customizer.adjust_args(args)

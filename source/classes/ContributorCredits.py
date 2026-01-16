@@ -481,9 +481,16 @@ def build_default_credits(world, player) -> ContributorCredits:
     
     gen.add_small_credits("FESTIVE RANDOMIZER", SmallColor.GREEN)
     gen.add_blank_line()
-    gen.add_big_credits("KAN                    TOTAL")
-    gen.add_blank_line()
-    gen.add_big_credits("CATOBAT            DINSAPHIR")
+    if world.limited_run[player] == '2604':
+        gen.add_big_credits("CODEMANN8          HIIMCODY1")
+        gen.add_blank_line()
+        gen.add_big_credits("AERINON   KARAFRUIT  CATOBAT")
+        gen.add_blank_line()
+        gen.add_big_credits("                            ")
+    else:
+        gen.add_big_credits("KAN                    TOTAL")
+        gen.add_blank_line()
+        gen.add_big_credits("CATOBAT            DINSAPHIR")
     gen.add_blank_line()
     gen.add_blank_line()
     
@@ -551,8 +558,18 @@ def build_default_credits(world, player) -> ContributorCredits:
     gen.add_empty_line()
     gen.add_empty_line()
 
-    for _ in range(12):
-        gen.add_empty_line()
+    if world.limited_run[player] == '2604':
+        gen.add_small_credits("IN MEMORY OF", SmallColor.RED)
+        gen.add_blank_line()
+        gen.add_big_credits("CASSIDYMOEN")
+        gen.add_blank_line()
+        gen.add_small_credits_mixed(["YOU BUILT PATHS WE ", ("STILL", SmallColor.RED), " WALK"], SmallColor.YELLOW)
+        gen.add_small_credits_mixed(["YOUR ", ("PASSION", SmallColor.RED), " BRINGS JOY TO ALL"], SmallColor.YELLOW)
+        gen.add_blank_line()
+        gen.add_small_credits_mixed([("FOREVER", SmallColor.GREEN), " PART OF THE RANDOMIZER"], SmallColor.YELLOW)
+    else:
+        for _ in range(12):
+            gen.add_empty_line()
 
     for _ in range(10):
         gen.add_empty_line()
@@ -731,6 +748,7 @@ if __name__ == "__main__":
     # Create mock world and player for testing
     class MockWorld:
         def __init__(self):
+            self.limited_run = {1: '2604'}
             pass
     
     world = MockWorld()

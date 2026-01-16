@@ -2048,5 +2048,6 @@ class TextTable(object):
         text['ganon_phase_3_silvers'] = CompressedTextMapper.convert("Oh no! Silver! My one true weakness!")
         text['murahdahla'] = CompressedTextMapper.convert("Hello @. I\nam Murahdahla, brother of\nSahasrahla and Aginah. Behold the power of\ninvisibility.\n{PAUSE3}\n… … …\nWait! You can see me? I knew I should have\nhidden in a hollow tree.")
         text['mastersword_pedestal_goal'] = CompressedTextMapper.convert("To claim thy reward, you must present all 3 Pendants of Virtue.")
+        text['limited_lostwoods'] = CompressedTextMapper.convert("{NOBORDER}\nThe heck was that? There's gotta be something around here that we can throw at that thing before we jump in.")
         text['end_pad_data'] = bytearray([0xfb])
         text['terminator'] = bytearray([0xFF, 0xFF])

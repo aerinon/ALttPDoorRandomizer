@@ -45,9 +45,10 @@ from source.enemizer.Enemizer import write_enemy_shuffle_settings
 
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = 'b118695a85b98bb1e59af2f8ae443d6f'
+RANDOMIZERBASEHASH = '81f972f5b27067580cdce8b31db2fa6e'
 
 limited_run_hashes = {
+    '2604' : '39574d621c6f880db88d601869b8bf71',
 }
 
 class JsonRom(object):
@@ -569,6 +570,8 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     # patch overworld edges
     inverted_buffer = [0] * 0x82
     owMode = 0
+    if world.limited_run[player] == '2604':
+        owMode = 1
     if world.owShuffle[player] != 'vanilla' or world.owCrossed[player] not in ['none', 'polar'] or world.owMixed[player]:
         if world.owShuffle[player] == 'parallel':
             owMode = 1
@@ -706,8 +709,9 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
         dr_flags |= DROptions.Map_Info
     if ((world.collection_rate[player] or world.goal[player] == 'completionist')
        and world.goal[player] not in ['triforcehunt', 'trinity', 'ganonhunt']):
-        dr_flags |= DROptions.Debug
-        rom.write_byte(snes_to_pc(0x308039), 1)
+        if world.limited_run[player] != '2604':
+            dr_flags |= DROptions.Debug
+            rom.write_byte(snes_to_pc(0x308039), 1)
     if world.doorShuffle[player] not in ['vanilla', 'basic'] and world.logic[player] != 'nologic'\
        and world.mixed_travel[player] == 'prevent':
         # PoD Falling Bridge or Hammjump
@@ -1320,7 +1324,14 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
             ganon_goal += [0x81, 0x82, 0x06, 0x07, 0x89] # AD and max collection rate
         else:
             ganon_goal += [0x02, world.crystals_needed_for_ganon[player], 0x07] # crystals and aga2
-
+    if world.limited_run[player] == '2604':
+        egg_goal_amount = world.limited_run_args[player]['egg_goal']
+        if world.goal[player] in ['triforcehunt', 'trinity']:
+            murah_goal += [0x08, egg_goal_amount]
+        if world.goal[player] in ['pedestal', 'trinity']:
+            ped_pull += [0x08, egg_goal_amount]
+        if world.goal[player] not in ['pedestal', 'triforcehunt']:
+            ganon_goal += [0x08, egg_goal_amount]
     gt_entry += [0xFF]
     ped_pull += [0xFF]
     ganon_goal += [0xFF]
@@ -1883,6 +1894,37 @@ def write_limited_data(rom, world, player):
     if world.limited_run[player] != 'none':
         # enable limited
         rom.write_byte(snes_to_pc(0xB08031), 0x01)
+    if world.limited_run[player] == '2604':
+        egg_goal_amount = world.limited_run_args[player]['egg_goal']
+        rom.write_bytes(0x180167, int16_as_bytes(egg_goal_amount)) # egg goal
+        # banana fixes
+        rom.write_byte(snes_to_pc(0x86DB0F), 0xED) # gfx offset
+        rom.write_byte(snes_to_pc(0x8DB35C), 0x59) # palette
+        rom.write_byte(snes_to_pc(0x8DB728), 0x80) # persist offscreen
+        rom.write_byte(snes_to_pc(0x8DB083), 0x81) # allocate 1 OAM slot
+        banana_candidates = [           (0x02, 0x0F), (0x03, 0x1B),
+            (0x04, 0x23), (0x04, 0x30), (0x06, 0x02), (0x0C, 0x1D),
+            (0x0C, 0x26), (0x10, 0x2F), (0x11, 0x21), (0x13, 0x09),
+            (0x13, 0x28), (0x17, 0x02), (0x18, 0x17), (0x1A, 0x2B),
+            (0x1C, 0x13), (0x1C, 0x36), (0x1F, 0x26), (0x21, 0x03),
+            (0x26, 0x37), (0x27, 0x03), (0x2A, 0x1E), (0x2B, 0x05),
+            (0x2C, 0x28), (0x2F, 0x17), (0x33, 0x31), (0x35, 0x17),
+            (0x39, 0x10), (0x3A, 0x26), (0x3B, 0x18), (0x3B, 0x1F),
+        ]
+        random.shuffle(banana_candidates)
+        selected_bananas = banana_candidates[:10]
+        x_coords = [coord[0] for coord in selected_bananas]
+        y_coords = [coord[1] for coord in selected_bananas]
+        rom.write_bytes(snes_to_pc(0x30EF00), x_coords + y_coords)
+
+        # Write credits data
+        credits_ptr_table, credits_line_data = get_credits_data(world, player)
+        rom.write_bytes(snes_to_pc(0x23812C), credits_ptr_table)
+        rom.write_bytes(snes_to_pc(0x23844C), credits_line_data)
+
+        # chest gfx
+        write_int16s(rom, snes_to_pc(0x00AFEE), [0x0DE1, 0x0DF1, 0x4DE1, 0x4DF1, 0x0DE2, 0x0DF2, 0x4DE2, 0x4DF2])  # palette
+        world.data_tables[player].gfx_data[0x0F].file_replacement = os.path.join("data", "limited", "2604", "gfx", "0f_basket.3bppc")
 
 
 def write_gfx_data(rom, world, player):
@@ -2724,6 +2766,12 @@ def write_strings(rom, world, player, team):
                             + "{PAUSE7}\nYou will have to find all the items necessary to beat Ganon.\n"
                             + "{PAUSE7}\nThis is your chance to be a hero.\n{PAUSE3}\n{CHANGEPIC}\n"
                             + "You must get the 7 crystals to beat Ganon.\n{PAUSE9}\n{CHANGEPIC}", False)
+    
+    # custom texts
+    if world.limited_run[player] == '2604':
+        tt['shop_fortune_teller_lw_hint_0'] = "A new harmony flows from the flute, calling you fourth to distant lands"
+        tt['kiki_first_extortion'] = "OoOo, banana! Gimme 10 bananas and I'll help you out."
+
     rom.write_bytes(0xE0000, tt.getBytes())
 
     credits = Credits()
