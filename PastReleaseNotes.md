@@ -10,6 +10,8 @@
 # Patch Notes
 
 Changelog archive
+* 1.5.1
+  * Bugfix: Fixed an issue with keys not counting correctly
 * 1.5.0
   * Logic: Fixed vanilla key logic for GT basement
   * Logic (Playthrough): Fixed an issue where enemy kill rules were not applied during playthrough calculation. (Thanks Catobat for the catch)
