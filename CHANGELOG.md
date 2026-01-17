@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.7.0.0
+- New OW Layout Shuffle Mode: Grid
+- Implemented Fog of War for Tile Flip
+
 # 0.6.1.11
 - Fixed bonk drops duplicate counting and potentially overwriting arbitrary values
 - Fixed boss icons on dungeon map check
