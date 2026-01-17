@@ -1787,7 +1787,7 @@ class Entrance(object):
                         if mirror_exit and mirror_region:
                             if mirror_region.can_reach(state):
                                 traverse_paths(mirror_region, self.parent_region)
-                                break # no need to continue if there is no path from the mirror re-entry to dest
+                                break  # no need to continue if there is no path from the mirror re-entry to dest
                     mirror_map.pop(0)
                 if found:
                     path = state.path.get(mirror_region, (mirror_region.name, None))
