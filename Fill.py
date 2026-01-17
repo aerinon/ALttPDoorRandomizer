@@ -1024,7 +1024,10 @@ def balance_money_progression(world):
                    'Rupees (100)': 100, 'Rupees (300)': 300}
     rupee_rooms = {'Eastern Rupees': 90, 'Mire Key Rupees': 45, 'Mire Shooter Rupees': 90,
                    'TR Rupees': 270, 'PoD Dark Basement': 270}
-    acceptable_balancers = ['Bombs (3)', 'Arrows (10)', 'Bombs (10)']
+    acceptable_balancers = ['Single Bomb', 'Bombs (3)', 'Bombs (10)',
+                            'Single Arrow', 'Arrows (5)', 'Arrows (10)',
+                            'Small Magic', 'Big Magic', 'Small Heart',
+                            'Fairy', 'Chicken', 'Nothing']
 
     base_value = sum(rupee_rooms.values())
     available_money = {player: base_value for player in range(1, world.players+1)}
@@ -1125,10 +1128,11 @@ def balance_money_progression(world):
                 unchecked_locations.remove(location)
                 if location.item:
                     if location.item.name.startswith('Rupee'):
-                        wallet[location.item.player] += rupee_chart[location.item.name]
-                        if location.item.name != 'Rupees (300)':
-                            balance_locations[location.item.player].add(location)
-                    if interesting_item(location, location.item, world, location.item.player):
+                        if not (location.item.name == 'Rupee (1)' and world.algorithm != 'district'):
+                            wallet[location.item.player] += rupee_chart[location.item.name]
+                            if location.item.name != 'Rupees (300)':
+                                balance_locations[location.item.player].add(location)
+                    elif interesting_item(location, location.item, world, location.item.player):
                         checked_locations.append(location)
                     elif location.item.name in acceptable_balancers:
                         balance_locations[location.item.player].add(location)
@@ -1172,7 +1176,11 @@ def balance_money_progression(world):
                     if len(increase_targets) == 0:
                         increase_targets = [x for x in balance_locations[target_player] if (rupee_chart[x.item.name] if x.item.name in rupee_chart else 0) < best_value]
                     if len(increase_targets) == 0:
-                        raise Exception('No early sphere swaps for rupees - money grind would be required - bailing for now')
+                        if state.can_farm_rupees(target_player):
+                            logger.warning(f'No more swap targets available. Short by {difference} rupees, but continuing (player can farm)')
+                            break
+                        else:
+                            raise Exception(f'No early sphere swaps for rupees - money grind would be required - bailing for now')
                     best_target = min(increase_targets, key=lambda t: rupee_chart[t.item.name] if t.item.name in rupee_chart else 0)
                     make_item_free = wallet[target_player] < 20
                     old_value = 0 if make_item_free else (rupee_chart[best_target.item.name] if best_target.item.name in rupee_chart else 0)

@@ -43,7 +43,7 @@ from source.enemizer.Enemizer import write_enemy_shuffle_settings
 
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = 'f2eebfbec9c8ad638e922ed1047d1c10'
+RANDOMIZERBASEHASH = '34c9d7b09fad982dea9e7c9e3ae885ee'
 
 
 class JsonRom(object):
@@ -1411,9 +1411,15 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
                                      | (0x04 if world.mapshuffle[player] != 'none' else 0x00)
                                      | (0x08 if world.bigkeyshuffle[player] != 'none' else 0x00)))  # free roaming item text boxes
     rom.write_byte(0x18003B, 0x01 if world.mapshuffle[player] not in ['none', 'nearby'] else 0x00)  # maps showing crystals on overworld
-    if world.keyshuffle[player] != 'universal' and (world.mapshuffle[player] not in ['none', 'nearby'] or world.doorShuffle[player] != 'vanilla'
-          or world.dropshuffle[player] != 'none' or world.pottery[player] not in ['none', 'cave']):
-        rom.write_byte(0x18003A, 0x01)  # show key counts on map pickup
+    map_hud_mode = 0x00
+    if world.dungeon_counters[player] == 'on':
+        map_hud_mode = 0x02  # always on
+    elif world.dungeon_counters[player] == 'off':
+        pass
+    elif world.keyshuffle[player] != 'universal' and (world.mapshuffle[player] not in ['none', 'nearby'] or world.doorShuffle[player] != 'vanilla'
+          or world.dropshuffle[player] != 'none' or world.pottery[player] not in ['none', 'cave'] or world.dungeon_counters[player] == 'pickup'):
+        map_hud_mode = 0x01  # show on pickup
+    rom.write_byte(0x18003A, map_hud_mode)
 
     # compasses showing dungeon count
     compass_mode = 0x80 if world.compassshuffle[player] not in ['none', 'nearby'] else 0x00
