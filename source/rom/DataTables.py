@@ -141,7 +141,7 @@ class DataTables:
         bytes = sum(1+len(x)*3 for x in self.ow_enemy_table.values() if len(x) > 0)+1
         self.pointer_addresses['ow_sprites'][1] = bytes
         # ending_byte = 0x09CB3B + bytes
-        max_per_state = {0: 0x40, 1: 0x90, 2: 0x81}  # dropped max on state 2 to steal space for extra sprites (Murahdahla, extra tutorial guard)
+        max_per_state = {0: 0x40, 1: 0x90, 2: 0x82}  # dropped max on state 2 to steal space for extra sprites (Murahdahla, extra tutorial guard)
 
         pointer_address = snes_to_pc(self.pointer_addresses['ow_sprites'][2][0])
         self.pointer_addresses['ow_sprites'][0] = pointer_address + ((max_per_state[0] + max_per_state[1] + max_per_state[2]) * 2)
