@@ -187,7 +187,7 @@
   },
   "ow_unparallel": {
     "action": "store_true",
-    "type": "bool"
+    "dest": "ow_parallel"
   },
   "ow_terrain": {
     "action": "store_true",
@@ -231,7 +231,7 @@
   },
   "ow_no_fog": {
     "action": "store_true",
-    "type": "bool"
+    "dest": "ow_fog"
   },
   "shuffle": {
     "choices": [
