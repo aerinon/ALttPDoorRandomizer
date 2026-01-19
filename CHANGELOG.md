@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.7.0.1
+- Fixed buggy sprites in post-Aga Zora's Domain
+- Fixed L/R map switch when in special OW screens
+- Fixes issue not able to screen transition if bumped by enemy in water
+
 # 0.7.0.0
 - New OW Layout Shuffle Mode: Grid
 - Implemented Fog of War for Tile Flip
