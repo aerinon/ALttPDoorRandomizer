@@ -92,13 +92,15 @@ SETTINGSTOPROCESS = {
       "bombbag": "bombbag"
     },
     "overworld": {
-      "overworldshuffle": "ow_shuffle",
+      "layout": "ow_layout",
+      "parallel": "ow_parallel",
       "terrain": "ow_terrain",
       "crossed": "ow_crossed",
       "keepsimilar": "ow_keepsimilar",
       "mixed": "ow_mixed",
       "whirlpool": "ow_whirlpool",
-      "overworldflute": "ow_fluteshuffle"
+      "overworldflute": "ow_fluteshuffle",
+      "fog": "ow_fog"
     },
     "entrance": {
       "entranceshuffle": "shuffle",

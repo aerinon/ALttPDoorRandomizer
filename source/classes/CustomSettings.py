@@ -93,7 +93,8 @@ class CustomSettings(object):
                     args.mystery = True
                 else:
                     settings = defaultdict(lambda: None, player_setting)
-                args.ow_shuffle[p] = get_setting(settings['ow_shuffle'], args.ow_shuffle[p])
+                args.ow_layout[p] = get_setting(settings['ow_layout'], args.ow_layout[p])
+                args.ow_parallel[p] = get_setting(settings['ow_parallel'], args.ow_parallel[p])
                 args.ow_terrain[p] = get_setting(settings['ow_terrain'], args.ow_terrain[p])
                 args.ow_crossed[p] = get_setting(settings['ow_crossed'], args.ow_crossed[p])
                 if args.ow_crossed[p] == 'chaos':
@@ -104,6 +105,7 @@ class CustomSettings(object):
                 args.ow_mixed[p] = get_setting(settings['ow_mixed'], args.ow_mixed[p])
                 args.ow_whirlpool[p] = get_setting(settings['ow_whirlpool'], args.ow_whirlpool[p])
                 args.ow_fluteshuffle[p] = get_setting(settings['ow_fluteshuffle'], args.ow_fluteshuffle[p])
+                args.ow_fog[p] = get_setting(settings['ow_fog'], args.ow_fog[p])
                 args.shuffle_followers[p] = get_setting(settings['shuffle_followers'], args.shuffle_followers[p])
                 args.bonk_drops[p] = get_setting(settings['bonk_drops'], args.bonk_drops[p])
                 args.shuffle[p] = get_setting(settings['shuffle'], args.shuffle[p])
@@ -138,6 +140,14 @@ class CustomSettings(object):
                         args.bow_mode[p] = 'retro_silvers'
                     args.take_any[p] = 'random' if args.take_any[p] == 'none' else args.take_any[p]
                     args.keyshuffle[p] = 'universal'
+
+                ow_shuffle = get_setting(settings['ow_shuffle'], args.ow_shuffle[p])
+                if ow_shuffle == 'parallel':
+                    args.ow_layout = 'wild'
+                    args.ow_parallel = True
+                elif ow_shuffle == 'full':
+                    args.ow_layout = 'wild'
+                    args.ow_parallel = False
 
                 args.mixed_travel[p] = get_setting(settings['mixed_travel'], args.mixed_travel[p])
                 args.standardize_palettes[p] = get_setting(settings['standardize_palettes'],
@@ -259,6 +269,11 @@ class CustomSettings(object):
             return self.file_source['ow-edges']
         return None
 
+    def get_owgrid(self):
+        if 'ow-grid' in self.file_source:
+            return self.file_source['ow-grid']
+        return None
+
     def get_owcrossed(self):
         if 'ow-crossed' in self.file_source:
             return self.file_source['ow-crossed']
@@ -362,13 +377,15 @@ class CustomSettings(object):
             self.world_rep['start_inventory'] = start_inv = {}
         for p in self.player_range:
             settings_dict[p] = {}
-            settings_dict[p]['ow_shuffle'] = world.owShuffle[p]
+            settings_dict[p]['ow_layout'] = world.owLayout[p]
+            settings_dict[p]['ow_parallel'] = world.owParallel[p]
             settings_dict[p]['ow_terrain'] = world.owTerrain[p]
             settings_dict[p]['ow_crossed'] = world.owCrossed[p]
             settings_dict[p]['ow_keepsimilar'] = world.owKeepSimilar[p]
             settings_dict[p]['ow_mixed'] = world.owMixed[p]
             settings_dict[p]['ow_whirlpool'] = world.owWhirlpoolShuffle[p]
             settings_dict[p]['ow_fluteshuffle'] = world.owFluteShuffle[p]
+            settings_dict[p]['ow_fog'] = world.owFog[p]
             settings_dict[p]['shuffle_followers'] = world.shuffle_followers[p]
             settings_dict[p]['bonk_drops'] = world.shuffle_bonk_drops[p]
             settings_dict[p]['shuffle'] = world.shuffle[p]

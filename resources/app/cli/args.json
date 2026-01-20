@@ -180,6 +180,22 @@
       "full"
     ]
   },
+  "ow_layout": {
+    "choices": [
+      "vanilla",
+      "grid",
+      "wild"
+    ]
+  },
+  "ow_parallel": {
+    "action": "store_true",
+    "help": "suppress",
+    "type": "bool"
+  },
+  "ow_unparallel": {
+    "action": "store_true",
+    "dest": "ow_parallel"
+  },
   "ow_terrain": {
     "action": "store_true",
     "type": "bool"
@@ -214,6 +230,15 @@
       "balanced",
       "random"
     ]
+  },
+  "ow_fog": {
+    "action": "store_true",
+    "help": "suppress",
+    "type": "bool"
+  },
+  "ow_no_fog": {
+    "action": "store_true",
+    "dest": "ow_fog"
   },
   "shuffle": {
     "choices": [

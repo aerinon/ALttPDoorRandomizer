@@ -132,20 +132,24 @@ Note: These changes do impact the logic. If you use `CodeTracker`, these Inverte
 
 Only settings specifically added by this Overworld Shuffle fork are found here. All door and entrance randomizer settings are supported. See their [readme](https://github.com/Aerinon/ALttPDoorRandomizer/blob/master/README.md)
 
-## Overworld Layout Shuffle (--ow_shuffle)
+## Overworld Layout Shuffle (--ow_layout)
 OW Edge Transitions are shuffled to create new world layouts. A brief visual representation of this can be viewed [here](https://zelda.codemann8.com/images/shared/ow-modes.gif). (This graphic also includes combinations of Crossed and Tile Flip)
 
 ### Vanilla
 
 OW Transitions are not shuffled.
 
-### Parallel
+### Grid
 
-OW Transitions are shuffled, but both worlds will have a matching layout, similar to that of vanilla.
+OW Screens are shuffled in such a way that they are still arranged on an 8x8 grid for each world like vanilla, and the OW Transitions are based on that arrangement.
 
-### Full
+### Wild
 
-OW Transitions are shuffled within each world separately.
+OW Transitions are shuffled with no respect to geometric coherence.
+
+## Parallel (--ow_unparallel to disable)
+
+With OW Layout Shuffle, this forces both worlds to have a matching layout.
 
 ## Free Terrain (--ow_terrain)
 
@@ -389,10 +393,16 @@ Districts are a concept originally conceived by Aerinon in the Door Randomizer, 
 Show the help message and exit.
 
 ```
---ow_shuffle <mode>
+--ow_layout <mode>
 ```
 
 For specifying the overworld layout shuffle you want as above. (default: vanilla)
+
+```
+--ow_unparallel
+```
+
+With OW Layout Shuffle, this no longer forces both worlds to have a matching layout.
 
 ```
 --ow_terrain
@@ -423,6 +433,12 @@ This gives each OW tile a random chance to be flipped to the opposite world
 ```
 
 For randomizing the flute spots around the overworld
+
+```
+--ow_no_fog
+```
+
+With OW Grid Layout Shuffle or Mixed, this disables the fog that prevents you from seeing unvisited screens on the overworld map.
 
 ```
 --shuffle_followers

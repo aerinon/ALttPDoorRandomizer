@@ -20,7 +20,8 @@ settings:
     shuffle_followers: true
     shuffle: crossed
     shufflelinks: true
-    ow_shuffle: parallel
+    ow_layout: wild
+    ow_parallel: true
     ow_terrain: true
     ow_crossed: grouped
     ow_keepsimilar: true
