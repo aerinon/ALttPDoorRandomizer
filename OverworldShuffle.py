@@ -8,7 +8,7 @@ from OWEdges import OWTileRegions, OWEdgeGroups, OWEdgeGroupsTerrain, OWExitType
 from OverworldGlitchRules import create_owg_connections
 from Utils import bidict
 
-version_number = '0.6.1.10'
+version_number = '0.7.0.1'
 # branch indicator is intentionally different across branches
 version_branch = '-u'
 
@@ -114,37 +114,38 @@ def link_overworld(world, player):
 
     # restructure Maze Race/Suburb/Frog/Dig Game manually due to NP/P relationship
     parallel_links_new = bidict(parallel_links) # shallow copy is enough (deep copy is broken)
-    if world.owKeepSimilar[player]:
-        del parallel_links_new['Maze Race ES']
-        del parallel_links_new['Kakariko Suburb WS']
-        for group in trimmed_groups.keys():
-            (std, region, axis, terrain, parallel, _, custom) = group
-            if parallel == IsParallel.Yes:
+    if world.owLayout[player] != 'grid':
+        if world.owKeepSimilar[player]:
+            del parallel_links_new['Maze Race ES']
+            del parallel_links_new['Kakariko Suburb WS']
+            for group in trimmed_groups.keys():
+                (std, region, axis, terrain, parallel, _, custom) = group
+                if parallel == IsParallel.Yes:
+                    (forward_edges, back_edges) = trimmed_groups[group]
+                    if ['Maze Race ES'] in forward_edges:
+                        forward_edges.remove(['Maze Race ES'])
+                        trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][0].append(['Maze Race ES'])
+                    if ['Kakariko Suburb WS'] in back_edges:
+                        back_edges.remove(['Kakariko Suburb WS'])
+                        trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][1].append(['Kakariko Suburb WS'])
+                    trimmed_groups[group] = (forward_edges, back_edges)
+        else:
+            for group in trimmed_groups.keys():
+                (std, region, axis, terrain, _, _, custom) = group
                 (forward_edges, back_edges) = trimmed_groups[group]
-                if ['Maze Race ES'] in forward_edges:
-                    forward_edges.remove(['Maze Race ES'])
-                    trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][0].append(['Maze Race ES'])
-                if ['Kakariko Suburb WS'] in back_edges:
-                    back_edges.remove(['Kakariko Suburb WS'])
-                    trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][1].append(['Kakariko Suburb WS'])
+                if ['Dig Game EC', 'Dig Game ES'] in forward_edges:
+                    forward_edges.remove(['Dig Game EC', 'Dig Game ES'])
+                    trimmed_groups[(std, region, axis, terrain, IsParallel.Yes, 1, custom)][0].append(['Dig Game ES'])
+                    trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][0].append(['Dig Game EC'])
+                if ['Frog WC', 'Frog WS'] in back_edges:
+                    back_edges.remove(['Frog WC', 'Frog WS'])
+                    trimmed_groups[(std, region, axis, terrain, IsParallel.Yes, 1, custom)][1].append(['Frog WS'])
+                    trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][1].append(['Frog WC'])
                 trimmed_groups[group] = (forward_edges, back_edges)
-    else:
-        for group in trimmed_groups.keys():
-            (std, region, axis, terrain, _, _, custom) = group
-            (forward_edges, back_edges) = trimmed_groups[group]
-            if ['Dig Game EC', 'Dig Game ES'] in forward_edges:
-                forward_edges.remove(['Dig Game EC', 'Dig Game ES'])
-                trimmed_groups[(std, region, axis, terrain, IsParallel.Yes, 1, custom)][0].append(['Dig Game ES'])
-                trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][0].append(['Dig Game EC'])
-            if ['Frog WC', 'Frog WS'] in back_edges:
-                back_edges.remove(['Frog WC', 'Frog WS'])
-                trimmed_groups[(std, region, axis, terrain, IsParallel.Yes, 1, custom)][1].append(['Frog WS'])
-                trimmed_groups[(std, region, axis, terrain, IsParallel.No, 1, custom)][1].append(['Frog WC'])
-            trimmed_groups[group] = (forward_edges, back_edges)
     parallel_links_new = {**dict(parallel_links_new), **dict({e:p[0] for e, p in parallel_links_new.inverse.items()})}
 
     connected_edges = []
-    if world.owShuffle[player] != 'vanilla':
+    if world.owLayout[player] != 'vanilla':
         trimmed_groups = remove_reserved(world, trimmed_groups, connected_edges, player)
         trimmed_groups = reorganize_groups(world, trimmed_groups, player)
 
@@ -232,7 +233,7 @@ def link_overworld(world, player):
             if 'undefined_chance' in custom_crossed:
                 undefined_chance = custom_crossed['undefined_chance']
 
-    if limited_crossed > -1:
+    if limited_crossed > -1 and world.owLayout[player] != 'grid':
         # connect forced crossed non-parallel edges based on previously determined tile flips
         for edge in swapped_edges:
             if edge not in parallel_links_new:
@@ -264,10 +265,10 @@ def link_overworld(world, player):
                                                                                 s[0x30],                                s[0x35],
                                                                     s[0x41],                 s[0x3a],s[0x3b],s[0x3c],                s[0x3f])
         world.spoiler.set_map('groups', text_output, ow_crossed_tiles, player)
-    elif limited_crossed > -1 or (world.owShuffle[player] == 'vanilla' and world.owCrossed[player] == 'unrestricted'):
+    elif (limited_crossed > -1 and world.owLayout[player] != 'grid') or (world.owLayout[player] == 'vanilla' and world.owCrossed[player] == 'unrestricted'):
         crossed_candidates = list()
         for group in trimmed_groups.keys():
-            (mode, wrld, dir, terrain, parallel, count, _) = group
+            (mode, wrld, _, terrain, parallel, _, _) = group
             if wrld == WorldType.Light and mode != OpenStd.Standard:
                 for (forward_set, back_set) in zip(trimmed_groups[group][0], trimmed_groups[group][1]):
                     if forward_set[0] in parallel_links_new:
@@ -278,7 +279,7 @@ def link_overworld(world, player):
                         combine_set = forward_combine+back_combine
                         
                         skip_forward = False
-                        if world.owShuffle[player] == 'vanilla':
+                        if world.owLayout[player] == 'vanilla':
                             if any(edge in force_crossed for edge in combine_set):
                                 if not any(edge in force_noncrossed for edge in combine_set):
                                     if any(edge in force_crossed for edge in forward_combine):
@@ -412,7 +413,7 @@ def link_overworld(world, player):
     # layout shuffle
     logging.getLogger('').debug('Shuffling overworld layout')
 
-    if world.owShuffle[player] == 'vanilla':
+    if world.owLayout[player] == 'vanilla':
         # apply outstanding flips
         trimmed_groups = performSwap(trimmed_groups, edges_to_swap)
         assert len(edges_to_swap) == 0, 'Not all edges were flipped successfully: ' + ', '.join(edges_to_swap)
@@ -425,8 +426,15 @@ def link_overworld(world, player):
                 assert len(forward_set) == len(back_set)
                 for (forward_edge, back_edge) in zip(forward_set, back_set):
                     connect_two_way(world, forward_edge, back_edge, player, connected_edges)
+    elif world.owLayout[player] == 'grid':
+        from source.overworld.LayoutGenerator import generate_random_grid_layout
+
+        for exitname, destname in special_screen_connections:
+            connect_two_way(world, exitname, destname, player, connected_edges)
+
+        generate_random_grid_layout(world, player, connected_edges, ow_crossed_tiles if world.owCrossed[player] == 'grouped' else [], force_noncrossed, force_crossed, limited_crossed, undefined_chance / 100)
     else:
-        if world.owKeepSimilar[player] and world.owShuffle[player] == 'parallel':
+        if world.owKeepSimilar[player] and world.owParallel[player]:
             for exitname, destname in parallelsimilar_connections:
                 connect_two_way(world, exitname, destname, player, connected_edges)
 
@@ -576,7 +584,10 @@ def link_overworld(world, player):
                 connect_simple(world, 'Flute Spot ' + str(o + 1), regions[1], player)
     
     if world.owFluteShuffle[player] == 'vanilla':
-        connect_flutes(default_flute_connections)
+        flute_spots = default_flute_connections.copy()
+        sort_flute_spots(world, player, flute_spots)
+        world.owflutespots[player] = flute_spots
+        connect_flutes(flute_spots)
     else:
         flute_spots = 8
         flute_pool = list(flute_data.keys())
@@ -701,9 +712,9 @@ def link_overworld(world, player):
 
             region_total -= sector[0]
             flute_spots -= spots_to_place
-        
+
         # connect new flute spots
-        new_spots.sort()
+        sort_flute_spots(world, player, new_spots)
         world.owflutespots[player] = new_spots
         connect_flutes(new_spots)
 
@@ -822,7 +833,7 @@ def connect_custom(world, connected_edges, groups, forced, player):
                         remove_pair_from_pool(edge1.name, edge2.name, is_crossed)
                         connect_two_way(world, edge1.name, edge2.name, player, connected_edges)
                         # resolve parallel
-                        if world.owShuffle[player] == 'parallel' and edge1.name in parallel_links_new:
+                        if world.owParallel[player] and edge1.name in parallel_links_new:
                             parallel_forward_edge = parallel_links_new[edge1.name]
                             parallel_back_edge = parallel_links_new[edge2.name]
                             if validate_crossed_allowed(parallel_forward_edge, parallel_back_edge, is_crossed):
@@ -838,13 +849,13 @@ def connect_custom(world, connected_edges, groups, forced, player):
                             connect_two_way(world, forward_edge, back_edge, player, connected_edges)
                         else:
                             raise GenerationException('Violation of force crossed rules on unresolved similars: \'%s\' <-> \'%s\'', forward_edge, back_edge)
-                        if world.owShuffle[player] == 'parallel' and forward_edge in parallel_links_new:
+                        if world.owParallel[player] and forward_edge in parallel_links_new:
                             parallel_forward_edge = parallel_links_new[forward_edge]
                             parallel_back_edge = parallel_links_new[back_edge]
                             if not validate_crossed_allowed(parallel_forward_edge, parallel_back_edge, is_crossed):
                                 raise GenerationException('Violation of force crossed rules on parallel unresolved similars: \'%s\' <-> \'%s\'', forward_edge, back_edge)
 
-def connect_two_way(world, edgename1, edgename2, player, connected_edges=None):
+def connect_two_way(world, edgename1, edgename2, player, connected_edges=None, set_spoiler=True):
     edge1 = world.get_entrance(edgename1, player)
     edge2 = world.get_entrance(edgename2, player)
     x = world.get_owedge(edgename1, player)
@@ -868,7 +879,7 @@ def connect_two_way(world, edgename1, edgename2, player, connected_edges=None):
     x.dest = y
     y.dest = x
 
-    if world.owShuffle[player] != 'vanilla' or world.owMixed[player] or world.owCrossed[player] != 'none':
+    if set_spoiler and (world.owLayout[player] != 'vanilla' or world.owMixed[player] or world.owCrossed[player] != 'none'):
         world.spoiler.set_overworld(edgename2, edgename1, 'both', player)
 
     if connected_edges is not None:
@@ -876,7 +887,7 @@ def connect_two_way(world, edgename1, edgename2, player, connected_edges=None):
         connected_edges.append(edgename2)
     
         # connecting parallel connections
-        if world.owShuffle[player] in ['vanilla', 'parallel']:
+        if world.owLayout[player] == 'vanilla' or world.owParallel[player]:
             if edgename1 in parallel_links_new:
                 try:
                     parallel_forward_edge = parallel_links_new[edgename1]
@@ -965,7 +976,7 @@ def determine_forced_flips(world, tile_ow_groups, do_grouped, player):
                         for whirl1, whirl2 in custom_whirlpools.items():
                             if [whirlpool_map[whirl1], whirlpool_map[whirl2]] not in merged_owids and should_merge_group(whirlpool_map[whirl1], whirlpool_map[whirl2]):
                                 merged_owids.append([whirlpool_map[whirl1], whirlpool_map[whirl2]])
-            if world.owShuffle[player] != 'vanilla':
+            if world.owLayout[player] != 'vanilla':
                 custom_edges = world.customizer.get_owedges()
                 if custom_edges and player in custom_edges:
                     custom_edges = custom_edges[player]
@@ -1071,6 +1082,9 @@ def shuffle_tiles(world, groups, result_list, do_grouped, forced_flips, player):
                 exist_dw_regions.extend(dw_regions)
 
         parity = [sum(group_parity[group[0][0]][i] for group in groups if group not in removed) for i in range(6)]
+        if world.owLayout[player] == 'grid':
+            parity[1] = 0
+            parity[2] = 0
         if not world.owKeepSimilar[player]:
             parity[1] += 2*parity[2]
             parity[2] = 0
@@ -1164,12 +1178,16 @@ def define_tile_groups(world, do_grouped, player):
     if world.shuffle[player] in ['vanilla', 'dungeonssimple', 'simple', 'restricted', 'district']:
         merge_groups([[0x05, 0x07]])
 
-    # all non-parallel screens
-    if world.owShuffle[player] == 'vanilla' and (world.owCrossed[player] == 'none' or do_grouped):
-        merge_groups([[0x00, 0x2d, 0x80], [0x0f, 0x81], [0x1a, 0x1b], [0x28, 0x29], [0x30, 0x3a]])
+    # special screens
+    if world.owLayout[player] != 'wild' and (world.owCrossed[player] == 'none' or do_grouped):
+        merge_groups([[0x00, 0x2d, 0x80], [0x0f, 0x81]])
+
+    # remaining non-parallel edges
+    if world.owLayout[player] == 'vanilla' and (world.owCrossed[player] == 'none' or do_grouped):
+        merge_groups([[0x1a, 0x1b], [0x28, 0x29], [0x30, 0x3a]])
 
     # special case: non-parallel keep similar
-    if world.owShuffle[player] == 'parallel' and world.owKeepSimilar[player] and (world.owCrossed[player] == 'none' or do_grouped):
+    if world.owLayout[player] == 'wild' and world.owParallel[player] and world.owKeepSimilar[player] and (world.owCrossed[player] == 'none' or do_grouped):
         merge_groups([[0x28, 0x29]])
 
     # whirlpool screens
@@ -1225,7 +1243,7 @@ def reorganize_groups(world, groups, player):
             new_group[0] = None
         if world.owTerrain[player]:
             new_group[3] = None
-        if world.owShuffle[player] != 'parallel':
+        if not world.owParallel[player]:
             new_group[4] = None
         if not world.owKeepSimilar[player]:
             new_group[5] = None
@@ -1293,6 +1311,15 @@ def adjust_edge_groups(world, trimmed_groups, edges_to_swap, player):
                             groups[key][i].remove(m)
                         groups[(mode, wrld, dir, terrain, parallel, count, group_name)][i].extend(matches)
     return groups
+
+def sort_flute_spots(world, player, flute_spots):
+    if world.owLayout[player] != 'grid':
+        flute_spots.sort(key=lambda id: flute_data[id][1] if id != 0x03 or not world.is_tile_swapped(0x03, player) else 0x04)
+    else:
+        world_layout = world.owgrid[player][0] if world.mode[player] != 'inverted' else world.owgrid[player][1]
+        layout_list = sum(world_layout, [])
+        layout_map = {id & 0xBF: i for i, id in enumerate(layout_list)}
+        flute_spots.sort(key=lambda id: layout_map[flute_data[id][1] if id != 0x03 or not world.is_tile_swapped(0x03, player) else 0x04])
 
 def create_dynamic_flute_exits(world, player):
     flute_in_pool = True if player not in world.customitemarray else any(i for i, n in world.customitemarray[player].items() if i == 'flute' and n > 0)
@@ -2325,6 +2352,11 @@ mirror_connections = {
 parallelsimilar_connections = [('Maze Race ES', 'Kakariko Suburb WS'),
                                ('Dig Game EC', 'Frog WC'),
                                ('Dig Game ES', 'Frog WS')
+                            ]
+
+special_screen_connections = [('Lost Woods NW', 'Master Sword Meadow SC'),
+                               ('Stone Bridge WC', 'Hobo EC'),
+                               ('Zora Waterfall NE', 'Zoras Domain SW')
                             ]
 
 # non shuffled overworld

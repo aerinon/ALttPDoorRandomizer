@@ -635,7 +635,7 @@ def do_dark_sanc(entrances, exits, avail):
                     forbidden.append('Links House')
                 else:
                     forbidden.append('Big Bomb Shop')
-            if avail.world.owShuffle[avail.player] == 'vanilla':
+            if avail.world.owLayout[avail.player] == 'vanilla':
                 choices = [e for e in avail.world.districts[avail.player]['Northwest Dark World'].entrances if e not in forbidden and e in entrances]
             else:
                 choices = [e for e in get_starting_entrances(avail) if e not in forbidden and e in entrances]
@@ -679,7 +679,7 @@ def do_links_house(entrances, exits, avail, cross_world):
                 forbidden.append(links_house_vanilla)
                 forbidden.extend(Forbidden_Swap_Entrances)
             shuffle_mode = avail.world.shuffle[avail.player]
-            if avail.world.owShuffle[avail.player] == 'vanilla':
+            if avail.world.owLayout[avail.player] == 'vanilla':
                 # simple shuffle -
                 if shuffle_mode == 'simple':
                     avail.links_on_mountain = True  # taken care of by the logic below
@@ -733,7 +733,7 @@ def do_links_house(entrances, exits, avail, cross_world):
 
         # links on dm
         dm_spots = LH_DM_Connector_List.union(LH_DM_Exit_Forbidden)
-        if links_house in dm_spots and avail.world.owShuffle[avail.player] == 'vanilla':
+        if links_house in dm_spots and avail.world.owLayout[avail.player] == 'vanilla':
             if avail.links_on_mountain:
                 return  # connector is fine
             logging.getLogger('').warning(f'Links House is placed in tight area and is now unhandled. Report any errors that occur from here.')

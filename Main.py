@@ -41,7 +41,7 @@ from source.enemizer.Enemizer import randomize_enemies
 from source.rom.DataTables import init_data_tables
 from source.limited.LimitedRunCoordinator import adjust_world_for_limited_runs
 
-version_number = '1.5.0'
+version_number = '1.5.2'
 version_branch = '-u'
 __version__ = f'{version_number}{version_branch}'
 
@@ -437,7 +437,7 @@ def init_world(args, fish):
         customized.load_yaml(args.customizer)
         customized.adjust_args(args, False)
 
-    world = World(args.multi, args.ow_shuffle, args.ow_crossed, args.ow_mixed, args.shuffle, args.door_shuffle, args.logic, args.mode, args.swords,
+    world = World(args.multi, args.ow_layout, args.ow_parallel, args.ow_crossed, args.ow_mixed, args.shuffle, args.door_shuffle, args.logic, args.mode, args.swords,
                   args.difficulty, args.item_functionality, args.timer, args.progressive, args.goal, args.algorithm,
                   args.accessibility, args.shuffleganon, args.custom, args.customitemarray, args.hints, args.spoiler)
 
@@ -458,6 +458,7 @@ def init_world(args, fish):
     world.owKeepSimilar = args.ow_keepsimilar.copy()
     world.owWhirlpoolShuffle = args.ow_whirlpool.copy()
     world.owFluteShuffle = args.ow_fluteshuffle.copy()
+    world.owFog = args.ow_fog.copy()
     world.shuffle_followers = args.shuffle_followers.copy()
     world.shuffle_bonk_drops = args.bonk_drops.copy()
     world.open_pyramid = args.openpyramid.copy()
@@ -732,7 +733,7 @@ def set_starting_inventory(world, args):
 
 def copy_world(world):
     # ToDo: Not good yet
-    ret = World(world.players, world.owShuffle, world.owCrossed, world.owMixed, world.shuffle, world.doorShuffle, world.logic, world.mode, world.swords,
+    ret = World(world.players, world.owLayout, world.owParallel, world.owCrossed, world.owMixed, world.shuffle, world.doorShuffle, world.logic, world.mode, world.swords,
                 world.difficulty, world.difficulty_adjustments, world.timer, world.progressive, world.goal, world.algorithm,
                 world.accessibility, world.shuffle_ganon, world.custom, world.customitemarray, world.hints, world.spoiler_mode)
     ret.teams = world.teams
@@ -772,6 +773,7 @@ def copy_world(world):
     ret.owKeepSimilar = world.owKeepSimilar.copy()
     ret.owWhirlpoolShuffle = world.owWhirlpoolShuffle.copy()
     ret.owFluteShuffle = world.owFluteShuffle.copy()
+    ret.owFog = world.owFog.copy()
     ret.shuffle_followers = world.shuffle_followers.copy()
     ret.shuffle_bonk_drops = world.shuffle_bonk_drops.copy()
     ret.open_pyramid = world.open_pyramid.copy()
@@ -955,7 +957,7 @@ def copy_world(world):
 
 def copy_world_premature(world, player, create_flute_exits=True):
     # ToDo: Not good yet
-    ret = World(world.players, world.owShuffle, world.owCrossed, world.owMixed, world.shuffle, world.doorShuffle, world.logic, world.mode, world.swords,
+    ret = World(world.players, world.owLayout, world.owParallel, world.owCrossed, world.owMixed, world.shuffle, world.doorShuffle, world.logic, world.mode, world.swords,
                 world.difficulty, world.difficulty_adjustments, world.timer, world.progressive, world.goal, world.algorithm,
                 world.accessibility, world.shuffle_ganon, world.custom, world.customitemarray, world.hints, world.spoiler_mode)
     ret.teams = world.teams
@@ -995,6 +997,7 @@ def copy_world_premature(world, player, create_flute_exits=True):
     ret.owKeepSimilar = world.owKeepSimilar.copy()
     ret.owWhirlpoolShuffle = world.owWhirlpoolShuffle.copy()
     ret.owFluteShuffle = world.owFluteShuffle.copy()
+    ret.owFog = world.owFog.copy()
     ret.shuffle_followers = world.shuffle_followers.copy()
     ret.shuffle_bonk_drops = world.shuffle_bonk_drops.copy()
     ret.open_pyramid = world.open_pyramid.copy()

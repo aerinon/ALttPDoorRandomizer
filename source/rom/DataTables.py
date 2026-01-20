@@ -143,10 +143,11 @@ class DataTables:
         bytes = sum(1+len(x)*3 for x in self.ow_enemy_table.values() if len(x) > 0)+1
         self.pointer_addresses['ow_sprites'][1] = bytes
         # ending_byte = 0x09CB3B + bytes
-        max_per_state = {0: 0x40, 1: 0x90, 2: 0x90}
+        max_per_state = {0: 0x40, 1: 0x90, 2: 0x82}  # dropped max on state 2 to steal space for extra sprites (Murahdahla, extra tutorial guard)
 
         pointer_address = snes_to_pc(self.pointer_addresses['ow_sprites'][2][0])
-        data_pointer = snes_to_pc(self.pointer_addresses['ow_sprites'][0])
+        self.pointer_addresses['ow_sprites'][0] = pointer_address + ((max_per_state[0] + max_per_state[1] + max_per_state[2]) * 2)
+        data_pointer = self.pointer_addresses['ow_sprites'][0]
         empty_pointer = pc_to_snes(data_pointer) & 0xFFFF
         rom.write_byte(data_pointer, 0xff)
         cached_dark_world = {}
@@ -179,6 +180,10 @@ class DataTables:
                             data_pointer += len(data)
                         rom.write_byte(data_pointer, 0xff)
                         data_pointer += 1
+        # Check if OW sprite data has overwritten the UW sprite pointer table
+        max_allowed_address = snes_to_pc(0x09D62E)
+        if data_pointer > max_allowed_address:
+            raise Exception(f'OW sprite data will cause the UW sprite pointer table to overwrite the pots pointer table. Data end: {hex(pc_to_snes(data_pointer))}, Max allowed: $09D62E')
 
 
 special_health_table = {

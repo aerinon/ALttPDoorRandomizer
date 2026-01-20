@@ -24,7 +24,7 @@ def main(args):
     start_time = time.process_time()
 
     # initialize the world
-    world = World(1, 'vanilla', 'vanilla', 'vanilla', 'vanilla', 'noglitches', 'standard', 'normal', 'none', 'on', 'ganon', 'freshness', False, False, False, False, False, False, None, False)
+    world = World(1, 'vanilla', True, 'vanilla', 'vanilla', 'vanilla', 'noglitches', 'standard', 'normal', 'none', 'on', 'ganon', 'freshness', False, False, False, False, False, False, None, False)
     world.player_names[1].append("Player 1")
     logger = logging.getLogger('')
 
@@ -157,9 +157,9 @@ def prefill_world(world, plando, text_patches):
                 elif line.startswith('!goal'):
                     _, goalstr = line.split(':', 1)
                     world.goal = {1: goalstr.strip()}
-                elif line.startswith('!owShuffle'):
+                elif line.startswith('!owLayout'):
                     _, modestr = line.split(':', 1)
-                    world.owShuffle = {1: modestr.strip()}
+                    world.owLayout = {1: modestr.strip()}
                 elif line.startswith('!owCrossed'):
                     _, modestr = line.split(':', 1)
                     world.owCrossed = {1: modestr.strip()}

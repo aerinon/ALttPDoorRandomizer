@@ -234,14 +234,18 @@
       "the entrances vanilla."
     ],
     "ow_shuffle": [
+      "Deprecated, use ow_layout and ow_unparallel instead."
+    ],
+    "ow_layout": [
       "This shuffles the layout of the overworld.",
       "Vanilla:        All overworld transitions are connected the same",
       "                way they were in the base game.",
-      "Parallel:       Overworld transitions are shuffled, but both worlds",
-      "                will have the same pattern/shape.",
-      "Full:           Overworld transitions are shuffled, but both worlds",
-      "                will have an independent map shape."
+      "Grid:           OW Screens are arranged on 8x8 grids and OW Transitions",
+      "                work according to this arrangement.",
+      "Wild:           OW Transitions are shuffled with no respect to geometric coherence."
     ],
+    "ow_unparallel": [
+      "With OW Layout Shuffle, this no longer forces both worlds to have a matching layout." ],
     "ow_terrain": [
       "With OW Layout Shuffle, this allows land and water edges to be connected." ],
     "ow_crossed": [
@@ -276,6 +280,9 @@
       "                spots from being on any adjacent screen.",
       "Random:         New flute spots will be generated with minimal bias."
     ],
+    "ow_no_fog": [
+      "With OW Grid Layout Shuffle or Mixed, this disables the fog that prevents",
+      "you from seeing unvisited screens on the overworld map." ],
     "door_shuffle": [
       "Select Door Shuffling Algorithm. (default: %(default)s)",
       "Basic:          Doors are mixed within a single dungeon.",

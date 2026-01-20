@@ -373,6 +373,26 @@ def update_deprecated_args(args):
             else:
                 args.shuffleganon = not args.no_shuffleganon in truthy
 
+        # OW Parallel defaults to TRUE
+        # Don't do: Yes
+        # Do:       No
+        if "ow_unparallel" in argVars:
+            if isinstance(args.ow_parallel, dict):
+                for player in range(1, players + 1):
+                    args.ow_parallel[player] = not args.ow_unparallel in truthy
+            else:
+                args.ow_parallel = not args.ow_unparallel in truthy
+
+        # OW Fog defaults to TRUE
+        # Don't do: Yes
+        # Do:       No
+        if "ow_no_fog" in argVars:
+            if isinstance(args.ow_fog, dict):
+                for player in range(1, players + 1):
+                    args.ow_fog[player] = not args.ow_no_fog in truthy
+            else:
+                args.ow_fog = not args.ow_no_fog in truthy
+
         # Playthrough defaults to TRUE
         # Don't do: Yes
         # Do:       No

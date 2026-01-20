@@ -20,11 +20,12 @@ from source.overworld.EntranceData import door_addresses
 
 class World(object):
 
-    def __init__(self, players, owShuffle, owCrossed, owMixed, shuffle, doorShuffle, logic, mode, swords, difficulty, difficulty_adjustments,
+    def __init__(self, players, owLayout, owParallel, owCrossed, owMixed, shuffle, doorShuffle, logic, mode, swords, difficulty, difficulty_adjustments,
                  timer, progressive, goal, algorithm, accessibility, shuffle_ganon, custom, customitemarray, hints, spoiler_mode):
         self.players = players
         self.teams = 1
-        self.owShuffle = owShuffle.copy()
+        self.owLayout = owLayout.copy()
+        self.owParallel = owParallel.copy()
         self.owTerrain = {}
         self.owKeepSimilar = {}
         self.owMixed = owMixed.copy()
@@ -32,6 +33,7 @@ class World(object):
         self.owCrossed = self.owCrossed if self.owCrossed != 'polar' or self.owMixed else 'none'
         self.owWhirlpoolShuffle = {}
         self.owFluteShuffle = {}
+        self.owFog = {}
         self.shuffle = shuffle.copy()
         self.doorShuffle = doorShuffle.copy()
         self.intensity = {}
@@ -86,6 +88,9 @@ class World(object):
         self.owswaps = {}
         self.owcrossededges = {}
         self.owwhirlpools = {}
+        self.owgrid = {}
+        self.owlayoutmap_lw = {}
+        self.owlayoutmap_dw = {}
         self.owflutespots = {}
         self.owsectors = {}
         self.allow_flip_sanc = {}
@@ -118,6 +123,7 @@ class World(object):
             set_player_attr('owswaps', [[],[],[]])
             set_player_attr('owcrossededges', [])
             set_player_attr('owwhirlpools', [])
+            set_player_attr('owgrid', None)
             set_player_attr('owsectors', None)
             set_player_attr('allow_flip_sanc', False)
             set_player_attr('remote_items', False)
@@ -1783,7 +1789,7 @@ class Entrance(object):
                         if mirror_exit and mirror_region:
                             if mirror_region.can_reach(state):
                                 traverse_paths(mirror_region, self.parent_region)
-                                break # no need to continue if there is no path from the mirror re-entry to dest
+                                break  # no need to continue if there is no path from the mirror re-entry to dest
                     mirror_map.pop(0)
                 if found:
                     path = state.path.get(mirror_region, (mirror_region.name, None))
@@ -2346,12 +2352,11 @@ class OWEdge(object):
     def __init__(self, player, name, owIndex, direction, terrain, edge_id, owSlotIndex=0xff):
         self.player = player
         self.name = name
-        self.type = DoorType.Open
         self.direction = direction
         self.terrain = terrain
+        self.parallel = None
         self.specialEntrance = False
         self.specialExit = False
-        self.deadEnd = False
 
         # rom properties
         self.owIndex = owIndex
@@ -2382,7 +2387,6 @@ class OWEdge(object):
             self.worldType = WorldType.Dark
 
         # logical properties
-        # self.connected = False  # combine with Dest?
         self.dest = None
         self.dependents = []
         self.dead = False
@@ -2398,9 +2402,6 @@ class OWEdge(object):
 
     def getTarget(self):
         return self.dest.specialID if self.dest.specialExit else self.dest.edge_id
-
-    def dead_end(self):
-        self.deadEnd = True
 
     def coordInfo(self, midpoint, vram_loc):
         self.midpoint = midpoint
@@ -3043,13 +3044,15 @@ class Spoiler(object):
                          'bow_mode': self.world.bow_mode,
                          'goal': self.world.goal,
                          'custom_goals': self.world.custom_goals,
-                         'ow_shuffle': self.world.owShuffle,
+                         'ow_layout': self.world.owLayout,
+                         'ow_parallel': self.world.owParallel,
                          'ow_terrain': self.world.owTerrain,
                          'ow_crossed': self.world.owCrossed,
                          'ow_keepsimilar': self.world.owKeepSimilar,
                          'ow_mixed': self.world.owMixed,
                          'ow_whirlpool': self.world.owWhirlpoolShuffle,
                          'ow_fluteshuffle': self.world.owFluteShuffle,
+                         'ow_fog': self.world.owFog,
                          'bonk_drops': self.world.shuffle_bonk_drops,
                          'shuffle_followers': self.world.shuffle_followers,
                          'shuffle': self.world.shuffle,
@@ -3314,15 +3317,18 @@ class Spoiler(object):
                     outfile.write('Enemy Drop Shuffle:'.ljust(line_width) + '%s\n' % self.metadata['dropshuffle'][player])
                     outfile.write('Take Any Caves:'.ljust(line_width) + '%s\n' % self.metadata['take_any'][player])
                     outfile.write('\n')
-                    outfile.write('Overworld Layout Shuffle:'.ljust(line_width) + '%s\n' % self.metadata['ow_shuffle'][player])
-                    if self.metadata['ow_shuffle'][player] != 'vanilla':
+                    outfile.write('Overworld Layout Shuffle:'.ljust(line_width) + '%s\n' % self.metadata['ow_layout'][player])
+                    if self.metadata['ow_layout'][player] != 'vanilla':
+                        outfile.write('Parallel OW:'.ljust(line_width) + '%s\n' % yn(self.metadata['ow_parallel'][player]))
                         outfile.write('Free Terrain:'.ljust(line_width) + '%s\n' % yn(self.metadata['ow_terrain'][player]))
                     outfile.write('Crossed OW:'.ljust(line_width) + '%s\n' % self.metadata['ow_crossed'][player])
-                    if self.metadata['ow_shuffle'][player] != 'vanilla' or self.metadata['ow_crossed'][player] != 'none':
+                    if self.metadata['ow_layout'][player] != 'vanilla' or self.metadata['ow_crossed'][player] != 'none':
                         outfile.write('Keep Similar OW Edges Together:'.ljust(line_width) + '%s\n' % yn(self.metadata['ow_keepsimilar'][player]))
                     outfile.write('OW Tile Flip (Mixed):'.ljust(line_width) + '%s\n' % yn(self.metadata['ow_mixed'][player]))
                     outfile.write('Whirlpool Shuffle:'.ljust(line_width) + '%s\n' % yn(self.metadata['ow_whirlpool'][player]))
                     outfile.write('Flute Shuffle:'.ljust(line_width) + '%s\n' % self.metadata['ow_fluteshuffle'][player])
+                    if self.metadata['ow_layout'][player] == 'grid' or self.metadata['ow_mixed'][player]:
+                        outfile.write('Overworld Fog:'.ljust(line_width) + '%s\n' % yn(self.metadata['ow_fog'][player]))
                     outfile.write('\n')
                     outfile.write('Entrance Shuffle:'.ljust(line_width) + '%s\n' % self.metadata['shuffle'][player])
                     if self.metadata['shuffle'][player] != 'vanilla':
@@ -3433,41 +3439,32 @@ class Spoiler(object):
                     outfile.write(f'{fairy}: {bottle}\n')
 
             if self.maps:
+                def write_map(type, title):
+                    for player in range(1, self.world.players + 1):
+                        if (type, player) in self.maps:
+                            outfile.write('\n\n' + title + '\n\n')
+                            break
+                    for player in range(1, self.world.players + 1):
+                        if (type, player) in self.maps:
+                            if self.world.players > 1:
+                                outfile.write(str('(Player ' + str(player) + ')\n')) # player name
+                            outfile.write(self.maps[(type, player)]['text'])
+
                 if 'all' in self.settings or 'flute' in self.settings:
                     # flute shuffle
-                    for player in range(1, self.world.players + 1):
-                        if ('flute', player) in self.maps:
-                            outfile.write('\n\nFlute Spots:\n\n')
-                            break
-                    for player in range(1, self.world.players + 1):
-                        if ('flute', player) in self.maps:
-                            if self.world.players > 1:
-                                outfile.write(str('(Player ' + str(player) + ')\n')) # player name
-                            outfile.write(self.maps[('flute', player)]['text'])
-                
+                    write_map('flute', 'Flute Spots:')
+
                 if 'all' in self.settings or 'overworld' in self.settings:
                     # overworld tile flips
-                    for player in range(1, self.world.players + 1):
-                        if ('swaps', player) in self.maps:
-                            outfile.write('\n\nOW Tile Flips:\n\n')
-                            break
-                    for player in range(1, self.world.players + 1):
-                        if ('swaps', player) in self.maps:
-                            if self.world.players > 1:
-                                outfile.write(str('(Player ' + str(player) + ')\n')) # player name
-                            outfile.write(self.maps[('swaps', player)]['text'])
+                    write_map('swaps', 'OW Tile Flips:')
 
                     # crossed groups
-                    for player in range(1, self.world.players + 1):
-                        if ('groups', player) in self.maps:
-                            outfile.write('\n\nOW Crossed Groups:\n\n')
-                            break
-                    for player in range(1, self.world.players + 1):
-                        if ('groups', player) in self.maps:
-                            if self.world.players > 1:
-                                outfile.write(str('(Player ' + str(player) + ')\n')) # player name
-                            outfile.write(self.maps[('groups', player)]['text'])
-            
+                    write_map('groups', 'OW Crossed Groups:')
+
+                    # grid layout
+                    write_map('layout_grid_lw', 'Light World Layout:')
+                    write_map('layout_grid_dw', 'Dark World Layout:')
+
             if self.overworlds and ('all' in self.settings or 'overworld' in self.settings):
                 outfile.write('\n\nOverworld Edges:\n\n')
                 # overworld transitions
@@ -3730,11 +3727,11 @@ boss_mode = {"none": 0, "simple": 1, "full": 2, "chaos": 3, 'random': 3, 'unique
 
 # byte 10: settings_version
 
-# byte 11: OOOT WCCC (OWR layout, free terrain, whirlpools, OWR crossed)
-or_mode = {"vanilla": 0, "parallel": 1, "full": 2}
+# byte 11: POOT WCCC (parallel, OWR layout, free terrain, whirlpools, OWR crossed)
+orlayout_mode = {"vanilla": 0, "grid": 1, "wild": 2}
 orcrossed_mode = {"none": 0, "polar": 1, "grouped": 2, "unrestricted": 4}
 
-# byte 12: KMBQ FF?? (keep similar, mixed/tile flip, bonk drops, follower quests, flute spots)
+# byte 12: KMBQ FFO? (keep similar, mixed/tile flip, bonk drops, follower quests, flute spots, fog)
 flutespot_mode = {"vanilla": 0, "balanced": 1, "random": 2}
 
 # byte 13: FBBB TTPP (flute_mode, bow_mode, take_any, prize shuffle)
@@ -3797,12 +3794,12 @@ class Settings(object):
 
             settings_version,
 
-            (or_mode[w.owShuffle[p]] << 5) | (0x10 if w.owTerrain[p] else 0)
+            (0x80 if w.owParallel[p] else 0) | (orlayout_mode[w.owLayout[p]] << 5) | (0x10 if w.owTerrain[p] else 0)
             | (0x08 if w.owWhirlpoolShuffle[p] else 0) | orcrossed_mode[w.owCrossed[p]],
 
             (0x80 if w.owKeepSimilar[p] else 0) | (0x40 if w.owMixed[p] else 0)
             | (0x20 if w.shuffle_bonk_drops[p] else 0) | (0x10 if w.shuffle_followers[p] else 0)
-            | (flutespot_mode[w.owFluteShuffle[p]] << 4),
+            | (flutespot_mode[w.owFluteShuffle[p]] << 4) | (0x02 if w.owFog[p] else 0),
 
             (flute_mode[w.flute_mode[p]] << 7 | bow_mode[w.bow_mode[p]] << 4
              | take_any_mode[w.take_any[p]] << 2 | prizeshuffle_mode[w.prizeshuffle[p]]),
@@ -3879,7 +3876,8 @@ class Settings(object):
             args.algorithm = r(algo_mode)[(settings[9] & 0x38) >> 3]
             args.shufflebosses[p] = r(boss_mode)[(settings[9] & 0x07)]
 
-        args.ow_shuffle[p] = r(or_mode)[(settings[11] & 0xE0) >> 5]
+        args.ow_parallel[p] = True if settings[11] & 0x80 else False
+        args.ow_layout[p] = r(orlayout_mode)[(settings[11] & 0x60) >> 5]
         args.ow_terrain[p] = True if settings[11] & 0x10 else False
         args.ow_whirlpool[p] = True if settings[11] & 0x08 else False
         args.ow_crossed[p] = r(orcrossed_mode)[(settings[11] & 0x07)]
@@ -3889,6 +3887,7 @@ class Settings(object):
         args.bonk_drops[p] = True if settings[12] & 0x20 else False
         args.shuffle_followers[p] = True if settings[12] & 0x10 else False
         args.ow_fluteshuffle[p] = r(flutespot_mode)[(settings[12] & 0x0C) >> 2]
+        args.ow_fog[p] = True if settings[12] & 0x02 else False
 
         if len(settings) > 13:
             args.flute_mode[p] = r(flute_mode)[(settings[13] & 0x80) >> 7]
