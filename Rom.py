@@ -31,7 +31,7 @@ from Utils import local_path, int16_as_bytes, int32_as_bytes, snes_to_pc
 from Items import ItemFactory, prize_item_table
 from source.overworld.EntranceData import door_addresses, ow_prize_table
 from source.overworld.EntranceShuffle2 import exit_ids
-from OverworldShuffle import default_flute_connections, flute_data
+from source.overworld.FluteShuffle import default_flute_connections, flute_data
 from InitialSram import InitialSram
 
 from source.classes.SFX import randomize_sfx, randomize_sfxinstruments, randomize_songinstruments

@@ -17,7 +17,8 @@ from OverworldGlitchRules import create_owg_connections
 from PotShuffle import shuffle_pots, shuffle_pot_switches
 from Regions import create_regions, create_shops, mark_light_dark_world_regions, create_dungeon_regions, adjust_locations
 from OWEdges import create_owedges
-from OverworldShuffle import link_overworld, update_world_regions, create_dynamic_flute_exits, create_dynamic_mirror_exits
+from OverworldShuffle import link_overworld, update_world_regions, create_dynamic_mirror_exits
+from source.overworld.FluteShuffle import create_dynamic_flute_exits
 from Rom import patch_rom, patch_race_rom, apply_rom_settings, LocalRom, JsonRom, get_hash_string
 from Doors import create_doors
 from DoorShuffle import link_doors, connect_portal, link_doors_prep
