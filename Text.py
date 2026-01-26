@@ -1795,6 +1795,7 @@ class TextTable(object):
         text['telepathic_tile_ice_stalfos_knights_room'] = CompressedTextMapper.convert("{NOBORDER}\nKnock 'em down and then bomb them dead.")
         text['telepathic_tile_tower_of_hera_entrance'] = CompressedTextMapper.convert("{NOBORDER}\nThis is a bad place, with a guy who will make you fall…\n\n\na lot.")
         text['houlihan_room'] = CompressedTextMapper.convert("Randomizer tournament winners\n{HARP}\n"
+                                                             "  ~~~2025~~~\nGammachuu\n\n"
                                                              "  ~~~2024~~~\nGammachuu\n\n"
                                                              "  ~~~2023~~~\nGanonsGoneWild\n\n"
                                                              "  ~~~2022~~~\nObscure\n\n"
