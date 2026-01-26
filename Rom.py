@@ -2810,7 +2810,23 @@ def write_strings(rom, world, player, team):
         tt['shop_fortune_teller_lw_hint_0'] = "A new harmony flows from the flute, calling you fourth to distant lands"
         tt['kiki_first_extortion'] = "OoOo, banana! Gimme 10 bananas and I'll help you out."
 
+    # Apply custom text overrides from customizer
+    if world.customizer:
+        custom_text = world.customizer.get_text()
+        if custom_text:
+            for text_key, text_value in custom_text.items():
+                try:
+                    tt[text_key] = text_value
+                except KeyError:
+                    logger = logging.getLogger('')
+                    logger.warning(f'Unknown text key in customizer: {text_key}')
+
     rom.write_bytes(0xE0000, tt.getBytes())
+    if world.customizer and world.customizer.get_telepathic_tiles():
+        for room, message_index in world.customizer.get_telepathic_tiles().items():
+            offset = int(room, 16) * 2
+            # SignText_Underworld table
+            rom.write_bytes(snes_to_pc(0x07F5F7 + offset), int16_as_bytes(int(message_index, 16)))
 
     credits = Credits()
 
