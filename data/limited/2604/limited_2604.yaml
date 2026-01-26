@@ -149,6 +149,89 @@ rooms:
     doors:
       - [ NorthE, BigKey ]
       - [ InteriorH, Bombable ]
+  "0x5F":
+    header: ["0x00", "0x13", "0x0B", "0x29", "0x00", "0x27", "0x42", "0x00", "0x00", "0x00", "0x3F", "0x7F", "0xC0", "0x00"]
+    layout: ["0xE1", "0x18"]
+    layer1:
+      - [ CornerTopConcaveNe, "0x0B", "0x24" ]
+      - [ WallTopEast, "0x0B", "0x28", "0x04" ]
+      - [ CornerTopConvexSe, "0x0B", "0x2F" ]
+      - [ WallTopNorth, "0x0F", "0x2F", "0x01" ]
+      - [ WallTopWest, "0x11", "0x28", "0x04" ]
+      - [ CornerTopConvexSw, "0x11", "0x2F" ]
+      - [ CornerTopConcaveNw2, "0x11", "0x24" ]
+      - [ Ceiling, "0x0F", "0x23", "0x06" ]
+      - [ SpikedFloor, "0x0C", "0x32", "0x05" ]
+      - [ RailH, "0x0C", "0x32", "0x04" ]
+      - [ RailH, "0x0C", "0x3A", "0x04" ]
+      - [ Pot, "0x16", "0x36" ]
+      - [ Chest, "0x08", "0x36" ]
+      - [ InterroomSpiralStairsUp, "0x15", "0x24" ]
+      - [ InterroomSpiralStairsDown, "0x07", "0x24" ]
+      - [ LargeDecor, "0x5", "0xE"]  # center
+      - [ LargeDecor, "0xD", "0xE"]  # left
+      - [ LargeDecor, "0x15", "0xE"]  # right
+      - [ LargeDecor, "0x1D", "0xE"]  # top left
+      - [ LargeDecor, "0x25", "0xE"]  # top right
+      - [ LargeDecor, "0x2D", "0xE"]  # bottom left
+      - [ LargeDecor, "0x35", "0xE"]  # bottom right
+      - [ TelepathyTile, "0x29", "0x25"]
+      - [ Chest, "0x2F", "0x30" ]
+      - [ CarpetV, "0x2E", "0x2F", "0x0"]
+    layer2: []
+    doors:
+      - [ WestS, SmallKey ]
+      - [ InteriorS, Bombable ]
+      - [ InteriorE, Normal ]
+sprites:
+  "0x5F":
+    - ["BlueBari", "0x04", "0x18", "0x00"]
+    - ["BlueBari", "0x0B", "0x18", "0x00"]
+    - ["BlueBari", "0x08", "0x1B", "0x00"]
+    - ["CorrectPullSwitch", "0x3", "0x8", "0x00"]
+    - ["CorrectPullSwitch", "0x7", "0x8", "0x00"]
+    - ["CorrectPullSwitch", "0xB", "0x8", "0x00"]
+    - ["CorrectPullSwitch", "0xF", "0x8", "0x00"]
+    - ["CorrectPullSwitch", "0x13", "0x8", "0x00"]
+    - ["CorrectPullSwitch", "0x17", "0x8", "0x00"]
+    - ["CorrectPullSwitch", "0x1B", "0x8", "0x00"]
+text:
+    'sign_rain_north_of_links_house': "Maiden Characteristics: Three of the captured maidens possessed exceptional skill in music. Coincidence?"
+    'sign_north_of_links_house': "Magical Resonance: The crystals emit a faint humming sound that varies in pitch based on the maiden's emotional state."
+    'sign_path_to_death_mountain': "Structural Survey: A compromised section of masonry within the Ice Palace may conceal the mechanism."
+    'sign_lost_woods': "Genealogical Note: Logi's descendant bears a name beginning with 'E' and ending with 'a'."
+    'sign_zoras': "Disputed Attribution: Eurus and Ibai each commanded either wind or water—records conflict on which held which."
+    'sign_outside_magic_shop': "Sage Relationships: Records indicate that Belenus and Enki often debated matters of philosophy and magic."
+    'sign_death_mountain_cave_back': "Historical Record: Mierin was the first maiden captured by the wizard."
+    'sign_east_of_links_house': "Established Scholarship: Belenus mastered light, Logi mastered fire, Aion mastered time."
+    'sign_south_of_lumberjacks': "Terminal Observation: Spirit and time occupy adjacent positions at the sequence's conclusion."
+    'sign_east_of_desert': "Hadah's Domain: Historical texts describe power that strikes suddenly from the heavens above."
+    'sign_east_of_sanctuary': "Central Position: Lightning occupies the exact midpoint between fire and spirit."
+    'sign_east_of_castle': "Sage Legacy: Logi and Hadah were known rivals during their lifetimes, their descendants reportedly continuing this ancient feud."
+    'sign_north_of_lake': "Lineage Exclusion: Cennia's bloodline traces to neither Enki nor Hadah."
+    'sign_lumberjacks_house': "Crystal Study: Lypha's crystal bears an odd numerical designation."
+    'sign_north_kakariko': "Sequence Fragment: Precisely three elements separate wind from spirit—those being water, fire, and lightning."
+    'sign_bumper_cave': "Temporal Observation: Exactly seventeen days passed between each maiden's disappearance."
+    'sign_catfish': "Seventh Vessel Analysis: Its occupant carries the bloodline of luminescence."
+    'sign_north_village_of_outcasts': "Timeline Analysis: Cennia was not among the first three maidens to vanish."
+    'sign_south_of_bumper_cave': "Observation: Sariah was confined to an even-numbered crystal."
+    'sign_east_of_pyramid': "Research Note: The third crystal contains the descendant of Eurus."
+    'sign_east_of_bomb_shop': "Physical Description: Records describe Cennia and Sariah as bearing striking resemblance to one another, often mistaken for sisters."
+    'sign_east_of_mire': "Ancestral Pattern: Arlene and Lypha descend from sages who commanded aerial and aquatic forces."
+    'sign_village_of_outcasts': "Documented Sequence: Ellia's disappearance occurred immediately following Arlene's."
+    'sign_before_wishing_pond': "Sequential Parallel: Wind precedes water in the same manner that lightning precedes spirit."
+    'sign_before_catfish_area': "Field Research Methodology: Recent expeditions indicate that arboreal entities affected by transformative curses retain significant knowledge."
+    'talking_tree_info_start': "Maiden and crystals? Hmm."
+    'talking_tree_info_1': "That second crystal... you can feel it from here. Sparks and tingles in the air around it. Makes my bark stand on end."
+    'talking_tree_info_2': "Arlene? No, she's not kin to the old man of the mountain. Different bloodline entirely."
+    'talking_tree_info_3': "The old man of the mountain's granddaughter loved the sea. Always down by the shore, that one, collecting shells and watching the waves"
+    'talking_tree_info_4': "They took Arlene first... then came back for Ellia. One right after the other, poor souls."
+    'talking_tree_other': "I have never been much interested in ancient lore."
+    'maiden_crystal_1': "Mechanism Theory: Each tongue corresponds to a crystal numbered from left to right. Ancient texts suggest the magic seal can only be broken by activating the levers in the primordial sequence—the order in which the seven sages first mastered their elements at the dawn of the age."
+    'chicken_hut_lady': "Some hooligan has scribbled all over every sign with their incoherent ramblings! Young people these days"
+telepathic_tiles:
+  "0x5F": "0x130" # Maiden_crystal_1 index
+
 
 
 
