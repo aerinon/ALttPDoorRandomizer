@@ -37,7 +37,7 @@ from source.classes.CustomSettings import CustomSettings
 from source.enemizer.DamageTables import DamageTable
 from source.enemizer.Enemizer import randomize_enemies
 from source.limited.LimitedRunCoordinator import adjust_world_for_limited_runs
-from source.rom.DataTables import init_data_tables, init_custom_rooms
+from source.rom.DataTables import init_data_tables, init_custom_rooms, init_custom_sprites
 
 version_number = '2.0.0'
 version_branch = '-u'
@@ -261,6 +261,8 @@ def main(args, seed=None, fish=None):
     for player in range(1, world.players + 1):
         if world.customizer and world.customizer.get_custom_rooms(player):
             init_custom_rooms(world, player, world.customizer.get_custom_rooms(player))
+        if world.customizer and world.customizer.get_custom_sprites(player):
+            init_custom_sprites(world, player, world.customizer.get_custom_sprites(player))
 
     if any(world.potshuffle.values()):
         logger.info(world.fish.translate("cli", "cli", "shuffling.pots"))
