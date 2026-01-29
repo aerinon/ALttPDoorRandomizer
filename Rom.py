@@ -1457,7 +1457,7 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
             map_x = x_map_position[idx]
             map_y = y_map_position[idx]
             if owid != 0xFF:
-                if (owid < 0x40) == (world.is_tile_swapped(owid, player)):
+                if (owid < 0x40) == (owid in world.owswaps[player][0]):
                     coord_flags |= 0x8000 # world indicator flag
                 if coord_flags & 0x4000 == 0:
                     map_x, map_y = adjust_ow_coordinates_to_layout(world, player, map_x, map_y, coord_flags & 0x8000 != 0)
