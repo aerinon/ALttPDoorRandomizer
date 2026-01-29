@@ -43,7 +43,7 @@ from source.enemizer.Enemizer import write_enemy_shuffle_settings
 
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '67b4921f9233b14736beead10ac5ec18'
+RANDOMIZERBASEHASH = '630ea96d0b0c1acdc3f4d158480cd951'
 
 
 class JsonRom(object):
@@ -518,7 +518,8 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
     else:
         flute_spots = world.owflutespots[player]
         owFlags |= 0x0100
-        write_int16(rom, snes_to_pc(0x0AB7F7), 0xEAEA)
+        if world.owFluteShuffle[player] != 'vanilla':
+            write_int16(rom, snes_to_pc(0x0AB80B), 0xEAEA)
 
     flute_writes = [(f, flute_data[f][1]) for f in flute_spots]
     for o in range(0, len(flute_writes)):
