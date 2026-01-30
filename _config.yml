@@ -1,1 +1,139 @@
+# Site settings
+title: ALttP Dungeon Randomizer
+description: Advanced dungeon randomization for The Legend of Zelda - A Link to the Past
+baseurl: "/ALttPDoorRandomizer"
+url: "https://aerinon.github.io"
+
+# Theme
 theme: jekyll-theme-slate
+remote_theme: just-the-docs/just-the-docs
+
+# Logo and branding
+# logo: "/assets/images/logo.png"
+
+# Navigation
+nav_enabled: true
+nav_external_links:
+  - title: GitHub
+    url: https://github.com/aerinon/ALttPDoorRandomizer
+  - title: Discord
+    url: https://discordapp.com/invite/alttprandomizer
+  - title: Download
+    url: https://github.com/aerinon/ALttPDoorRandomizer/releases
+
+# Search
+search_enabled: true
+search:
+  heading_level: 2
+  previews: 3
+  preview_words_before: 5
+  preview_words_after: 10
+  tokenizer_separator: /[\s/]+/
+  rel_url: true
+  button: true
+
+# Heading anchors
+heading_anchors: true
+
+# Aux links
+aux_links:
+  "Door Randomizer on GitHub":
+    - "https://github.com/aerinon/ALttPDoorRandomizer"
+  "ALTTP Rando Discord":
+    - "https://discordapp.com/invite/alttprandomizer"
+
+aux_links_new_tab: true
+
+# Footer
+footer_content: "Copyright &copy; 2026 ALttP Door Randomizer Team. Based on ALttP Entrance Randomizer."
+
+# Back to top link
+back_to_top: true
+back_to_top_text: "Back to top"
+
+# Collections for blog posts
+collections:
+  posts:
+    output: true
+    permalink: /blog/:year/:month/:day/:title/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "default"
+  - scope:
+      path: ""
+    values:
+      layout: "default"
+
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Exclude from processing
+exclude:
+  - .git/
+  - .github/
+  - .gitignore
+  - .gitattributes
+  - source/
+  - test/
+  - resources/
+  - data/
+  - debug/
+  - analysis/
+  - analysis2/
+  - alttp_dungeon_randomizer.egg-info/
+  - DR/
+  - "*.py"
+  - "*.pyc"
+  - "*.pyd"
+  - "*.pyo"
+  - "*.egg-info"
+  - "*.spec"
+  - requirements*.txt
+  - setup.py
+  - TestSuite.py
+  - DungeonRandomizer.py
+  - Gui.py
+  - MultiServer.py
+  - MultiClient.py
+  - CLAUDE.md
+  - LICENSE
+  - libbz2-dev
+  - tlogbfs.txt
+
+# Include files
+include:
+  - _posts
+  - blog
+  - docs/Customizer.md
+  - docs/BUILDING.md
+  - docs/DR_hint_reference.md
+
+# Color scheme (for just-the-docs theme)
+color_scheme: dark
+
+# Google Analytics (optional - add your tracking ID)
+# ga_tracking: UA-XXXXXXXX-X
+
+# Compress HTML
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  startings: []
+  blanklines: false
+  profile: false
