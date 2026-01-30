@@ -1020,7 +1020,7 @@ def balance_money_progression(world):
                 slot = shop_to_location_table[location.parent_region.name].index(location.name)
                 shop = location.parent_region.shop
                 shop_item = shop.inventory[slot]
-                if location.item and interesting_item(location, location.item, world, location.item.player):
+                if shop_item and location.item and interesting_item(location, location.item, world, location.item.player):
                     if location.item.name.startswith('Rupee') and loc_player == location.item.player:
                         if shop_item['price'] < rupee_chart[location.item.name]:
                             wallet[loc_player] -= shop_item['price']  # will get picked up in the location_free block
