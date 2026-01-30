@@ -1,0 +1,81 @@
+# GitHub Pages Deployment Workflow
+name: 📄 Deploy GitHub Pages
+
+# Deploy on push to DoorDevUnstable branch
+on:
+  push:
+    branches:
+      - DoorDevUnstable
+  # Allow manual trigger
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  # Build job
+  build:
+    name: 🔨 Build Site
+    runs-on: ubuntu-latest
+    steps:
+      - name: ✔️ Checkout
+        uses: actions/checkout@v4
+
+      - name: 💎 Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: false
+
+      - name: 💿 Install dependencies
+        run: |
+          gem install bundler
+          bundle config set --local path 'vendor/bundle'
+          # Create Gemfile if it doesn't exist
+          if [ ! -f Gemfile ]; then
+            cat > Gemfile << 'EOF'
+          source 'https://rubygems.org'
+          gem 'github-pages', group: :jekyll_plugins
+          gem 'jekyll-feed'
+          gem 'jekyll-seo-tag'
+          gem 'jekyll-sitemap'
+          gem 'just-the-docs'
+          EOF
+          fi
+          bundle install
+
+      - name: 🔨 Build with Jekyll
+        run: bundle exec jekyll build --baseurl "/ALttPDoorRandomizer"
+        env:
+          JEKYLL_ENV: production
+
+      - name: 📤 Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
+
+  # Deployment job
+  deploy:
+    name: 🚀 Deploy to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: ✅ Deployment complete
+        run: |
+          echo "🎉 GitHub Pages deployed successfully!"
+          echo "📄 Site URL: ${{ steps.deployment.outputs.page_url }}"
