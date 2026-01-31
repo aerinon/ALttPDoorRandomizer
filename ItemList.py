@@ -341,9 +341,10 @@ def generate_itempool(world, player):
             world.escape_assist[player].append('bombs')
 
     for (location, item) in placed_items.items():
-        world.push_item(world.get_location(location, player), ItemFactory(item, player), False)
-        world.get_location(location, player).event = True
-        world.get_location(location, player).locked = True
+        loc = world.get_location(location, player)
+        world.push_item(loc, ItemFactory(item, player), False)
+        loc.event = True
+        loc.locked = True
 
     if world.shopsanity[player] and not skip_pool_adjustments:
         for shop in world.shops[player]:

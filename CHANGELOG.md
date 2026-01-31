@@ -1,5 +1,13 @@
 # Changelog
 
+# 0.7.0.2
+- Fixed money error for bombbag/take-anys
+- Fixed palette issue for map check/flute menu
+- Fixed issue with dungeon icons showing in opposite world in Inverted
+- Fixed Links position in map checks when in Special OW areas
+- Fixed buffered sword issue in OW Shuffle water transitions
+- Added PlasmaKappa tribute TF room text
+
 # 0.7.0.1
 - Fixed buggy sprites in post-Aga Zora's Domain
 - Fixed L/R map switch when in special OW screens

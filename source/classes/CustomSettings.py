@@ -10,7 +10,7 @@ from pathlib import Path
 
 import RaceRandom as random
 from BaseClasses import LocationType, DoorType
-from OverworldShuffle import default_flute_connections, flute_data
+from source.overworld.FluteShuffle import default_flute_connections, flute_data
 from source.tools.MysteryUtils import roll_settings, get_weights
 
 
