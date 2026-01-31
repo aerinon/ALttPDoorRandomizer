@@ -137,8 +137,8 @@ class LocalRom(object):
             outfile.write(self.buffer)
 
     @staticmethod
-    def fromJsonRom(rom, file, rom_size = 0x200000):
-        ret = LocalRom(file, True, rom.name, rom.hash)
+    def fromJsonRom(rom, file, rom_size = 0x200000, flag=None):
+        ret = LocalRom(file, True, rom.name, rom.hash, flag=flag)
         ret.buffer.extend(bytearray([0x00] * (rom_size - len(ret.buffer))))
         for address, values in rom.patches.items():
             ret.write_bytes(int(address), values)

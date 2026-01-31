@@ -311,7 +311,7 @@ def main(args, seed=None, fish=None):
                 if args.jsonout:
                     jsonout[f'patch_t{team}_p{player}'] = rom.patches
                     if args.bps:
-                        localRom = LocalRom.fromJsonRom(rom, args.rom)
+                        localRom = LocalRom.fromJsonRom(rom, args.rom, flag=limited_run_flag)
                         patch = create_bps_from_data(LocalRom(args.rom, patch=False, flag=limited_run_flag).buffer, localRom.buffer)
                         jsonout[f'bps_t{team}_p{player}'] = base64.b64encode(patch.binary_ba).decode()
                 else:
