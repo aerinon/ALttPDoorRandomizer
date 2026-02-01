@@ -1,4 +1,3 @@
-import copy
 import logging
 import RaceRandom as random
 import random as _random
@@ -8,7 +7,7 @@ from OverworldShuffle import connect_two_way, validate_layout
 
 ENABLE_KEEP_SIMILAR_SPECIAL_HANDLING = False
 PREVENT_WRAPPED_LARGE_SCREENS = False
-DRAW_IMAGE = False
+DRAW_IMAGE = True
 
 large_screen_ids = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35] + [0x40, 0x43, 0x45, 0x58, 0x5B, 0x5E, 0x70, 0x75]
 
@@ -49,7 +48,7 @@ class WorldPiece:
 
     def __init__(
         self,
-        screens: List[List[Optional[Screen]]],
+        screens: Optional[List[List[Optional[Screen]]]] = None,
         grid: Optional[List[List[int]]] = None,
         width: int = 0,
         height: int = 0,
@@ -62,7 +61,7 @@ class WorldPiece:
         west_edges_water: Optional[List[List[List[OWEdge]]]] = None,
         east_edges_water: Optional[List[List[List[OWEdge]]]] = None
     ):
-        self.screens = screens
+        self.screens = screens if screens is not None else []
         self.grid = grid if grid is not None else []
         self.width = width
         self.height = height
@@ -154,7 +153,7 @@ class LayoutGeneratorOptions:
     """
     Configuration options for layout generation.
     """
-    __slots__ = ('horizontal_wrap', 'vertical_wrap',
+    __slots__ = ('horizontal_wrap', 'vertical_wrap', 'split_large_screens',
                  'large_screen_pool', 'distortion_chance', 'random_order',
                  'multi_choice', 'max_delay', 'first_ignore_bonus_points',
                  'penalty_full_edge_mismatch', 'penalty_partial_edge_mismatch', 'bonus_partial_edge_match',
@@ -168,6 +167,7 @@ class LayoutGeneratorOptions:
         self,
         horizontal_wrap: bool = True,
         vertical_wrap: bool = True,
+        split_large_screens = False,
         large_screen_pool: bool = False,
         distortion_chance: float = 0.0,
         random_order: int = 0,
@@ -194,6 +194,7 @@ class LayoutGeneratorOptions:
     ):
         self.horizontal_wrap = horizontal_wrap
         self.vertical_wrap = vertical_wrap
+        self.split_large_screens = split_large_screens
         self.large_screen_pool = large_screen_pool
         self.distortion_chance = distortion_chance
         self.random_order = random_order
@@ -418,8 +419,8 @@ def create_piece_list(world: World, player: int, options: LayoutGeneratorOptions
 
         if castle_screen and central_bonk_screen and links_house_screen:
             piece = create_piece(world, player, [
-                [0x1B, 0x1B],
-                [0x1B, 0x1B],
+                [0x1B, 0x1C],
+                [0x23, 0x24],
                 [0x2B, 0x2C]
             ], overworld_screens)
 
@@ -439,10 +440,18 @@ def create_piece_list(world: World, player: int, options: LayoutGeneratorOptions
     # Add large screens
     for screen in all_large_screens:
         if screen not in used_screens_set:
-            piece = create_piece(world, player, [[screen.id, screen.id], [screen.id, screen.id]], overworld_screens)
-            if options.large_screen_pool:
-                piece.restriction = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35]
-            piece_list.append(piece)
+            base_id = screen.id
+            if options.split_large_screens:
+                for quadrant_offset in [0x00, 0x01, 0x08, 0x09]:
+                    piece = create_piece(world, player, [[base_id + quadrant_offset]], overworld_screens)
+                    if options.large_screen_pool:
+                        piece.restriction = [large_screen_id + quadrant_offset for large_screen_id in [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35]]
+                    piece_list.append(piece)
+            else:
+                piece = create_piece(world, player, [[base_id, base_id + 0x01], [base_id + 0x08, base_id + 0x09]], overworld_screens)
+                if options.large_screen_pool:
+                    piece.restriction = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35]
+                piece_list.append(piece)
             used_screens_set.add(screen)
             if world.owParallel[player]:
                 used_screens_set.add(screen.parallel)
@@ -478,43 +487,50 @@ def create_piece_list(world: World, player: int, options: LayoutGeneratorOptions
             for k in range(piece.height):
                 for l in range(piece.width):
                     piece.crossed_groups[k].append(-1)
-                    screen_id = piece.main.grid[k][l]
-                    if screen_id != -1:
-                        piece.crossed_groups[k][l] = 1 if screen_id in crossed_group_b else 0
+                    screen = piece.main.screens[k][l]
+                    if screen:
+                        piece.crossed_groups[k][l] = 1 if screen.id in crossed_group_b else 0
                     else:
                         if piece.parallel and piece.parallel.screens[k][l]:
-                            piece.crossed_groups[k][l] = 1 if piece.parallel.grid[k][l] in crossed_group_b else 0
+                            piece.crossed_groups[k][l] = 1 if piece.parallel.screens[k][l].id in crossed_group_b else 0
 
     return piece_list
 
 def create_piece(world: World, player: int, grid: List[List[int]], overworld_screens: Dict[int, Screen]) -> Piece:
     """
-    Create piece from grid of screen IDs
-    Takes 2D array of screen IDs and creates main and parallel pieces
+    Create piece from grid of cell IDs
+    Takes 2D array of cell IDs and creates main and parallel pieces
     """
     piece = Piece(
-        main=WorldPiece(screens=[]),
+        main=WorldPiece(),
         width=len(grid[0]),
         height=len(grid)
     )
 
     if world.owParallel[player]:
-        piece.parallel = WorldPiece(screens=[])
+        piece.parallel = WorldPiece()
 
     found_screens = set()
 
     for i in range(piece.height):
         new_row = []
+        new_screen_row = []
         new_row_parallel = []
-        piece.main.screens.append(new_row)
+        new_screen_row_parallel = []
+        piece.main.grid.append(new_row)
+        piece.main.screens.append(new_screen_row)
         if world.owParallel[player]:
-            piece.parallel.screens.append(new_row_parallel)
+            piece.parallel.grid.append(new_row_parallel)
+            piece.parallel.screens.append(new_screen_row_parallel)
 
         for j in range(piece.width):
-            screen = overworld_screens.get(grid[i][j])
-            new_row.append(screen)
-            if world.owParallel[player]:
-                new_row_parallel.append(screen.parallel if screen else None)
+            cell_id = grid[i][j]
+            new_row.append(cell_id)
+            screen = overworld_screens.get(get_screen_id_from_cell(cell_id))
+            new_screen_row.append(screen)
+            if world.owParallel[player] and screen:
+                new_row_parallel.append(cell_id - screen.id + screen.parallel.id)
+                new_screen_row_parallel.append(screen.parallel)
 
             if screen and screen not in found_screens:
                 found_screens.add(screen)
@@ -532,14 +548,14 @@ def create_piece(world: World, player: int, grid: List[List[int]], overworld_scr
 def add_piece_data(world: World, player: int, piece: Piece, large_screen_quadrant_info: Dict[int, Dict], large_screen_quadrant_info_land: Dict[int, Dict], large_screen_quadrant_info_water: Dict[int, Dict]) -> None:
     """
     Add computed data to piece
-    Calls add_piece_grid_info for main and parallel pieces
+    Calls add_world_piece_edge_info for main and parallel pieces
     """
     num_pieces = 2 if piece.parallel else 1
     for p in range(num_pieces):
         world_piece = piece.main if p == 0 else piece.parallel
-        world_piece.width = len(world_piece.screens[0])
-        world_piece.height = len(world_piece.screens)
-        add_piece_grid_info(world, player, world_piece, large_screen_quadrant_info, large_screen_quadrant_info_land, large_screen_quadrant_info_water)
+        world_piece.width = piece.width
+        world_piece.height = piece.height
+        add_world_piece_edge_info(world, player, world_piece, large_screen_quadrant_info, large_screen_quadrant_info_land, large_screen_quadrant_info_water)
 
     piece.width = piece.main.width
     piece.height = piece.main.height
@@ -572,12 +588,11 @@ def add_piece_data(world: World, player: int, piece: Piece, large_screen_quadran
         piece.edge_sides = 0
         piece.max_edges_per_side = 0
 
-def add_piece_grid_info(world: World, player: int, piece: WorldPiece, large_screen_quadrant_info: Dict[int, Dict], large_screen_quadrant_info_land: Dict[int, Dict], large_screen_quadrant_info_water: Dict[int, Dict]) -> None:
+def add_world_piece_edge_info(world: World, player: int, piece: WorldPiece, large_screen_quadrant_info: Dict[int, Dict], large_screen_quadrant_info_land: Dict[int, Dict], large_screen_quadrant_info_water: Dict[int, Dict]) -> None:
     """
     Populate piece edge information
     Initializes 8x8 edge arrays and extracts edges from screens
     """
-    piece.grid = [[] for _ in range(8)]
     piece.north_edges = [[] for _ in range(8)]
     piece.south_edges = [[] for _ in range(8)]
     piece.west_edges = [[] for _ in range(8)]
@@ -591,7 +606,6 @@ def add_piece_grid_info(world: World, player: int, piece: WorldPiece, large_scre
 
     for k in range(piece.height):
         for l in range(piece.width):
-            piece.grid[k].append(piece.screens[k][l].id if piece.screens[k][l] else -1)
             piece.north_edges[k].append([])
             piece.south_edges[k].append([])
             piece.west_edges[k].append([])
@@ -603,38 +617,41 @@ def add_piece_grid_info(world: World, player: int, piece: WorldPiece, large_scre
                 piece.west_edges_water[k].append([])
                 piece.east_edges_water[k].append([])
 
-    done_large = set()
     for k in range(piece.height):
         for l in range(piece.width):
             screen = piece.screens[k][l]
             if not screen:
                 continue
 
+            cell_id = piece.grid[k][l]
+
             if screen.big:
-                if screen.id not in done_large:
-                    done_large.add(screen.id)
-                    quadrant_info = (large_screen_quadrant_info[screen.id] if world.owTerrain[player]
-                                   else large_screen_quadrant_info_land[screen.id])
+                # Determine quadrant by subtracting cell ID from screen ID
+                # 0x00 = NW (top-left), 0x01 = NE (top-right), 0x08 = SW (bottom-left), 0x09 = SE (bottom-right)
+                quadrant_offset = cell_id - screen.id
+                if quadrant_offset == 0x00:
+                    quadrant_name = "NW"
+                elif quadrant_offset == 0x01:
+                    quadrant_name = "NE"
+                elif quadrant_offset == 0x08:
+                    quadrant_name = "SW"
+                else:
+                    quadrant_name = "SE"
 
-                    piece.north_edges[k][l] = [e for e in quadrant_info["NW"][Direction.North] if not e.dest]
-                    piece.north_edges[k][l + 1] = [e for e in quadrant_info["NE"][Direction.North] if not e.dest]
-                    piece.south_edges[k + 1][l] = [e for e in quadrant_info["SW"][Direction.South] if not e.dest]
-                    piece.south_edges[k + 1][l + 1] = [e for e in quadrant_info["SE"][Direction.South] if not e.dest]
-                    piece.west_edges[k][l] = [e for e in quadrant_info["NW"][Direction.West] if not e.dest]
-                    piece.west_edges[k + 1][l] = [e for e in quadrant_info["SW"][Direction.West] if not e.dest]
-                    piece.east_edges[k][l + 1] = [e for e in quadrant_info["NE"][Direction.East] if not e.dest]
-                    piece.east_edges[k + 1][l + 1] = [e for e in quadrant_info["SE"][Direction.East] if not e.dest]
+                quadrant_info = (large_screen_quadrant_info[screen.id] if world.owTerrain[player]
+                               else large_screen_quadrant_info_land[screen.id])
 
-                    if not world.owTerrain[player]:
-                        quadrant_info = large_screen_quadrant_info_water[screen.id]
-                        piece.north_edges_water[k][l] = [e for e in quadrant_info["NW"][Direction.North] if not e.dest]
-                        piece.north_edges_water[k][l + 1] = [e for e in quadrant_info["NE"][Direction.North] if not e.dest]
-                        piece.south_edges_water[k + 1][l] = [e for e in quadrant_info["SW"][Direction.South] if not e.dest]
-                        piece.south_edges_water[k + 1][l + 1] = [e for e in quadrant_info["SE"][Direction.South] if not e.dest]
-                        piece.west_edges_water[k][l] = [e for e in quadrant_info["NW"][Direction.West] if not e.dest]
-                        piece.west_edges_water[k + 1][l] = [e for e in quadrant_info["SW"][Direction.West] if not e.dest]
-                        piece.east_edges_water[k][l + 1] = [e for e in quadrant_info["NE"][Direction.East] if not e.dest]
-                        piece.east_edges_water[k + 1][l + 1] = [e for e in quadrant_info["SE"][Direction.East] if not e.dest]
+                piece.north_edges[k][l] = [e for e in quadrant_info[quadrant_name][Direction.North] if not e.dest]
+                piece.south_edges[k][l] = [e for e in quadrant_info[quadrant_name][Direction.South] if not e.dest]
+                piece.west_edges[k][l] = [e for e in quadrant_info[quadrant_name][Direction.West] if not e.dest]
+                piece.east_edges[k][l] = [e for e in quadrant_info[quadrant_name][Direction.East] if not e.dest]
+
+                if not world.owTerrain[player]:
+                    quadrant_info_water = large_screen_quadrant_info_water[screen.id]
+                    piece.north_edges_water[k][l] = [e for e in quadrant_info_water[quadrant_name][Direction.North] if not e.dest]
+                    piece.south_edges_water[k][l] = [e for e in quadrant_info_water[quadrant_name][Direction.South] if not e.dest]
+                    piece.west_edges_water[k][l] = [e for e in quadrant_info_water[quadrant_name][Direction.West] if not e.dest]
+                    piece.east_edges_water[k][l] = [e for e in quadrant_info_water[quadrant_name][Direction.East] if not e.dest]
             else:
                 for edge in sorted(screen.edges.values(), key=lambda e: e.midpoint):
                     if not edge.dest:
@@ -650,6 +667,19 @@ def add_piece_grid_info(world: World, player: int, piece: WorldPiece, large_scre
                         elif edge.direction == Direction.East:
                             target = piece.east_edges[k][l] if world.owTerrain[player] or edge.terrain != Terrain.Water else piece.east_edges_water[k][l]
                             target.append(edge)
+
+def get_screen_id_from_cell(cell_id: int) -> int:
+    """Get the base screen ID from a cell ID.
+
+    For large screens, returns the top-left corner ID.
+    For small screens, returns the cell ID unchanged.
+    """
+    base_id = cell_id & 0xBF # Remove world bit if present
+    # Check if this is a quadrant of a large screen
+    for large_id in large_screen_ids:
+        if base_id in [large_id, large_id + 0x01, large_id + 0x08, large_id + 0x09]:
+            return large_id | (cell_id & 0x40) # Preserve world bit
+    return cell_id
 
 # ============================================================================
 # PLACEMENT ALGORITHM
@@ -1316,11 +1346,22 @@ def format_grid_for_spoiler(grid: List[List[int]]) -> str:
     return "\n".join(lines)
 
 def is_same_large_screen(grid: List[List[int]], row1: int, col1: int, row2: int, col2: int) -> bool:
-    id1 = grid[row1 % 8][col1 % 8]
-    id2 = grid[row2 % 8][col2 % 8]
+    """Checks if two adjacent cells belong to the same large screen with correct quadrant positions."""
+    id1, id2 = grid[row1 % 8][col1 % 8], grid[row2 % 8][col2 % 8]
     if id1 == -1 or id2 == -1:
         return False
-    return id1 == id2 and id1 in large_screen_ids
+    base1, base2 = get_screen_id_from_cell(id1), get_screen_id_from_cell(id2)
+    if base1 != base2 or base1 not in large_screen_ids:
+        return False
+    # Get quadrant offsets (0x00=NW, 0x01=NE, 0x08=SW, 0x09=SE)
+    q1, q2 = (id1 & 0xBF) - (base1 & 0xBF), (id2 & 0xBF) - (base2 & 0xBF)
+    # Swap if cell2 is before cell1
+    if col1 > col2 or row1 > row2:
+        q1, q2 = q2, q1
+    # Check valid adjacency: east (0x00->0x01, 0x08->0x09) or south (0x00->0x08, 0x01->0x09)
+    if col1 != col2:
+        return (q1, q2) in [(0x00, 0x01), (0x08, 0x09)]
+    return (q1, q2) in [(0x00, 0x08), (0x01, 0x09)]
 
 # ============================================================================
 # MAIN EXECUTION
@@ -1347,6 +1388,7 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
     options = LayoutGeneratorOptions(
         horizontal_wrap=horizontal_wrap,
         vertical_wrap=vertical_wrap,
+        split_large_screens=False,
         large_screen_pool=False,
         distortion_chance=0.0,
         random_order=6 if world.owParallel[player] else 12,
@@ -1385,19 +1427,9 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
         connect_edges_for_screen_layout(world, player, result.grid_info, options, connected_edges, prio_edges, overworld_screens, True)
         grid = result.grid_info.grid
 
-        # Make new grid containing cell IDs for the overworld map
-        map_grid = copy.deepcopy(grid)
-        for w in range(2):
-            for i in range(8):
-                for j in range(8):
-                    screen_id = map_grid[w][i][j]
-                    if screen_id in large_screen_ids and map_grid[w][i][(j + 1) % 8] == screen_id and map_grid[w][(i + 1) % 8][j] == screen_id and map_grid[w][(i + 1) % 8][(j + 1) % 8] == screen_id:
-                        map_grid[w][i][(j + 1) % 8] = screen_id + 0x01
-                        map_grid[w][(i + 1) % 8][j] = screen_id + 0x08
-                        map_grid[w][(i + 1) % 8][(j + 1) % 8] = screen_id + 0x09
-        world.owgrid[player] = map_grid
-        world.owlayoutmap_lw[player] = {id & 0xBF: i for i, id in enumerate(sum(map_grid[0], []))}
-        world.owlayoutmap_dw[player] = {id & 0xBF: i for i, id in enumerate(sum(map_grid[1], []))}
+        world.owgrid[player] = grid
+        world.owlayoutmap_lw[player] = {id & 0xBF: i for i, id in enumerate(sum(grid[0], []))}
+        world.owlayoutmap_dw[player] = {id & 0xBF: i for i, id in enumerate(sum(grid[1], []))}
 
         world.spoiler.set_map('layout_grid_lw', format_grid_for_spoiler(grid[0]), grid[0], player)
         if not world.owParallel[player]:
