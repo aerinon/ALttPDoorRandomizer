@@ -2690,4 +2690,8 @@ sprite_translation = {
     'Zoro': EnemySprite.Zoro,
 
     'CorrectPullSwitch': EnemySprite.CorrectPullSwitch,
+    'LaserEyeLeft': EnemySprite.LaserEyeLeft,
+    'LaserEyeRight': EnemySprite.LaserEyeRight,
+    'UnclePriest': EnemySprite.UnclePriest,
+    'RupeePull': EnemySprite.RupeePull,
 }
