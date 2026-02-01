@@ -170,7 +170,7 @@ class ObjectType:
     DiagonalWallBSeBottom = 0x1C  # Diagonal wall B ◢ (bottom)
     PlatformStairs = 0x21  # Platform stairs ↔
     RailH = 0x22  # ↔
-    PitEdgeE = 0x27  # Pit edge ┏━┓ E (north) ↔
+    PitEdgeNorthFull = 0x27  # Pit edge ┏━┓ E (north) ↔
     PitEdgeSouthFull = 0x28  # Pit edge ┗━┛ (south) ↔
     PitEdgeSouthLine = 0x29  # Pit edge ━━━ (south) ↔
     PitEdgeNorthLine = 0x2A  # Pit edge ━━━ (north) ↔

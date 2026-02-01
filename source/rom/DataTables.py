@@ -238,7 +238,7 @@ def init_custom_rooms(world, player, custom_rooms):
             data_bytes = [int(x, 16) for x in room_data['header']]
             data_tables.room_headers[room_id] = RoomHeader(room_id, data_bytes)
 
-        if any(room_data[attr] for attr in ['layout', 'layer1', 'layer2', 'doors']):
+        if any(attr in room_data and room_data[attr] for attr in ['layout', 'layer1', 'layer2', 'doors']):
             room = data_tables.room_list[room_id] if room_id in data_tables.room_list else Room([], [], [], [])
 
             if room_data['layout']:
