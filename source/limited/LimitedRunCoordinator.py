@@ -36,7 +36,7 @@ def adjust_world_for_limited_runs(world, args):
                 else:
                     custom_file = load_yaml(yaml)
                     for section_key, section_value in custom_file.items():
-                        if section_key in world.customizer.file_source:
+                        if section_value and section_key in world.customizer.file_source:
                             world.customizer.file_source[section_key].update(section_value)
                         else:
                             world.customizer.file_source[section_key] = section_value
