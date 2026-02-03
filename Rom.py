@@ -646,6 +646,12 @@ def patch_rom(world, rom, player, team, is_mystery=False):
         for room in world.rooms:
             if room.player == player and room.palette is not None:
                 rom.write_byte(0x13f200+room.index, room.palette)
+    else:
+        if world.keyshuffle[player] != 'universal':
+            for name, layout in world.key_layout[player].items():
+                offset = compass_data[name][4]//2
+                rom.write_byte(0x13f020+offset, layout.max_chests + layout.max_drops)  # not currently used
+                rom.write_byte(0x187010+offset, layout.max_chests)
     if world.doorShuffle[player] == 'basic':
         rom.write_byte(0x138002, 1)
     for door in world.doors:
