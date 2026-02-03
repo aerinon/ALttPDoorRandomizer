@@ -52,13 +52,6 @@ When reporting a bug, please provide:
 
 ### Critical Issues
 
-#### Dungeon Key HUD indicator
-
-**Status**: Under investigation
-
-Dungeon Key HUD indicator shows incorrect total number of keys under certain settings.
-
-
 #### Links House on Death Mountain - no logical way off the mountain
 
 **Status**: Under investigation
