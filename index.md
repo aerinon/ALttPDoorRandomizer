@@ -68,11 +68,11 @@ Join the discussion and get help:
 
 ## Learn More
 
-- [Features Guide](/features) - Comprehensive feature documentation
-- [Installation & Usage](/installation) - Setup and running the randomizer
-- [Known Issues](/known-issues) - Current bugs and limitations
-- [Roadmap](/roadmap) - Future development plans
-- [Blog](/blog) - Latest updates and release notes
+- [Features Guide](/features.html) - Comprehensive feature documentation
+- [Installation & Usage](/installation.html) - Setup and running the randomizer
+- [Known Issues](/known-issues.html) - Current bugs and limitations
+- [Roadmap](/roadmap.html) - Future development plans
+- [Blog](/blog.html) - Latest updates and release notes
 
 ## Credits
 
