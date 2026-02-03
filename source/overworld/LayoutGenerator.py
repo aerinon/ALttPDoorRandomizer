@@ -1,4 +1,5 @@
 import logging
+from DungeonGenerator import GenerationException
 import RaceRandom as random
 import random as _random
 from typing import List, Dict, Optional, Set, Tuple
@@ -6,7 +7,6 @@ from BaseClasses import OWEdge, World, Direction, Terrain
 from OverworldShuffle import connect_two_way, validate_layout
 
 ENABLE_KEEP_SIMILAR_SPECIAL_HANDLING = False
-PREVENT_WRAPPED_LARGE_SCREENS = False
 DRAW_IMAGE = True
 
 large_screen_ids = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35] + [0x40, 0x43, 0x45, 0x58, 0x5B, 0x5E, 0x70, 0x75]
@@ -78,8 +78,7 @@ class Piece:
     """
     Represents a piece consisting of a main and optionally a parallel world piece.
     """
-    __slots__ = ('main', 'parallel', 'world', 'width', 'height',
-                 'invalid_wrap_row', 'invalid_wrap_column', 'restriction',
+    __slots__ = ('main', 'parallel', 'world', 'width', 'height', 'restriction',
                  'crossed_groups', 'delay', 'order', 'edge_sides', 'max_edges_per_side')
 
     def __init__(
@@ -89,8 +88,6 @@ class Piece:
         world: int = 0,
         width: int = 0,
         height: int = 0,
-        invalid_wrap_row: Optional[List[int]] = None,
-        invalid_wrap_column: Optional[List[int]] = None,
         restriction: Optional[List[int]] = None,
         crossed_groups: Optional[List[List[int]]] = None,
         delay: int = 0,
@@ -103,8 +100,6 @@ class Piece:
         self.world = world # 0 or 1
         self.width = width
         self.height = height
-        self.invalid_wrap_row = invalid_wrap_row if invalid_wrap_row is not None else []
-        self.invalid_wrap_column = invalid_wrap_column if invalid_wrap_column is not None else []
         self.restriction = restriction
         self.crossed_groups = crossed_groups if crossed_groups is not None else []
         self.delay = delay
@@ -400,74 +395,42 @@ def define_large_screen_quadrants(
 
 def create_piece_list(world: World, player: int, options: LayoutGeneratorOptions, crossed_group_b: List[int], overworld_screens: Dict[int, Screen], large_screen_quadrant_info: Dict[int, Dict], large_screen_quadrant_info_land: Dict[int, Dict], large_screen_quadrant_info_water: Dict[int, Dict]) -> List[Piece]:
     piece_list: List[Piece] = []
-    used_screens_set = set()
 
-    all_large_screens = [s for s in overworld_screens.values() if s.big]
-    all_small_screens = [s for s in overworld_screens.values() if not s.big]
-
+    # Determine which screens to process
+    all_screens = list(overworld_screens.values())
     if world.owParallel[player]:
         # In Parallel, only use light world screens
         # Each piece will automatically handle both worlds through parallel mechanism
-        all_large_screens = [s for s in all_large_screens if not s.dark_world]
-        all_small_screens = [s for s in all_small_screens if not s.dark_world]
+        all_screens = [s for s in all_screens if not s.dark_world]
 
-    # In Standard mode, screens 0x1B, 0x2B, 0x2C are glued together as a single piece
-    if world.mode[player] == 'standard':
-        castle_screen = overworld_screens.get(0x1B)
-        central_bonk_screen = overworld_screens.get(0x2B)
-        links_house_screen = overworld_screens.get(0x2C)
-
-        if castle_screen and central_bonk_screen and links_house_screen:
-            piece = create_piece(world, player, [
-                [0x1B, 0x1C],
-                [0x23, 0x24],
-                [0x2B, 0x2C]
-            ], overworld_screens)
-
-            if options.large_screen_pool:
-                piece.restriction = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35]
-
-            piece_list.append(piece)
-            used_screens_set.add(castle_screen)
-            used_screens_set.add(central_bonk_screen)
-            used_screens_set.add(links_house_screen)
-
-            if world.owParallel[player]:
-                used_screens_set.add(castle_screen.parallel)
-                used_screens_set.add(central_bonk_screen.parallel)
-                used_screens_set.add(links_house_screen.parallel)
-
-    # Add large screens
-    for screen in all_large_screens:
-        if screen not in used_screens_set:
-            base_id = screen.id
-            if options.split_large_screens:
-                for quadrant_offset in [0x00, 0x01, 0x08, 0x09]:
-                    piece = create_piece(world, player, [[base_id + quadrant_offset]], overworld_screens)
-                    if options.large_screen_pool:
-                        piece.restriction = [large_screen_id + quadrant_offset for large_screen_id in [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35]]
-                    piece_list.append(piece)
-            else:
-                piece = create_piece(world, player, [[base_id, base_id + 0x01], [base_id + 0x08, base_id + 0x09]], overworld_screens)
+    # Phase 1: Create individual 1x1 pieces for all cells
+    for screen in all_screens:
+        if screen.big:
+            # Create 4 pieces for large screen quadrants
+            for offset in [0x00, 0x01, 0x08, 0x09]:
+                piece = create_piece(world, player, [[screen.id + offset]], overworld_screens)
                 if options.large_screen_pool:
-                    piece.restriction = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35]
+                    piece.restriction = [large_id + offset for large_id in [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35]]
                 piece_list.append(piece)
-            used_screens_set.add(screen)
-            if world.owParallel[player]:
-                used_screens_set.add(screen.parallel)
-
-    # Add small screens
-    for screen in all_small_screens:
-        if screen not in used_screens_set:
+        else:
             piece = create_piece(world, player, [[screen.id]], overworld_screens)
             if options.large_screen_pool:
                 piece.restriction = [s.id for s in overworld_screens.values() if not s.big]
             piece_list.append(piece)
-            used_screens_set.add(screen)
-            if world.owParallel[player]:
-                used_screens_set.add(screen.parallel)
 
-    # Add piece data
+    # Phase 2: Apply options via merging
+
+    # Merge large screens if not split
+    if not options.split_large_screens:
+        for large_id in large_screen_ids:
+            if large_id in [s.id for s in all_screens if s.big]:
+                piece_list = merge_pieces(piece_list, [[large_id, large_id + 0x01], [large_id + 0x08, large_id + 0x09]], world, player, overworld_screens)
+
+    # Standard mode: merge castle area
+    if world.mode[player] == 'standard':
+        piece_list = merge_pieces(piece_list, [[0x23, 0x24], [0x2B, 0x2C]], world, player, overworld_screens)
+
+    # Phase 3: Add piece data
     for piece in piece_list:
         add_piece_data(world, player, piece, large_screen_quadrant_info, large_screen_quadrant_info_land, large_screen_quadrant_info_water)
         # Handle crossed groups
@@ -502,13 +465,13 @@ def create_piece(world: World, player: int, grid: List[List[int]], overworld_scr
     Takes 2D array of cell IDs and creates main and parallel pieces
     """
     piece = Piece(
-        main=WorldPiece(),
+        main=WorldPiece(width=len(grid[0]), height=len(grid)),
         width=len(grid[0]),
         height=len(grid)
     )
 
     if world.owParallel[player]:
-        piece.parallel = WorldPiece()
+        piece.parallel = WorldPiece(width=len(grid[0]), height=len(grid))
 
     found_screens = set()
 
@@ -526,24 +489,253 @@ def create_piece(world: World, player: int, grid: List[List[int]], overworld_scr
         for j in range(piece.width):
             cell_id = grid[i][j]
             new_row.append(cell_id)
-            screen = overworld_screens.get(get_screen_id_from_cell(cell_id))
-            new_screen_row.append(screen)
-            if world.owParallel[player] and screen:
-                new_row_parallel.append(cell_id - screen.id + screen.parallel.id)
-                new_screen_row_parallel.append(screen.parallel)
-
-            if screen and screen not in found_screens:
+            screen = None if cell_id == -1 else overworld_screens.get(get_screen_id_from_cell(cell_id))
+            if screen:
                 found_screens.add(screen)
-                piece.world = 1 if screen.dark_world else 0
-                if screen.big and PREVENT_WRAPPED_LARGE_SCREENS:
-                    # For large screens, prevent wrapping at the second row/column
-                    # This ensures the 2x2 piece doesn't split across the grid boundary
-                    if (i + 1) not in piece.invalid_wrap_row:
-                        piece.invalid_wrap_row.append(i + 1)
-                    if (j + 1) not in piece.invalid_wrap_column:
-                        piece.invalid_wrap_column.append(j + 1)
+            new_screen_row.append(screen)
+            if world.owParallel[player]:
+                if screen:
+                    new_row_parallel.append(cell_id - screen.id + screen.parallel.id)
+                    new_screen_row_parallel.append(screen.parallel)
+                else:
+                    new_row_parallel.append(-1)
+                    new_screen_row_parallel.append(None)
+
+    worlds = set(s.dark_world for s in found_screens if s is not None)
+    if len(worlds) != 1:
+        raise GenerationException("Piece contains screens from both Light World and Dark World")
+    piece.world = 1 if True in worlds else 0
 
     return piece
+
+def get_piece_cells(piece: Piece) -> Set[int]:
+    """Get all cell IDs contained in a piece."""
+    cells = set()
+    for row in piece.main.grid:
+        for cell in row:
+            if cell != -1:
+                cells.add(cell)
+    return cells
+
+def expand_arrangement(arrangement: List[List[int]], pieces: List[Piece]) -> List[List[int]]:
+    """
+    Expand an arrangement to include all cells from the pieces being merged.
+
+    When merging pieces, if a piece contains cells not in the original arrangement,
+    we need to expand the arrangement to include those cells in their correct
+    relative positions.
+
+    Raises an exception if the relative positions of cells within pieces conflict
+    with the requested arrangement (e.g., contradictory merge operations).
+    """
+    # Build a mapping of cell_id -> (row, col) for all cells in all pieces
+    # relative to a common coordinate system
+    cell_positions: Dict[int, Tuple[int, int]] = {}
+    # Also track position -> cell_id to detect when two cells would occupy the same position
+    position_to_cell: Dict[Tuple[int, int], int] = {}
+
+    # First, map cells from the original arrangement
+    for i, row in enumerate(arrangement):
+        for j, cell in enumerate(row):
+            if cell != -1:
+                cell_positions[cell] = (i, j)
+                position_to_cell[(i, j)] = cell
+
+    # For each piece, determine where its cells should go
+    for piece in pieces:
+        # Find a cell that's already in our arrangement to anchor this piece
+        anchor_cell = None
+        anchor_piece_pos = None
+        for i, row in enumerate(piece.main.grid):
+            for j, cell in enumerate(row):
+                if cell != -1 and cell in cell_positions:
+                    anchor_cell = cell
+                    anchor_piece_pos = (i, j)
+                    break
+            if anchor_cell is not None:
+                break
+
+        # Calculate offset between piece coordinates and arrangement coordinates
+        anchor_arr_pos = cell_positions[anchor_cell]
+        offset_row = anchor_arr_pos[0] - anchor_piece_pos[0]
+        offset_col = anchor_arr_pos[1] - anchor_piece_pos[1]
+
+        # Add all cells from this piece to cell_positions, checking for conflicts
+        for i, row in enumerate(piece.main.grid):
+            for j, cell in enumerate(row):
+                if cell != -1:
+                    new_pos = (i + offset_row, j + offset_col)
+                    if cell in cell_positions:
+                        # Cell already has a position - verify it's consistent
+                        if cell_positions[cell] != new_pos:
+                            raise GenerationException(
+                                f"Cannot merge: cell 0x{cell:02X} has conflicting positions. "
+                                f"Existing position {cell_positions[cell]} conflicts with "
+                                f"position {new_pos} from piece containing cells "
+                                f"{[c for row in piece.main.grid for c in row if c != -1]}. "
+                                f"This indicates contradictory merge operations."
+                            )
+                    elif new_pos in position_to_cell:
+                        # Position is already occupied by a different cell
+                        existing_cell = position_to_cell[new_pos]
+                        raise GenerationException(
+                            f"Cannot merge: cell 0x{cell:02X} would be placed at position {new_pos}, "
+                            f"but that position is already occupied by cell 0x{existing_cell:02X}. "
+                            f"This indicates contradictory merge operations."
+                        )
+                    else:
+                        cell_positions[cell] = new_pos
+                        position_to_cell[new_pos] = cell
+
+    # Find the bounding box of all cells
+    if not cell_positions:
+        return arrangement
+
+    min_row = min(pos[0] for pos in cell_positions.values())
+    max_row = max(pos[0] for pos in cell_positions.values())
+    min_col = min(pos[1] for pos in cell_positions.values())
+    max_col = max(pos[1] for pos in cell_positions.values())
+
+    # Create new arrangement with normalized coordinates
+    new_height = max_row - min_row + 1
+    new_width = max_col - min_col + 1
+    new_arrangement = [[-1] * new_width for _ in range(new_height)]
+
+    for cell, (row, col) in cell_positions.items():
+        new_arrangement[row - min_row][col - min_col] = cell
+
+    return new_arrangement
+
+def calculate_merged_restrictions(pieces: List[Piece], arrangement: List[List[int]]) -> Optional[List[int]]:
+    """
+    Calculate restrictions for the merged piece.
+
+    For each piece with restrictions, we translate the restrictions to account
+    for the piece's position in the merged arrangement. The final restriction
+    is the intersection of all translated restrictions.
+
+    For example, when merging 4 quadrant pieces into a 2x2:
+    - NW piece (at position 0,0) has restrictions like [0x00, 0x03, ...] - no translation needed
+    - NE piece (at position 0,1) has restrictions like [0x01, 0x04, ...] - translate left by 1
+    - SW piece (at position 1,0) has restrictions like [0x08, 0x0B, ...] - translate up by 1
+    - SE piece (at position 1,1) has restrictions like [0x09, 0x0C, ...] - translate up and left by 1
+
+    After translation, all should give [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35]
+    """
+    if not any(p.restriction for p in pieces):
+        return None
+
+    # Build mapping from cell to position in arrangement
+    cell_to_new_pos = {}
+    for i, row in enumerate(arrangement):
+        for j, cell in enumerate(row):
+            if cell != -1:
+                cell_to_new_pos[cell] = (i, j)
+
+    # For each piece, translate its restrictions
+    translated_restrictions = []
+    for piece in pieces:
+        if piece.restriction is None:
+            continue
+
+        # Find the first cell in this piece and its position in the arrangement
+        piece_cell = None
+        piece_old_pos = None
+        for i, row in enumerate(piece.main.grid):
+            for j, cell in enumerate(row):
+                if cell != -1 and cell in cell_to_new_pos:
+                    piece_cell = cell
+                    piece_old_pos = (i, j)
+                    break
+            if piece_cell is not None:
+                break
+
+        if piece_cell is None:
+            continue
+
+        new_pos = cell_to_new_pos[piece_cell]
+        # The offset is how much we need to shift the restriction positions
+        # to get the top-left corner position of the merged piece
+        offset_row = new_pos[0] - piece_old_pos[0]
+        offset_col = new_pos[1] - piece_old_pos[1]
+
+        # Translate restrictions: shift each restriction position back by the offset
+        # to get the position where the merged piece's top-left corner would be
+        translated = []
+        for r in piece.restriction:
+            r_row = r // 8
+            r_col = r % 8
+            new_r_row = r_row - offset_row
+            new_r_col = r_col - offset_col
+            if 0 <= new_r_row < 8 and 0 <= new_r_col < 8:
+                translated.append(new_r_row * 8 + new_r_col)
+        translated_restrictions.append(set(translated))
+
+    # Intersection of all translated restrictions
+    result = translated_restrictions[0]
+    for tr in translated_restrictions[1:]:
+        result &= tr
+
+    return list(result)
+
+def merge_pieces(piece_list: List[Piece], arrangement: List[List[int]], world: World, player: int, overworld_screens: Dict[int, Screen]) -> List[Piece]:
+    """
+    Merge pieces according to the specified arrangement.
+
+    The arrangement is a 2D list where:
+    - Positive values are cell IDs that must be included
+    - -1 indicates a flexible/empty position
+
+    Example: [[0x00, 0x01], [0x08, 0x09]] merges 4 pieces into a 2x2 piece
+
+    If a piece being merged contains additional cells not in the arrangement,
+    the arrangement is automatically expanded to include all cells from all
+    pieces being merged.
+    """
+    # Collect all cell IDs from arrangement, excluding -1
+    target_cells = set()
+    for row in arrangement:
+        for cell in row:
+            if cell != -1:
+                target_cells.add(cell)
+
+    # Find all pieces containing any of the target cells
+    pieces_to_merge = []
+    remaining_pieces = []
+
+    for piece in piece_list:
+        piece_cells = get_piece_cells(piece)
+        if piece_cells & target_cells:
+            pieces_to_merge.append(piece)
+        else:
+            remaining_pieces.append(piece)
+
+    # Validate: all target cells must be found
+    found_cells = set()
+    for piece in pieces_to_merge:
+        piece_cells = get_piece_cells(piece)
+        # Check for overlapping cells between pieces (indicates contradictory merges)
+        overlap = found_cells & piece_cells
+        if overlap:
+            raise GenerationException(f"Cannot merge: cells {overlap} appear in multiple pieces (contradictory merge operations)")
+        found_cells.update(piece_cells)
+
+    if not target_cells.issubset(found_cells):
+        missing = target_cells - found_cells
+        raise GenerationException(f"Cannot merge: cells {missing} not found in any piece")
+
+    # If pieces contain additional cells not in the arrangement, expand the arrangement
+    if found_cells != target_cells:
+        arrangement = expand_arrangement(arrangement, pieces_to_merge)
+
+    # Create the merged piece
+    merged_piece = create_piece(world, player, arrangement, overworld_screens)
+
+    # Calculate merged restrictions
+    merged_piece.restriction = calculate_merged_restrictions(pieces_to_merge, arrangement)
+
+    remaining_pieces.append(merged_piece)
+    return remaining_pieces
 
 def add_piece_data(world: World, player: int, piece: Piece, large_screen_quadrant_info: Dict[int, Dict], large_screen_quadrant_info_land: Dict[int, Dict], large_screen_quadrant_info_water: Dict[int, Dict]) -> None:
     """
@@ -553,12 +745,7 @@ def add_piece_data(world: World, player: int, piece: Piece, large_screen_quadran
     num_pieces = 2 if piece.parallel else 1
     for p in range(num_pieces):
         world_piece = piece.main if p == 0 else piece.parallel
-        world_piece.width = piece.width
-        world_piece.height = piece.height
         add_world_piece_edge_info(world, player, world_piece, large_screen_quadrant_info, large_screen_quadrant_info_land, large_screen_quadrant_info_water)
-
-    piece.width = piece.main.width
-    piece.height = piece.main.height
 
     # Calculate edge_sides and max_edges_per_side: 0 for multi-cell pieces
     if piece.width == 1 and piece.height == 1:
@@ -739,8 +926,6 @@ def random_place_piece(
         piece_main = piece.main
         piece_parallel = piece.parallel
         wrld = piece.world
-        invalid_wrap_row = piece.invalid_wrap_row
-        invalid_wrap_column = piece.invalid_wrap_column
         restriction = piece.restriction
         piece_width = piece.width
         piece_height = piece.height
@@ -751,13 +936,8 @@ def random_place_piece(
 
         i_range = height if vertical_wrap else height - piece_height + 1
         for i in range(i_range):
-            if i >= height - piece_height + 1 and (height - i) in invalid_wrap_row:
-                continue
-
             j_range = width if horizontal_wrap else width - piece_width + 1
             for j in range(j_range):
-                if j >= width - piece_width + 1 and (width - j) in invalid_wrap_column:
-                    continue
                 if restriction and (i * 8 + j) not in restriction:
                     continue
 
@@ -1268,7 +1448,7 @@ def connect_edge_sets(world: World, player: int, edge_set_1: List[OWEdge], edge_
                 for k in range(len(edge_set_2)):
                     connect_two_way(world, edges_to_connect[k].name, edge_set_2[k].name, player, connected_edges, final_placement)
             else:
-                raise Exception("There should never be multiple edges with high priority in an edge set")
+                raise GenerationException("There should never be multiple edges with high priority in an edge set")
 
 # ============================================================================
 # GRID FORMATTING
@@ -1452,4 +1632,4 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
             except Exception as e:
                 logger.warning(f"Warning: Could not create visualization: {e}")
     else:
-        raise Exception(f"Layout generation FAILED after {result.failures} attempts and {elapsed_time:.3f} seconds")
+        raise GenerationException(f"Layout generation FAILED after {result.failures} attempts and {elapsed_time:.3f} seconds")
