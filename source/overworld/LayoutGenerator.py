@@ -273,6 +273,25 @@ def create_empty_grid_info(edge_connection_seed: float) -> GridInfo:
         edge_connection_seed=edge_connection_seed
     )
 
+def copy_grid_info(source: GridInfo, edge_connection_seed: float) -> GridInfo:
+    """
+    Create a deep copy of a GridInfo object with a new edge_connection_seed.
+    Only copies the grid data structures, not the OWEdge references (which are shared).
+    """
+    return GridInfo(
+        grid=[[row[:] for row in world_grid] for world_grid in source.grid],
+        north_edges_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.north_edges_grid],
+        south_edges_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.south_edges_grid],
+        west_edges_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.west_edges_grid],
+        east_edges_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.east_edges_grid],
+        north_edges_water_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.north_edges_water_grid],
+        south_edges_water_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.south_edges_water_grid],
+        west_edges_water_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.west_edges_water_grid],
+        east_edges_water_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.east_edges_water_grid],
+        crossed_groups=[row[:] for row in source.crossed_groups],
+        edge_connection_seed=edge_connection_seed
+    )
+
 def initialize_screens(world: World, player: int) -> Dict[int, Screen]:
     overworld_screens: Dict[int, Screen] = {}
     screen_edges_map = group_owedges_by_screens(world, player)
@@ -1171,11 +1190,141 @@ def random_place_piece(
 
     return PiecePlacementResult(success=True, piece=piece, score_major=used_score_major, score_minor=used_score_minor)
 
+def place_single_restriction_pieces(
+    world: World,
+    player: int,
+    grid_info: GridInfo,
+    options: LayoutGeneratorOptions,
+    pieces: List[Piece]
+) -> Tuple[List[Piece], int]:
+    """
+    Place pieces that have a restriction list with only a single element.
+    These pieces are forced into a single position, so we can place them deterministically.
+
+    This function iteratively:
+    1. Validates restriction lists against current grid state and grid bounds
+    2. Places pieces with single-element restrictions
+    3. Repeats until no more pieces can be placed
+
+    Returns a tuple of (remaining_pieces, count_of_placed_pieces).
+    """
+    use_crossed_groups = (world.owCrossed[player] == 'polar' and world.owMixed[player]) or world.owCrossed[player] == 'grouped'
+
+    remaining_pieces = list(pieces)
+    placed_count = 0
+
+    placed_this_iteration = True
+    while placed_this_iteration:
+        placed_this_iteration = False
+
+        # Validate and update restriction lists for all remaining pieces
+        for piece in remaining_pieces:
+            if piece.restriction is None:
+                continue
+
+            valid_positions = []
+            for position in piece.restriction:
+                row = position // 8
+                column = position % 8
+                wrld = piece.world
+                piece_crossed_groups = piece.crossed_groups
+
+                # Check if this position is valid
+                is_valid = True
+
+                # Check if piece would go outside grid bounds when wrapping is disabled
+                if not options.horizontal_wrap and column + piece.width > 8:
+                    is_valid = False
+                if not options.vertical_wrap and row + piece.height > 8:
+                    is_valid = False
+
+                # Check for overlap with already placed pieces
+                if is_valid:
+                    for k in range(piece.height):
+                        if not is_valid:
+                            break
+                        row_idx = (row + k) % 8
+                        for l in range(piece.width):
+                            col_idx = (column + l) % 8
+
+                            # Check main world overlap
+                            if grid_info.grid[wrld][row_idx][col_idx] != -1 and piece.main.screens[k][l]:
+                                is_valid = False
+                                break
+
+                            # Check parallel world overlap
+                            if piece.parallel and grid_info.grid[1 - wrld][row_idx][col_idx] != -1 and piece.parallel.screens[k][l]:
+                                is_valid = False
+                                break
+
+                            # Check crossed groups
+                            if use_crossed_groups and grid_info.crossed_groups[row_idx][col_idx] != -1 and grid_info.crossed_groups[row_idx][col_idx] != piece_crossed_groups[k][l]:
+                                is_valid = False
+                                break
+
+                if is_valid:
+                    valid_positions.append(position)
+
+            # Update the restriction list
+            if len(valid_positions) == 0:
+                raise GenerationException(f"No valid positions remaining for piece with restriction list (original: {piece.restriction})")
+
+            piece.restriction = valid_positions
+
+        # Place pieces with single-element restrictions
+        new_remaining_pieces = []
+        for piece in remaining_pieces:
+            # Check if this piece has exactly one restriction position
+            if piece.restriction is not None and len(piece.restriction) == 1:
+                position = piece.restriction[0]
+                row = position // 8
+                column = position % 8
+                wrld = piece.world
+                piece_crossed_groups = piece.crossed_groups
+
+                # Place the piece on the grid
+                for k in range(piece.height):
+                    row_idx = (row + k) % 8
+                    for l in range(piece.width):
+                        col_idx = (column + l) % 8
+                        num_pieces = 2 if piece.parallel else 1
+                        for p in range(num_pieces):
+                            world_piece = piece.main if p == 0 else piece.parallel
+                            w = wrld if p == 0 else 1 - wrld
+
+                            grid_info.grid[w][row_idx][col_idx] = world_piece.grid[k][l]
+                            grid_info.north_edges_grid[w][row_idx][col_idx] = world_piece.north_edges[k][l]
+                            grid_info.south_edges_grid[w][row_idx][col_idx] = world_piece.south_edges[k][l]
+                            grid_info.west_edges_grid[w][row_idx][col_idx] = world_piece.west_edges[k][l]
+                            grid_info.east_edges_grid[w][row_idx][col_idx] = world_piece.east_edges[k][l]
+
+                            if not world.owTerrain[player]:
+                                grid_info.north_edges_water_grid[w][row_idx][col_idx] = world_piece.north_edges_water[k][l]
+                                grid_info.south_edges_water_grid[w][row_idx][col_idx] = world_piece.south_edges_water[k][l]
+                                grid_info.west_edges_water_grid[w][row_idx][col_idx] = world_piece.west_edges_water[k][l]
+                                grid_info.east_edges_water_grid[w][row_idx][col_idx] = world_piece.east_edges_water[k][l]
+
+                        if use_crossed_groups:
+                            grid_info.crossed_groups[row_idx][col_idx] = piece_crossed_groups[k][l]
+
+                placed_count += 1
+                placed_this_iteration = True
+            else:
+                new_remaining_pieces.append(piece)
+
+        remaining_pieces = new_remaining_pieces
+
+    return remaining_pieces, placed_count
+
 def get_random_layout(world: World, player: int, connected_edges_cache: List[str], pieces_to_place: List[Piece], options: LayoutGeneratorOptions, prio_edges: List[str], overworld_screens: Dict[int, Screen]) -> LayoutGeneratorResult:
     total_score = 0
     best_score = -1000000
     worst_score = 1000000
     best_grid_info = None
+
+    # Pre-place pieces with single-element restriction lists
+    base_grid_info = create_empty_grid_info(0.0)
+    remaining_pieces, preplaced_count = place_single_restriction_pieces(world, player, base_grid_info, options, pieces_to_place)
 
     successes = 0
     failures = 0
@@ -1183,9 +1332,10 @@ def get_random_layout(world: World, player: int, connected_edges_cache: List[str
     while run < options.min_runs or (run * successes < options.target_runs_times_successes and run < options.max_runs):
         run += 1
         connected_edges = connected_edges_cache.copy()
-        piece_list = pieces_to_place.copy()
+        piece_list = remaining_pieces.copy()
 
-        grid_info = create_empty_grid_info(random.random())
+        # Copy the pre-placed grid with a new random seed for edge connections
+        grid_info = copy_grid_info(base_grid_info, random.random())
         for piece in piece_list:
             piece.delay = 0
 
@@ -1212,7 +1362,7 @@ def get_random_layout(world: World, player: int, connected_edges_cache: List[str
                 for i in range(1, min(options.multi_choice, len(piece_list))):
                     pieces.append(piece_list[i])
 
-            result = random_place_piece(world, player, grid_info, options, pieces, len(placed_pieces) < options.first_ignore_bonus_points)
+            result = random_place_piece(world, player, grid_info, options, pieces, len(placed_pieces) + preplaced_count < options.first_ignore_bonus_points)
 
             if not result.success:
                 failures += 1
