@@ -449,6 +449,12 @@ def create_piece_list(world: World, player: int, options: LayoutGeneratorOptions
     if world.mode[player] == 'standard':
         piece_list = merge_pieces(piece_list, [[0x23, 0x24], [0x2B, 0x2C]], world, player, overworld_screens)
 
+    # Trim pieces by removing empty rows/columns on edges
+    piece_list = [trim_piece(piece) for piece in piece_list]
+
+    # Validate piece sizes and apply wrapping if needed
+    piece_list = validate_and_wrap_pieces(piece_list, options, world, player, overworld_screens)
+
     # Phase 3: Add piece data
     for piece in piece_list:
         add_piece_data(world, player, piece, large_screen_quadrant_info, large_screen_quadrant_info_land, large_screen_quadrant_info_water)
@@ -536,6 +542,59 @@ def get_piece_cells(piece: Piece) -> Set[int]:
                 cells.add(cell)
     return cells
 
+def trim_piece(piece: Piece) -> Piece:
+    """
+    Trim a piece by removing any full rows or columns on the edges that only consist of -1.
+    Adjusts position restrictions when present.
+    """
+    # Find the bounds of non-empty cells
+    min_row, max_row = piece.height, -1
+    min_col, max_col = piece.width, -1
+
+    for i in range(piece.height):
+        for j in range(piece.width):
+            has_content = piece.main.grid[i][j] != -1
+            if piece.parallel:
+                has_content = has_content or piece.parallel.grid[i][j] != -1
+            if has_content:
+                min_row = min(min_row, i)
+                max_row = max(max_row, i)
+                min_col = min(min_col, j)
+                max_col = max(max_col, j)
+
+    if max_row < 0 or (min_row == 0 and max_row == piece.height - 1 and min_col == 0 and max_col == piece.width - 1):
+        return piece
+
+    new_height = max_row - min_row + 1
+    new_width = max_col - min_col + 1
+    piece.width = new_width
+    piece.height = new_height
+
+    # Trim piece
+    piece.main.grid = [row[min_col:max_col + 1] for row in piece.main.grid[min_row:max_row + 1]]
+    piece.main.screens = [row[min_col:max_col + 1] for row in piece.main.screens[min_row:max_row + 1]]
+    piece.main.width = new_width
+    piece.main.height = new_height
+
+    if piece.parallel:
+        piece.parallel.grid = [row[min_col:max_col + 1] for row in piece.parallel.grid[min_row:max_row + 1]]
+        piece.parallel.screens = [row[min_col:max_col + 1] for row in piece.parallel.screens[min_row:max_row + 1]]
+        piece.parallel.width = new_width
+        piece.parallel.height = new_height
+
+    # Adjust restrictions if present
+    if piece.restriction is not None:
+        adjusted_restrictions = []
+        for pos in piece.restriction:
+            old_row = pos // 8
+            old_col = pos % 8
+            new_row = (old_row + min_row) % 8
+            new_col = (old_col + min_col) % 8
+            adjusted_restrictions.append(new_row * 8 + new_col)
+        piece.restriction = adjusted_restrictions
+
+    return piece
+
 def expand_arrangement(arrangement: List[List[int]], pieces: List[Piece]) -> List[List[int]]:
     """
     Expand an arrangement to include all cells from the pieces being merged.
@@ -546,19 +605,25 @@ def expand_arrangement(arrangement: List[List[int]], pieces: List[Piece]) -> Lis
 
     Raises an exception if the relative positions of cells within pieces conflict
     with the requested arrangement (e.g., contradictory merge operations).
+
+    Note: This function uses wrap-aware position checking. Positions that differ
+    by multiples of 8 are considered equivalent (for wrapping support). This allows
+    arrangements like [[0x10, 0x11, 0x12, 0x13, 0x14]] and [[0x14, 0x15, 0x16, 0x17, 0x10]]
+    to be merged into a valid horizontal loop.
     """
     # Build a mapping of cell_id -> (row, col) for all cells in all pieces
     # relative to a common coordinate system
     cell_positions: Dict[int, Tuple[int, int]] = {}
-    # Also track position -> cell_id to detect when two cells would occupy the same position
-    position_to_cell: Dict[Tuple[int, int], int] = {}
+    # Track wrapped_position -> cell_id to detect when two different cells would occupy the same position after wrapping
+    wrapped_position_to_cell: Dict[Tuple[int, int], int] = {}
 
     # First, map cells from the original arrangement
     for i, row in enumerate(arrangement):
         for j, cell in enumerate(row):
             if cell != -1:
                 cell_positions[cell] = (i, j)
-                position_to_cell[(i, j)] = cell
+                wrapped_pos = (i % 8, j % 8)
+                wrapped_position_to_cell[wrapped_pos] = cell
 
     # For each piece, determine where its cells should go
     for piece in pieces:
@@ -584,27 +649,33 @@ def expand_arrangement(arrangement: List[List[int]], pieces: List[Piece]) -> Lis
             for j, cell in enumerate(row):
                 if cell != -1:
                     new_pos = (i + offset_row, j + offset_col)
+                    # Normalize position for wrapping (positions differing by 8 are equivalent)
+                    wrapped_pos = (new_pos[0] % 8, new_pos[1] % 8)
+
                     if cell in cell_positions:
-                        # Cell already has a position - verify it's consistent
-                        if cell_positions[cell] != new_pos:
+                        # Cell already has a position - verify it's consistent after wrapping
+                        existing_pos = cell_positions[cell]
+                        existing_wrapped = (existing_pos[0] % 8, existing_pos[1] % 8)
+                        if existing_wrapped != wrapped_pos:
                             raise GenerationException(
                                 f"Cannot merge: cell 0x{cell:02X} has conflicting positions. "
-                                f"Existing position {cell_positions[cell]} conflicts with "
-                                f"position {new_pos} from piece containing cells "
+                                f"Existing position {existing_pos} (wrapped: {existing_wrapped}) conflicts with "
+                                f"position {new_pos} (wrapped: {wrapped_pos}) from piece containing cells "
                                 f"{[c for row in piece.main.grid for c in row if c != -1]}. "
                                 f"This indicates contradictory merge operations."
                             )
-                    elif new_pos in position_to_cell:
-                        # Position is already occupied by a different cell
-                        existing_cell = position_to_cell[new_pos]
+                        # Same cell at same wrapped position - this is fine (loop detected)
+                    elif wrapped_pos in wrapped_position_to_cell:
+                        # Position is already occupied by a different cell after wrapping
+                        existing_cell = wrapped_position_to_cell[wrapped_pos]
                         raise GenerationException(
-                            f"Cannot merge: cell 0x{cell:02X} would be placed at position {new_pos}, "
-                            f"but that position is already occupied by cell 0x{existing_cell:02X}. "
-                            f"This indicates contradictory merge operations."
+                            f"Cannot merge: cell 0x{cell:02X} would be placed at position {new_pos} "
+                            f"(wrapped: {wrapped_pos}), but that position is already occupied by "
+                            f"cell 0x{existing_cell:02X}. This indicates contradictory merge operations."
                         )
                     else:
                         cell_positions[cell] = new_pos
-                        position_to_cell[new_pos] = cell
+                        wrapped_position_to_cell[wrapped_pos] = cell
 
     # Find the bounding box of all cells
     if not cell_positions:
@@ -684,10 +755,9 @@ def calculate_merged_restrictions(pieces: List[Piece], arrangement: List[List[in
         for r in piece.restriction:
             r_row = r // 8
             r_col = r % 8
-            new_r_row = r_row - offset_row
-            new_r_col = r_col - offset_col
-            if 0 <= new_r_row < 8 and 0 <= new_r_col < 8:
-                translated.append(new_r_row * 8 + new_r_col)
+            new_r_row = (r_row - offset_row) % 8
+            new_r_col = (r_col - offset_col) % 8
+            translated.append(new_r_row * 8 + new_r_col)
         translated_restrictions.append(set(translated))
 
     # Intersection of all translated restrictions
@@ -755,6 +825,61 @@ def merge_pieces(piece_list: List[Piece], arrangement: List[List[int]], world: W
 
     remaining_pieces.append(merged_piece)
     return remaining_pieces
+
+def validate_and_wrap_pieces(piece_list: List[Piece], options: LayoutGeneratorOptions, world: World, player: int, overworld_screens: Dict[int, Screen]) -> List[Piece]:
+    """
+    Validate that all pieces are at most 8x8 in size.
+    If a piece is too large, attempt to reduce its size using wrapping.
+    """
+    result_pieces = []
+
+    for piece in piece_list:
+        if piece.width <= 8 and piece.height <= 8:
+            result_pieces.append(piece)
+            continue
+
+        # Piece is too large, need to apply wrapping
+        if piece.width > 8 and not options.horizontal_wrap:
+            raise GenerationException(
+                f"Piece has width {piece.width} which exceeds 8, but horizontal wrapping is not enabled. "
+                f"Cells: {[c for row in piece.main.grid for c in row if c != -1]}"
+            )
+
+        if piece.height > 8 and not options.vertical_wrap:
+            raise GenerationException(
+                f"Piece has height {piece.height} which exceeds 8, but vertical wrapping is not enabled. "
+                f"Cells: {[c for row in piece.main.grid for c in row if c != -1]}"
+            )
+
+        # Calculate wrapped dimensions
+        wrapped_width = min(piece.width, 8)
+        wrapped_height = min(piece.height, 8)
+
+        # Create new wrapped grid, checking for conflicts
+        wrapped_grid = [[-1] * wrapped_width for _ in range(wrapped_height)]
+
+        for i in range(piece.height):
+            wrapped_i = i % 8
+            for j in range(piece.width):
+                wrapped_j = j % 8
+                cell = piece.main.grid[i][j]
+
+                if cell != -1:
+                    existing = wrapped_grid[wrapped_i][wrapped_j]
+                    if existing != -1 and existing != cell:
+                        raise GenerationException(
+                            f"Wrapping conflict: cell 0x{cell:02X} at position ({i}, {j}) "
+                            f"would wrap to ({wrapped_i}, {wrapped_j}) which already contains cell 0x{existing:02X}. "
+                            f"Piece cells: {[c for row in piece.main.grid for c in row if c != -1]}"
+                        )
+                    wrapped_grid[wrapped_i][wrapped_j] = cell
+
+        # Create the wrapped piece
+        wrapped_piece = create_piece(world, player, wrapped_grid, overworld_screens)
+        wrapped_piece.restriction = piece.restriction
+        result_pieces.append(wrapped_piece)
+
+    return result_pieces
 
 def add_piece_data(world: World, player: int, piece: Piece, large_screen_quadrant_info: Dict[int, Dict], large_screen_quadrant_info_land: Dict[int, Dict], large_screen_quadrant_info_water: Dict[int, Dict]) -> None:
     """
