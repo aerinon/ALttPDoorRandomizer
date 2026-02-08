@@ -148,8 +148,7 @@ class LayoutGeneratorOptions:
     """
     Configuration options for layout generation.
     """
-    __slots__ = ('horizontal_wrap', 'vertical_wrap', 'split_large_screens',
-                 'large_screen_pool', 'distortion_chance', 'random_order',
+    __slots__ = ('horizontal_wrap', 'vertical_wrap', 'split_large_screens', 'distortion_chance', 'random_order',
                  'multi_choice', 'max_delay', 'first_ignore_bonus_points',
                  'penalty_full_edge_mismatch', 'penalty_partial_edge_mismatch', 'bonus_partial_edge_match',
                  'bonus_full_edge_match', 'bonus_crossed_group_match', 'bonus_fill_parallel',
@@ -163,7 +162,6 @@ class LayoutGeneratorOptions:
         horizontal_wrap: bool = True,
         vertical_wrap: bool = True,
         split_large_screens = False,
-        large_screen_pool: bool = False,
         distortion_chance: float = 0.0,
         random_order: int = 0,
         multi_choice: int = 1,
@@ -190,7 +188,6 @@ class LayoutGeneratorOptions:
         self.horizontal_wrap = horizontal_wrap
         self.vertical_wrap = vertical_wrap
         self.split_large_screens = split_large_screens
-        self.large_screen_pool = large_screen_pool
         self.distortion_chance = distortion_chance
         self.random_order = random_order
         self.multi_choice = multi_choice
@@ -428,14 +425,13 @@ def create_piece_list(world: World, player: int, options: LayoutGeneratorOptions
             # Create 4 pieces for large screen quadrants
             for offset in [0x00, 0x01, 0x08, 0x09]:
                 piece = create_piece(world, player, [[screen.id + offset]], overworld_screens)
-                if options.large_screen_pool:
-                    piece.restriction = [large_id + offset for large_id in [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35]]
                 piece_list.append(piece)
         else:
             piece = create_piece(world, player, [[screen.id]], overworld_screens)
-            if options.large_screen_pool:
-                piece.restriction = [s.id for s in overworld_screens.values() if not s.big]
             piece_list.append(piece)
+
+    # Apply position restrictions from Customizer
+    piece_list = apply_position_restrictions(world, player, piece_list, overworld_screens)
 
     # Phase 2: Apply options via merging
 
@@ -448,6 +444,9 @@ def create_piece_list(world: World, player: int, options: LayoutGeneratorOptions
     # Standard mode: merge castle area
     if world.mode[player] == 'standard':
         piece_list = merge_pieces(piece_list, [[0x23, 0x24], [0x2B, 0x2C]], world, player, overworld_screens)
+
+    # Apply fixed arrangement restrictions from Customizer
+    piece_list = apply_arrangement_restrictions(world, player, piece_list, overworld_screens)
 
     # Trim pieces by removing empty rows/columns on edges
     piece_list = [trim_piece(piece) for piece in piece_list]
@@ -533,6 +532,211 @@ def create_piece(world: World, player: int, grid: List[List[int]], overworld_scr
 
     return piece
 
+def apply_position_restrictions(world: World, player: int, piece_list: List[Piece], overworld_screens: Dict[int, Screen]) -> List[Piece]:
+    """
+    Apply position restrictions from Customizer to pieces at the end of phase 1.
+
+    Position restrictions specify that certain cells can only be placed at certain positions.
+    The Customizer format is:
+        restricted_positions:
+          - cells: [0x13, 0x2C]
+            positions: [0x00, 0x07, 0x38, 0x3F]
+            world: both # or 'light' or 'dark'
+
+    Note: At the end of phase 1, all pieces are 1x1 (one piece per cell).
+
+    The world bit (0x40) in user input is ignored. The actual cell ID is determined by:
+    - The world where the restriction applies (light=0, dark=1)
+    - The mixed_state of the screen containing that cell (swapped screens flip the world bit)
+    """
+    if not world.customizer:
+        return piece_list
+
+    grid_options = world.customizer.get_owgrid()
+    if not grid_options or player not in grid_options:
+        return piece_list
+
+    grid_options = grid_options[player]
+    restricted_positions = grid_options.get('restricted_positions', [])
+    if not restricted_positions:
+        return piece_list
+
+    # Build a mapping from cell ID to piece for quick lookup
+    cell_to_piece = {piece.main.grid[0][0]: piece for piece in piece_list}
+
+    for restriction_idx, restriction in enumerate(restricted_positions):
+        cells = restriction.get('cells', [])
+        positions = restriction.get('positions', [])
+        restriction_world = restriction.get('world', 'both')
+
+        # Validate input
+        if not cells:
+            raise GenerationException(f"Invalid restriction in restricted_positions[{restriction_idx}]: No cells provided")
+        for cell_id in cells:
+            validate_cell_id(cell_id, f"restricted_positions[{restriction_idx}].cells")
+        if not positions:
+            raise GenerationException(f"Invalid restriction in restricted_positions[{restriction_idx}]: No positions provided")
+        for pos in positions:
+            validate_cell_id(pos, f"restricted_positions[{restriction_idx}].positions")
+        validate_world_value(restriction_world, f"restricted_positions[{restriction_idx}]")
+
+        position_set = set(positions)
+
+        for user_cell_id in cells:
+            # Ignore the world bit in user input
+            base_cell_id = user_cell_id & 0xBF
+
+            # Determine which worlds this restriction applies to
+            worlds_to_check = []
+            if restriction_world == 'light' or restriction_world == 'both':
+                worlds_to_check.append(0) # Light World
+            if restriction_world == 'dark' or restriction_world == 'both':
+                worlds_to_check.append(1) # Dark World
+
+            for target_world in worlds_to_check:
+                # Determine the actual cell ID based on the target world and mixed state
+                screen_id = get_screen_id_from_cell(base_cell_id)
+                screen = overworld_screens.get(screen_id)
+                is_swapped = screen.mixed_state == "swapped"
+
+                # Calculate the actual cell ID:
+                # - In Light World (target_world=0): use base_cell_id if normal, base_cell_id|0x40 if swapped
+                # - In Dark World (target_world=1): use base_cell_id|0x40 if normal, base_cell_id if swapped
+                if target_world == 0:
+                    # Light World
+                    actual_cell_id = (base_cell_id | 0x40) if is_swapped else base_cell_id
+                else:
+                    # Dark World
+                    actual_cell_id = base_cell_id if is_swapped else (base_cell_id | 0x40)
+
+                piece = cell_to_piece.get(actual_cell_id)
+
+                # Apply the position restriction
+                if piece.restriction is None:
+                    piece.restriction = list(position_set)
+                else:
+                    # Intersect with existing restrictions
+                    piece.restriction = [p for p in piece.restriction if p in position_set]
+
+    return piece_list
+
+def apply_arrangement_restrictions(world: World, player: int, piece_list: List[Piece], overworld_screens: Dict[int, Screen]) -> List[Piece]:
+    """
+    Apply fixed arrangement restrictions from Customizer to pieces at the end of phase 2.
+
+    Fixed arrangements specify the relative positioning between multiple screens.
+    The Customizer format is:
+        fixed_arrangements:
+          - arrangement:
+              - 0x03 0x04 0x05 0x06 0x07
+              - 0x0B 0x0C 0x0D 0x0E    .
+            world: both # or 'light' or 'dark'
+
+    The '.' character is a placeholder that allows any screen to be placed there.
+
+    The world bit (0x40) in user input is ignored. The actual cell ID is determined by:
+    - The world where the restriction applies (light=0, dark=1)
+    - The mixed_state of the screen containing that cell (swapped screens flip the world bit)
+    """
+    if not world.customizer:
+        return piece_list
+
+    grid_options = world.customizer.get_owgrid()
+    if not grid_options or player not in grid_options:
+        return piece_list
+
+    grid_options = grid_options[player]
+    fixed_arrangements = grid_options.get('fixed_arrangements', [])
+    if not fixed_arrangements:
+        return piece_list
+
+    for arrangement_idx, arrangement_config in enumerate(fixed_arrangements):
+        arrangement_rows = arrangement_config.get('arrangement', [])
+        arrangement_world = arrangement_config.get('world', 'both')
+
+        # Validate world value
+        validate_world_value(arrangement_world, f"fixed_arrangements[{arrangement_idx}]")
+
+        if not arrangement_rows:
+            raise GenerationException(f"Invalid arrangement in fixed_arrangements[{arrangement_idx}]: No arrangement provided")
+
+        # Pre-validate the arrangement: check row lengths and entry validity
+        expected_row_length = None
+        for row_idx, row_str in enumerate(arrangement_rows):
+            parts = str(row_str).split()
+            if expected_row_length is None:
+                expected_row_length = len(parts)
+            elif len(parts) != expected_row_length:
+                raise GenerationException(f"Invalid arrangement in fixed_arrangements[{arrangement_idx}]: row {row_idx} has {len(parts)} entries but expected {expected_row_length} (all rows must have the same number of entries)")
+
+            # Validate each entry
+            for part_idx, part in enumerate(parts):
+                part = part.strip()
+                if part == '.':
+                    continue
+                # Try to parse as cell ID
+                try:
+                    if part.startswith('0x') or part.startswith('0X'):
+                        cell_id = int(part, 16)
+                    else:
+                        cell_id = int(part)
+                    validate_cell_id(cell_id, f"fixed_arrangements[{arrangement_idx}].arrangement[{row_idx}][{part_idx}]")
+                except ValueError:
+                    raise GenerationException(f"Invalid entry '{part}' in fixed_arrangements[{arrangement_idx}].arrangement[{row_idx}][{part_idx}]: must be a cell ID (0x00-0x7F) or '.'")
+
+        # Determine which worlds this arrangement applies to
+        worlds_to_apply = []
+        if arrangement_world == 'light' or arrangement_world == 'both':
+            worlds_to_apply.append(0) # Light World
+        if arrangement_world == 'dark' or arrangement_world == 'both':
+            worlds_to_apply.append(1) # Dark World
+
+        for target_world in worlds_to_apply:
+            # Parse the arrangement into a 2D list of cell IDs, translating based on world and mixed state
+            # Each row is a string like "0x03 0x04 0x05 0x06 0x07" or contains '.' for wildcards
+            arrangement = []
+            for row_str in arrangement_rows:
+                row = []
+                # Split by whitespace
+                parts = str(row_str).split()
+                for part in parts:
+                    part = part.strip()
+                    if part == '.':
+                        row.append(-1) # -1 represents wildcard
+                    else:
+                        # Parse as hex or decimal (already validated above)
+                        if part.startswith('0x') or part.startswith('0X'):
+                            user_cell_id = int(part, 16)
+                        else:
+                            user_cell_id = int(part)
+
+                        # Ignore the world bit in user input
+                        base_cell_id = user_cell_id & 0xBF
+
+                        # Get the screen that contains this cell
+                        screen_id = get_screen_id_from_cell(base_cell_id)
+                        screen = overworld_screens.get(screen_id)
+                        is_swapped = screen.mixed_state == "swapped"
+
+                        # Calculate the actual cell ID:
+                        # - In Light World (target_world=0): use base_cell_id if normal, base_cell_id|0x40 if swapped
+                        # - In Dark World (target_world=1): use base_cell_id|0x40 if normal, base_cell_id if swapped
+                        if target_world == 0:
+                            # Light World
+                            actual_cell_id = (base_cell_id | 0x40) if is_swapped else base_cell_id
+                        else:
+                            # Dark World
+                            actual_cell_id = base_cell_id if is_swapped else (base_cell_id | 0x40)
+
+                        row.append(actual_cell_id)
+                if row:
+                    arrangement.append(row)
+
+            # Merge the pieces according to the arrangement
+            piece_list = merge_pieces(piece_list, arrangement, world, player, overworld_screens)
+
+    return piece_list
+
 def get_piece_cells(piece: Piece) -> Set[int]:
     """Get all cell IDs contained in a piece."""
     cells = set()
@@ -541,6 +745,15 @@ def get_piece_cells(piece: Piece) -> Set[int]:
             if cell != -1:
                 cells.add(cell)
     return cells
+
+def validate_cell_id(cell_id: int, context: str) -> None:
+    if not isinstance(cell_id, int) or cell_id < 0x00 or cell_id > 0x7F:
+        raise GenerationException(f"Invalid cell ID 0x{cell_id:02X} in {context}: must be in range 0x00-0x7F")
+
+def validate_world_value(world_value: str, context: str) -> None:
+    allowed_values = {'light', 'dark', 'both'}
+    if world_value not in allowed_values:
+        raise GenerationException(f"Invalid world value '{world_value}' in {context}: must be one of {allowed_values}")
 
 def trim_piece(piece: Piece) -> Piece:
     """
@@ -1828,12 +2041,14 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
 
     horizontal_wrap = False
     vertical_wrap = False
+    split_large_screens = False
     if world.customizer:
         grid_options = world.customizer.get_owgrid()
         if grid_options and player in grid_options:
             grid_options = grid_options[player]
             horizontal_wrap = 'wrap_horizontal' in grid_options and grid_options['wrap_horizontal'] == True
             vertical_wrap = 'wrap_vertical' in grid_options and grid_options['wrap_vertical'] == True
+            split_large_screens = 'split_large_screens' in grid_options and grid_options['split_large_screens'] == True
 
     first_ignore_bonus = 2
     if not world.owParallel[player]:
@@ -1843,8 +2058,7 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
     options = LayoutGeneratorOptions(
         horizontal_wrap=horizontal_wrap,
         vertical_wrap=vertical_wrap,
-        split_large_screens=False,
-        large_screen_pool=False,
+        split_large_screens=split_large_screens,
         distortion_chance=0.0,
         random_order=6 if world.owParallel[player] else 12,
         multi_choice=1,
