@@ -3724,7 +3724,7 @@ logical_connections = [
     ('PoD Pit Room Block Path S', 'PoD Pit Room'),
     ('PoD Arena Landing Bonk Path', 'PoD Arena Bridge'),
     ('PoD Arena North Drop Down', 'PoD Arena Main'),
-    ('PoD Arena Bridge Drop Down', 'PoD Arena Main'),
+    ('PoD Arena Bridge Drop Down', 'PoD Arena Landing'),
     ('PoD Arena North to Landing Barrier - Orange', 'PoD Arena Landing'),
     ('PoD Arena Main to Ranged Crystal', 'PoD Arena Main - Ranged Crystal'),
     ('PoD Arena Main to Landing Barrier - Blue', 'PoD Arena Landing'),
