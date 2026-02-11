@@ -56,7 +56,7 @@ Door Randomizer takes the dungeon experience in A Link to the Past to the next l
 4. Configure your settings and generate a seed
 5. Apply the patch to your A Link to the Past ROM (must be JP 1.0 version)
 
-[See detailed installation instructions →](/installation)
+[See detailed installation instructions →](installation.html)
 
 ## Community
 
@@ -68,11 +68,11 @@ Join the discussion and get help:
 
 ## Learn More
 
-- [Features Guide](/features.html) - Comprehensive feature documentation
-- [Installation & Usage](/installation.html) - Setup and running the randomizer
-- [Known Issues](/known-issues.html) - Current bugs and limitations
-- [Roadmap](/roadmap.html) - Future development plans
-- [Blog](/blog.html) - Latest updates and release notes
+- [Features Guide](features.html) - Comprehensive feature documentation
+- [Installation & Usage](installation.html) - Setup and running the randomizer
+- [Known Issues](known-issues.html) - Current bugs and limitations
+- [Roadmap](roadmap.html) - Future development plans
+- [Blog](blog.html) - Latest updates and release notes
 
 ## Credits
 
