@@ -148,6 +148,7 @@ class ObjectType:
     """Maps object names to their type IDs."""
 
     # Subtype 1 Objects (0x00-0xF7)
+    CeilingH = 0x00  # ↔
     WallTopNorth = 0x01  # ↔
     WallTopS = 0x02  # Wall (top, south) ↔
     WallBottomN = 0x03  # Wall (bottom, north) ↔
@@ -208,7 +209,7 @@ class ObjectType:
     PipePathH = 0x53  # Pipe path ↔
     WallTorchesN = 0x55  # Wall torches (north) ↔
     WallTorchesS = 0x56  # Wall torches (south) ↔
-    ThickRail = 0x5D  # Thick rail ↔
+    ThickRailH = 0x5D  # Thick rail ↔
     BlocksH = 0x5E  # Blocks ↔
     LongRailH = 0x5F  # Long rail ↔
     Ceiling = 0x60  # ↕
@@ -247,7 +248,7 @@ class ObjectType:
     CannonHoleW = 0x85  # Cannon hole (west) ↕
     CannonHoleE = 0x86  # Cannon hole (east) ↕
     TallTorchesV = 0x87  # Tall torches ↕
-    ThickRail = 0x88  # ↕
+    ThickRailV = 0x88  # ↕
     BlocksV = 0x89  # Blocks ↕
     LongRailV = 0x8A  # Long rail ↕
     JumpLedgeW = 0x8B  # Jump ledge (west) ↕
