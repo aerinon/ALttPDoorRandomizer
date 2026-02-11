@@ -26,7 +26,7 @@ rooms:
       - [ CornerTopConcaveNe, "0x34", "0x24" ]
       - [ WallTopEast, "0x34", "0x28", "0x09" ]
       - [ CornerTopConcaveNw, "0x34", "0x3A" ]
-      - [ ThickRail, "0x2A", "0x2C", "0x04" ]
+      - [ ThickRailV, "0x2A", "0x2C", "0x04" ]
       - [ Pit, "0x2E", "0x2F", "0x00" ]
       - [ Pot, "0x32", "0x2C" ]
       - [ Pot, "0x32", "0x34" ]
@@ -89,10 +89,10 @@ rooms:
       - [ NineBlueRupees, "0x35", "0x0E" ]
       - [ NineBlueRupees, "0x35", "0x18" ]
       - [ NineBlueRupees, "0x35", "0x22" ]
-      - [ ThickRail, "0x2C", "0x08", "0x0F" ]
-      - [ ThickRail, "0x2C", "0x1A", "0x0D" ]
-      - [ ThickRail, "0x32", "0x08", "0x0F" ]
-      - [ ThickRail, "0x32", "0x1A", "0x0D" ]
+      - [ ThickRailV, "0x2C", "0x08", "0x0F" ]
+      - [ ThickRailV, "0x2C", "0x1A", "0x0D" ]
+      - [ ThickRailV, "0x32", "0x08", "0x0F" ]
+      - [ ThickRailV, "0x32", "0x1A", "0x0D" ]
       - [ CarpetH, "0x2A", "0x2E", "0x02" ]
       - [ CarpetH, "0x2A", "0x32", "0x02" ]
       - [ CarpetV, "0x2E", "0x0C", "0x08" ]
@@ -310,16 +310,144 @@ rooms:
       - [ CarpetTrimH, "0x32", "0x38", "0x00" ]
       - [ CarpetTrimV, "0x35", "0x35", "0x00" ]
       - [ Chest, "0x28", "0x27"]  # Hidden
+      - [ TiledFloor, "0x28", "0x09", "0x0C" ]  # D'ni numeral 5 - top serif (8x2)
+      - [ TiledFloor, "0x2A", "0x0D", "0x01" ]  # left vertical (4x2 using size 0x1)
+      - [ TiledFloor, "0x32", "0x0D", "0x01" ]  # right vertical (4x2 using size 0x1)
+      - [ TiledFloor, "0x2E", "0x0F", "0x00" ]  # center stamp (4x4)
+      - [ TiledFloor, "0x28", "0x15", "0x0C" ]  # bottom serif (8x2)
     layer2: [ ]
     doors:
       - [ SouthW, BombableEntrance ] # will this be correctly overwritten when needed?
       - [ NorthW, Normal ]
       - [ InteriorN, Bombable ]
       - [ InteriorE, Normal ]
-    # unsued dungeons for puzzles:
-       # swamp - pot row room?
-       # tt - crystal switch spike room, maybe
-       # mire - spike room?
+  "0xAB":  # tt - crystal switch spike room
+    header: [ "0x00", "0x17", "0x0A", "0x1B", "0x00", "0x44", "0x00", "0x00", "0x00", "0x00", "0x64", "0xE0", "0x17",
+              "0x0A" ]
+    layout: [ "0xE9", "0x00" ]
+    layer1:
+      - [ BluePegsV, "0x08", "0x2A", "0x01" ]
+      - [ BluePegsV, "0x08", "0x2E", "0x01" ]
+      - [ BluePegsV, "0x08", "0x32", "0x01" ]
+      - [ BluePegsV, "0x08", "0x36", "0x01" ]
+      - [ OrangePegsV, "0x0E", "0x2C", "0x05" ]
+      - [ BluePegsV, "0x16", "0x2C", "0x01" ]
+      - [ BluePegsV, "0x16", "0x34", "0x01" ]
+      - [ Pot, "0x0A", "0x30" ]
+      - [ InterroomSpiralStairsUp, "0x0E", "0x24" ]
+      - [ OrangePegsV, "0x27", "0x2B", "0x01" ]
+      - [ BluePegsV, "0x2B", "0x2B", "0x01" ]
+      - [ OrangePegsV, "0x2F", "0x2B", "0x01" ]
+      - [ Block, "0x33", "0x2B" ]
+      - [ OrangePegsV, "0x37", "0x2B", "0x01" ]
+      - [ BluePegsV, "0x27", "0x2F", "0x01" ]
+      - [ Block, "0x2B", "0x2F"]
+      - [ BluePegsV, "0x2F", "0x2F", "0x01" ]
+      - [ OrangePegsV, "0x33", "0x2F", "0x01" ]
+      - [ BluePegsV, "0x37", "0x2F", "0x01" ]
+      - [ Block, "0x27", "0x33" ]
+      - [ Block, "0x2B", "0x33" ]
+      - [ BluePegsV, "0x2F", "0x33", "0x01" ]
+      - [ OrangePegsV, "0x33", "0x33", "0x01" ]
+      - [ Block, "0x37", "0x33"]
+      - [ BluePegsV, "0x27", "0x37", "0x01" ]
+      - [ OrangePegsV, "0x2B", "0x37", "0x01" ]
+      - [ Block, "0x2F", "0x37"]
+      - [ Block, "0x33", "0x37"]
+      - [ BluePegsV, "0x37", "0x37", "0x01" ]
+      - [ Chest, "0x33", "0x27" ]
+      - [ RailH, "0x25", "0x28", "0x0A" ]
+      - [ RailH, "0x35", "0x28", "0x00" ]
+      - [ Block, "0x39", "0x27"]
+    layer2: [ ]
+    doors:
+      - [ InteriorW, StairKey ]
+      - [ SouthW, Normal ]
+      - [ InteriorS, Bombable ]
+#  "0x38": # swamp - pot row
+#    header: [ "0x80", "0x0A", "0x08", "0x11", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0x28", "0x20", "0x0D", "0x09" ]
+#    layout: [ "0xE1", "0x04" ]
+#    layer1:
+#      - [ CornerTopConcaveNw2, "0x02", "0x0C" ]
+#      - [ WallTopNorth, "0x06", "0x0C", "0x01" ]
+#      - [ CornerTopConvexSe, "0x08", "0x0C" ]
+#      - [ WallTopWest, "0x08", "0x08", "0x02" ]
+#      - [ CornerTopConcaveNw2, "0x08", "0x04" ]
+#      - [ CornerTopConcaveSe, "0x02", "0x12" ]
+#      - [ WallTopS, "0x06", "0x12", "0x01" ]
+#      - [ CornerTopConvexNE, "0x08", "0x12" ]
+#      - [ WallTopWest, "0x08", "0x16", "0x0B" ]
+#      - [ CornerTopConvexSe, "0x08", "0x2C" ]
+#      - [ WallTopNorth, "0x06", "0x2C", "0x01" ]
+#      - [ CornerTopConcaveNw2, "0x02", "0x2C" ]
+#      - [ CornerTopConcaveSe, "0x02", "0x32" ]
+#      - [ WallTopS, "0x06", "0x32", "0x01" ]
+#      - [ CornerTopConvexNE, "0x08", "0x32" ]
+#      - [ WallTopWest, "0x08", "0x36", "0x02" ]
+#      - [ CornerTopConcaveSe, "0x08", "0x3A" ]
+#      - [ WallColumnsW, "0x08", "0x1A", "0x02" ]
+#      - [ WallColumnsE, "0x1A", "0x0E", "0x06" ]
+#      - [ InterroomSpiralStairsUp, "0x0E", "0x04" ]
+#      - [ WaterFloor, "0x0B", "0x08", "0x0F" ]
+#      - [ WaterFloor, "0x0B", "0x18", "0x03" ]
+#      - [ WaterFloor, "0x0D", "0x18", "0x03" ]
+#      - [ WaterFloor, "0x15", "0x18", "0x03" ]
+#      - [ WaterFloor, "0x17", "0x18", "0x03" ]
+#      - [ WaterFloor, "0x0B", "0x2A", "0x0F" ]
+#      - [ WaterFloor, "0x0B", "0x28", "0x00" ]
+#      - [ WaterFloor, "0x0D", "0x28", "0x00" ]
+#      - [ WaterFloor, "0x15", "0x28", "0x00" ]
+#      - [ WaterFloor, "0x17", "0x28", "0x00" ]
+#      - [ WaterEdgeNorthConcave, "0x0B", "0x07", "0x0D" ]
+#      - [ WaterEdgeW, "0x0B", "0x08", "0x0F" ]
+#      - [ WaterEdgeW, "0x0B", "0x18", "0x0F" ]
+#      - [ WaterEdgeW, "0x0B", "0x28", "0x0F" ]
+#      - [ WaterEdgeW, "0x0B", "0x38", "0x01" ]
+#      - [ WaterEdgeSouthConcave, "0x0B", "0x3A", "0x0D" ]
+#      - [ WaterEdgeE, "0x1A", "0x08", "0x0F" ]
+#      - [ WaterEdgeE, "0x1A", "0x18", "0x0F" ]
+#      - [ WaterEdgeE, "0x1A", "0x28", "0x0F" ]
+#      - [ WaterEdgeE, "0x1A", "0x38", "0x01" ]
+#      - [ WaterEdgeNorthConvex, "0x11", "0x18", "0x01" ]
+#      - [ WaterEdgeE, "0x11", "0x19", "0x0F" ]
+#      - [ WaterEdgeSouthConvex, "0x11", "0x29", "0x01" ]
+#      - [ WaterEdgeW, "0x14", "0x19", "0x0F" ]
+#      - [ WaterGrateS, "0x0E", "0x3A" ]
+#      - [ WaterfallFaceShort, "0x16", "0x04" ]
+#      - [ Pot, "0x12", "0x19" ]
+#      - [ Pot, "0x12", "0x1B" ]
+#      - [ Pot, "0x12", "0x25" ]
+#      - [ Pot, "0x12", "0x27" ]
+#      - [ MedusaHead, "0x18", "0x20" ]
+#      - [ CeilingLarge, "0x00", "0x04", "0x05" ]
+#      - [ CeilingLarge, "0x00", "0x16", "0x07" ]
+#      - [ CeilingLarge, "0x00", "0x24", "0x05" ]
+#      - [ CeilingLarge, "0x00", "0x36", "0x05" ]
+#      - [ ThickRailH, "0x29", "0x12", "0x02" ]
+#      - [ ThickRailH, "0x2F", "0x10", "0x04" ]
+#      - [ ThickRailV, "0x31", "0x08", "0x00" ]
+#      - [ ThickRailH, "0x2F", "0x08", "0x00" ]
+#      - [ ThickRailV, "0x39", "0x0E", "0x00" ]
+#      - [ BlocksV, "0x25", "0x0C", "0x01" ]
+#      - [ BlocksV, "0x2B", "0x0C", "0x00" ]
+#      - [ PressurePlate, "0x29", "0x08" ]
+#      - [ PressurePlate, "0x29", "0x0C" ]
+#      - [ PressurePlate, "0x29", "0x10" ]
+#      - [ PressurePlate, "0x2B", "0x0A" ]
+#      - [ PressurePlate, "0x2B", "0x0E" ]
+#      - [ PressurePlate, "0x2D", "0x0C" ]
+#      - [ TallTorchesH, "0x23", "0x2E", "0x00" ]
+#      - [ TallTorchesH, "0x27", "0x2E", "0x00" ]
+#      - [ TallTorchesH, "0x22", "0x30", "0x00" ]
+#      - [ TallTorchesH, "0x28", "0x30", "0x00" ]
+#      - [ TallTorchesH, "0x23", "0x32", "0x00" ]
+#      - [ TallTorchesH, "0x27", "0x32", "0x00" ]
+#    layer2: [ ]
+#    doors:
+#      - [ WestN, Bombable ]
+#      - [ WestS, SmallKey ]
+#      - [ InteriorS, Bombable ]
+    # mire - falling foes room
   # hint rooms
   "0x118": # kak gamble - telepatic tile - link
     header: [ "0x00", "0x05", "0x03", "0x0F", "0x00", "0x00", "0x00", "0x01", "0x15", "0x03", "0x0D", "0x00",
@@ -356,8 +484,7 @@ rooms:
     doors:
       - [ SouthE, Normal ]  # Door 0x00 at position 0x10
       - [ SouthE, IncognitoEntrance ]  # Door 0x12 at position 0x10
-  # fairy ascension - somaria platform
-  "0xED":
+  "0xED": # fairy ascension - somaria platform
     header: [ "0x20", "0x20", "0x0D", "0x13", "0x00", "0x00", "0x00", "0x00", "0x00", "0xFD", "0xFD",
               "0xFD", "0x20", "0x20" ]
     layout: [ "0x81", "0x1C" ]
@@ -435,7 +562,7 @@ rooms:
       - [ PitEdgeSouthFull, "0x2D", "0x31", "0x02" ]
       - [ PitEdgeW, "0x2D", "0x2F", "0x01" ]
       - [ PitEdgeE, "0x31", "0x2F", "0x01" ]
-      - [ PitEdgeE, "0x34", "0x2E", "0x02" ]
+      - [ PitEdgeNorthFull, "0x34", "0x2E", "0x02" ]
       - [ PitEdgeSouthFull, "0x34", "0x31", "0x02" ]
       - [ PitEdgeW, "0x34", "0x2F", "0x01" ]
       - [ PitEdgeE, "0x38", "0x2F", "0x01" ]
@@ -457,25 +584,23 @@ rooms:
       - [ DiagonalCeilingASe, "0x1B", "0x17", "0x00" ]
       - [ CeilingLarge, "0x1E", "0x14", "0x0D" ]
       - [ CeilingLarge, "0x1B", "0x18", "0x00" ]
-      - [ WallTopNorth, "0x1B", "0x1B", "0x0A" ]
+      - [ CeilingH, "0x1B", "0x1B", "0x0A" ]
       - [ CeilingLarge, "0x28", "0x12", "0x07" ]
       - [ CeilingLarge, "0x23", "0x1D", "0x03" ]
       - [ CeilingLarge, "0x28", "0x22", "0x04" ]
       - [ CeilingLarge, "0x23", "0x2D", "0x02" ]
       - [ Ceiling, "0x26", "0x1D", "0x0D" ]
-#      - [ SomariaPathV, "0x19", "0x2D", "0x00"]
-#      - [ SomariaPathH, "0x19", "0x2D", "0x00"]
-#      - [ SomariaPathV, "0x22", "0x2D", "0x00" ]
-#      - [ SomariaPathH, "0x19", "0x2F", "0x00" ]
+      - [ SomariaPathV, "0x19", "0x2D", "0x02"]
+      - [ SomariaPathH, "0x19", "0x2D", "0x02"]
+      - [ SomariaPathV, "0x1D", "0x2D", "0x02" ]
+      - [ SomariaPathH, "0x19", "0x31", "0x02" ]
       - [ SomariaPathCornerSW, "0x19", "0x31"]
-      - [ SomariaPathCornerNE, "0x20", "0x2D"]
-      - [ SomariaPathCornerSE, "0x20", "0x31"]
+      - [ SomariaPathCornerNE, "0x1D", "0x2D"]
+      - [ SomariaPathCornerSE, "0x1D", "0x31"]
       - [ SomariaPathEndpoint, "0x19", "0x2D"]
     layer2: [ ]
     doors:
       - [ SouthE, CaveEntrance ]
-  "0xFD":
-    header: [ "0x00", "0x20", "0x0D", "0x13", "0x00", "0x00", "0x00", "0x00", "0x00", "0x00", "0xED", "0xED", "0x00", "0x07" ]
 
   # red herrings
   # 10-13 of these
@@ -541,11 +666,62 @@ text:
     'talking_tree_other': "I have never been much interested in ancient lore."
     'maiden_crystal_1': "Mechanism Theory: Each statue corresponds to a crystal numbered from left to right. Ancient texts suggest the magic seal can only be broken by activating them in the primordial sequence - the order in which the seven sages first mastered their elements at the dawn of the age."
     'maiden_crystal_2': ">" # link's face, hint to map room
+    'maiden_crystal_3': "Some say books can magically transport you elsewhere."
+    'maiden_crystal_4': "Puzzle inspirations\n{HARP}\nPoD: Outer Wilds\nSP: Sokoban\nSW: TUNIC\nTT: The Witness\nIP: Return of the Obra Dinn\nMire: WIP\nTR: Riven\nSolve all puzzles for a special reward here!"
     'chicken_hut_lady': "Some hooligan has scribbled all over every sign with their incoherent ramblings! Young people these days"
 telepathic_tiles:
   "0x5F": "0x130" # Maiden_crystal_1 index
   "0x118": "0x131" # Maiden_crystal_2 index
-# push block customizations?
+
+# todo: list
+  # SokoSwamp - push block extension system - add all 6 blocks (wip)
+  # SokoSwamp - verify room layout (wip)
+  # SokoSwamp - create/verify multiple pressure plate tag (wip)
+  # red herrings - need to add red herrings everywhere - also hints that new secrets exist
+  # Red Herring Room Ideas:
+  # - Hyrule Castle 0x60 (West Lobby): Drapes on west wall
+  # - Eastern Palace 0xA8 (Stalfos Room): WallCrackW on west side
+  # - Desert Palace 0x63 (Desert Tiles 1): WallCrackEast on east side
+  # - Tower of Hera 0x77 (Main Lobby): FakeBombableFloor
+  # - Agahnim's Tower 0xB0 (Pacifist Run): Drapes
+  # - PoD 0x0A (Stalfos Basement): WallCrackW on west side
+  # - Swamp 0x06 (Boss Room): WallCrackN on north wall (funny - it's the boss room!)
+  # - Skull 0x57 (Pot Prison + Skull 2 East Lobby): WallCrackW on west side of Pot Prison, WallCrackEast on east side of East Lobby (same wall, both sides - funny!)
+  # - Ice 0xBE (Anti-Fairy room): BombableFloor (REAL not fake) in middle (if it doesn't mess up the antifairy start position)
+  # - Mire 0xB3 (Mire Spikes): WallCrackEast on east side
+  # - Thieves 0xBC (Hallway): WallCrackEast on east wall
+  # - TR 0xC6 (Hub Ledges): WallCrackW on west wall, north side
+  # - GT 0x7B (DMs Room): Drapes
+#    - 0x0060 - Hyrule Castle West Lobby
+#    - 0x00A8 - Eastern Palace Stalfos Room
+#    - 0x0063 - Desert Palace Desert Tiles 1
+#    - 0x0077 - Tower of Hera Main Lobby
+#    - 0x00B0 - Agahnim's Tower Pacifist Run
+#    - 0x000A - PoD Stalfos Basement
+#    - 0x0006 - Swamp Boss Room
+#    - 0x0057 - Skull Pot Prison + Skull 2 East Lobby
+#    - 0x00BE - Ice Anti-Fairy room
+#    - 0x00B3 - Mire Spikes
+#    - 0x00BC - Thieves Hallway
+#    - 0x00C6 - TR Hub Ledges
+#    - 0x007B - GT DMs Room
+
+  # boomerang reward: layer shenanigans - whatevers?
+
+  # Mire Portal - telepathic tile - hint text for book interaction
+  # Mire Portal - puzzle room layout
+  # Mire Portal - figure out tag system
+  # Mire Portal - figure out book item
+      # place ancilla/sprite, record necessary variables, x/y coords, camrea coords?
+      # second activation to teleport
+
+  # GT final room - room layout
+  # GT final room - telepathic tile - add puzzle credits
+  # GT final room - trigger
+  # GT final room - all puzzle prize item (the silver boom?)
+
+  # Cosmetics
+  # Showcase
 
 
 
