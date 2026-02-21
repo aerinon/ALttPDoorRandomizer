@@ -4,7 +4,7 @@ import RaceRandom as random
 import random as _random
 from typing import List, Dict, Optional, Set, Tuple
 from BaseClasses import OWEdge, World, Direction, Terrain
-from OverworldShuffle import connect_two_way, validate_layout
+from OverworldShuffle import connect_two_way, get_separate_ow_areas, validate_layout
 
 ENABLE_KEEP_SIMILAR_SPECIAL_HANDLING = False
 DRAW_IMAGE = True
@@ -155,7 +155,7 @@ class LayoutGeneratorOptions:
                  'forced_non_crossed_edges', 'forced_crossed_edges', 'check_reachability',
                  'crossed_chance', 'crossed_limit',
                  'sort_by_edge_sides', 'sort_by_max_edges_per_side', 'sort_by_piece_size',
-                 'min_runs', 'max_runs', 'target_runs_times_successes')
+                 'min_runs', 'max_runs', 'target_runs_times_successes', 'score_mult_separate_areas')
 
     def __init__(
         self,
@@ -183,7 +183,8 @@ class LayoutGeneratorOptions:
         sort_by_piece_size: bool = False,
         min_runs: int = 100,
         max_runs: int = 10000,
-        target_runs_times_successes: int = 5000
+        target_runs_times_successes: int = 5000,
+        score_mult_separate_areas: float = 4
     ):
         self.horizontal_wrap = horizontal_wrap
         self.vertical_wrap = vertical_wrap
@@ -210,6 +211,7 @@ class LayoutGeneratorOptions:
         self.min_runs = min_runs
         self.max_runs = max_runs
         self.target_runs_times_successes = target_runs_times_successes
+        self.score_mult_separate_areas = score_mult_separate_areas
 
 class LayoutGeneratorResult:
     """
@@ -1655,14 +1657,18 @@ def place_single_restriction_pieces(
     return remaining_pieces, placed_count
 
 def get_random_layout(world: World, player: int, connected_edges_cache: List[str], pieces_to_place: List[Piece], options: LayoutGeneratorOptions, prio_edges: List[str], overworld_screens: Dict[int, Screen]) -> LayoutGeneratorResult:
+    skip_validate_layout = world.accessibility[player] == 'none'
+    score_mult_separate_areas = options.score_mult_separate_areas
     total_score = 0
     best_score = -1000000
     worst_score = 1000000
     best_grid_info = None
+    separate_areas = None
 
     # Pre-place pieces with single-element restriction lists
     base_grid_info = create_empty_grid_info(0.0)
     remaining_pieces, preplaced_count = place_single_restriction_pieces(world, player, base_grid_info, options, pieces_to_place)
+    logger = logging.getLogger('')
 
     successes = 0
     failures = 0
@@ -1716,21 +1722,18 @@ def get_random_layout(world: World, player: int, connected_edges_cache: List[str
             # Successfully placed all pieces
             if options.check_reachability:
                 disabled_count = connect_edges_for_screen_layout(world, player, grid_info, options, connected_edges, prio_edges, overworld_screens, False)
-                valid_layout = validate_layout(world, player)
-                # Clean up connected entrances and edges
-                for edge_name in connected_edges:
-                    if edge_name not in connected_edges_cache:
-                        entrance = world.get_entrance(edge_name, player)
-                        entrance.connected_region.entrances.remove(entrance)
-                        entrance.connected_region = None
-                        edge = world.get_owedge(edge_name, player)
-                        edge.dest = None
+                valid_layout = skip_validate_layout or validate_layout(world, player)
                 if not valid_layout:
+                    clean_up_connected_edges(world, player, connected_edges_cache, connected_edges)
                     failures += 1
                     continue
-                logging.getLogger('').debug("Found valid layout with " + str(disabled_count)+ " disabled edges")
-                successes += 1
                 score = -disabled_count
+                if score_mult_separate_areas > 0:
+                    separate_areas = len(get_separate_ow_areas(world, player))
+                    score -= score_mult_separate_areas * separate_areas
+                logger.debug("Found valid layout with " + str(disabled_count) + " disabled edges and " + str(separate_areas) + " separate areas")
+                clean_up_connected_edges(world, player, connected_edges_cache, connected_edges)
+                successes += 1
             else:
                 successes += 1
                 score = major_score
@@ -1758,6 +1761,15 @@ def get_random_layout(world: World, player: int, connected_edges_cache: List[str
         successes=successes,
         failures=failures
     )
+
+def clean_up_connected_edges(world: World, player: int, connected_edges_cache: List[str], connected_edges: List[str]) -> None:
+    for edge_name in connected_edges:
+        if edge_name not in connected_edges_cache:
+            entrance = world.get_entrance(edge_name, player)
+            entrance.connected_region.entrances.remove(entrance)
+            entrance.connected_region = None
+            edge = world.get_owedge(edge_name, player)
+            edge.dest = None
 
 def get_prioritized_edges(world: World, player: int) -> List[str]:
     prio_edges = []
@@ -2080,7 +2092,8 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
         sort_by_piece_size=True,
         min_runs=100,
         max_runs=10000,
-        target_runs_times_successes=5000
+        target_runs_times_successes=5000,
+        score_mult_separate_areas=4
     )
 
     overworld_screens = initialize_screens(world, player)
@@ -2112,6 +2125,7 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
         logger.debug(f"  Successes: {result.successes}")
         logger.debug(f"  Failures: {result.failures}")
         logger.debug(f"  Generation time: {elapsed_time:.3f}s")
+        logger.debug(f"  Layouts per second: {(result.successes+result.failures)/elapsed_time:.3f}")
 
         if DRAW_IMAGE:
             logger.debug("Creating layout visualization...")
