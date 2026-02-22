@@ -7,7 +7,7 @@ from BaseClasses import OWEdge, World, Direction, Terrain
 from OverworldShuffle import connect_two_way, get_separate_ow_areas, validate_layout
 
 ENABLE_KEEP_SIMILAR_SPECIAL_HANDLING = False
-DRAW_IMAGE = True
+DRAW_IMAGE = False
 
 large_screen_ids = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35] + [0x40, 0x43, 0x45, 0x58, 0x5B, 0x5E, 0x70, 0x75]
 
@@ -155,7 +155,8 @@ class LayoutGeneratorOptions:
                  'forced_non_crossed_edges', 'forced_crossed_edges', 'check_reachability',
                  'crossed_chance', 'crossed_limit',
                  'sort_by_edge_sides', 'sort_by_max_edges_per_side', 'sort_by_piece_size',
-                 'min_runs', 'max_runs', 'target_runs_times_successes', 'score_mult_separate_areas')
+                 'min_runs', 'max_runs', 'target_runs_times_successes', 'score_mult_separate_areas',
+                 'start_loc_min_distance', 'score_mult_start_loc_distance')
 
     def __init__(
         self,
@@ -184,7 +185,9 @@ class LayoutGeneratorOptions:
         min_runs: int = 100,
         max_runs: int = 10000,
         target_runs_times_successes: int = 5000,
-        score_mult_separate_areas: float = 4
+        score_mult_separate_areas: float = 4,
+        start_loc_min_distance: int = 4,
+        score_mult_start_loc_distance: float = 3
     ):
         self.horizontal_wrap = horizontal_wrap
         self.vertical_wrap = vertical_wrap
@@ -212,6 +215,8 @@ class LayoutGeneratorOptions:
         self.max_runs = max_runs
         self.target_runs_times_successes = target_runs_times_successes
         self.score_mult_separate_areas = score_mult_separate_areas
+        self.start_loc_min_distance = start_loc_min_distance
+        self.score_mult_start_loc_distance = score_mult_start_loc_distance
 
 class LayoutGeneratorResult:
     """
@@ -1659,11 +1664,13 @@ def place_single_restriction_pieces(
 def get_random_layout(world: World, player: int, connected_edges_cache: List[str], pieces_to_place: List[Piece], options: LayoutGeneratorOptions, prio_edges: List[str], overworld_screens: Dict[int, Screen]) -> LayoutGeneratorResult:
     skip_validate_layout = world.accessibility[player] == 'none'
     score_mult_separate_areas = options.score_mult_separate_areas
+    apply_start_loc_penalty = options.score_mult_start_loc_distance > 0 and world.shuffle[player] == 'vanilla' and (world.is_dark_chapel_start(player) or world.doorShuffle[player] == 'vanilla' or world.intensity[player] < 3 or world.mode[player] == 'standard')
     total_score = 0
     best_score = -1000000
     worst_score = 1000000
     best_grid_info = None
     separate_areas = None
+    start_loc_distance = None
 
     # Pre-place pieces with single-element restriction lists
     base_grid_info = create_empty_grid_info(0.0)
@@ -1731,7 +1738,12 @@ def get_random_layout(world: World, player: int, connected_edges_cache: List[str
                 if score_mult_separate_areas > 0:
                     separate_areas = len(get_separate_ow_areas(world, player))
                     score -= score_mult_separate_areas * separate_areas
-                logger.debug("Found valid layout with " + str(disabled_count) + " disabled edges and " + str(separate_areas) + " separate areas")
+                if apply_start_loc_penalty:
+                    start_loc_distance = get_start_loc_distance(world, player, grid_info.grid, options)
+                    min_dist = options.start_loc_min_distance
+                    if start_loc_distance < min_dist:
+                        score -= options.score_mult_start_loc_distance * (min_dist - start_loc_distance)
+                logger.debug("Found valid layout with " + str(disabled_count) + " disabled edges and " + str(separate_areas) + " separate areas and distance " + str(start_loc_distance) + " between start locations")
                 clean_up_connected_edges(world, player, connected_edges_cache, connected_edges)
                 successes += 1
             else:
@@ -1770,6 +1782,31 @@ def clean_up_connected_edges(world: World, player: int, connected_edges_cache: L
             entrance.connected_region = None
             edge = world.get_owedge(edge_name, player)
             edge.dest = None
+
+def find_cell_position(grid: List[List[List[int]]], cell_id: int) -> Optional[Tuple[int, int, int]]:
+    """Find the position of a cell in the grid, returning (world, row, col) or None if not found."""
+    for w in range(2):
+        for row in range(8):
+            for col in range(8):
+                if grid[w][row][col] == cell_id:
+                    return (w, row, col)
+    return None
+
+def get_start_loc_distance(world: World, player: int, grid: List[List[List[int]]], options: LayoutGeneratorOptions) -> float:
+    """Computes the starting location Manhattan distance on the grid, treating the world as a third dimension (switching world adds 1 to the distance)."""
+    pos_lh = find_cell_position(grid, 0x6C if world.is_bombshop_start(player) else 0x2C)
+    pos_sanc = find_cell_position(grid, 0x53 if world.is_dark_chapel_start(player) else 0x13)
+    if pos_lh is None or pos_sanc is None:
+        raise GenerationException("Could not find starting location cells, something went wrong with grid layout generation!")
+    w1, row1, col1 = pos_lh
+    w2, row2, col2 = pos_sanc
+    row_diff = abs(row1 - row2)
+    col_diff = abs(col1 - col2)
+    if options.horizontal_wrap:
+        col_diff = min(col_diff, 8 - col_diff)
+    if options.vertical_wrap:
+        row_diff = min(row_diff, 8 - row_diff)
+    return row_diff + col_diff + abs(w1 - w2)
 
 def get_prioritized_edges(world: World, player: int) -> List[str]:
     prio_edges = []
@@ -2093,7 +2130,9 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
         min_runs=100,
         max_runs=10000,
         target_runs_times_successes=5000,
-        score_mult_separate_areas=4
+        score_mult_separate_areas=4,
+        start_loc_min_distance=4,
+        score_mult_start_loc_distance=3
     )
 
     overworld_screens = initialize_screens(world, player)
