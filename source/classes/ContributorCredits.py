@@ -482,11 +482,9 @@ def build_default_credits(world, player) -> ContributorCredits:
     gen.add_small_credits("FESTIVE RANDOMIZER", SmallColor.GREEN)
     gen.add_blank_line()
     if world.limited_run[player] == '2604':
-        gen.add_big_credits("CODEMANN8          HIIMCODY1")
+        gen.add_big_credits("CODEMANN8            AERINON")
         gen.add_blank_line()
-        gen.add_big_credits("AERINON   KARAFRUIT  CATOBAT")
-        gen.add_blank_line()
-        gen.add_big_credits("                            ")
+        gen.add_big_credits("HIIMCODY1      FISH_WAFFLE64")
     else:
         gen.add_big_credits("KAN                    TOTAL")
         gen.add_blank_line()
@@ -523,9 +521,9 @@ def build_default_credits(world, player) -> ContributorCredits:
     gen.add_blank_line()
     gen.add_blank_line()
     
-    gen.add_small_credits("WEBSITE", SmallColor.YELLOW)
+    gen.add_small_credits("WEBSITE & LOGO", SmallColor.YELLOW)
     gen.add_blank_line()
-    gen.add_big_credits("HIIMCODY1")
+    gen.add_big_credits("HIIMCODY1             PLEASURE")
     gen.add_blank_line()
     gen.add_blank_line()
     
@@ -559,12 +557,15 @@ def build_default_credits(world, player) -> ContributorCredits:
     gen.add_empty_line()
 
     if world.limited_run[player] == '2604':
+        gen.add_empty_line()
+        gen.add_empty_line()
+        gen.add_empty_line()
         gen.add_small_credits("IN MEMORY OF", SmallColor.RED)
         gen.add_blank_line()
         gen.add_big_credits("CASSIDYMOEN")
         gen.add_blank_line()
         gen.add_small_credits_mixed(["YOU BUILT PATHS WE ", ("STILL", SmallColor.RED), " WALK"], SmallColor.YELLOW)
-        gen.add_small_credits_mixed(["YOUR ", ("PASSION", SmallColor.RED), " BRINGS JOY TO ALL"], SmallColor.YELLOW)
+        gen.add_small_credits_mixed(["YOUR ", ("PASSION", SmallColor.RED), " BRINGS US JOY"], SmallColor.YELLOW)
         gen.add_blank_line()
         gen.add_small_credits_mixed([("FOREVER", SmallColor.GREEN), " PART OF THE RANDOMIZER"], SmallColor.YELLOW)
     else:
