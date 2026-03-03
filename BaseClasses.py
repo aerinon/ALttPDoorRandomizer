@@ -329,6 +329,16 @@ class World(object):
     def is_tile_lw_like(self, owid, player):
         return (owid >= 0x40 and owid < 0x80) == self.is_tile_swapped(owid, player)
 
+    def get_portal_unsafe(self, portal_name, player):
+        if (portal_name, player) in self._portal_cache:
+            return self._portal_cache[(portal_name, player)]
+        else:
+            for portal in self.dungeon_portals[player]:
+                if portal.name == portal_name and portal.player == player:
+                    self._portal_cache[(portal_name, player)] = portal
+                    return portal
+        return None
+
     def is_atgt_swapped(self, player):
         return self.is_tile_swapped(0x03, player) and self.is_tile_swapped(0x1b, player)
 

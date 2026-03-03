@@ -111,11 +111,11 @@
 
     "randomizer.dungeon.experimental": "Enable Experimental Features",
 
-    "randomizer.dungeon.dungeon_counters": "Dungeon Chest Counters",
+    "randomizer.dungeon.dungeon_counters": "Dungeon Counters",
     "randomizer.dungeon.dungeon_counters.default": "Auto",
     "randomizer.dungeon.dungeon_counters.off": "Off",
     "randomizer.dungeon.dungeon_counters.on": "On",
-    "randomizer.dungeon.dungeon_counters.pickup": "On Compass Pickup",
+    "randomizer.dungeon.dungeon_counters.pickup": "On Item Pickup",
 
     "randomizer.dungeon.mixed_travel": "Mixed Dungeon Travel ",
     "randomizer.dungeon.mixed_travel.prevent": "Prevent Mixed Dungeon Travel",
