@@ -261,12 +261,17 @@ class ObjectType:
     BluePegsV = 0x92  # Blue pegs ↕
     OrangePegsV = 0x93  # Orange pegs ↕
     InvisibleFloorV = 0x94  # Invisible floor ↕
+    CeilingMediumH = 0x9C  # Ceiling (medium) ↔
+    CeilingSmallV = 0x9D  # Ceiling (small) ↕
+    CeilingTinyH = 0x9E  # Ceiling (tiny) ↔
     DiagonalCeiling = 0xA0  # Diagonal ceiling A ◤
     DiagonalCeilingASw = 0xA1  # ◣
     DiagonalCeilingASe = 0xA2  # ◥
     Pit = 0xA4  # ⇲
     DiagonalLayer2MaskANw = 0xA5  # Diagonal layer 2 mask A ◤
     DiagonalLayer2MaskANe = 0xA7  # Diagonal layer 2 mask A ◥
+    DiagonalLayer2CeilingASw = 0xA8  # Diagonal layer 2 ceiling A ◣
+    DiagonalLayer2CeilingASe = 0xAA  # Diagonal layer 2 ceiling A ◢
     DiagonalLayer2MaskBNw = 0xA9  # Diagonal layer 2 mask B ◤
     DiagonalLayer2MaskBSw = 0xAA  # Diagonal layer 2 mask B ◣
     DiagonalLayer2MaskBNe = 0xAB  # Diagonal layer 2 mask B ◥
@@ -318,11 +323,13 @@ class ObjectType:
     Floor10 = 0xE8  # Floor 10 ⇲
 
     # Subtype 2 Objects (0x100+)
-    CornerTopConcaveNe = 0x102  # ▜
-    CornerTopConcaveNw = 0x103  # ▟
-    CornerTopConvexSw = 0x104  # ▟
+    CornerTopConcaveNW = 0x100  # ▛
+    CornerTopConcaveSE = 0x101  # ▙
+    CornerTopConcaveNE = 0x102  # ▜
+    CornerTopConcaveSW = 0x103  # ▟
+    CornerTopConvexSW = 0x104  # ▟
     CornerTopConvexNE = 0x105  # Corner (top, convex) ▜
-    CornerTopConvexSe = 0x106  # ▙
+    CornerTopConvexSE = 0x106  # ▙
     CornerTopConvexNW = 0x107  # Corner (top, convex) ▛
     CornerBottomConcaveNW = 0x108  # Corner (bottom, concave) ▛
     CornerBottomConcaveSW = 0x109  # Corner (bottom, concave) ▙
@@ -363,6 +370,7 @@ class ObjectType:
     IntraroomStairsNorthSwim = 0x133  # Intraroom stairs north (swim layer)
     Block = 0x134  # Block
     WaterLadder = 0x135  # Water ladder (north)
+    Torch = 0x136  # Torch
     DamFloodgate = 0x137  # Dam floodgate
     InterroomSpiralStairsUp = 0x138
     InterroomSpiralStairsDown = 0x139
