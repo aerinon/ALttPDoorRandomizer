@@ -242,3 +242,84 @@ def get_uw_enemy_table():
             uw_table.room_map[room].append(sprite.copy())
     return uw_table
 
+
+def init_custom_rooms(world, player, custom_rooms):
+    data_tables = world.data_tables[player]
+    for room_id, room_data in custom_rooms.items():
+        room_id = int(room_id, 16)
+        if room_data['header']:
+            data_bytes = [int(x, 16) for x in room_data['header']]
+            data_tables.room_headers[room_id] = RoomHeader(room_id, data_bytes)
+
+        if any(room_data[attr] for attr in ['layout', 'layer1', 'layer2', 'doors']):
+            room = data_tables.room_list[room_id] if room_id in data_tables.room_list else Room([], [], [], [])
+
+            if room_data['layout']:
+                room.layout = [int(x, 16) for x in room_data['layout']]
+            if room_data['layer1']:
+                room.layer1 = [RoomObject.factory(*[int(x, 16) if i != 0 else x for i, x in enumerate(obj)])
+                               for obj in room_data['layer1']]
+            if room_data['layer2']:
+                room.layer2 = [RoomObject.factory(*[int(x, 16) if i != 0 else x for i, x in enumerate(obj)])
+                               for obj in room_data['layer2']]
+            if room_data['doors']:
+                room.doors = [DoorObject(Position[pair[0]], DoorKind[pair[1]]) for pair in room_data['doors']]
+            data_tables.room_list[room_id] = room
+
+
+def init_custom_sprites(world, player, custom_sprites):
+    """Initialize custom sprite placements for specified rooms.
+
+    Args:
+        world: World object
+        player: Player number
+        custom_sprites: Dict mapping room IDs to sprite lists
+
+    Sprite format (5 or 4 params):
+        [kind, tile_x, tile_y, layer, sub_type]  # Full format
+        [kind, tile_x, tile_y, layer]             # sub_type defaults to 0x00
+
+    kind can be either:
+        - Hex string: "0x83"
+        - English name: "Stalfos" (uses sprite_translation lookup)
+
+    Example YAML:
+        sprites:
+          "0x02":
+            - ["CricketRat", "0x12", "0x05", "0x01", "0x00"]  # CricketRat at x=0x12, y=0x05, layer=1
+            - ["CricketRat", "0x15", "0x06", "0x01"]          # CricketRat at x=0x15, y=0x06, layer=1, sub_type=0x00
+            - ["0x6D", "0x18", "0x09", "0x01"]                # Same as CricketRat (0x6D = CricketRat ID)
+    """
+    from source.dungeon.EnemyList import Sprite, sprite_translation
+
+    data_tables = world.data_tables[player]
+    for room_id, sprite_list in custom_sprites.items():
+        room_id = int(room_id, 16)
+
+        # Clear existing sprites for this room
+        data_tables.uw_enemy_table.room_map[room_id] = []
+
+        # Add custom sprites
+        for sprite_data in sprite_list:
+            # Parse sprite parameters: [kind, tile_x, tile_y, layer, sub_type (optional)]
+            kind_param = sprite_data[0]
+
+            # Handle both hex strings and English names
+            if isinstance(kind_param, str) and kind_param.startswith('0x'):
+                kind = int(kind_param, 16)
+            elif kind_param in sprite_translation:
+                kind = sprite_translation[kind_param]
+            else:
+                raise ValueError(f"Unknown sprite kind: {kind_param}")
+
+            tile_x = int(sprite_data[1], 16)
+            tile_y = int(sprite_data[2], 16)
+            layer = int(sprite_data[3], 16)
+            sub_type = int(sprite_data[4], 16) if len(sprite_data) > 4 else 0x00
+
+            # Create sprite using factory
+            sprite = Sprite.factory(room_id, kind, tile_x, tile_y, layer, sub_type)
+            data_tables.uw_enemy_table.room_map[room_id].append(sprite)
+
+
+

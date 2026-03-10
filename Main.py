@@ -41,6 +41,7 @@ from source.enemizer.DamageTables import DamageTable
 from source.enemizer.Enemizer import randomize_enemies
 from source.rom.DataTables import init_data_tables
 from source.limited.LimitedRunCoordinator import adjust_world_for_limited_runs
+from source.rom.DataTables import init_data_tables, init_custom_rooms, init_custom_sprites
 
 version_number = '1.5.2'
 version_branch = '-u'
@@ -62,7 +63,7 @@ def check_python_version():
 
 def main(args, seed=None, fish=None):
     check_python_version()
-    
+
     if args.print_template_yaml:
         return export_yaml(args, fish)
 
@@ -160,6 +161,12 @@ def main(args, seed=None, fish=None):
         randomize_enemies(world, player)
         adjust_locations(world, player)
 
+    for player in range(1, world.players + 1):
+        if world.customizer and world.customizer.get_custom_rooms(player):
+            init_custom_rooms(world, player, world.customizer.get_custom_rooms(player))
+        if world.customizer and world.customizer.get_custom_sprites(player):
+            init_custom_sprites(world, player, world.customizer.get_custom_sprites(player))
+
     if any(world.potshuffle.values()):
         logger.info(world.fish.translate("cli", "cli", "shuffling.pots"))
         for player in range(1, world.players + 1):
@@ -175,7 +182,7 @@ def main(args, seed=None, fish=None):
         link_overworld(world, player)
         create_shops(world, player)
         mark_light_dark_world_regions(world, player)
-    
+
     init_districts(world)
 
     logger.info(world.fish.translate("cli","cli","shuffling.world"))
@@ -414,7 +421,7 @@ def export_yaml(args, fish):
 
     for player in range(1, world.players + 1):
         world.difficulty_requirements[player] = difficulties[world.difficulty[player]]
-    
+
     set_starting_inventory(world, args)
 
     world.settings = CustomSettings()
@@ -506,7 +513,7 @@ def init_world(args, fish):
         for setting in in_progress_settings:
             if world.customizer and world.customizer.has_setting(player, setting):
                 getattr(world, setting)[player] = world.customizer.get_setting(player, setting)
-    
+
     return world
 
 
@@ -917,7 +924,7 @@ def copy_world(world):
         if edge.dest:
             copiededge = ret.check_for_owedge(edge.name, edge.player)
             copiededge.dest = ret.check_for_owedge(edge.dest.name, edge.dest.player)
-    
+
     # everything below this line is changing the original object, seems to be complicated to replicate similar objects organically
     ret.doors = world.doors
     for door in ret.doors:
@@ -925,7 +932,7 @@ def copy_world(world):
         door.entrance = copied_entrance
         if copied_entrance:
             copied_entrance.door = door
-    
+
     ret.paired_doors = world.paired_doors
     ret.rooms = world.rooms
     ret.dungeon_layouts = world.dungeon_layouts

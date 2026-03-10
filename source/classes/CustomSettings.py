@@ -334,6 +334,30 @@ class CustomSettings(object):
             return self.file_source['goals']
         return None
 
+    def get_text(self):
+        if 'text' in self.file_source:
+            return self.file_source['text']
+        return None
+
+    def get_telepathic_tiles(self):
+        if 'text' in self.file_source:
+            return self.file_source['telepathic_tiles']
+        return None
+
+    def get_sprites(self):
+        if 'sprites' in self.file_source:
+            return self.file_source['sprites']
+        return None
+
+    def get_custom_sprites(self, player):
+        # these are optionally player specific for now
+        if self.get_sprites():
+            if player in self.get_sprites():
+                return self.get_sprites()[player]
+            else:
+                return self.get_sprites()
+        return None
+
 
     def get_attribute_by_player_composite(self, attribute, player):
         attempt = self.get_attribute_by_player_new(attribute, player)

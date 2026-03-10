@@ -575,6 +575,23 @@ class Sprite(object):
     def __str__(self):
         return enemy_names[self.kind] if self.sub_type != 0x7 else overlord_names[self.kind]
 
+    @staticmethod
+    def factory(room_id, kind, tile_x, tile_y, layer, sub_type=0x00):
+        """Create a sprite from basic parameters.
+
+        Args:
+            room_id: Room number (super_tile)
+            kind: Sprite kind ID (hex)
+            tile_x: X tile position (hex)
+            tile_y: Y tile position (hex)
+            layer: Layer (0 or 1)
+            sub_type: Subtype (hex, defaults to 0x00)
+
+        Returns:
+            Sprite object
+        """
+        return Sprite(room_id, kind, sub_type, layer, tile_x, tile_y)
+
 
 # map of super_tile to list of Sprite objects:
 vanilla_sprites = {}
@@ -2684,4 +2701,6 @@ sprite_translation = {
     'Zora': EnemySprite.Zora,
     'Zoro': EnemySprite.Zoro,
     'CustomSprite': EnemySprite.CustomSprite,
+
+    'CorrectPullSwitch': EnemySprite.CorrectPullSwitch,
 }
