@@ -1680,6 +1680,11 @@ sprites:
     - ["AntiFairy", "0x18", "0x18", "0x00"]
     - ["Overlord", "0x07", "0x1A", "0x00", "FallingBridge"]
 text:
+    # custom texts
+    'shop_fortune_teller_lw_hint_0': "A new harmony flows from the flute, calling you fourth to distant lands"
+    'kiki_first_extortion': "OoOo, banana! Gimme 10 bananas and I'll help you out."
+    'limited_run_message_0': "{NOBORDER}\nThe heck was that? There's gotta be something around here that we can throw at that thing before we jump in."
+    'ganon_phase_3': "You'll never throw me outta here!"
     'sign_rain_north_of_links_house': "Historical Note: Of all the sages, Logi was considered the most formidable in direct combat — a warrior first, scholar second."
     'sign_north_of_links_house': "Magical Resonance: The crystals emit a faint humming sound that varies in pitch based on the maiden's emotional state."
     'sign_path_to_death_mountain': "Structural Survey: A compromised section of masonry within the Ice Palace may conceal the mechanism."

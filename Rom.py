@@ -1356,12 +1356,10 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
             ganon_goal += [0x02, world.crystals_needed_for_ganon[player], 0x07] # crystals and aga2
     if world.limited_run[player] == '2604':
         egg_goal_amount = world.limited_run_args[player]['egg_goal']
-        if world.goal[player] in ['triforcehunt', 'trinity']:
-            murah_goal += [0x08, egg_goal_amount]
-        if world.goal[player] in ['pedestal', 'trinity']:
-            ped_pull += [0x08, egg_goal_amount]
-        if world.goal[player] not in ['pedestal', 'triforcehunt']:
-            ganon_goal += [0x08, egg_goal_amount]
+        if world.goal[player] == 'pedestal':
+            ped_pull += [0x08, egg_goal_amount, 0x00]
+        else:
+            ganon_goal += [0x08, egg_goal_amount, 0x00]
     gt_entry += [0xFF]
     ped_pull += [0xFF]
     ganon_goal += [0xFF]
@@ -1954,6 +1952,8 @@ def write_limited_data(rom, world, player):
         x_coords = [coord[0] for coord in selected_bananas]
         y_coords = [coord[1] for coord in selected_bananas]
         rom.write_bytes(snes_to_pc(0x30EF00), x_coords + y_coords)
+
+        write_int16(rom, snes_to_pc(0x30EF14), 0x0198) # lost woods message
 
         # Write credits data
         credits_ptr_table, credits_line_data = get_credits_data(world, player)
@@ -2804,11 +2804,6 @@ def write_strings(rom, world, player, team):
                             + "{PAUSE7}\nYou will have to find all the items necessary to beat Ganon.\n"
                             + "{PAUSE7}\nThis is your chance to be a hero.\n{PAUSE3}\n{CHANGEPIC}\n"
                             + "You must get the 7 crystals to beat Ganon.\n{PAUSE9}\n{CHANGEPIC}", False)
-
-    # custom texts
-    if world.limited_run[player] == '2604':
-        tt['shop_fortune_teller_lw_hint_0'] = "A new harmony flows from the flute, calling you fourth to distant lands"
-        tt['kiki_first_extortion'] = "OoOo, banana! Gimme 10 bananas and I'll help you out."
 
     # Apply custom text overrides from customizer
     if world.customizer:
