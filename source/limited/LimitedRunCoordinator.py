@@ -28,7 +28,7 @@ def get_limited_run_args(limited_run_args):
 def adjust_world_for_limited_runs(world, args):
     for player in range(1, world.players + 1):
         if world.limited_run[player] != 'none':
-            if world.limited_run_args[player] == '2604':
+            if world.limited_run[player] == '2604':
                 if world.goal[player] in ['triforcehunt', 'trinity', 'ganonhunt', 'completionist']:
                     raise NotImplementedError(f"Triforce pieces and collection rate goals are not compatible with Easter 2026 Festive")
             yaml = os.path.join('data', 'limited', world.limited_run[player], f'limited_{world.limited_run[player]}.yaml')
