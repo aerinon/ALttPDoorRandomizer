@@ -456,7 +456,7 @@ def randomize_enemies(world, player):
                     custom_uw = enemy_map['Underworld']
                 if 'Overworld' in enemy_map:
                     custom_ow = enemy_map['Overworld']
-        randomize_underworld_sprite_sheets(data_tables.sprite_sheets, data_tables, custom_uw, world.limited_run[player] == '2604')
+        randomize_underworld_sprite_sheets(data_tables.sprite_sheets, data_tables, custom_uw, world.limited_run[player])
         randomize_underworld_rooms(data_tables, world, player, custom_uw)
         randomize_overworld_sprite_sheets(data_tables.sprite_sheets, data_tables, custom_ow)
         randomize_overworld_enemies(data_tables, custom_ow)
