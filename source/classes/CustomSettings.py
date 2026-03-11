@@ -206,6 +206,11 @@ class CustomSettings(object):
             return self.file_source['item_pool']
         return None
 
+    def get_item_pool_adjust(self):
+        if 'item_pool_adjust' in self.file_source:
+            return self.file_source['item_pool_adjust']
+        return None
+
     def get_placements(self):
         if 'placements' in self.file_source:
             return self.file_source['placements']
