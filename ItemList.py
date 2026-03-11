@@ -287,6 +287,42 @@ def generate_itempool(world, player):
             for _ in range(0, amt):
                 pool.append('Rupees (20)')
 
+    if world.shopsanity[player] and not skip_pool_adjustments:
+        for shop in world.shops[player]:
+            if shop.region.name in shop_to_location_table:
+                for index, slot in enumerate(shop.inventory):
+                    if slot:
+                        item = slot['item']
+                        if shop.region.name == 'Capacity Upgrade' and world.difficulty[player] != 'normal':
+                            pool.append('Rupees (20)')
+                        else:
+                            pool.append(item)
+
+    if (world.customizer and world.customizer.get_item_pool_adjust()
+            and player in world.customizer.get_item_pool_adjust()):
+        diff = difficulties[world.difficulty[player]]
+        for item_name, delta in world.customizer.get_item_pool_adjust()[player].items():
+            if not isinstance(delta, int):
+                continue
+            if delta > 0:
+                if item_name == 'Bottle (Random)':
+                    for _ in range(delta):
+                        pool.append(random.choice(diff.bottles))
+                else:
+                    pool.extend([item_name] * delta)
+            elif delta < 0:
+                remove_count = abs(delta)
+                if item_name == 'Bottle (Random)':
+                    bottle_names = set(diff.bottles)
+                    for _ in range(remove_count):
+                        bottle = next((x for x in pool if x in bottle_names), None)
+                        if bottle:
+                            pool.remove(bottle)
+                else:
+                    for _ in range(remove_count):
+                        if item_name in pool:
+                            pool.remove(item_name)
+
     if world.logic[player] == 'hybridglitches' and world.pottery[player] not in ['none', 'cave']:
         # In HMG force swamp smalls in pots to allow getting out of swamp palace
         placed_items['Swamp Palace - Trench 1 Pot Key'] = 'Small Key (Swamp Palace)'
@@ -328,17 +364,6 @@ def generate_itempool(world, player):
         world.push_item(world.get_location(location, player), ItemFactory(item, player), False)
         world.get_location(location, player).event = True
         world.get_location(location, player).locked = True
-
-    if world.shopsanity[player] and not skip_pool_adjustments:
-        for shop in world.shops[player]:
-            if shop.region.name in shop_to_location_table:
-                for index, slot in enumerate(shop.inventory):
-                    if slot:
-                        item = slot['item']
-                        if shop.region.name == 'Capacity Upgrade' and world.difficulty[player] != 'normal':
-                            pool.append('Rupees (20)')
-                        else:
-                            pool.append(item)
 
     items = ItemFactory(pool, player)
     if world.shopsanity[player]:
