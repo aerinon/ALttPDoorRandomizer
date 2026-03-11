@@ -608,8 +608,13 @@ def fast_fill_pot_for_multiworld(world, item_pool, fill_locations):
         flex = 256 - world.data_tables[player].pot_secret_table.multiworld_count
         fill_count = len(pot_fill_locations[player]) - flex
         if fill_count > 0:
-            fill_spots = random.sample(pot_fill_locations[player], fill_count)
-            fill_items = random.sample(pot_item_pool[player], fill_count)
+            first_count = min(fill_count, len(pot_item_pool[player]))
+            fill_items = random.sample(pot_item_pool[player], first_count)
+            remaining = fill_count - first_count
+            if remaining > 0:
+                other_items = [i for i in item_pool if i.player == player and i not in pot_item_pool[player]]
+                fill_items += random.sample(other_items, min(remaining, len(other_items)))
+            fill_spots = random.sample(pot_fill_locations[player], len(fill_items))
             for x in fill_items:
                 item_pool.remove(x)
             for x in fill_spots:
