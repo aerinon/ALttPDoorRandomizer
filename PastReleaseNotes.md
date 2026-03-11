@@ -10,6 +10,9 @@
 # Patch Notes
 
 Changelog archive
+* 1.5.5
+  * Logic: Fixed an issue where PoD Bridge lead to Arena Main instead of Arena Landing Area. (Potentially unnecessarily requiring bombs or Somaria to progress)
+  * HUD: Key counters are correct even when door shuffle is off
 * 1.5.4
   * Documentation: New AI-assisted documentation [Site](https://aerinon.github.io/ALttPDoorRandomizer)
   * Generation Error: Fixed Issue with Shop Code and Take Any Caves (thanks Codemann for assistance)
