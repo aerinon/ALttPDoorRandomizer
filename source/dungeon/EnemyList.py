@@ -449,7 +449,7 @@ def init_enemy_stats():
         EnemySprite.Stalfos: EnemyStats(EnemySprite.Stalfos, False, True, 6, health=4, dmg=1),
         EnemySprite.GreenZirro: EnemyStats(EnemySprite.GreenZirro, False, False, 1, health=4, dmg=5, dmask=0x80),
         EnemySprite.BlueZirro: EnemyStats(EnemySprite.BlueZirro, False, False, 7, health=8, dmg=3, dmask=0x80),
-        EnemySprite.Pikit: EnemyStats(EnemySprite.Pikit, False, True, 2, health=12, dmg=5),
+        EnemySprite.Pikit: EnemyStats(EnemySprite.Pikit, False, False, 2, health=12, dmg=5),
 
         EnemySprite.OldMan: EnemyStats(EnemySprite.OldMan, True, dmg=0),
         EnemySprite.PipeDown: EnemyStats(EnemySprite.PipeDown, True, dmg=0),
