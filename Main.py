@@ -36,7 +36,6 @@ from source.tools.BPS import create_bps_from_data
 from source.classes.CustomSettings import CustomSettings
 from source.enemizer.DamageTables import DamageTable
 from source.enemizer.Enemizer import randomize_enemies
-from source.limited.LimitedRunCoordinator import adjust_world_for_limited_runs
 from source.rom.DataTables import init_data_tables, init_custom_rooms, init_custom_sprites
 
 version_number = '2.0.0'
