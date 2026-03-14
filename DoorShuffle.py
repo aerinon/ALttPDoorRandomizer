@@ -105,6 +105,9 @@ def link_doors_prep(world, player):
                 world.get_portal('Turtle Rock Eye Bridge', player).destination = True
         else:
             analyze_portals(world, player)
+            if world.doorShuffle[player] == 'vanilla': # these are always not destinations
+                world.get_portal('Desert Back', player).destination = False
+                world.get_portal('Skull 3', player).destination = False
         for portal in world.dungeon_portals[player]:
             connect_portal(portal, world, player)
 
@@ -234,11 +237,21 @@ def vanilla_key_logic(world, player):
     enabled_entrances = world.enabled_entrances[player] = {}
     builder_queue = deque(builders)
     last_key, loops = None, 0
+
+    # --- Precompute all potential portals for each builder using dungeon_portals ---
+    from DungeonGenerator import dungeon_portals
+    all_potential_portals_map = {}
+    for builder in builders:
+        portal_names = list(dungeon_portals.get(builder.name, []))
+        all_potential_portals_map[builder.name] = set(world.get_portal(portal_name, player).door.entrance.parent_region.name for portal_name in portal_names)
+        
     while len(builder_queue) > 0:
         builder = builder_queue.popleft()
         origin_list = entrances_map[builder.name]
         find_enabled_origins(builder.sectors, enabled_entrances, origin_list, entrances_map, builder.name)
-        if len(origin_list) <= 0:
+        all_potential_origins = all_potential_portals_map[builder.name]
+        enabled = entrances_map[builder.name]
+        if len(origin_list) <= 0 or should_delay_processing(enabled, all_potential_origins, potentials, connections, world, player):
             if last_key == builder.name or loops > 1000:
                 origin_name = (world.get_region(origin_list[0], player).entrances[0].parent_region.name
                                if len(origin_list) > 0 else 'no origin')
@@ -309,6 +322,33 @@ def create_alternative_door_rules(door, amount, dungeon, world, player):
 
 def validate_vanilla_reservation(dungeon, world, player):
     return validate_key_layout(world.key_layout[player][dungeon.name], world, player)
+
+
+def should_delay_processing(enabled_origins, potential_origins, potentials, connections, world, player):
+    disabled_origins = potential_origins.difference(set(enabled_origins))
+    main_targets = []
+    for do in disabled_origins:
+        region = world.get_region(do, player)
+        portal = _find_portal_for_region(region, world, player)
+        if portal and not portal.destination:
+            main_targets.append(region)
+    if not main_targets:
+        return False  # No non-destination disabled origins found
+    enabling_regions = {connections[r.name] for r in main_targets}
+    for enabling_region in enabling_regions:
+        dungeon_names = {
+            portal.door.entrance.parent_region.dungeon.name
+            for dungeon_r in potentials[enabling_region]
+            if (portal := _find_portal_for_region(world.get_region(dungeon_r, player), world, player))
+        }
+        if len(dungeon_names) > 1:
+            return True
+    return False
+
+
+def _find_portal_for_region(region, world, player):
+    return next((p for ent in region.entrances
+                 if (p := world.get_portal_unsafe(ent.parent_region.name.rstrip(' Portal'), player))), None)
 
 
 # some useful functions
@@ -3686,7 +3726,7 @@ logical_connections = [
     ('PoD Pit Room Block Path S', 'PoD Pit Room'),
     ('PoD Arena Landing Bonk Path', 'PoD Arena Bridge'),
     ('PoD Arena North Drop Down', 'PoD Arena Main'),
-    ('PoD Arena Bridge Drop Down', 'PoD Arena Main'),
+    ('PoD Arena Bridge Drop Down', 'PoD Arena Landing'),
     ('PoD Arena North to Landing Barrier - Orange', 'PoD Arena Landing'),
     ('PoD Arena Main to Ranged Crystal', 'PoD Arena Main - Ranged Crystal'),
     ('PoD Arena Main to Landing Barrier - Blue', 'PoD Arena Landing'),

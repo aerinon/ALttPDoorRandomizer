@@ -43,7 +43,7 @@ from source.rom.DataTables import init_data_tables
 from source.limited.LimitedRunCoordinator import adjust_world_for_limited_runs
 from source.rom.DataTables import init_data_tables, init_custom_rooms, init_custom_sprites
 
-version_number = '1.5.2'
+version_number = '1.5.6'
 version_branch = '-u'
 __version__ = f'{version_number}{version_branch}'
 

@@ -330,7 +330,7 @@ def init_sprite_requirements():
         SpriteRequirement(EnemySprite.Stalfos).sub_group(0, 0x1f),
         SpriteRequirement(EnemySprite.GreenZirro).no_drop().sub_group(3, 0x1b).exclude(NoFlyingRooms),
         SpriteRequirement(EnemySprite.BlueZirro).no_drop().sub_group(3, 0x1b).exclude(NoFlyingRooms),
-        SpriteRequirement(EnemySprite.Pikit).sub_group(3, 0x1b),
+        SpriteRequirement(EnemySprite.Pikit).no_drop().sub_group(3, 0x1b),
         SpriteRequirement(EnemySprite.CrystalMaiden).affix(),
         SpriteRequirement(EnemySprite.OldMan).affix().sub_group(2, 0x1c),
         SpriteRequirement(EnemySprite.PipeDown).affix(),
