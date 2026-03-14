@@ -67,6 +67,14 @@ item_pool:
     Sanctuary Heart Container: 3
     Shovel: 3
     Single Arrow: 1
+    Green Potion: 1
+    Blue Potion: 1
+    Red Potion: 1
+item_pool_adjust:
+  1:
+    Bottle (Random): 2        # add 2 extra random bottles on top of the base pool
+    Magic Upgrade (1/2): 1    # add 1 extra half-magic
+    Boss Heart Container: -3  # remove 3 heart containers from the base pool
 placements:
   1:
     Palace of Darkness - Big Chest: Hammer
