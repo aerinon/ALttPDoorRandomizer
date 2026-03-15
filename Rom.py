@@ -2579,16 +2579,19 @@ def write_strings(rom, world, player, team):
         loc.item = i
         return loc
     (crystal5, crystal6, greenpendant) = tuple([x[0] if x else missing_prize() for x in [crystal5, crystal6, greenpendant]])
+    bigbomb_follower = 'Big Bomb?\n'
+    if world.shuffle_followers[player]:
+        bigbomb_follower = ''
     if world.prizeshuffle[player] in ['none', 'dungeon']:
         (crystal5, crystal6, greenpendant) = tuple([x.parent_region.dungeon.name for x in [crystal5, crystal6, greenpendant]])
-        tt['bomb_shop'] = 'Big Bomb?\nMy supply is blocked until you clear %s and %s.' % (crystal5, crystal6)
+        tt['bomb_shop'] = f'{bigbomb_follower}My supply is blocked until you clear %s and %s.' % (crystal5, crystal6)
         tt['sahasrahla_bring_courage'] = 'I lost my family heirloom in %s' % greenpendant
     elif world.prizeshuffle[player] == 'nearby':
         (crystal5, crystal6, greenpendant) = tuple([x.item.dungeon_object.name for x in [crystal5, crystal6, greenpendant]])
-        tt['bomb_shop'] = 'Big Bomb?\nThe crystals can be found near %s and %s.' % (crystal5, crystal6)
+        tt['bomb_shop'] = f'{bigbomb_follower}The crystals can be found near %s and %s.' % (crystal5, crystal6)
         tt['sahasrahla_bring_courage'] = 'I lost my family heirloom near %s' % greenpendant
     else:
-        tt['bomb_shop'] = 'Big Bomb?\nThe crystals can be found %s and %s.' % (crystal5.hint_text, crystal6.hint_text)
+        tt['bomb_shop'] = f'{bigbomb_follower}The crystals can be found %s and %s.' % (crystal5.hint_text, crystal6.hint_text)
         tt['sahasrahla_bring_courage'] = 'My family heirloom can be found %s' % greenpendant.hint_text
 
     tt['sign_ganons_tower'] = ('You need %d crystal to enter.' if world.crystals_needed_for_gt[player] == 1 else 'You need %d crystals to enter.') % world.crystals_needed_for_gt[player]
