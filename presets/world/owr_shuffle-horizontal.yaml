@@ -1,3 +1,6 @@
+settings:
+  1:
+    ow_layout: wild
 ow-edges:
   1:
     two-way:

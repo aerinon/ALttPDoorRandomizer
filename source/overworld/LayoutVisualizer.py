@@ -4,7 +4,18 @@ from datetime import datetime
 from typing import Dict, List
 from PIL import Image, ImageDraw
 from BaseClasses import Direction, OWEdge
-from source.overworld.LayoutGenerator import Screen
+from source.overworld.LayoutGenerator import Screen, get_screen_id_from_cell
+
+def get_quadrant_from_cell_id(cell_id: int, screen_id: int) -> str:
+    offset = (cell_id & 0xBF) - (screen_id & 0xBF)
+    if offset == 0x00:
+        return "NW"
+    elif offset == 0x01:
+        return "NE"
+    elif offset == 0x08:
+        return "SW"
+    else:
+        return "SE"
 
 def get_edge_lists(grid: List[List[List[int]]],
                    overworld_screens: Dict[int, Screen],
@@ -13,7 +24,7 @@ def get_edge_lists(grid: List[List[List[int]]],
     Get list of edges for each cell and direction.
 
     Args:
-        grid: 3D list [world][row][col] containing screen IDs
+        grid: 3D list [world][row][col] containing cell IDs
         overworld_screens: Dict of screen_id -> Screen objects
         large_screen_quadrant_info: Dict of screen_id -> quadrant info for large screens
 
@@ -24,47 +35,27 @@ def get_edge_lists(grid: List[List[List[int]]],
     GRID_SIZE = 8
     edge_lists = {}
 
-    # Large screen base IDs
-    large_screen_base_ids = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35,
-                            0x40, 0x43, 0x45, 0x58, 0x5B, 0x5E, 0x70, 0x75]
-
     for world_idx in range(2):
-        # Build a map of screen_id -> list of (row, col) positions for large screens
-        large_screen_positions = {}
         for row in range(GRID_SIZE):
             for col in range(GRID_SIZE):
-                screen_id = grid[world_idx][row][col]
-                if screen_id != -1 and screen_id in large_screen_base_ids:
-                    if screen_id not in large_screen_positions:
-                        large_screen_positions[screen_id] = []
-                    large_screen_positions[screen_id].append((row, col))
+                cell_id = grid[world_idx][row][col]
 
-        for row in range(GRID_SIZE):
-            for col in range(GRID_SIZE):
-                screen_id = grid[world_idx][row][col]
-
-                if screen_id == -1:
+                if cell_id == -1:
                     # Empty cell - no edges
                     for direction in [Direction.North, Direction.South, Direction.East, Direction.West]:
                         edge_lists[(world_idx, row, col, direction)] = []
                     continue
 
+                screen_id = get_screen_id_from_cell(cell_id)
                 screen = overworld_screens.get(screen_id)
                 if not screen:
                     for direction in [Direction.North, Direction.South, Direction.East, Direction.West]:
                         edge_lists[(world_idx, row, col, direction)] = []
                     continue
 
-                is_large = screen_id in large_screen_base_ids
-
-                if is_large:
-                    # For large screens, determine which quadrant this cell is
-                    # Find all positions of this large screen and determine quadrant
-                    positions = large_screen_positions.get(screen_id, [(row, col)])
-
-                    # Determine quadrant by finding relative position
-                    # The quadrant is determined by which cells are adjacent
-                    quadrant = determine_large_screen_quadrant(row, col, positions, GRID_SIZE)
+                if screen.big:
+                    # For large screens, determine quadrant from cell ID
+                    quadrant = get_quadrant_from_cell_id(cell_id, screen_id)
 
                     # Get edges for this quadrant
                     if screen_id in large_screen_quadrant_info:
@@ -85,45 +76,6 @@ def get_edge_lists(grid: List[List[List[int]]],
 
     return edge_lists
 
-def determine_large_screen_quadrant(row: int, col: int, positions: List[tuple], grid_size: int) -> str:
-    """
-    Determine which quadrant (NW, NE, SW, SE) a cell is in for a large screen.
-    Handles wrapping correctly by checking adjacency patterns.
-
-    Args:
-        row: Current cell row
-        col: Current cell column
-        positions: List of all (row, col) positions for this large screen
-        grid_size: Size of the grid (8)
-
-    Returns:
-        Quadrant string: "NW", "NE", "SW", or "SE"
-    """
-    positions_set = set(positions)
-
-    # Check which adjacent cells also belong to this large screen
-    has_right = ((row, (col + 1) % grid_size) in positions_set)
-    has_below = (((row + 1) % grid_size, col) in positions_set)
-    has_left = ((row, (col - 1) % grid_size) in positions_set)
-    has_above = (((row - 1) % grid_size, col) in positions_set)
-
-    # Determine quadrant based on adjacency
-    # NW: has right and below neighbors
-    # NE: has left and below neighbors
-    # SW: has right and above neighbors
-    # SE: has left and above neighbors
-
-    if has_right and has_below:
-        return "NW"
-    elif has_left and has_below:
-        return "NE"
-    elif has_right and has_above:
-        return "SW"
-    elif has_left and has_above:
-        return "SE"
-    else:
-        raise Exception("?")
-
 def is_crossed_edge(edge: OWEdge, overworld_screens: Dict[int, Screen]) -> bool:
     if edge.dest is None:
         return False
@@ -131,6 +83,40 @@ def is_crossed_edge(edge: OWEdge, overworld_screens: Dict[int, Screen]) -> bool:
     source_screen = overworld_screens.get(edge.owIndex)
     dest_screen = overworld_screens.get(edge.dest.owIndex)
     return source_screen.dark_world != dest_screen.dark_world
+
+def are_large_screen_cells_connected(cell_id1: int, cell_id2: int, quadrant1: str, quadrant2: str, direction: str) -> bool:
+    """
+    Check if two cells of a large screen are connected (should have no border between them).
+
+    For cells to be connected:
+    1. They must be from the same large screen (same base screen ID)
+    2. Their quadrants must be adjacent in the expected direction
+
+    Args:
+        cell_id1: Cell ID of the first cell
+        cell_id2: Cell ID of the second cell
+        quadrant1: Quadrant of the first cell ("NW", "NE", "SW", "SE")
+        quadrant2: Quadrant of the second cell
+        direction: Direction from cell1 to cell2 ("east", "south")
+
+    Returns:
+        True if the cells should have no border between them
+    """
+    # Must be from the same large screen
+    screen_id1 = get_screen_id_from_cell(cell_id1)
+    screen_id2 = get_screen_id_from_cell(cell_id2)
+    if screen_id1 != screen_id2:
+        return False
+
+    # Check if quadrants are properly adjacent
+    if direction == "east":
+        # For east connection: NW->NE or SW->SE
+        return (quadrant1 == "NW" and quadrant2 == "NE") or (quadrant1 == "SW" and quadrant2 == "SE")
+    elif direction == "south":
+        # For south connection: NW->SW or NE->SE
+        return (quadrant1 == "NW" and quadrant2 == "SW") or (quadrant1 == "NE" and quadrant2 == "SE")
+
+    return False
 
 def visualize_layout(grid: List[List[List[int]]], output_dir: str,
                      overworld_screens: Dict[int, Screen],
@@ -162,78 +148,42 @@ def visualize_layout(grid: List[List[List[int]]], output_dir: str,
     output_height = world_height
     output_img = Image.new('RGB', (output_width, output_height), color='black')
 
-    # Large screen base IDs (defined once for reuse)
-    large_screen_base_ids = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35,
-                            0x40, 0x43, 0x45, 0x58, 0x5B, 0x5E, 0x70, 0x75]
-
     # Process both worlds
     for world_idx in range(2):
         x_offset = 0 if world_idx == 0 else (world_width + gap)
 
-        # Build a map of screen_id -> list of (row, col) positions for large screens
-        large_screen_positions = {}
-        for row in range(GRID_SIZE):
-            for col in range(GRID_SIZE):
-                screen_id = grid[world_idx][row][col]
-                if screen_id != -1 and screen_id in large_screen_base_ids:
-                    if screen_id not in large_screen_positions:
-                        large_screen_positions[screen_id] = []
-                    large_screen_positions[screen_id].append((row, col))
-
         # Process each cell in the grid individually
-        # This handles wrapped large screens correctly by drawing each quadrant separately
         for row in range(GRID_SIZE):
             for col in range(GRID_SIZE):
-                screen_id = grid[world_idx][row][col]
+                cell_id = grid[world_idx][row][col]
 
-                if screen_id == -1:
+                if cell_id == -1:
                     # Empty cell - fill with black (already black from initialization)
                     continue
 
-                is_large = screen_id in large_screen_base_ids
+                screen_id = get_screen_id_from_cell(cell_id)
+                screen = overworld_screens.get(screen_id)
+                if not screen:
+                    continue
 
-                # Calculate source position in the world image
-                source_row = (screen_id % 0x40) >> 3
-                source_col = screen_id % 0x08
-                world_img = lightworld_img if screen_id < 0x40 else darkworld_img
+                is_large = screen.big
 
-                if is_large:
-                    # For large screens, determine which quadrant this cell represents
-                    positions = large_screen_positions.get(screen_id, [(row, col)])
-                    quadrant = determine_large_screen_quadrant(row, col, positions, GRID_SIZE)
+                # Calculate source position in the world image based on cell_id
+                # For large screens, cell_id already encodes the quadrant position
+                source_row = (cell_id % 0x40) >> 3
+                source_col = cell_id % 0x08
+                world_img = lightworld_img if cell_id < 0x40 else darkworld_img
 
-                    # Map quadrant to source offset within the 2x2 large screen
-                    quadrant_offsets = {
-                        "NW": (0, 0),
-                        "NE": (1, 0),
-                        "SW": (0, 1),
-                        "SE": (1, 1)
-                    }
-                    q_col_offset, q_row_offset = quadrant_offsets[quadrant]
+                source_x = source_col * SOURCE_CELL_SIZE
+                source_y = source_row * SOURCE_CELL_SIZE
 
-                    # Calculate source position for this quadrant
-                    source_x = (source_col + q_col_offset) * SOURCE_CELL_SIZE
-                    source_y = (source_row + q_row_offset) * SOURCE_CELL_SIZE
-
-                    # Crop single cell from source (the specific quadrant)
-                    cropped = world_img.crop((
-                        source_x,
-                        source_y,
-                        source_x + SOURCE_CELL_SIZE,
-                        source_y + SOURCE_CELL_SIZE
-                    ))
-                else:
-                    # Small screen (1x1)
-                    source_x = source_col * SOURCE_CELL_SIZE
-                    source_y = source_row * SOURCE_CELL_SIZE
-
-                    # Crop single cell from source
-                    cropped = world_img.crop((
-                        source_x,
-                        source_y,
-                        source_x + SOURCE_CELL_SIZE,
-                        source_y + SOURCE_CELL_SIZE
-                    ))
+                # Crop single cell from source
+                cropped = world_img.crop((
+                    source_x,
+                    source_y,
+                    source_x + SOURCE_CELL_SIZE,
+                    source_y + SOURCE_CELL_SIZE
+                ))
 
                 # Resize to output size (64x64 pixels)
                 resized = cropped.resize(
@@ -257,52 +207,93 @@ def visualize_layout(grid: List[List[List[int]]], output_dir: str,
     for world_idx in range(2):
         x_offset = 0 if world_idx == 0 else (world_width + gap)
 
-        # Build large screen positions map for this world
-        large_screen_positions = {}
-        for row in range(GRID_SIZE):
-            for col in range(GRID_SIZE):
-                screen_id = grid[world_idx][row][col]
-                if screen_id != -1 and screen_id in large_screen_base_ids:
-                    if screen_id not in large_screen_positions:
-                        large_screen_positions[screen_id] = []
-                    large_screen_positions[screen_id].append((row, col))
-
         # Draw borders for each cell
+        # For large screens, only draw borders where cells are not connected
         for row in range(GRID_SIZE):
             for col in range(GRID_SIZE):
-                screen_id = grid[world_idx][row][col]
+                cell_id = grid[world_idx][row][col]
 
-                if screen_id == -1:
+                if cell_id == -1:
                     continue
 
-                is_large = screen_id in large_screen_base_ids
+                screen_id = get_screen_id_from_cell(cell_id)
+                screen = overworld_screens.get(screen_id)
+                if not screen:
+                    continue
+
+                is_large = screen.big
 
                 dest_x = x_offset + col * OUTPUT_CELL_SIZE
                 dest_y = row * OUTPUT_CELL_SIZE
 
                 if is_large:
-                    # For large screens, determine which quadrant this cell is
-                    positions = large_screen_positions.get(screen_id, [(row, col)])
-                    quadrant = determine_large_screen_quadrant(row, col, positions, GRID_SIZE)
+                    quadrant = get_quadrant_from_cell_id(cell_id, screen_id)
 
-                    # Draw border only on the outer edges of the large screen
-                    # (not on internal edges between quadrants)
-                    # NW: draw top and left borders
-                    # NE: draw top and right borders
-                    # SW: draw bottom and left borders
-                    # SE: draw bottom and right borders
-
-                    if quadrant in ["NW", "NE"]:
-                        # Draw top border
-                        draw.line([(dest_x, dest_y), (dest_x + OUTPUT_CELL_SIZE - 1, dest_y)], fill='black', width=BORDER_WIDTH)
+                    # Check each border direction
+                    # Top border: draw if this is a north quadrant OR if the cell above is not connected
+                    draw_top = True
                     if quadrant in ["SW", "SE"]:
-                        # Draw bottom border
-                        draw.line([(dest_x, dest_y + OUTPUT_CELL_SIZE - 1), (dest_x + OUTPUT_CELL_SIZE - 1, dest_y + OUTPUT_CELL_SIZE - 1)], fill='black', width=BORDER_WIDTH)
-                    if quadrant in ["NW", "SW"]:
-                        # Draw left border
-                        draw.line([(dest_x, dest_y), (dest_x, dest_y + OUTPUT_CELL_SIZE - 1)], fill='black', width=BORDER_WIDTH)
+                        # Check if cell above is connected
+                        above_row = (row - 1) % GRID_SIZE
+                        above_cell_id = grid[world_idx][above_row][col]
+                        if above_cell_id != -1:
+                            above_screen_id = get_screen_id_from_cell(above_cell_id)
+                            above_screen = overworld_screens.get(above_screen_id)
+                            if above_screen and above_screen.big:
+                                above_quadrant = get_quadrant_from_cell_id(above_cell_id, above_screen_id)
+                                if are_large_screen_cells_connected(above_cell_id, cell_id, above_quadrant, quadrant, "south"):
+                                    draw_top = False
+
+                    # Bottom border: draw if this is a south quadrant OR if the cell below is not connected
+                    draw_bottom = True
+                    if quadrant in ["NW", "NE"]:
+                        # Check if cell below is connected
+                        below_row = (row + 1) % GRID_SIZE
+                        below_cell_id = grid[world_idx][below_row][col]
+                        if below_cell_id != -1:
+                            below_screen_id = get_screen_id_from_cell(below_cell_id)
+                            below_screen = overworld_screens.get(below_screen_id)
+                            if below_screen and below_screen.big:
+                                below_quadrant = get_quadrant_from_cell_id(below_cell_id, below_screen_id)
+                                if are_large_screen_cells_connected(cell_id, below_cell_id, quadrant, below_quadrant, "south"):
+                                    draw_bottom = False
+
+                    # Left border: draw if this is a west quadrant OR if the cell to the left is not connected
+                    draw_left = True
                     if quadrant in ["NE", "SE"]:
-                        # Draw right border
+                        # Check if cell to the left is connected
+                        left_col = (col - 1) % GRID_SIZE
+                        left_cell_id = grid[world_idx][row][left_col]
+                        if left_cell_id != -1:
+                            left_screen_id = get_screen_id_from_cell(left_cell_id)
+                            left_screen = overworld_screens.get(left_screen_id)
+                            if left_screen and left_screen.big:
+                                left_quadrant = get_quadrant_from_cell_id(left_cell_id, left_screen_id)
+                                if are_large_screen_cells_connected(left_cell_id, cell_id, left_quadrant, quadrant, "east"):
+                                    draw_left = False
+
+                    # Right border: draw if this is an east quadrant OR if the cell to the right is not connected
+                    draw_right = True
+                    if quadrant in ["NW", "SW"]:
+                        # Check if cell to the right is connected
+                        right_col = (col + 1) % GRID_SIZE
+                        right_cell_id = grid[world_idx][row][right_col]
+                        if right_cell_id != -1:
+                            right_screen_id = get_screen_id_from_cell(right_cell_id)
+                            right_screen = overworld_screens.get(right_screen_id)
+                            if right_screen and right_screen.big:
+                                right_quadrant = get_quadrant_from_cell_id(right_cell_id, right_screen_id)
+                                if are_large_screen_cells_connected(cell_id, right_cell_id, quadrant, right_quadrant, "east"):
+                                    draw_right = False
+
+                    # Draw the borders
+                    if draw_top:
+                        draw.line([(dest_x, dest_y), (dest_x + OUTPUT_CELL_SIZE - 1, dest_y)], fill='black', width=BORDER_WIDTH)
+                    if draw_bottom:
+                        draw.line([(dest_x, dest_y + OUTPUT_CELL_SIZE - 1), (dest_x + OUTPUT_CELL_SIZE - 1, dest_y + OUTPUT_CELL_SIZE - 1)], fill='black', width=BORDER_WIDTH)
+                    if draw_left:
+                        draw.line([(dest_x, dest_y), (dest_x, dest_y + OUTPUT_CELL_SIZE - 1)], fill='black', width=BORDER_WIDTH)
+                    if draw_right:
                         draw.line([(dest_x + OUTPUT_CELL_SIZE - 1, dest_y), (dest_x + OUTPUT_CELL_SIZE - 1, dest_y + OUTPUT_CELL_SIZE - 1)], fill='black', width=BORDER_WIDTH)
                 else:
                     # Small screen - draw border around single cell
@@ -315,8 +306,8 @@ def visualize_layout(grid: List[List[List[int]]], output_dir: str,
         # Draw edge connection indicators for each cell
         for row in range(GRID_SIZE):
             for col in range(GRID_SIZE):
-                screen_id = grid[world_idx][row][col]
-                if screen_id == -1:
+                cell_id = grid[world_idx][row][col]
+                if cell_id == -1:
                     continue
 
                 dest_x = x_offset + col * OUTPUT_CELL_SIZE

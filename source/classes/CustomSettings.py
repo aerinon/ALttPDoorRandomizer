@@ -509,6 +509,7 @@ class CustomSettings(object):
         self.world_rep['ow-whirlpools'] = whirlpools = {}
         self.world_rep['ow-tileflips'] = flips = {}
         self.world_rep['ow-flutespots'] = flute = {}
+        self.world_rep['ow-grid'] = owgrid = {}
         for p in self.player_range:
             connections = edges[p] = {}
             connections['two-way'] = {}
@@ -529,6 +530,57 @@ class CustomSettings(object):
             else:
                 flute[p]['force'] = list(HexInt(id) for id in sorted(default_flute_connections))
             flute[p]['forbid'] = []
+            # layout grid
+            owgrid[p] = {}
+            grid = world.owgrid[p]
+            if grid is None:
+                grid = [
+                    [[HexInt(row * 8 + col) for col in range(8)] for row in range(8)],
+                    [[HexInt(row * 8 + col) for col in range(8)] for row in range(8)]
+                ]
+            else:
+                grid = [
+                    [[HexInt(cell & 0xBF) for cell in row] for row in grid[0]],
+                    [[HexInt(cell & 0xBF) for cell in row] for row in grid[1]]
+                ]
+            # Create fixed_arrangements for both worlds
+            owgrid[p]['fixed_arrangements'] = [
+                {
+                    'arrangement': [' '.join(f'0x{cell:02X}' for cell in row) for row in grid[0]],
+                    'world': 'light'
+                },
+                {
+                    'arrangement': [' '.join(f'0x{cell:02X}' for cell in row) for row in grid[1]],
+                    'world': 'dark'
+                }
+            ]
+            # Pin top left corners to position 0x00
+            owgrid[p]['restricted_positions'] = [
+                {
+                    'cells': [HexInt(grid[0][0][0])],
+                    'positions': [HexInt(0x00)],
+                    'world': 'light'
+                },
+                {
+                    'cells': [HexInt(grid[1][0][0])],
+                    'positions': [HexInt(0x00)],
+                    'world': 'dark'
+                }
+            ]
+            # Set advanced grid options
+            horizontal_wrap = False
+            vertical_wrap = False
+            split_large_screens = False
+            if world.customizer:
+                grid_options = world.customizer.get_owgrid()
+                if grid_options and p in grid_options:
+                    grid_options = grid_options[p]
+                    horizontal_wrap = 'wrap_horizontal' in grid_options and grid_options['wrap_horizontal'] == True
+                    vertical_wrap = 'wrap_vertical' in grid_options and grid_options['wrap_vertical'] == True
+                    split_large_screens = 'split_large_screens' in grid_options and grid_options['split_large_screens'] == True
+            owgrid[p]['wrap_horizontal'] = horizontal_wrap
+            owgrid[p]['wrap_vertical'] = vertical_wrap
+            owgrid[p]['split_large_screens'] = split_large_screens
         for key, data in world.spoiler.overworlds.items():
             player = data['player'] if 'player' in data else 1
             connections = edges[player]
@@ -536,7 +588,7 @@ class CustomSettings(object):
             connections[sub][data['entrance']] = data['exit']
         for key, data in world.spoiler.whirlpools.items():
             player = data['player'] if 'player' in data else 1
-            whirlconnects = whirlconnects[player]
+            whirlconnects = whirlpools[player]
             sub = 'two-way' if data['direction'] == 'both' else 'one-way'
             whirlconnects[sub][data['entrance']] = data['exit']
 

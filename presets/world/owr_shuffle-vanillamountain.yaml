@@ -1,0 +1,16 @@
+ow-edges:
+  1:
+    two-way:
+      West Death Mountain EN*: East Death Mountain WN*
+      West Death Mountain ES*: East Death Mountain WS*
+      East Death Mountain EN*: Death Mountain TR Pegs WN*
+      West Dark Death Mountain EN*: East Dark Death Mountain WN*
+      West Dark Death Mountain ES*: East Dark Death Mountain WS*
+      East Dark Death Mountain EN*: Turtle Rock WN*
+ow-grid:
+  1:
+    fixed_arrangements:
+      - arrangement:
+          - 0x03 0x04 0x05 0x06 0x07
+          - 0x0B 0x0C 0x0D 0x0E    .
+        world: both

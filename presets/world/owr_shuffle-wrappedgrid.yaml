@@ -1,0 +1,7 @@
+settings:
+  1:
+    ow_layout: grid
+ow-grid:
+  1:
+    wrap_horizontal: true
+    wrap_vertical: true

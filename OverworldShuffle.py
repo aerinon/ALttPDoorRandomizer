@@ -567,7 +567,7 @@ def link_overworld(world, player):
                     remove_connected(forward_edge_sets, back_edge_sets)
             assert len(connected_edges) == len(default_connections) * 2, connected_edges
 
-            valid_layout = validate_layout(world, player)
+            valid_layout = world.accessibility[player] == 'none' or validate_layout(world, player)
 
             tries -= 1
         assert valid_layout, 'Could not find a valid OW layout'
@@ -1369,9 +1369,6 @@ def build_accessible_region_list(world, start_region, player, build_copy_world=F
     return explored_regions
 
 def validate_layout(world, player):
-    if world.accessibility[player] == 'none':
-        return True
-    
     entrance_connectors = {
         'East Death Mountain (Bottom)':       ['East Death Mountain (Top East)'],
         'Kakariko Suburb Area':               ['Maze Race Ledge'],
@@ -1458,7 +1455,7 @@ def validate_layout(world, player):
     while unreachable_count != len(unreachable_regions):
         # find unreachable regions
         unreachable_regions = {}
-        for region_name in list(OWTileRegions.copy().keys()):
+        for region_name in list(OWTileRegions.keys()):
             if region_name not in explored_regions and region_name not in isolated_regions:
                 region = world.get_region(region_name, player)
                 unreachable_regions[region_name] = region
@@ -1501,9 +1498,55 @@ def validate_layout(world, player):
 
     if len(unreachable_regions):
         return False
-    
+
     return True
-    
+
+def get_separate_ow_areas(world, player):
+    """
+    Returns a list of separated areas in the overworld layout.
+    It looks at the distinct connected components when only considering
+    OW edge and whirlpool connections (no entrances, portals, mirror, or flute).
+    Uses Union-Find to handle directed edges properly (treats them as undirected).
+    """
+    parent = {}
+
+    def find(x):
+        if x not in parent:
+            parent[x] = x
+        if parent[x] != x:
+            parent[x] = find(parent[x]) # Path compression
+        return parent[x]
+
+    def union(x, y):
+        root_x = find(x)
+        root_y = find(y)
+        if root_x != root_y:
+            parent[root_y] = root_x
+
+    all_regions = set(OWTileRegions.keys()) - set(isolated_regions)
+    considered_exit_spot_types = set(['OpenTerrain', 'OWTerrain', 'Ledge', 'OWEdge', 'Whirlpool'])
+
+    # Initialize all regions in Union-Find
+    for region_name in all_regions:
+        find(region_name)
+
+    # Build connections by examining all edges (treating directed as undirected)
+    for region_name in all_regions:
+        region = world.get_region(region_name, player)
+        for exit in region.exits:
+            if exit.spot_type in considered_exit_spot_types and exit.connected_region is not None and exit.connected_region.name in all_regions:
+                union(region_name, exit.connected_region.name)
+
+    # Group regions by their root
+    areas = {}
+    for region_name in all_regions:
+        root = find(region_name)
+        if root not in areas:
+            areas[root] = []
+        areas[root].append(region_name)
+
+    return list(areas.values())
+
 test_connections = [
                     #('Links House ES', 'Octoballoon WS'),
                     #('Links House NE', 'Lost Woods Pass SW')
