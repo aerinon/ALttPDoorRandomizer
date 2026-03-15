@@ -120,9 +120,6 @@ def create_item_pool_config(world):
                 LocationGroup('bkgt').locs(mode_grouping['GT Trash'])]
             for loc_name in mode_grouping['Big Chests'] + mode_grouping['Heart Containers']:
                 config.reserved_locations[player].add(loc_name)
-            if world.prizeshuffle[player] != 'none':
-                for loc_name in mode_grouping['Prizes']:
-                    config.reserved_locations[player].add(loc_name)
     elif world.algorithm == 'major_only':
         config.location_groups = [
             LocationGroup('MajorItems'),
