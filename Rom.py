@@ -45,10 +45,10 @@ from source.enemizer.Enemizer import write_enemy_shuffle_settings
 
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = '4d9c88bc92e9fd20482880fd41b3ec0d'
+RANDOMIZERBASEHASH = 'f1d838125b574639a74cf3de462da7d0'
 
 limited_run_hashes = {
-    '2604' : '7f63de73c6ef240fa3d82a8d658119c1',
+    '2604' : 'ed578ed47f345d2464db1b6bac0683fb',
 }
 
 class JsonRom(object):
@@ -2339,6 +2339,9 @@ def write_strings(rom, world, player, team):
             "    Crosskeys\n"
             "    Tournament\n"
             "    Winners\n{HARP}\n"
+            "    ~~~2025~~~\n      humbugh\n\n"
+            "    ~~~2024~~~\n    Gammachuu\n\n"
+            "    ~~~2023~~~\n    WallKicks\n\n"            
             "    ~~~2022~~~\n     Schulzer\n\n"
             "    ~~~2021~~~\n      Goomba\n\n"
             "    ~~~2020~~~\n    Linlinlin\n\n"
@@ -2671,16 +2674,19 @@ def write_strings(rom, world, player, team):
         loc.item = i
         return loc
     (crystal5, crystal6, greenpendant) = tuple([x[0] if x else missing_prize() for x in [crystal5, crystal6, greenpendant]])
+    bigbomb_follower = 'Big Bomb?\n'
+    if world.shuffle_followers[player]:
+        bigbomb_follower = ''
     if world.prizeshuffle[player] in ['none', 'dungeon']:
         (crystal5, crystal6, greenpendant) = tuple([x.parent_region.dungeon.name for x in [crystal5, crystal6, greenpendant]])
-        tt['bomb_shop'] = 'Big Bomb?\nMy supply is blocked until you clear %s and %s.' % (crystal5, crystal6)
+        tt['bomb_shop'] = f'{bigbomb_follower}My supply is blocked until you clear %s and %s.' % (crystal5, crystal6)
         tt['sahasrahla_bring_courage'] = 'I lost my family heirloom in %s' % greenpendant
     elif world.prizeshuffle[player] == 'nearby':
         (crystal5, crystal6, greenpendant) = tuple([x.item.dungeon_object.name for x in [crystal5, crystal6, greenpendant]])
-        tt['bomb_shop'] = 'Big Bomb?\nThe crystals can be found near %s and %s.' % (crystal5, crystal6)
+        tt['bomb_shop'] = f'{bigbomb_follower}The crystals can be found near %s and %s.' % (crystal5, crystal6)
         tt['sahasrahla_bring_courage'] = 'I lost my family heirloom near %s' % greenpendant
     else:
-        tt['bomb_shop'] = 'Big Bomb?\nThe crystals can be found %s and %s.' % (crystal5.hint_text, crystal6.hint_text)
+        tt['bomb_shop'] = f'{bigbomb_follower}The crystals can be found %s and %s.' % (crystal5.hint_text, crystal6.hint_text)
         tt['sahasrahla_bring_courage'] = 'My family heirloom can be found %s' % greenpendant.hint_text
 
     tt['sign_ganons_tower'] = ('You need %d crystal to enter.' if world.crystals_needed_for_gt[player] == 1 else 'You need %d crystals to enter.') % world.crystals_needed_for_gt[player]

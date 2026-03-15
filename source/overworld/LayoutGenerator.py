@@ -1,13 +1,12 @@
-import copy
 import logging
+from DungeonGenerator import GenerationException
 import RaceRandom as random
 import random as _random
 from typing import List, Dict, Optional, Set, Tuple
 from BaseClasses import OWEdge, World, Direction, Terrain
-from OverworldShuffle import connect_two_way, validate_layout
+from OverworldShuffle import connect_two_way, get_separate_ow_areas, validate_layout
 
 ENABLE_KEEP_SIMILAR_SPECIAL_HANDLING = False
-PREVENT_WRAPPED_LARGE_SCREENS = False
 DRAW_IMAGE = False
 
 large_screen_ids = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35] + [0x40, 0x43, 0x45, 0x58, 0x5B, 0x5E, 0x70, 0x75]
@@ -49,7 +48,7 @@ class WorldPiece:
 
     def __init__(
         self,
-        screens: List[List[Optional[Screen]]],
+        screens: Optional[List[List[Optional[Screen]]]] = None,
         grid: Optional[List[List[int]]] = None,
         width: int = 0,
         height: int = 0,
@@ -62,7 +61,7 @@ class WorldPiece:
         west_edges_water: Optional[List[List[List[OWEdge]]]] = None,
         east_edges_water: Optional[List[List[List[OWEdge]]]] = None
     ):
-        self.screens = screens
+        self.screens = screens if screens is not None else []
         self.grid = grid if grid is not None else []
         self.width = width
         self.height = height
@@ -79,8 +78,7 @@ class Piece:
     """
     Represents a piece consisting of a main and optionally a parallel world piece.
     """
-    __slots__ = ('main', 'parallel', 'world', 'width', 'height',
-                 'invalid_wrap_row', 'invalid_wrap_column', 'restriction',
+    __slots__ = ('main', 'parallel', 'world', 'width', 'height', 'restriction',
                  'crossed_groups', 'delay', 'order', 'edge_sides', 'max_edges_per_side')
 
     def __init__(
@@ -90,8 +88,6 @@ class Piece:
         world: int = 0,
         width: int = 0,
         height: int = 0,
-        invalid_wrap_row: Optional[List[int]] = None,
-        invalid_wrap_column: Optional[List[int]] = None,
         restriction: Optional[List[int]] = None,
         crossed_groups: Optional[List[List[int]]] = None,
         delay: int = 0,
@@ -104,8 +100,6 @@ class Piece:
         self.world = world # 0 or 1
         self.width = width
         self.height = height
-        self.invalid_wrap_row = invalid_wrap_row if invalid_wrap_row is not None else []
-        self.invalid_wrap_column = invalid_wrap_column if invalid_wrap_column is not None else []
         self.restriction = restriction
         self.crossed_groups = crossed_groups if crossed_groups is not None else []
         self.delay = delay
@@ -154,21 +148,21 @@ class LayoutGeneratorOptions:
     """
     Configuration options for layout generation.
     """
-    __slots__ = ('horizontal_wrap', 'vertical_wrap',
-                 'large_screen_pool', 'distortion_chance', 'random_order',
+    __slots__ = ('horizontal_wrap', 'vertical_wrap', 'split_large_screens', 'distortion_chance', 'random_order',
                  'multi_choice', 'max_delay', 'first_ignore_bonus_points',
                  'penalty_full_edge_mismatch', 'penalty_partial_edge_mismatch', 'bonus_partial_edge_match',
                  'bonus_full_edge_match', 'bonus_crossed_group_match', 'bonus_fill_parallel',
                  'forced_non_crossed_edges', 'forced_crossed_edges', 'check_reachability',
                  'crossed_chance', 'crossed_limit',
                  'sort_by_edge_sides', 'sort_by_max_edges_per_side', 'sort_by_piece_size',
-                 'min_runs', 'max_runs', 'target_runs_times_successes')
+                 'min_runs', 'max_runs', 'target_runs_times_successes', 'score_mult_separate_areas',
+                 'start_loc_min_distance', 'score_mult_start_loc_distance')
 
     def __init__(
         self,
         horizontal_wrap: bool = True,
         vertical_wrap: bool = True,
-        large_screen_pool: bool = False,
+        split_large_screens = False,
         distortion_chance: float = 0.0,
         random_order: int = 0,
         multi_choice: int = 1,
@@ -190,11 +184,14 @@ class LayoutGeneratorOptions:
         sort_by_piece_size: bool = False,
         min_runs: int = 100,
         max_runs: int = 10000,
-        target_runs_times_successes: int = 5000
+        target_runs_times_successes: int = 5000,
+        score_mult_separate_areas: float = 4,
+        start_loc_min_distance: int = 4,
+        score_mult_start_loc_distance: float = 3
     ):
         self.horizontal_wrap = horizontal_wrap
         self.vertical_wrap = vertical_wrap
-        self.large_screen_pool = large_screen_pool
+        self.split_large_screens = split_large_screens
         self.distortion_chance = distortion_chance
         self.random_order = random_order
         self.multi_choice = multi_choice
@@ -217,6 +214,9 @@ class LayoutGeneratorOptions:
         self.min_runs = min_runs
         self.max_runs = max_runs
         self.target_runs_times_successes = target_runs_times_successes
+        self.score_mult_separate_areas = score_mult_separate_areas
+        self.start_loc_min_distance = start_loc_min_distance
+        self.score_mult_start_loc_distance = score_mult_start_loc_distance
 
 class LayoutGeneratorResult:
     """
@@ -274,6 +274,25 @@ def create_empty_grid_info(edge_connection_seed: float) -> GridInfo:
         west_edges_water_grid=[[[[] for _ in range(8)] for _ in range(8)] for _ in range(2)],
         east_edges_water_grid=[[[[] for _ in range(8)] for _ in range(8)] for _ in range(2)],
         crossed_groups=[[-1] * 8 for _ in range(8)],
+        edge_connection_seed=edge_connection_seed
+    )
+
+def copy_grid_info(source: GridInfo, edge_connection_seed: float) -> GridInfo:
+    """
+    Create a deep copy of a GridInfo object with a new edge_connection_seed.
+    Only copies the grid data structures, not the OWEdge references (which are shared).
+    """
+    return GridInfo(
+        grid=[[row[:] for row in world_grid] for world_grid in source.grid],
+        north_edges_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.north_edges_grid],
+        south_edges_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.south_edges_grid],
+        west_edges_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.west_edges_grid],
+        east_edges_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.east_edges_grid],
+        north_edges_water_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.north_edges_water_grid],
+        south_edges_water_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.south_edges_water_grid],
+        west_edges_water_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.west_edges_water_grid],
+        east_edges_water_grid=[[[cell[:] for cell in row] for row in world_grid] for world_grid in source.east_edges_water_grid],
+        crossed_groups=[row[:] for row in source.crossed_groups],
         edge_connection_seed=edge_connection_seed
     )
 
@@ -399,66 +418,50 @@ def define_large_screen_quadrants(
 
 def create_piece_list(world: World, player: int, options: LayoutGeneratorOptions, crossed_group_b: List[int], overworld_screens: Dict[int, Screen], large_screen_quadrant_info: Dict[int, Dict], large_screen_quadrant_info_land: Dict[int, Dict], large_screen_quadrant_info_water: Dict[int, Dict]) -> List[Piece]:
     piece_list: List[Piece] = []
-    used_screens_set = set()
 
-    all_large_screens = [s for s in overworld_screens.values() if s.big]
-    all_small_screens = [s for s in overworld_screens.values() if not s.big]
-
+    # Determine which screens to process
+    all_screens = list(overworld_screens.values())
     if world.owParallel[player]:
         # In Parallel, only use light world screens
         # Each piece will automatically handle both worlds through parallel mechanism
-        all_large_screens = [s for s in all_large_screens if not s.dark_world]
-        all_small_screens = [s for s in all_small_screens if not s.dark_world]
+        all_screens = [s for s in all_screens if not s.dark_world]
 
-    # In Standard mode, screens 0x1B, 0x2B, 0x2C are glued together as a single piece
-    if world.mode[player] == 'standard':
-        castle_screen = overworld_screens.get(0x1B)
-        central_bonk_screen = overworld_screens.get(0x2B)
-        links_house_screen = overworld_screens.get(0x2C)
-
-        if castle_screen and central_bonk_screen and links_house_screen:
-            piece = create_piece(world, player, [
-                [0x1B, 0x1B],
-                [0x1B, 0x1B],
-                [0x2B, 0x2C]
-            ], overworld_screens)
-
-            if options.large_screen_pool:
-                piece.restriction = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35]
-
-            piece_list.append(piece)
-            used_screens_set.add(castle_screen)
-            used_screens_set.add(central_bonk_screen)
-            used_screens_set.add(links_house_screen)
-
-            if world.owParallel[player]:
-                used_screens_set.add(castle_screen.parallel)
-                used_screens_set.add(central_bonk_screen.parallel)
-                used_screens_set.add(links_house_screen.parallel)
-
-    # Add large screens
-    for screen in all_large_screens:
-        if screen not in used_screens_set:
-            piece = create_piece(world, player, [[screen.id, screen.id], [screen.id, screen.id]], overworld_screens)
-            if options.large_screen_pool:
-                piece.restriction = [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35]
-            piece_list.append(piece)
-            used_screens_set.add(screen)
-            if world.owParallel[player]:
-                used_screens_set.add(screen.parallel)
-
-    # Add small screens
-    for screen in all_small_screens:
-        if screen not in used_screens_set:
+    # Phase 1: Create individual 1x1 pieces for all cells
+    for screen in all_screens:
+        if screen.big:
+            # Create 4 pieces for large screen quadrants
+            for offset in [0x00, 0x01, 0x08, 0x09]:
+                piece = create_piece(world, player, [[screen.id + offset]], overworld_screens)
+                piece_list.append(piece)
+        else:
             piece = create_piece(world, player, [[screen.id]], overworld_screens)
-            if options.large_screen_pool:
-                piece.restriction = [s.id for s in overworld_screens.values() if not s.big]
             piece_list.append(piece)
-            used_screens_set.add(screen)
-            if world.owParallel[player]:
-                used_screens_set.add(screen.parallel)
 
-    # Add piece data
+    # Apply position restrictions from Customizer
+    piece_list = apply_position_restrictions(world, player, piece_list, overworld_screens)
+
+    # Phase 2: Apply options via merging
+
+    # Merge large screens if not split
+    if not options.split_large_screens:
+        for large_id in large_screen_ids:
+            if large_id in [s.id for s in all_screens if s.big]:
+                piece_list = merge_pieces(piece_list, [[large_id, large_id + 0x01], [large_id + 0x08, large_id + 0x09]], world, player, overworld_screens)
+
+    # Standard mode: merge castle area
+    if world.mode[player] == 'standard':
+        piece_list = merge_pieces(piece_list, [[0x23, 0x24], [0x2B, 0x2C]], world, player, overworld_screens)
+
+    # Apply fixed arrangement restrictions from Customizer
+    piece_list = apply_arrangement_restrictions(world, player, piece_list, overworld_screens)
+
+    # Trim pieces by removing empty rows/columns on edges
+    piece_list = [trim_piece(piece) for piece in piece_list]
+
+    # Validate piece sizes and apply wrapping if needed
+    piece_list = validate_and_wrap_pieces(piece_list, options, world, player, overworld_screens)
+
+    # Phase 3: Add piece data
     for piece in piece_list:
         add_piece_data(world, player, piece, large_screen_quadrant_info, large_screen_quadrant_info_land, large_screen_quadrant_info_water)
         # Handle crossed groups
@@ -478,71 +481,635 @@ def create_piece_list(world: World, player: int, options: LayoutGeneratorOptions
             for k in range(piece.height):
                 for l in range(piece.width):
                     piece.crossed_groups[k].append(-1)
-                    screen_id = piece.main.grid[k][l]
-                    if screen_id != -1:
-                        piece.crossed_groups[k][l] = 1 if screen_id in crossed_group_b else 0
+                    screen = piece.main.screens[k][l]
+                    if screen:
+                        piece.crossed_groups[k][l] = 1 if screen.id in crossed_group_b else 0
                     else:
                         if piece.parallel and piece.parallel.screens[k][l]:
-                            piece.crossed_groups[k][l] = 1 if piece.parallel.grid[k][l] in crossed_group_b else 0
+                            piece.crossed_groups[k][l] = 1 if piece.parallel.screens[k][l].id in crossed_group_b else 0
 
     return piece_list
 
 def create_piece(world: World, player: int, grid: List[List[int]], overworld_screens: Dict[int, Screen]) -> Piece:
     """
-    Create piece from grid of screen IDs
-    Takes 2D array of screen IDs and creates main and parallel pieces
+    Create piece from grid of cell IDs
+    Takes 2D array of cell IDs and creates main and parallel pieces
     """
     piece = Piece(
-        main=WorldPiece(screens=[]),
+        main=WorldPiece(width=len(grid[0]), height=len(grid)),
         width=len(grid[0]),
         height=len(grid)
     )
 
     if world.owParallel[player]:
-        piece.parallel = WorldPiece(screens=[])
+        piece.parallel = WorldPiece(width=len(grid[0]), height=len(grid))
 
     found_screens = set()
 
     for i in range(piece.height):
         new_row = []
+        new_screen_row = []
         new_row_parallel = []
-        piece.main.screens.append(new_row)
+        new_screen_row_parallel = []
+        piece.main.grid.append(new_row)
+        piece.main.screens.append(new_screen_row)
         if world.owParallel[player]:
-            piece.parallel.screens.append(new_row_parallel)
+            piece.parallel.grid.append(new_row_parallel)
+            piece.parallel.screens.append(new_screen_row_parallel)
 
         for j in range(piece.width):
-            screen = overworld_screens.get(grid[i][j])
-            new_row.append(screen)
-            if world.owParallel[player]:
-                new_row_parallel.append(screen.parallel if screen else None)
-
-            if screen and screen not in found_screens:
+            cell_id = grid[i][j]
+            new_row.append(cell_id)
+            screen = None if cell_id == -1 else overworld_screens.get(get_screen_id_from_cell(cell_id))
+            if screen:
                 found_screens.add(screen)
-                piece.world = 1 if screen.dark_world else 0
-                if screen.big and PREVENT_WRAPPED_LARGE_SCREENS:
-                    # For large screens, prevent wrapping at the second row/column
-                    # This ensures the 2x2 piece doesn't split across the grid boundary
-                    if (i + 1) not in piece.invalid_wrap_row:
-                        piece.invalid_wrap_row.append(i + 1)
-                    if (j + 1) not in piece.invalid_wrap_column:
-                        piece.invalid_wrap_column.append(j + 1)
+            new_screen_row.append(screen)
+            if world.owParallel[player]:
+                if screen:
+                    new_row_parallel.append(cell_id - screen.id + screen.parallel.id)
+                    new_screen_row_parallel.append(screen.parallel)
+                else:
+                    new_row_parallel.append(-1)
+                    new_screen_row_parallel.append(None)
+
+    worlds = set(s.dark_world for s in found_screens if s is not None)
+    if len(worlds) != 1:
+        raise GenerationException("Piece contains screens from both Light World and Dark World")
+    piece.world = 1 if True in worlds else 0
 
     return piece
+
+def apply_position_restrictions(world: World, player: int, piece_list: List[Piece], overworld_screens: Dict[int, Screen]) -> List[Piece]:
+    """
+    Apply position restrictions from Customizer to pieces at the end of phase 1.
+
+    Position restrictions specify that certain cells can only be placed at certain positions.
+    The Customizer format is:
+        restricted_positions:
+          - cells: [0x13, 0x2C]
+            positions: [0x00, 0x07, 0x38, 0x3F]
+            world: both # or 'light' or 'dark'
+
+    Note: At the end of phase 1, all pieces are 1x1 (one piece per cell).
+
+    The world bit (0x40) in user input is ignored. The actual cell ID is determined by:
+    - The world where the restriction applies (light=0, dark=1)
+    - The mixed_state of the screen containing that cell (swapped screens flip the world bit)
+    """
+    if not world.customizer:
+        return piece_list
+
+    grid_options = world.customizer.get_owgrid()
+    if not grid_options or player not in grid_options:
+        return piece_list
+
+    grid_options = grid_options[player]
+    restricted_positions = grid_options.get('restricted_positions', [])
+    if not restricted_positions:
+        return piece_list
+
+    # Build a mapping from cell ID to piece for quick lookup
+    cell_to_piece = {piece.main.grid[0][0]: piece for piece in piece_list}
+
+    for restriction_idx, restriction in enumerate(restricted_positions):
+        cells = restriction.get('cells', [])
+        positions = restriction.get('positions', [])
+        restriction_world = restriction.get('world', 'both')
+
+        # Validate input
+        if not cells:
+            raise GenerationException(f"Invalid restriction in restricted_positions[{restriction_idx}]: No cells provided")
+        for cell_id in cells:
+            validate_cell_id(cell_id, f"restricted_positions[{restriction_idx}].cells")
+        if not positions:
+            raise GenerationException(f"Invalid restriction in restricted_positions[{restriction_idx}]: No positions provided")
+        for pos in positions:
+            validate_cell_id(pos, f"restricted_positions[{restriction_idx}].positions")
+        validate_world_value(restriction_world, f"restricted_positions[{restriction_idx}]")
+
+        position_set = set(positions)
+
+        for user_cell_id in cells:
+            # Ignore the world bit in user input
+            base_cell_id = user_cell_id & 0xBF
+
+            # Determine which worlds this restriction applies to
+            worlds_to_check = []
+            if restriction_world == 'light' or restriction_world == 'both':
+                worlds_to_check.append(0) # Light World
+            if restriction_world == 'dark' or restriction_world == 'both':
+                worlds_to_check.append(1) # Dark World
+
+            for target_world in worlds_to_check:
+                # Determine the actual cell ID based on the target world and mixed state
+                screen_id = get_screen_id_from_cell(base_cell_id)
+                screen = overworld_screens.get(screen_id)
+                is_swapped = screen.mixed_state == "swapped"
+
+                # Calculate the actual cell ID:
+                # - In Light World (target_world=0): use base_cell_id if normal, base_cell_id|0x40 if swapped
+                # - In Dark World (target_world=1): use base_cell_id|0x40 if normal, base_cell_id if swapped
+                if target_world == 0:
+                    # Light World
+                    actual_cell_id = (base_cell_id | 0x40) if is_swapped else base_cell_id
+                else:
+                    # Dark World
+                    actual_cell_id = base_cell_id if is_swapped else (base_cell_id | 0x40)
+
+                piece = cell_to_piece.get(actual_cell_id)
+
+                # Apply the position restriction
+                if piece.restriction is None:
+                    piece.restriction = list(position_set)
+                else:
+                    # Intersect with existing restrictions
+                    piece.restriction = [p for p in piece.restriction if p in position_set]
+
+    return piece_list
+
+def apply_arrangement_restrictions(world: World, player: int, piece_list: List[Piece], overworld_screens: Dict[int, Screen]) -> List[Piece]:
+    """
+    Apply fixed arrangement restrictions from Customizer to pieces at the end of phase 2.
+
+    Fixed arrangements specify the relative positioning between multiple screens.
+    The Customizer format is:
+        fixed_arrangements:
+          - arrangement:
+              - 0x03 0x04 0x05 0x06 0x07
+              - 0x0B 0x0C 0x0D 0x0E    .
+            world: both # or 'light' or 'dark'
+
+    The '.' character is a placeholder that allows any screen to be placed there.
+
+    The world bit (0x40) in user input is ignored. The actual cell ID is determined by:
+    - The world where the restriction applies (light=0, dark=1)
+    - The mixed_state of the screen containing that cell (swapped screens flip the world bit)
+    """
+    if not world.customizer:
+        return piece_list
+
+    grid_options = world.customizer.get_owgrid()
+    if not grid_options or player not in grid_options:
+        return piece_list
+
+    grid_options = grid_options[player]
+    fixed_arrangements = grid_options.get('fixed_arrangements', [])
+    if not fixed_arrangements:
+        return piece_list
+
+    for arrangement_idx, arrangement_config in enumerate(fixed_arrangements):
+        arrangement_rows = arrangement_config.get('arrangement', [])
+        arrangement_world = arrangement_config.get('world', 'both')
+
+        # Validate world value
+        validate_world_value(arrangement_world, f"fixed_arrangements[{arrangement_idx}]")
+
+        if not arrangement_rows:
+            raise GenerationException(f"Invalid arrangement in fixed_arrangements[{arrangement_idx}]: No arrangement provided")
+
+        # Pre-validate the arrangement: check row lengths and entry validity
+        expected_row_length = None
+        for row_idx, row_str in enumerate(arrangement_rows):
+            parts = str(row_str).split()
+            if expected_row_length is None:
+                expected_row_length = len(parts)
+            elif len(parts) != expected_row_length:
+                raise GenerationException(f"Invalid arrangement in fixed_arrangements[{arrangement_idx}]: row {row_idx} has {len(parts)} entries but expected {expected_row_length} (all rows must have the same number of entries)")
+
+            # Validate each entry
+            for part_idx, part in enumerate(parts):
+                part = part.strip()
+                if part == '.':
+                    continue
+                # Try to parse as cell ID
+                try:
+                    if part.startswith('0x') or part.startswith('0X'):
+                        cell_id = int(part, 16)
+                    else:
+                        cell_id = int(part)
+                    validate_cell_id(cell_id, f"fixed_arrangements[{arrangement_idx}].arrangement[{row_idx}][{part_idx}]")
+                except ValueError:
+                    raise GenerationException(f"Invalid entry '{part}' in fixed_arrangements[{arrangement_idx}].arrangement[{row_idx}][{part_idx}]: must be a cell ID (0x00-0x7F) or '.'")
+
+        # Determine which worlds this arrangement applies to
+        worlds_to_apply = []
+        if arrangement_world == 'light' or arrangement_world == 'both':
+            worlds_to_apply.append(0) # Light World
+        if arrangement_world == 'dark' or arrangement_world == 'both':
+            worlds_to_apply.append(1) # Dark World
+
+        for target_world in worlds_to_apply:
+            # Parse the arrangement into a 2D list of cell IDs, translating based on world and mixed state
+            # Each row is a string like "0x03 0x04 0x05 0x06 0x07" or contains '.' for wildcards
+            arrangement = []
+            for row_str in arrangement_rows:
+                row = []
+                # Split by whitespace
+                parts = str(row_str).split()
+                for part in parts:
+                    part = part.strip()
+                    if part == '.':
+                        row.append(-1) # -1 represents wildcard
+                    else:
+                        # Parse as hex or decimal (already validated above)
+                        if part.startswith('0x') or part.startswith('0X'):
+                            user_cell_id = int(part, 16)
+                        else:
+                            user_cell_id = int(part)
+
+                        # Ignore the world bit in user input
+                        base_cell_id = user_cell_id & 0xBF
+
+                        # Get the screen that contains this cell
+                        screen_id = get_screen_id_from_cell(base_cell_id)
+                        screen = overworld_screens.get(screen_id)
+                        is_swapped = screen.mixed_state == "swapped"
+
+                        # Calculate the actual cell ID:
+                        # - In Light World (target_world=0): use base_cell_id if normal, base_cell_id|0x40 if swapped
+                        # - In Dark World (target_world=1): use base_cell_id|0x40 if normal, base_cell_id if swapped
+                        if target_world == 0:
+                            # Light World
+                            actual_cell_id = (base_cell_id | 0x40) if is_swapped else base_cell_id
+                        else:
+                            # Dark World
+                            actual_cell_id = base_cell_id if is_swapped else (base_cell_id | 0x40)
+
+                        row.append(actual_cell_id)
+                if row:
+                    arrangement.append(row)
+
+            # Merge the pieces according to the arrangement
+            piece_list = merge_pieces(piece_list, arrangement, world, player, overworld_screens)
+
+    return piece_list
+
+def get_piece_cells(piece: Piece) -> Set[int]:
+    """Get all cell IDs contained in a piece."""
+    cells = set()
+    for row in piece.main.grid:
+        for cell in row:
+            if cell != -1:
+                cells.add(cell)
+    return cells
+
+def validate_cell_id(cell_id: int, context: str) -> None:
+    if not isinstance(cell_id, int) or cell_id < 0x00 or cell_id > 0x7F:
+        raise GenerationException(f"Invalid cell ID 0x{cell_id:02X} in {context}: must be in range 0x00-0x7F")
+
+def validate_world_value(world_value: str, context: str) -> None:
+    allowed_values = {'light', 'dark', 'both'}
+    if world_value not in allowed_values:
+        raise GenerationException(f"Invalid world value '{world_value}' in {context}: must be one of {allowed_values}")
+
+def trim_piece(piece: Piece) -> Piece:
+    """
+    Trim a piece by removing any full rows or columns on the edges that only consist of -1.
+    Adjusts position restrictions when present.
+    """
+    # Find the bounds of non-empty cells
+    min_row, max_row = piece.height, -1
+    min_col, max_col = piece.width, -1
+
+    for i in range(piece.height):
+        for j in range(piece.width):
+            has_content = piece.main.grid[i][j] != -1
+            if piece.parallel:
+                has_content = has_content or piece.parallel.grid[i][j] != -1
+            if has_content:
+                min_row = min(min_row, i)
+                max_row = max(max_row, i)
+                min_col = min(min_col, j)
+                max_col = max(max_col, j)
+
+    if max_row < 0 or (min_row == 0 and max_row == piece.height - 1 and min_col == 0 and max_col == piece.width - 1):
+        return piece
+
+    new_height = max_row - min_row + 1
+    new_width = max_col - min_col + 1
+    piece.width = new_width
+    piece.height = new_height
+
+    # Trim piece
+    piece.main.grid = [row[min_col:max_col + 1] for row in piece.main.grid[min_row:max_row + 1]]
+    piece.main.screens = [row[min_col:max_col + 1] for row in piece.main.screens[min_row:max_row + 1]]
+    piece.main.width = new_width
+    piece.main.height = new_height
+
+    if piece.parallel:
+        piece.parallel.grid = [row[min_col:max_col + 1] for row in piece.parallel.grid[min_row:max_row + 1]]
+        piece.parallel.screens = [row[min_col:max_col + 1] for row in piece.parallel.screens[min_row:max_row + 1]]
+        piece.parallel.width = new_width
+        piece.parallel.height = new_height
+
+    # Adjust restrictions if present
+    if piece.restriction is not None:
+        adjusted_restrictions = []
+        for pos in piece.restriction:
+            old_row = pos // 8
+            old_col = pos % 8
+            new_row = (old_row + min_row) % 8
+            new_col = (old_col + min_col) % 8
+            adjusted_restrictions.append(new_row * 8 + new_col)
+        piece.restriction = adjusted_restrictions
+
+    return piece
+
+def expand_arrangement(arrangement: List[List[int]], pieces: List[Piece]) -> List[List[int]]:
+    """
+    Expand an arrangement to include all cells from the pieces being merged.
+
+    When merging pieces, if a piece contains cells not in the original arrangement,
+    we need to expand the arrangement to include those cells in their correct
+    relative positions.
+
+    Raises an exception if the relative positions of cells within pieces conflict
+    with the requested arrangement (e.g., contradictory merge operations).
+
+    Note: This function uses wrap-aware position checking. Positions that differ
+    by multiples of 8 are considered equivalent (for wrapping support). This allows
+    arrangements like [[0x10, 0x11, 0x12, 0x13, 0x14]] and [[0x14, 0x15, 0x16, 0x17, 0x10]]
+    to be merged into a valid horizontal loop.
+    """
+    # Build a mapping of cell_id -> (row, col) for all cells in all pieces
+    # relative to a common coordinate system
+    cell_positions: Dict[int, Tuple[int, int]] = {}
+    # Track wrapped_position -> cell_id to detect when two different cells would occupy the same position after wrapping
+    wrapped_position_to_cell: Dict[Tuple[int, int], int] = {}
+
+    # First, map cells from the original arrangement
+    for i, row in enumerate(arrangement):
+        for j, cell in enumerate(row):
+            if cell != -1:
+                cell_positions[cell] = (i, j)
+                wrapped_pos = (i % 8, j % 8)
+                wrapped_position_to_cell[wrapped_pos] = cell
+
+    # For each piece, determine where its cells should go
+    for piece in pieces:
+        # Find a cell that's already in our arrangement to anchor this piece
+        anchor_cell = None
+        anchor_piece_pos = None
+        for i, row in enumerate(piece.main.grid):
+            for j, cell in enumerate(row):
+                if cell != -1 and cell in cell_positions:
+                    anchor_cell = cell
+                    anchor_piece_pos = (i, j)
+                    break
+            if anchor_cell is not None:
+                break
+
+        # Calculate offset between piece coordinates and arrangement coordinates
+        anchor_arr_pos = cell_positions[anchor_cell]
+        offset_row = anchor_arr_pos[0] - anchor_piece_pos[0]
+        offset_col = anchor_arr_pos[1] - anchor_piece_pos[1]
+
+        # Add all cells from this piece to cell_positions, checking for conflicts
+        for i, row in enumerate(piece.main.grid):
+            for j, cell in enumerate(row):
+                if cell != -1:
+                    new_pos = (i + offset_row, j + offset_col)
+                    # Normalize position for wrapping (positions differing by 8 are equivalent)
+                    wrapped_pos = (new_pos[0] % 8, new_pos[1] % 8)
+
+                    if cell in cell_positions:
+                        # Cell already has a position - verify it's consistent after wrapping
+                        existing_pos = cell_positions[cell]
+                        existing_wrapped = (existing_pos[0] % 8, existing_pos[1] % 8)
+                        if existing_wrapped != wrapped_pos:
+                            raise GenerationException(
+                                f"Cannot merge: cell 0x{cell:02X} has conflicting positions. "
+                                f"Existing position {existing_pos} (wrapped: {existing_wrapped}) conflicts with "
+                                f"position {new_pos} (wrapped: {wrapped_pos}) from piece containing cells "
+                                f"{[c for row in piece.main.grid for c in row if c != -1]}. "
+                                f"This indicates contradictory merge operations."
+                            )
+                        # Same cell at same wrapped position - this is fine (loop detected)
+                    elif wrapped_pos in wrapped_position_to_cell:
+                        # Position is already occupied by a different cell after wrapping
+                        existing_cell = wrapped_position_to_cell[wrapped_pos]
+                        raise GenerationException(
+                            f"Cannot merge: cell 0x{cell:02X} would be placed at position {new_pos} "
+                            f"(wrapped: {wrapped_pos}), but that position is already occupied by "
+                            f"cell 0x{existing_cell:02X}. This indicates contradictory merge operations."
+                        )
+                    else:
+                        cell_positions[cell] = new_pos
+                        wrapped_position_to_cell[wrapped_pos] = cell
+
+    # Find the bounding box of all cells
+    if not cell_positions:
+        return arrangement
+
+    min_row = min(pos[0] for pos in cell_positions.values())
+    max_row = max(pos[0] for pos in cell_positions.values())
+    min_col = min(pos[1] for pos in cell_positions.values())
+    max_col = max(pos[1] for pos in cell_positions.values())
+
+    # Create new arrangement with normalized coordinates
+    new_height = max_row - min_row + 1
+    new_width = max_col - min_col + 1
+    new_arrangement = [[-1] * new_width for _ in range(new_height)]
+
+    for cell, (row, col) in cell_positions.items():
+        new_arrangement[row - min_row][col - min_col] = cell
+
+    return new_arrangement
+
+def calculate_merged_restrictions(pieces: List[Piece], arrangement: List[List[int]]) -> Optional[List[int]]:
+    """
+    Calculate restrictions for the merged piece.
+
+    For each piece with restrictions, we translate the restrictions to account
+    for the piece's position in the merged arrangement. The final restriction
+    is the intersection of all translated restrictions.
+
+    For example, when merging 4 quadrant pieces into a 2x2:
+    - NW piece (at position 0,0) has restrictions like [0x00, 0x03, ...] - no translation needed
+    - NE piece (at position 0,1) has restrictions like [0x01, 0x04, ...] - translate left by 1
+    - SW piece (at position 1,0) has restrictions like [0x08, 0x0B, ...] - translate up by 1
+    - SE piece (at position 1,1) has restrictions like [0x09, 0x0C, ...] - translate up and left by 1
+
+    After translation, all should give [0x00, 0x03, 0x05, 0x18, 0x1B, 0x1E, 0x30, 0x35]
+    """
+    if not any(p.restriction for p in pieces):
+        return None
+
+    # Build mapping from cell to position in arrangement
+    cell_to_new_pos = {}
+    for i, row in enumerate(arrangement):
+        for j, cell in enumerate(row):
+            if cell != -1:
+                cell_to_new_pos[cell] = (i, j)
+
+    # For each piece, translate its restrictions
+    translated_restrictions = []
+    for piece in pieces:
+        if piece.restriction is None:
+            continue
+
+        # Find the first cell in this piece and its position in the arrangement
+        piece_cell = None
+        piece_old_pos = None
+        for i, row in enumerate(piece.main.grid):
+            for j, cell in enumerate(row):
+                if cell != -1 and cell in cell_to_new_pos:
+                    piece_cell = cell
+                    piece_old_pos = (i, j)
+                    break
+            if piece_cell is not None:
+                break
+
+        if piece_cell is None:
+            continue
+
+        new_pos = cell_to_new_pos[piece_cell]
+        # The offset is how much we need to shift the restriction positions
+        # to get the top-left corner position of the merged piece
+        offset_row = new_pos[0] - piece_old_pos[0]
+        offset_col = new_pos[1] - piece_old_pos[1]
+
+        # Translate restrictions: shift each restriction position back by the offset
+        # to get the position where the merged piece's top-left corner would be
+        translated = []
+        for r in piece.restriction:
+            r_row = r // 8
+            r_col = r % 8
+            new_r_row = (r_row - offset_row) % 8
+            new_r_col = (r_col - offset_col) % 8
+            translated.append(new_r_row * 8 + new_r_col)
+        translated_restrictions.append(set(translated))
+
+    # Intersection of all translated restrictions
+    result = translated_restrictions[0]
+    for tr in translated_restrictions[1:]:
+        result &= tr
+
+    return list(result)
+
+def merge_pieces(piece_list: List[Piece], arrangement: List[List[int]], world: World, player: int, overworld_screens: Dict[int, Screen]) -> List[Piece]:
+    """
+    Merge pieces according to the specified arrangement.
+
+    The arrangement is a 2D list where:
+    - Positive values are cell IDs that must be included
+    - -1 indicates a flexible/empty position
+
+    Example: [[0x00, 0x01], [0x08, 0x09]] merges 4 pieces into a 2x2 piece
+
+    If a piece being merged contains additional cells not in the arrangement,
+    the arrangement is automatically expanded to include all cells from all
+    pieces being merged.
+    """
+    # Collect all cell IDs from arrangement, excluding -1
+    target_cells = set()
+    for row in arrangement:
+        for cell in row:
+            if cell != -1:
+                target_cells.add(cell)
+
+    # Find all pieces containing any of the target cells
+    pieces_to_merge = []
+    remaining_pieces = []
+
+    for piece in piece_list:
+        piece_cells = get_piece_cells(piece)
+        if piece_cells & target_cells:
+            pieces_to_merge.append(piece)
+        else:
+            remaining_pieces.append(piece)
+
+    # Validate: all target cells must be found
+    found_cells = set()
+    for piece in pieces_to_merge:
+        piece_cells = get_piece_cells(piece)
+        # Check for overlapping cells between pieces (indicates contradictory merges)
+        overlap = found_cells & piece_cells
+        if overlap:
+            raise GenerationException(f"Cannot merge: cells {overlap} appear in multiple pieces (contradictory merge operations)")
+        found_cells.update(piece_cells)
+
+    if not target_cells.issubset(found_cells):
+        missing = target_cells - found_cells
+        raise GenerationException(f"Cannot merge: cells {missing} not found in any piece")
+
+    # If pieces contain additional cells not in the arrangement, expand the arrangement
+    if found_cells != target_cells:
+        arrangement = expand_arrangement(arrangement, pieces_to_merge)
+
+    # Create the merged piece
+    merged_piece = create_piece(world, player, arrangement, overworld_screens)
+
+    # Calculate merged restrictions
+    merged_piece.restriction = calculate_merged_restrictions(pieces_to_merge, arrangement)
+
+    remaining_pieces.append(merged_piece)
+    return remaining_pieces
+
+def validate_and_wrap_pieces(piece_list: List[Piece], options: LayoutGeneratorOptions, world: World, player: int, overworld_screens: Dict[int, Screen]) -> List[Piece]:
+    """
+    Validate that all pieces are at most 8x8 in size.
+    If a piece is too large, attempt to reduce its size using wrapping.
+    """
+    result_pieces = []
+
+    for piece in piece_list:
+        if piece.width <= 8 and piece.height <= 8:
+            result_pieces.append(piece)
+            continue
+
+        # Piece is too large, need to apply wrapping
+        if piece.width > 8 and not options.horizontal_wrap:
+            raise GenerationException(
+                f"Piece has width {piece.width} which exceeds 8, but horizontal wrapping is not enabled. "
+                f"Cells: {[c for row in piece.main.grid for c in row if c != -1]}"
+            )
+
+        if piece.height > 8 and not options.vertical_wrap:
+            raise GenerationException(
+                f"Piece has height {piece.height} which exceeds 8, but vertical wrapping is not enabled. "
+                f"Cells: {[c for row in piece.main.grid for c in row if c != -1]}"
+            )
+
+        # Calculate wrapped dimensions
+        wrapped_width = min(piece.width, 8)
+        wrapped_height = min(piece.height, 8)
+
+        # Create new wrapped grid, checking for conflicts
+        wrapped_grid = [[-1] * wrapped_width for _ in range(wrapped_height)]
+
+        for i in range(piece.height):
+            wrapped_i = i % 8
+            for j in range(piece.width):
+                wrapped_j = j % 8
+                cell = piece.main.grid[i][j]
+
+                if cell != -1:
+                    existing = wrapped_grid[wrapped_i][wrapped_j]
+                    if existing != -1 and existing != cell:
+                        raise GenerationException(
+                            f"Wrapping conflict: cell 0x{cell:02X} at position ({i}, {j}) "
+                            f"would wrap to ({wrapped_i}, {wrapped_j}) which already contains cell 0x{existing:02X}. "
+                            f"Piece cells: {[c for row in piece.main.grid for c in row if c != -1]}"
+                        )
+                    wrapped_grid[wrapped_i][wrapped_j] = cell
+
+        # Create the wrapped piece
+        wrapped_piece = create_piece(world, player, wrapped_grid, overworld_screens)
+        wrapped_piece.restriction = piece.restriction
+        result_pieces.append(wrapped_piece)
+
+    return result_pieces
 
 def add_piece_data(world: World, player: int, piece: Piece, large_screen_quadrant_info: Dict[int, Dict], large_screen_quadrant_info_land: Dict[int, Dict], large_screen_quadrant_info_water: Dict[int, Dict]) -> None:
     """
     Add computed data to piece
-    Calls add_piece_grid_info for main and parallel pieces
+    Calls add_world_piece_edge_info for main and parallel pieces
     """
     num_pieces = 2 if piece.parallel else 1
     for p in range(num_pieces):
         world_piece = piece.main if p == 0 else piece.parallel
-        world_piece.width = len(world_piece.screens[0])
-        world_piece.height = len(world_piece.screens)
-        add_piece_grid_info(world, player, world_piece, large_screen_quadrant_info, large_screen_quadrant_info_land, large_screen_quadrant_info_water)
-
-    piece.width = piece.main.width
-    piece.height = piece.main.height
+        add_world_piece_edge_info(world, player, world_piece, large_screen_quadrant_info, large_screen_quadrant_info_land, large_screen_quadrant_info_water)
 
     # Calculate edge_sides and max_edges_per_side: 0 for multi-cell pieces
     if piece.width == 1 and piece.height == 1:
@@ -572,12 +1139,11 @@ def add_piece_data(world: World, player: int, piece: Piece, large_screen_quadran
         piece.edge_sides = 0
         piece.max_edges_per_side = 0
 
-def add_piece_grid_info(world: World, player: int, piece: WorldPiece, large_screen_quadrant_info: Dict[int, Dict], large_screen_quadrant_info_land: Dict[int, Dict], large_screen_quadrant_info_water: Dict[int, Dict]) -> None:
+def add_world_piece_edge_info(world: World, player: int, piece: WorldPiece, large_screen_quadrant_info: Dict[int, Dict], large_screen_quadrant_info_land: Dict[int, Dict], large_screen_quadrant_info_water: Dict[int, Dict]) -> None:
     """
     Populate piece edge information
     Initializes 8x8 edge arrays and extracts edges from screens
     """
-    piece.grid = [[] for _ in range(8)]
     piece.north_edges = [[] for _ in range(8)]
     piece.south_edges = [[] for _ in range(8)]
     piece.west_edges = [[] for _ in range(8)]
@@ -591,7 +1157,6 @@ def add_piece_grid_info(world: World, player: int, piece: WorldPiece, large_scre
 
     for k in range(piece.height):
         for l in range(piece.width):
-            piece.grid[k].append(piece.screens[k][l].id if piece.screens[k][l] else -1)
             piece.north_edges[k].append([])
             piece.south_edges[k].append([])
             piece.west_edges[k].append([])
@@ -603,38 +1168,41 @@ def add_piece_grid_info(world: World, player: int, piece: WorldPiece, large_scre
                 piece.west_edges_water[k].append([])
                 piece.east_edges_water[k].append([])
 
-    done_large = set()
     for k in range(piece.height):
         for l in range(piece.width):
             screen = piece.screens[k][l]
             if not screen:
                 continue
 
+            cell_id = piece.grid[k][l]
+
             if screen.big:
-                if screen.id not in done_large:
-                    done_large.add(screen.id)
-                    quadrant_info = (large_screen_quadrant_info[screen.id] if world.owTerrain[player]
-                                   else large_screen_quadrant_info_land[screen.id])
+                # Determine quadrant by subtracting cell ID from screen ID
+                # 0x00 = NW (top-left), 0x01 = NE (top-right), 0x08 = SW (bottom-left), 0x09 = SE (bottom-right)
+                quadrant_offset = cell_id - screen.id
+                if quadrant_offset == 0x00:
+                    quadrant_name = "NW"
+                elif quadrant_offset == 0x01:
+                    quadrant_name = "NE"
+                elif quadrant_offset == 0x08:
+                    quadrant_name = "SW"
+                else:
+                    quadrant_name = "SE"
 
-                    piece.north_edges[k][l] = [e for e in quadrant_info["NW"][Direction.North] if not e.dest]
-                    piece.north_edges[k][l + 1] = [e for e in quadrant_info["NE"][Direction.North] if not e.dest]
-                    piece.south_edges[k + 1][l] = [e for e in quadrant_info["SW"][Direction.South] if not e.dest]
-                    piece.south_edges[k + 1][l + 1] = [e for e in quadrant_info["SE"][Direction.South] if not e.dest]
-                    piece.west_edges[k][l] = [e for e in quadrant_info["NW"][Direction.West] if not e.dest]
-                    piece.west_edges[k + 1][l] = [e for e in quadrant_info["SW"][Direction.West] if not e.dest]
-                    piece.east_edges[k][l + 1] = [e for e in quadrant_info["NE"][Direction.East] if not e.dest]
-                    piece.east_edges[k + 1][l + 1] = [e for e in quadrant_info["SE"][Direction.East] if not e.dest]
+                quadrant_info = (large_screen_quadrant_info[screen.id] if world.owTerrain[player]
+                               else large_screen_quadrant_info_land[screen.id])
 
-                    if not world.owTerrain[player]:
-                        quadrant_info = large_screen_quadrant_info_water[screen.id]
-                        piece.north_edges_water[k][l] = [e for e in quadrant_info["NW"][Direction.North] if not e.dest]
-                        piece.north_edges_water[k][l + 1] = [e for e in quadrant_info["NE"][Direction.North] if not e.dest]
-                        piece.south_edges_water[k + 1][l] = [e for e in quadrant_info["SW"][Direction.South] if not e.dest]
-                        piece.south_edges_water[k + 1][l + 1] = [e for e in quadrant_info["SE"][Direction.South] if not e.dest]
-                        piece.west_edges_water[k][l] = [e for e in quadrant_info["NW"][Direction.West] if not e.dest]
-                        piece.west_edges_water[k + 1][l] = [e for e in quadrant_info["SW"][Direction.West] if not e.dest]
-                        piece.east_edges_water[k][l + 1] = [e for e in quadrant_info["NE"][Direction.East] if not e.dest]
-                        piece.east_edges_water[k + 1][l + 1] = [e for e in quadrant_info["SE"][Direction.East] if not e.dest]
+                piece.north_edges[k][l] = [e for e in quadrant_info[quadrant_name][Direction.North] if not e.dest]
+                piece.south_edges[k][l] = [e for e in quadrant_info[quadrant_name][Direction.South] if not e.dest]
+                piece.west_edges[k][l] = [e for e in quadrant_info[quadrant_name][Direction.West] if not e.dest]
+                piece.east_edges[k][l] = [e for e in quadrant_info[quadrant_name][Direction.East] if not e.dest]
+
+                if not world.owTerrain[player]:
+                    quadrant_info_water = large_screen_quadrant_info_water[screen.id]
+                    piece.north_edges_water[k][l] = [e for e in quadrant_info_water[quadrant_name][Direction.North] if not e.dest]
+                    piece.south_edges_water[k][l] = [e for e in quadrant_info_water[quadrant_name][Direction.South] if not e.dest]
+                    piece.west_edges_water[k][l] = [e for e in quadrant_info_water[quadrant_name][Direction.West] if not e.dest]
+                    piece.east_edges_water[k][l] = [e for e in quadrant_info_water[quadrant_name][Direction.East] if not e.dest]
             else:
                 for edge in sorted(screen.edges.values(), key=lambda e: e.midpoint):
                     if not edge.dest:
@@ -650,6 +1218,19 @@ def add_piece_grid_info(world: World, player: int, piece: WorldPiece, large_scre
                         elif edge.direction == Direction.East:
                             target = piece.east_edges[k][l] if world.owTerrain[player] or edge.terrain != Terrain.Water else piece.east_edges_water[k][l]
                             target.append(edge)
+
+def get_screen_id_from_cell(cell_id: int) -> int:
+    """Get the base screen ID from a cell ID.
+
+    For large screens, returns the top-left corner ID.
+    For small screens, returns the cell ID unchanged.
+    """
+    base_id = cell_id & 0xBF # Remove world bit if present
+    # Check if this is a quadrant of a large screen
+    for large_id in large_screen_ids:
+        if base_id in [large_id, large_id + 0x01, large_id + 0x08, large_id + 0x09]:
+            return large_id | (cell_id & 0x40) # Preserve world bit
+    return cell_id
 
 # ============================================================================
 # PLACEMENT ALGORITHM
@@ -709,8 +1290,6 @@ def random_place_piece(
         piece_main = piece.main
         piece_parallel = piece.parallel
         wrld = piece.world
-        invalid_wrap_row = piece.invalid_wrap_row
-        invalid_wrap_column = piece.invalid_wrap_column
         restriction = piece.restriction
         piece_width = piece.width
         piece_height = piece.height
@@ -721,13 +1300,8 @@ def random_place_piece(
 
         i_range = height if vertical_wrap else height - piece_height + 1
         for i in range(i_range):
-            if i >= height - piece_height + 1 and (height - i) in invalid_wrap_row:
-                continue
-
             j_range = width if horizontal_wrap else width - piece_width + 1
             for j in range(j_range):
-                if j >= width - piece_width + 1 and (width - j) in invalid_wrap_column:
-                    continue
                 if restriction and (i * 8 + j) not in restriction:
                     continue
 
@@ -961,11 +1535,147 @@ def random_place_piece(
 
     return PiecePlacementResult(success=True, piece=piece, score_major=used_score_major, score_minor=used_score_minor)
 
+def place_single_restriction_pieces(
+    world: World,
+    player: int,
+    grid_info: GridInfo,
+    options: LayoutGeneratorOptions,
+    pieces: List[Piece]
+) -> Tuple[List[Piece], int]:
+    """
+    Place pieces that have a restriction list with only a single element.
+    These pieces are forced into a single position, so we can place them deterministically.
+
+    This function iteratively:
+    1. Validates restriction lists against current grid state and grid bounds
+    2. Places pieces with single-element restrictions
+    3. Repeats until no more pieces can be placed
+
+    Returns a tuple of (remaining_pieces, count_of_placed_pieces).
+    """
+    use_crossed_groups = (world.owCrossed[player] == 'polar' and world.owMixed[player]) or world.owCrossed[player] == 'grouped'
+
+    remaining_pieces = list(pieces)
+    placed_count = 0
+
+    placed_this_iteration = True
+    while placed_this_iteration:
+        placed_this_iteration = False
+
+        # Validate and update restriction lists for all remaining pieces
+        for piece in remaining_pieces:
+            if piece.restriction is None:
+                continue
+
+            valid_positions = []
+            for position in piece.restriction:
+                row = position // 8
+                column = position % 8
+                wrld = piece.world
+                piece_crossed_groups = piece.crossed_groups
+
+                # Check if this position is valid
+                is_valid = True
+
+                # Check if piece would go outside grid bounds when wrapping is disabled
+                if not options.horizontal_wrap and column + piece.width > 8:
+                    is_valid = False
+                if not options.vertical_wrap and row + piece.height > 8:
+                    is_valid = False
+
+                # Check for overlap with already placed pieces
+                if is_valid:
+                    for k in range(piece.height):
+                        if not is_valid:
+                            break
+                        row_idx = (row + k) % 8
+                        for l in range(piece.width):
+                            col_idx = (column + l) % 8
+
+                            # Check main world overlap
+                            if grid_info.grid[wrld][row_idx][col_idx] != -1 and piece.main.screens[k][l]:
+                                is_valid = False
+                                break
+
+                            # Check parallel world overlap
+                            if piece.parallel and grid_info.grid[1 - wrld][row_idx][col_idx] != -1 and piece.parallel.screens[k][l]:
+                                is_valid = False
+                                break
+
+                            # Check crossed groups
+                            if use_crossed_groups and grid_info.crossed_groups[row_idx][col_idx] != -1 and grid_info.crossed_groups[row_idx][col_idx] != piece_crossed_groups[k][l]:
+                                is_valid = False
+                                break
+
+                if is_valid:
+                    valid_positions.append(position)
+
+            # Update the restriction list
+            if len(valid_positions) == 0:
+                raise GenerationException(f"No valid positions remaining for piece with restriction list (original: {piece.restriction})")
+
+            piece.restriction = valid_positions
+
+        # Place pieces with single-element restrictions
+        new_remaining_pieces = []
+        for piece in remaining_pieces:
+            # Check if this piece has exactly one restriction position
+            if piece.restriction is not None and len(piece.restriction) == 1:
+                position = piece.restriction[0]
+                row = position // 8
+                column = position % 8
+                wrld = piece.world
+                piece_crossed_groups = piece.crossed_groups
+
+                # Place the piece on the grid
+                for k in range(piece.height):
+                    row_idx = (row + k) % 8
+                    for l in range(piece.width):
+                        col_idx = (column + l) % 8
+                        num_pieces = 2 if piece.parallel else 1
+                        for p in range(num_pieces):
+                            world_piece = piece.main if p == 0 else piece.parallel
+                            w = wrld if p == 0 else 1 - wrld
+
+                            grid_info.grid[w][row_idx][col_idx] = world_piece.grid[k][l]
+                            grid_info.north_edges_grid[w][row_idx][col_idx] = world_piece.north_edges[k][l]
+                            grid_info.south_edges_grid[w][row_idx][col_idx] = world_piece.south_edges[k][l]
+                            grid_info.west_edges_grid[w][row_idx][col_idx] = world_piece.west_edges[k][l]
+                            grid_info.east_edges_grid[w][row_idx][col_idx] = world_piece.east_edges[k][l]
+
+                            if not world.owTerrain[player]:
+                                grid_info.north_edges_water_grid[w][row_idx][col_idx] = world_piece.north_edges_water[k][l]
+                                grid_info.south_edges_water_grid[w][row_idx][col_idx] = world_piece.south_edges_water[k][l]
+                                grid_info.west_edges_water_grid[w][row_idx][col_idx] = world_piece.west_edges_water[k][l]
+                                grid_info.east_edges_water_grid[w][row_idx][col_idx] = world_piece.east_edges_water[k][l]
+
+                        if use_crossed_groups:
+                            grid_info.crossed_groups[row_idx][col_idx] = piece_crossed_groups[k][l]
+
+                placed_count += 1
+                placed_this_iteration = True
+            else:
+                new_remaining_pieces.append(piece)
+
+        remaining_pieces = new_remaining_pieces
+
+    return remaining_pieces, placed_count
+
 def get_random_layout(world: World, player: int, connected_edges_cache: List[str], pieces_to_place: List[Piece], options: LayoutGeneratorOptions, prio_edges: List[str], overworld_screens: Dict[int, Screen]) -> LayoutGeneratorResult:
+    skip_validate_layout = world.accessibility[player] == 'none'
+    score_mult_separate_areas = options.score_mult_separate_areas
+    apply_start_loc_penalty = options.score_mult_start_loc_distance > 0 and world.shuffle[player] == 'vanilla' and (world.is_dark_chapel_start(player) or world.doorShuffle[player] == 'vanilla' or world.intensity[player] < 3 or world.mode[player] == 'standard')
     total_score = 0
     best_score = -1000000
     worst_score = 1000000
     best_grid_info = None
+    separate_areas = None
+    start_loc_distance = None
+
+    # Pre-place pieces with single-element restriction lists
+    base_grid_info = create_empty_grid_info(0.0)
+    remaining_pieces, preplaced_count = place_single_restriction_pieces(world, player, base_grid_info, options, pieces_to_place)
+    logger = logging.getLogger('')
 
     successes = 0
     failures = 0
@@ -973,9 +1683,10 @@ def get_random_layout(world: World, player: int, connected_edges_cache: List[str
     while run < options.min_runs or (run * successes < options.target_runs_times_successes and run < options.max_runs):
         run += 1
         connected_edges = connected_edges_cache.copy()
-        piece_list = pieces_to_place.copy()
+        piece_list = remaining_pieces.copy()
 
-        grid_info = create_empty_grid_info(random.random())
+        # Copy the pre-placed grid with a new random seed for edge connections
+        grid_info = copy_grid_info(base_grid_info, random.random())
         for piece in piece_list:
             piece.delay = 0
 
@@ -1002,7 +1713,7 @@ def get_random_layout(world: World, player: int, connected_edges_cache: List[str
                 for i in range(1, min(options.multi_choice, len(piece_list))):
                     pieces.append(piece_list[i])
 
-            result = random_place_piece(world, player, grid_info, options, pieces, len(placed_pieces) < options.first_ignore_bonus_points)
+            result = random_place_piece(world, player, grid_info, options, pieces, len(placed_pieces) + preplaced_count < options.first_ignore_bonus_points)
 
             if not result.success:
                 failures += 1
@@ -1018,21 +1729,23 @@ def get_random_layout(world: World, player: int, connected_edges_cache: List[str
             # Successfully placed all pieces
             if options.check_reachability:
                 disabled_count = connect_edges_for_screen_layout(world, player, grid_info, options, connected_edges, prio_edges, overworld_screens, False)
-                valid_layout = validate_layout(world, player)
-                # Clean up connected entrances and edges
-                for edge_name in connected_edges:
-                    if edge_name not in connected_edges_cache:
-                        entrance = world.get_entrance(edge_name, player)
-                        entrance.connected_region.entrances.remove(entrance)
-                        entrance.connected_region = None
-                        edge = world.get_owedge(edge_name, player)
-                        edge.dest = None
+                valid_layout = skip_validate_layout or validate_layout(world, player)
                 if not valid_layout:
+                    clean_up_connected_edges(world, player, connected_edges_cache, connected_edges)
                     failures += 1
                     continue
-                logging.getLogger('').debug("Found valid layout with " + str(disabled_count)+ " disabled edges")
-                successes += 1
                 score = -disabled_count
+                if score_mult_separate_areas > 0:
+                    separate_areas = len(get_separate_ow_areas(world, player))
+                    score -= score_mult_separate_areas * separate_areas
+                if apply_start_loc_penalty:
+                    start_loc_distance = get_start_loc_distance(world, player, grid_info.grid, options)
+                    min_dist = options.start_loc_min_distance
+                    if start_loc_distance < min_dist:
+                        score -= options.score_mult_start_loc_distance * (min_dist - start_loc_distance)
+                logger.debug("Found valid layout with " + str(disabled_count) + " disabled edges and " + str(separate_areas) + " separate areas and distance " + str(start_loc_distance) + " between start locations")
+                clean_up_connected_edges(world, player, connected_edges_cache, connected_edges)
+                successes += 1
             else:
                 successes += 1
                 score = major_score
@@ -1060,6 +1773,40 @@ def get_random_layout(world: World, player: int, connected_edges_cache: List[str
         successes=successes,
         failures=failures
     )
+
+def clean_up_connected_edges(world: World, player: int, connected_edges_cache: List[str], connected_edges: List[str]) -> None:
+    for edge_name in connected_edges:
+        if edge_name not in connected_edges_cache:
+            entrance = world.get_entrance(edge_name, player)
+            entrance.connected_region.entrances.remove(entrance)
+            entrance.connected_region = None
+            edge = world.get_owedge(edge_name, player)
+            edge.dest = None
+
+def find_cell_position(grid: List[List[List[int]]], cell_id: int) -> Optional[Tuple[int, int, int]]:
+    """Find the position of a cell in the grid, returning (world, row, col) or None if not found."""
+    for w in range(2):
+        for row in range(8):
+            for col in range(8):
+                if grid[w][row][col] == cell_id:
+                    return (w, row, col)
+    return None
+
+def get_start_loc_distance(world: World, player: int, grid: List[List[List[int]]], options: LayoutGeneratorOptions) -> float:
+    """Computes the starting location Manhattan distance on the grid, treating the world as a third dimension (switching world adds 1 to the distance)."""
+    pos_lh = find_cell_position(grid, 0x6C if world.is_bombshop_start(player) else 0x2C)
+    pos_sanc = find_cell_position(grid, 0x53 if world.is_dark_chapel_start(player) else 0x13)
+    if pos_lh is None or pos_sanc is None:
+        raise GenerationException("Could not find starting location cells, something went wrong with grid layout generation!")
+    w1, row1, col1 = pos_lh
+    w2, row2, col2 = pos_sanc
+    row_diff = abs(row1 - row2)
+    col_diff = abs(col1 - col2)
+    if options.horizontal_wrap:
+        col_diff = min(col_diff, 8 - col_diff)
+    if options.vertical_wrap:
+        row_diff = min(row_diff, 8 - row_diff)
+    return row_diff + col_diff + abs(w1 - w2)
 
 def get_prioritized_edges(world: World, player: int) -> List[str]:
     prio_edges = []
@@ -1238,7 +1985,7 @@ def connect_edge_sets(world: World, player: int, edge_set_1: List[OWEdge], edge_
                 for k in range(len(edge_set_2)):
                     connect_two_way(world, edges_to_connect[k].name, edge_set_2[k].name, player, connected_edges, final_placement)
             else:
-                raise Exception("There should never be multiple edges with high priority in an edge set")
+                raise GenerationException("There should never be multiple edges with high priority in an edge set")
 
 # ============================================================================
 # GRID FORMATTING
@@ -1316,11 +2063,22 @@ def format_grid_for_spoiler(grid: List[List[int]]) -> str:
     return "\n".join(lines)
 
 def is_same_large_screen(grid: List[List[int]], row1: int, col1: int, row2: int, col2: int) -> bool:
-    id1 = grid[row1 % 8][col1 % 8]
-    id2 = grid[row2 % 8][col2 % 8]
+    """Checks if two adjacent cells belong to the same large screen with correct quadrant positions."""
+    id1, id2 = grid[row1 % 8][col1 % 8], grid[row2 % 8][col2 % 8]
     if id1 == -1 or id2 == -1:
         return False
-    return id1 == id2 and id1 in large_screen_ids
+    base1, base2 = get_screen_id_from_cell(id1), get_screen_id_from_cell(id2)
+    if base1 != base2 or base1 not in large_screen_ids:
+        return False
+    # Get quadrant offsets (0x00=NW, 0x01=NE, 0x08=SW, 0x09=SE)
+    q1, q2 = (id1 & 0xBF) - (base1 & 0xBF), (id2 & 0xBF) - (base2 & 0xBF)
+    # Swap if cell2 is before cell1
+    if col1 > col2 or row1 > row2:
+        q1, q2 = q2, q1
+    # Check valid adjacency: east (0x00->0x01, 0x08->0x09) or south (0x00->0x08, 0x01->0x09)
+    if col1 != col2:
+        return (q1, q2) in [(0x00, 0x01), (0x08, 0x09)]
+    return (q1, q2) in [(0x00, 0x08), (0x01, 0x09)]
 
 # ============================================================================
 # MAIN EXECUTION
@@ -1332,12 +2090,14 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
 
     horizontal_wrap = False
     vertical_wrap = False
+    split_large_screens = False
     if world.customizer:
         grid_options = world.customizer.get_owgrid()
         if grid_options and player in grid_options:
             grid_options = grid_options[player]
             horizontal_wrap = 'wrap_horizontal' in grid_options and grid_options['wrap_horizontal'] == True
             vertical_wrap = 'wrap_vertical' in grid_options and grid_options['wrap_vertical'] == True
+            split_large_screens = 'split_large_screens' in grid_options and grid_options['split_large_screens'] == True
 
     first_ignore_bonus = 2
     if not world.owParallel[player]:
@@ -1347,7 +2107,7 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
     options = LayoutGeneratorOptions(
         horizontal_wrap=horizontal_wrap,
         vertical_wrap=vertical_wrap,
-        large_screen_pool=False,
+        split_large_screens=split_large_screens,
         distortion_chance=0.0,
         random_order=6 if world.owParallel[player] else 12,
         multi_choice=1,
@@ -1369,7 +2129,10 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
         sort_by_piece_size=True,
         min_runs=100,
         max_runs=10000,
-        target_runs_times_successes=5000
+        target_runs_times_successes=5000,
+        score_mult_separate_areas=4,
+        start_loc_min_distance=4,
+        score_mult_start_loc_distance=3
     )
 
     overworld_screens = initialize_screens(world, player)
@@ -1385,19 +2148,9 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
         connect_edges_for_screen_layout(world, player, result.grid_info, options, connected_edges, prio_edges, overworld_screens, True)
         grid = result.grid_info.grid
 
-        # Make new grid containing cell IDs for the overworld map
-        map_grid = copy.deepcopy(grid)
-        for w in range(2):
-            for i in range(8):
-                for j in range(8):
-                    screen_id = map_grid[w][i][j]
-                    if screen_id in large_screen_ids and map_grid[w][i][(j + 1) % 8] == screen_id and map_grid[w][(i + 1) % 8][j] == screen_id and map_grid[w][(i + 1) % 8][(j + 1) % 8] == screen_id:
-                        map_grid[w][i][(j + 1) % 8] = screen_id + 0x01
-                        map_grid[w][(i + 1) % 8][j] = screen_id + 0x08
-                        map_grid[w][(i + 1) % 8][(j + 1) % 8] = screen_id + 0x09
-        world.owgrid[player] = map_grid
-        world.owlayoutmap_lw[player] = {id & 0xBF: i for i, id in enumerate(sum(map_grid[0], []))}
-        world.owlayoutmap_dw[player] = {id & 0xBF: i for i, id in enumerate(sum(map_grid[1], []))}
+        world.owgrid[player] = grid
+        world.owlayoutmap_lw[player] = {id & 0xBF: i for i, id in enumerate(sum(grid[0], []))}
+        world.owlayoutmap_dw[player] = {id & 0xBF: i for i, id in enumerate(sum(grid[1], []))}
 
         world.spoiler.set_map('layout_grid_lw', format_grid_for_spoiler(grid[0]), grid[0], player)
         if not world.owParallel[player]:
@@ -1411,6 +2164,7 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
         logger.debug(f"  Successes: {result.successes}")
         logger.debug(f"  Failures: {result.failures}")
         logger.debug(f"  Generation time: {elapsed_time:.3f}s")
+        logger.debug(f"  Layouts per second: {(result.successes+result.failures)/elapsed_time:.3f}")
 
         if DRAW_IMAGE:
             logger.debug("Creating layout visualization...")
@@ -1420,4 +2174,4 @@ def generate_random_grid_layout(world: World, player: int, connected_edges: List
             except Exception as e:
                 logger.warning(f"Warning: Could not create visualization: {e}")
     else:
-        raise Exception(f"Layout generation FAILED after {result.failures} attempts and {elapsed_time:.3f} seconds")
+        raise GenerationException(f"Layout generation FAILED after {result.failures} attempts and {elapsed_time:.3f} seconds")

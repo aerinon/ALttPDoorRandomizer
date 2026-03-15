@@ -277,9 +277,44 @@ someDescription:
 
 `grid` contains additional options that only have an effect when `ow_layout` is set to `grid`.
 
+#### fixed_arrangements
+
+Use this to dictate the relative positioning between multiple screens (or quadrants of large screens). Screens and quadrants are addressed by their OW Slot ID (independently of their world), ranging from 0x00 to 0x3F. An `arrangement` is given as a list of rows with equal lenghts. If you do not want to specify a full rectangle of screens, you can use `.` as a placeholder to allow the generator to place any screen there. The `world` property can be set to `light`, `dark` or `both` (default value) and determines for which worlds the arrangement applies.
+
+This example forces Death Mountain to stay connected the same as vanilla in both worlds:
+```
+fixed_arrangements:
+  - arrangement:
+      - 0x03 0x04 0x05 0x06 0x07
+      - 0x0B 0x0C 0x0D 0x0E    .
+    world: both
+```
+
+#### restricted_positions
+
+Use this to restrict cells to a specified set of possible positions. The `world` property can be set to `light`, `dark` or `both` (default value) and determines for which worlds the restriction applies.
+
+This example forces the Sanctuary and Link's House screens in both worlds to get placed in corners of the grid:
+```
+restricted_positions:
+  - cells:
+      - 0x13
+      - 0x2C
+    positions:
+      - 0x00
+      - 0x07
+      - 0x38
+      - 0x3F
+    world: both
+```
+
 #### wrap_horizontal / wrap_vertical
 
 Set these to `true` to allow for overworld edge transitions to wrap from one side of a world to the opposite side. With `wrap_horizontal`, there can be east transitions on the eastern edge of the world map that send the player to the western edge of the world. With `wrap_vertical`, there can be south transitions on the southern edge of the world map that send the player to the northern edge of the world.
+
+#### split_large_screens
+
+When set to `true`, the four quadrants of each large screen are placed on the grid independently of each other.
 
 ### ow-crossed
 

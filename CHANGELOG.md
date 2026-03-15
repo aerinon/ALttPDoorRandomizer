@@ -1,5 +1,17 @@
 # Changelog
 
+# 0.7.0.3
+- Further updates and new yamls for Grid OW Shuffle
+- Further customizer options for Grid OW Shuffle like defining screens that should stay together
+- Fix buffer sword slash when dashing into water
+- Fixed bug with MSU-1 GT2 track not falling back to GT track
+- Fix for Kiki unfollowing after certain entrance transition conditions
+- Fixed bug/oversight with vanilla_fill and prize_shuffle
+- Changed big bomb shop vendor text to be follower agnostic
+- Updated crosskeys winners (thanks clearmouse)
+- Fixed bug with potential locale determination (thanks Esme)
+- \~Merged in DR v1.5.6~
+
 # 0.7.0.2
 - Fixed money error for bombbag/take-anys
 - Fixed palette issue for map check/flute menu
