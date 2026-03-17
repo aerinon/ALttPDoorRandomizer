@@ -1,6 +1,11 @@
 meta:
 settings:
   triforce_gfx: Egg
+sprite_sheets:
+  77:
+    3: 0x50
+  79:
+    3: 0x52
 enemies:
   Overworld:
     0x00:
