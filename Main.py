@@ -157,19 +157,13 @@ def main(args, seed=None, fish=None):
         create_dungeons(world, player)
         world.damage_table[player] = DamageTable()
         world.data_tables[player] = init_data_tables(world, player)
-        place_bosses(world, player)
-        randomize_enemies(world, player)
-        adjust_locations(world, player)
-
-    for player in range(1, world.players + 1):
         if world.customizer and world.customizer.get_custom_rooms(player):
             init_custom_rooms(world, player, world.customizer.get_custom_rooms(player))
         if world.customizer and world.customizer.get_custom_sprites(player):
             init_custom_sprites(world, player, world.customizer.get_custom_sprites(player))
-
-    for player in range(1, world.players + 1):
-        if world.customizer and world.customizer.get_custom_rooms(player):
-            init_custom_rooms(world, player, world.customizer.get_custom_rooms(player))
+        place_bosses(world, player)
+        randomize_enemies(world, player)
+        adjust_locations(world, player)
 
     if any(world.potshuffle.values()):
         logger.info(world.fish.translate("cli", "cli", "shuffling.pots"))
