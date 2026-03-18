@@ -2594,6 +2594,8 @@ overlord_names = {
     0x19: 'ArmosCoordinator', 0x1A: 'BombTrap',
 }
 
+overlord_translation = {b: a for a, b in overlord_names.items()}
+
 sprite_translation = {
     'RollerVerticalDown': EnemySprite.RollerVerticalDown,
     'RollerVerticalUp': EnemySprite.RollerVerticalUp,
@@ -2703,4 +2705,9 @@ sprite_translation = {
     'CustomSprite': EnemySprite.CustomSprite,
 
     'CorrectPullSwitch': EnemySprite.CorrectPullSwitch,
+    'LaserEyeLeft': EnemySprite.LaserEyeLeft,
+    'LaserEyeRight': EnemySprite.LaserEyeRight,
+    'UnclePriest': EnemySprite.UnclePriest,
+    'RupeePull': EnemySprite.RupeePull,
+    'CrystalSwitch': EnemySprite.CrystalSwitch,
 }

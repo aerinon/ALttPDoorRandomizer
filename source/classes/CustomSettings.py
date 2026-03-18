@@ -178,7 +178,7 @@ class CustomSettings(object):
                     args.compassshuffle[p] = dungeon_item_map[args.compassshuffle[p]]
                 if args.bigkeyshuffle[p] in dungeon_item_map:
                     args.bigkeyshuffle[p] = dungeon_item_map[args.bigkeyshuffle[p]]
-                
+
                 if get_setting(settings['keysanity'], args.keysanity):
                     if args.bigkeyshuffle[p] in ['none', 0]:
                         args.bigkeyshuffle[p] = 'wild'
@@ -309,6 +309,19 @@ class CustomSettings(object):
             return self.file_source['doors']
         return None
 
+    def get_rooms(self):
+        if 'rooms' in self.file_source:
+            return self.file_source['rooms']
+        return None
+
+    def get_custom_rooms(self, player):
+        # these are optionally player specific for now
+        if self.get_rooms():
+            if player in self.get_rooms():
+                return self.get_rooms()[player]
+            else:
+                return self.get_rooms()
+
     def get_bosses(self):
         if 'bosses' in self.file_source:
             return self.file_source['bosses']
@@ -329,11 +342,16 @@ class CustomSettings(object):
             return self.file_source['drops']
         return None
 
+    def get_sprite_sheets(self):
+        if 'sprite_sheets' in self.file_source:
+            return self.file_source['sprite_sheets']
+        return None
+
     def get_enemies(self):
         if 'enemies' in self.file_source:
             return self.file_source['enemies']
         return None
-    
+
     def get_goals(self):
         if 'goals' in self.file_source:
             return self.file_source['goals']

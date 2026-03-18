@@ -148,6 +148,7 @@ class ObjectType:
     """Maps object names to their type IDs."""
 
     # Subtype 1 Objects (0x00-0xF7)
+    CeilingH = 0x00  # ↔
     WallTopNorth = 0x01  # ↔
     WallTopS = 0x02  # Wall (top, south) ↔
     WallBottomN = 0x03  # Wall (bottom, north) ↔
@@ -170,7 +171,7 @@ class ObjectType:
     DiagonalWallBSeBottom = 0x1C  # Diagonal wall B ◢ (bottom)
     PlatformStairs = 0x21  # Platform stairs ↔
     RailH = 0x22  # ↔
-    PitEdgeE = 0x27  # Pit edge ┏━┓ E (north) ↔
+    PitEdgeNorthFull = 0x27  # Pit edge ┏━┓ E (north) ↔
     PitEdgeSouthFull = 0x28  # Pit edge ┗━┛ (south) ↔
     PitEdgeSouthLine = 0x29  # Pit edge ━━━ (south) ↔
     PitEdgeNorthLine = 0x2A  # Pit edge ━━━ (north) ↔
@@ -208,7 +209,7 @@ class ObjectType:
     PipePathH = 0x53  # Pipe path ↔
     WallTorchesN = 0x55  # Wall torches (north) ↔
     WallTorchesS = 0x56  # Wall torches (south) ↔
-    ThickRail = 0x5D  # Thick rail ↔
+    ThickRailH = 0x5D  # Thick rail ↔
     BlocksH = 0x5E  # Blocks ↔
     LongRailH = 0x5F  # Long rail ↔
     Ceiling = 0x60  # ↕
@@ -247,7 +248,7 @@ class ObjectType:
     CannonHoleW = 0x85  # Cannon hole (west) ↕
     CannonHoleE = 0x86  # Cannon hole (east) ↕
     TallTorchesV = 0x87  # Tall torches ↕
-    ThickRail = 0x88  # ↕
+    ThickRailV = 0x88  # ↕
     BlocksV = 0x89  # Blocks ↕
     LongRailV = 0x8A  # Long rail ↕
     JumpLedgeW = 0x8B  # Jump ledge (west) ↕
@@ -260,6 +261,9 @@ class ObjectType:
     BluePegsV = 0x92  # Blue pegs ↕
     OrangePegsV = 0x93  # Orange pegs ↕
     InvisibleFloorV = 0x94  # Invisible floor ↕
+    CeilingMediumH = 0x9C  # Ceiling (medium) ↔
+    CeilingSmallV = 0x9D  # Ceiling (small) ↕
+    CeilingTinyH = 0x9E  # Ceiling (tiny) ↔
     DiagonalCeiling = 0xA0  # Diagonal ceiling A ◤
     DiagonalCeilingASw = 0xA1  # ◣
     DiagonalCeilingANe = 0xA2  # ◥
@@ -267,6 +271,8 @@ class ObjectType:
     Pit = 0xA4  # ⇲
     DiagonalLayer2MaskANw = 0xA5  # Diagonal layer 2 mask A ◤
     DiagonalLayer2MaskANe = 0xA7  # Diagonal layer 2 mask A ◥
+    DiagonalLayer2CeilingASw = 0xA8  # Diagonal layer 2 ceiling A ◣
+    DiagonalLayer2CeilingASe = 0xAA  # Diagonal layer 2 ceiling A ◢
     DiagonalLayer2MaskBNw = 0xA9  # Diagonal layer 2 mask B ◤
     DiagonalLayer2MaskBSw = 0xAA  # Diagonal layer 2 mask B ◣
     DiagonalLayer2MaskBNe = 0xAB  # Diagonal layer 2 mask B ◥
@@ -318,13 +324,13 @@ class ObjectType:
     Floor10 = 0xE8  # Floor 10 ⇲
 
     # Subtype 2 Objects (0x100+)
-    CornerTopConcaveNw2 = 0x100  # ▛
-    CornerTopConcaveSe = 0x101  # ▙
-    CornerTopConcaveNe = 0x102  # ▜
-    CornerTopConcaveNw = 0x103  # ▟
-    CornerTopConvexSw = 0x104  # ▟
+    CornerTopConcaveNW = 0x100  # ▛
+    CornerTopConcaveSE = 0x101  # ▙
+    CornerTopConcaveNE = 0x102  # ▜
+    CornerTopConcaveSW = 0x103  # ▟
+    CornerTopConvexSW = 0x104  # ▟
     CornerTopConvexNE = 0x105  # Corner (top, convex) ▜
-    CornerTopConvexSe = 0x106  # ▙
+    CornerTopConvexSE = 0x106  # ▙
     CornerTopConvexNW = 0x107  # Corner (top, convex) ▛
     CornerBottomConcaveNW = 0x108  # Corner (bottom, concave) ▛
     CornerBottomConcaveSW = 0x109  # Corner (bottom, concave) ▙
@@ -365,6 +371,7 @@ class ObjectType:
     IntraroomStairsNorthSwim = 0x133  # Intraroom stairs north (swim layer)
     Block = 0x134  # Block
     WaterLadder = 0x135  # Water ladder (north)
+    Torch = 0x136  # Torch
     DamFloodgate = 0x137  # Dam floodgate
     InterroomSpiralStairsUp = 0x138
     InterroomSpiralStairsDown = 0x139
