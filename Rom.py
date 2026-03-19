@@ -1960,9 +1960,22 @@ def write_limited_data(rom, world, player):
         rom.write_bytes(snes_to_pc(0x23812C), credits_ptr_table)
         rom.write_bytes(snes_to_pc(0x23844C), credits_line_data)
 
-        # chest gfx
+        # chest palette
         write_int16s(rom, snes_to_pc(0x00AFEE), [0x0DE1, 0x0DF1, 0x4DE1, 0x4DF1, 0x0DE2, 0x0DF2, 0x4DE2, 0x4DF2])  # palette
-        world.data_tables[player].gfx_data[0x0F].file_replacement = os.path.join("data", "limited", "2604", "gfx", "0f_basket.3bppc")
+        
+        # gfx replacements
+        gfx_dir = os.path.join("data", "limited", "2604", "gfx")
+        for filename in os.listdir(local_path(gfx_dir)):
+            if ".3bpp" in filename.lower():
+                gfx_index = os.path.splitext(filename)[0].split("_", 1)[0]
+                try:
+                    gfx_key = int(gfx_index, 16)
+                except ValueError:
+                    continue
+                if gfx_key in world.data_tables[player].gfx_data:
+                    gfx_data = world.data_tables[player].gfx_data[gfx_key]
+                    if gfx_data.stored_uncompressed == filename.lower().endswith(".3bpp"):
+                        gfx_data.file_replacement = os.path.join(gfx_dir, filename)
 
 
 def write_gfx_data(rom, world, player):
