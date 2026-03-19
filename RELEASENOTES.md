@@ -9,3 +9,4 @@
   * Inverted: Dark Sanctuary exit is now connected with vanilla entrances. (Thanks homemadebeer!)
   * Spoiler Log: Drops, prize packs, and in-game text added to the debug spoiler. (Thanks clearmouse!)
   * Text: Updated crosskeys tournament winners. (Thanks clearmouse!)
+  * Logic: Fixed Old Man Cave Dropdown leading to Old Man Cave (East) instead of Old Man Cave (West).

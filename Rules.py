@@ -1348,7 +1348,7 @@ def add_conditional_lamps(world, player):
         'Sewers Dark Aquabats': {'sewer': True, 'entrances': ['Sewers Dark Aquabats N', 'Sewers Dark Aquabats ES'], 'locations': []},
         'Sewers Key Rat': {'sewer': True, 'entrances': ['Sewers Key Rat S', 'Sewers Key Rat NE'], 'locations': ['Hyrule Castle - Key Rat Key Drop']},
         'Old Man Cave (East)': {'sewer': False, 'entrances': ['Old Man Cave Exit (East)', 'Old Man Cave W']},
-        'Old Man Cave (West)': {'sewer': False, 'entrances': ['Old Man Cave E']},
+        'Old Man Cave (West)': {'sewer': False, 'entrances': ['Old Man Cave E', 'Old Man Cave Dropdown']},
         'Old Man House Back': {'sewer': False, 'entrances': ['Old Man House Back to Front', 'Old Man House Exit (Top)']},
         'Death Mountain Return Cave (left)': {'sewer': False, 'entrances': ['Death Mountain Return Cave E', 'Death Mountain Return Cave Exit (West)']},
         'Death Mountain Return Cave (right)': {'sewer': False, 'entrances': ['Death Mountain Return Cave Exit (East)', 'Death Mountain Return Cave W']},
