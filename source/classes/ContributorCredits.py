@@ -521,9 +521,9 @@ def build_default_credits(world, player) -> ContributorCredits:
     gen.add_blank_line()
     gen.add_blank_line()
     
-    gen.add_small_credits("WEBSITE & LOGO", SmallColor.YELLOW)
+    gen.add_small_credits("WEBSITE AND LOGO", SmallColor.YELLOW)
     gen.add_blank_line()
-    gen.add_big_credits("HIIMCODY1             PLEASURE")
+    gen.add_big_credits("HIIMCODY1           PLEASURE")
     gen.add_blank_line()
     gen.add_blank_line()
     

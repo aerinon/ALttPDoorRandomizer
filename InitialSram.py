@@ -56,6 +56,10 @@ class InitialSram:
     def pre_set_overworld_flag(self, owid, bitmask):
         self._or_value(OVERWORLD_DATA+owid, bitmask)
 
+    def pre_set_underworld_flag(self, roomid, bitmask):
+        self._or_value(ROOM_DATA+(roomid*2), bitmask&0xFF)
+        self._or_value(ROOM_DATA+(roomid*2)+1, bitmask>>8)
+
     def pre_open_tr_bomb_doors(self):
         self._or_value(ROOM_DATA+0x47, 0x80)
         self._or_value(ROOM_DATA+0x01AB, 0x80)

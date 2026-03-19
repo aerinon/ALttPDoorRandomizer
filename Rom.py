@@ -1955,6 +1955,8 @@ def write_limited_data(rom, world, player):
 
         write_int16(rom, snes_to_pc(0x30EF14), 0x0198) # lost woods message
 
+        rom.initial_sram.pre_set_underworld_flag(0x10A, 0x8000) # pre-open aginah cave
+
         # Write credits data
         credits_ptr_table, credits_line_data = get_credits_data(world, player)
         rom.write_bytes(snes_to_pc(0x23812C), credits_ptr_table)
@@ -2824,6 +2826,10 @@ def write_strings(rom, world, player, team):
                             + "{PAUSE7}\nThis is your chance to be a hero.\n{PAUSE3}\n{CHANGEPIC}\n"
                             + "You must get the 7 crystals to beat Ganon.\n{PAUSE9}\n{CHANGEPIC}", False)
 
+    if world.limited_run[player] == '2604':
+        from source.limited.LimitedRunCoordinator import TavernMan_2604_Texts
+        tt['kakariko_tavern_fisherman'] = random.choice(TavernMan_2604_Texts)
+    
     # Apply custom text overrides from customizer
     if world.customizer:
         custom_text = world.customizer.get_text()

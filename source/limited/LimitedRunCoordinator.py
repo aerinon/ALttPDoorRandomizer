@@ -44,3 +44,12 @@ def adjust_world_for_limited_runs(world, args):
                         else:
                             world.customizer.file_source[section_key] = section_value
                 world.customizer.adjust_args(args)
+
+TavernMan_2604_Texts = [
+    "If you had the opportunity to win a free hot dog, would you relish it?",
+    "I heard the hot dog asked the bartender on a date. I guess he finally mustard up the courage.",
+    "They say the hot dog couldn't impregnate the bun, too many condiments.",
+    "A Buddhist came in here and ordered a hot dog. He said, 'Make me one with everything.'",
+    "I haven't been to the hot dog factory. You could say I haven't sausage a place.",
+    "Have you ordered a hot dog from here? They're not the wurst.",
+]
