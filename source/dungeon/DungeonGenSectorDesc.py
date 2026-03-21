@@ -453,7 +453,8 @@ class SimpleExplorationState:
             connect_region = explorable_door.door.entrance.connected_region
             self.crystal = explorable_door.crystal
             self.crystal_forced = explorable_door.flag
-            if connect_region is not None and not self.visited(connect_region):
+            # going to exclude outdoors from this exploration
+            if connect_region is not None and not self.visited(connect_region) and connect_region.type == RegionType.Dungeon:
                 self.visit_region(connect_region)
 
     def next_avail_door(self):
