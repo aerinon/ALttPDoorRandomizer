@@ -1964,6 +1964,7 @@ def write_limited_data(rom, world, player):
 
         # chest palette
         write_int16s(rom, snes_to_pc(0x00AFEE), [0x0DE1, 0x0DF1, 0x4DE1, 0x4DF1, 0x0DE2, 0x0DF2, 0x4DE2, 0x4DF2])  # palette
+        rom.write_bytes(snes_to_pc(0x07B55F), [0xEA, 0xEA]) # open chests from any direction
         
         # gfx replacements
         gfx_dir = os.path.join("data", "limited", "2604", "gfx")
