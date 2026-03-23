@@ -48,7 +48,7 @@ JAP10HASH = '03a63945398191337e896e5771f77173'
 RANDOMIZERBASEHASH = 'f1d838125b574639a74cf3de462da7d0'
 
 limited_run_hashes = {
-    '2604' : 'e47ed513291de1854c0131aece8822ce',
+    '2604' : '3e14af4a88ee4c8e93e69895ed39b347',
 }
 
 class JsonRom(object):

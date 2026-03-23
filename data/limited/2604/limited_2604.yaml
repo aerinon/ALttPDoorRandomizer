@@ -3,7 +3,7 @@ settings:
   triforce_gfx: Egg
 sprite_sheets:
   77:
-    3: 0x50
+    3: 0x50 # not currently necessary to keep, keeping for the example
 enemies:
   Overworld:
     0x00:
@@ -1735,9 +1735,17 @@ text:
     'death_mountain_bully_with_pearl': "I heard codemann8 was the one who hid the eggs.\nRIP Easter Bunny."
     'death_mountain_bullied_no_pearl': "\n       egg"
     'death_mountain_bullied_with_pearl': "\n       egg"
+    'thief_desert_rupee_cave': "Te a oescesrva hmevswe h atv sfed ra es htstebz rudtw."
+    'thief_ice_rupee_cave': "hysysm ert eeltesle hntecpiei re,o tlatta' h uzaon on"
     'blacksmiths_shop_before_saving': "It's a bad time to lose my partner. I'm sure there are tons of frogs out there this time of year."
     'witch_bring_mushroom': "I'm brewing up a magical egg dye and I could use a mushroom."
-    'blinds_hut_dude': "Never gonna give you up, never gonna let you down, never gonna run around and desert you."
+    'blinds_hut_dude': "They say baskets are more accessible than traditional chests."
+    'kakariko_saharalasa_wife': "Oh, you don't yet possess the sword of legend!"
+    'kakariko_saharalasa_wife_sword_story': "A wicked root has taken hold of this world. A dark gardener tends to it.\nAre you up to the task?\n  ≥ Yes\n    No\n{CHOICE}"
+    'kakariko_saharalasa_wife_closing': "It'll take more than a gardener to defeat a gardener."
+    'kakariko_saharalasa_after_master_sword': "Ah! You bear the Master Sword!\nNow you may cut down the evil at its root."
+    'kakariko_flophouse_man_no_flippers': "Never gonna give you up, never gonna let you down, never gonna run around and desert you."
+    'kakariko_flophouse_man': "Never gonna give you up, never gonna let you down, never gonna run around and desert you."
     'kakariko_saharalasa_grandson_next': "Did you see that Song Instrument Shuffle is on AVIANART as a post-gen option?"
     'houlihan_room': "2026 Easter Festive:\nOverworld: codemann8\nDungeons: Aerinon\nMagazine: codemann8\nWebsite: HiimCody1\nGFX: Fish_waffle64"
 telepathic_tiles:
@@ -1749,8 +1757,6 @@ telepathic_tiles:
 
 # todo: list
   # Polish
-  # Mire Portal - Mirror Portal sprite
-  # Mire Portal - Clear after use
   # SokoSwamp: Duplicate block on final push
   # Room polish - decorations
   # Showcase for devs
