@@ -207,7 +207,14 @@
     "choices":[
       "original",
       "big",
-      "all",
+      "all"
+    ]
+  },
+  "door_type_distribution": {
+    "choices": [
+      "vanilla",
+      "pooled",
+      "crossed",
       "chaos"
     ]
   },

@@ -586,3 +586,11 @@ dungeon_portals = {
 }
 
 special_bk_regions = ['Hyrule Dungeon Cellblock', "Thieves Blind's Cell"]
+
+
+def uniform_distribute(pool, capacities, total):
+    """Distribute `total` items among pool dungeons uniformly by candidate slot count."""
+    slots = [d for d in sorted(pool) for _ in range(capacities[d])]
+    random.shuffle(slots)
+    chosen = slots[:total]
+    return {d: chosen.count(d) for d in pool}
