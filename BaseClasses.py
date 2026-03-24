@@ -157,6 +157,7 @@ class World(object):
             set_player_attr('decoupledoors', False)
             set_player_attr('door_self_loops', False)
             set_player_attr('door_type_mode', 'original')
+            set_player_attr('door_type_distribution', 'pooled')
             set_player_attr('trap_door_mode', 'optional')
             set_player_attr('key_logic_algorithm', 'partial')
             set_player_attr('aga_randomness', True)
@@ -2635,6 +2636,7 @@ class Spoiler(object):
                          'dungeon_shuffle_algorithm': self.world.dungeon_shuffle_algorithm,
                          'intensity': self.world.intensity,
                          'door_type_mode': self.world.door_type_mode,
+                         'door_type_distribution': self.world.door_type_distribution,
                          'trap_door_mode': self.world.trap_door_mode,
                          'key_logic': self.world.key_logic_algorithm,
                          'decoupledoors': self.world.decoupledoors,
@@ -3178,7 +3180,7 @@ counter_mode = {"default": 0, "off": 1, "on": 2, "pickup": 3}
 access_mode = {"items": 0, "locations": 1, "none": 2}
 
 # byte 7: B?MC DDEE (big, ?, maps, compass, door_type, enemies)
-door_type_mode = {'original': 0, 'big': 1, 'all': 2, 'chaos': 3}
+door_type_mode = {'original': 0, 'big': 1, 'all': 2}  # 3 (chaos) was migrated to door_type_distribution
 enemy_mode = {"none": 0, "shuffled": 1, "chaos": 2, "random": 2, "legacy": 3}
 
 # byte 8: HHHD DPBS (enemy_health, enemy_dmg, potshuffle, bomb logic, shuffle links)
@@ -3205,9 +3207,10 @@ overworld_map_mode = {'default': 0, 'compass': 1, 'map': 2}
 trap_door_mode = {'vanilla': 0, 'optional': 1, 'boss': 2, 'oneway': 3}
 key_logic_algo = {'dangerous': 0, 'partial': 1, 'strict': 2, 'experimental': 3}
 
-# byte 13: SSDD M??? (skullwoods, linked_drops, mirrorscroll, ??? = 3 free bytes)
+# byte 13: SSDD MDD? (skullwoods, linked_drops, mirrorscroll, door_type_distribution, ? 1 free bit)
 skullwoods_mode = {'original': 0, 'restricted': 1, 'loose': 2, 'followlinked': 3}
 linked_drops_mode = {'unset': 0, 'linked': 1, 'independent': 2}
+door_type_distribution_mode = {'vanilla': 0, 'pooled': 1, 'crossed': 2, 'chaos': 3}
 
 # todo: dungeon shuffle algorithm: 4-5 options?
 
@@ -3262,7 +3265,7 @@ class Settings(object):
              | trap_door_mode[w.trap_door_mode[p]] << 3 | key_logic_algo[w.key_logic_algorithm[p]]),
 
             (skullwoods_mode[w.skullwoods[p]] << 6 | linked_drops_mode[w.linked_drops[p]] << 4
-             | (0x8 if w.mirrorscroll[p] else 0)),
+             | (0x8 if w.mirrorscroll[p] else 0) | door_type_distribution_mode[w.door_type_distribution[p]] << 1),
         ])
         return base64.b64encode(code, "+-".encode()).decode()
 
@@ -3314,7 +3317,7 @@ class Settings(object):
         # args.keyshuffle[p] = True if settings[7] & 0x40 else False
         args.mapshuffle[p] = True if settings[7] & 0x20 else False
         args.compassshuffle[p] = True if settings[7] & 0x10 else False
-        args.door_type_mode[p] = r(door_type_mode)[(settings[7] & 0xc) >> 2]
+        args.door_type_mode[p] = r(door_type_mode).get((settings[7] & 0xc) >> 2, 'all')  # 3 (chaos) migrated to door_type_distribution
         args.shuffleenemies[p] = r(enemy_mode)[settings[7] & 0x3]
 
         args.enemy_health[p] = r(e_health)[(settings[8] & 0xE0) >> 5]
@@ -3341,6 +3344,7 @@ class Settings(object):
             args.skullwoods[p] = r(skullwoods_mode)[(settings[13] & 0xc0) >> 6]
             args.linked_drops[p] = r(linked_drops_mode)[(settings[13] & 0x30) >> 4]
             args.mirrorscroll[p] = True if settings[13] & 0x8 else False
+            args.door_type_distribution[p] = r(door_type_distribution_mode)[(settings[13] & 0x6) >> 1]
 
 
 class KeyRuleType(FastEnum):

@@ -256,8 +256,14 @@
       "Door Types to Shuffle (default: %(default)s)",
       "original: Shuffles key doors, bombable, and dashable doors",
       "big:      Adds big key doors",
-      "all:      Adds traps doors (and any future supported door types)",
-      "chaos:    Increases the number of door types in all dungeon pools"
+      "all:      Adds traps doors (and any future supported door types)"
+    ],
+    "door_type_distribution" : [
+      "Door Type Distribution (default: %(default)s)",
+      "vanilla: Each dungeon keeps its own vanilla door type counts",
+      "pooled:  Door types are redistributed within each dungeon pool",
+      "crossed: Door types are redistributed across all dungeons",
+      "chaos:   Door types are redistributed across all dungeons with randomized totals"
     ],
     "trap_door_mode" : [
       "Trap Door Removal (default: %(default)s)",

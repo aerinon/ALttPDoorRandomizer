@@ -121,6 +121,7 @@ def main(args, seed=None, fish=None):
     world.dungeon_shuffle_algorithm = args.dungeon_shuffle_algorithm.copy()
     world.intensity = {player: random.randint(1, 3) if args.intensity[player] == 'random' else int(args.intensity[player]) for player in range(1, world.players + 1)}
     world.door_type_mode = args.door_type_mode.copy()
+    world.door_type_distribution = args.door_type_distribution.copy()
     world.trap_door_mode = args.trap_door_mode.copy()
     world.key_logic_algorithm = args.key_logic_algorithm.copy()
     world.decoupledoors = args.decoupledoors.copy()
@@ -534,6 +535,7 @@ def copy_world(world):
     ret.decoupledoors = world.decoupledoors.copy()
     ret.door_self_loops = world.door_self_loops.copy()
     ret.door_type_mode = world.door_type_mode.copy()
+    ret.door_type_distribution = world.door_type_distribution.copy()
     ret.trap_door_mode = world.trap_door_mode.copy()
     ret.key_logic_algorithm = world.key_logic_algorithm.copy()
     ret.aga_randomness = world.aga_randomness.copy()

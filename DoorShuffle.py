@@ -19,6 +19,7 @@ from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
 from source.dungeon.DungeonStitcherV2 import create_dungeon
 from source.dungeon.NewKeyLogic import analyze_dungeon as analyze_dungeon_new
 from source.dungeon.SmallKeyDoorShuffle import shuffle_small_key_doors as shuffle_small_key_doors_v2
+from source.dungeon.DungeonGenerationCommon import uniform_distribute
 
 from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths, drop_entrances
 from DungeonGenerator import create_dungeon_builders, split_dungeon_builder, simple_dungeon_builder, default_dungeon_entrances
@@ -1863,7 +1864,7 @@ class DoorTypePool:
         # todo: custom pools?
         for dungeon in pool:
             counts = door_type_counts[dungeon]
-            if world.door_type_mode[player] == 'chaos':
+            if world.door_type_distribution[player] == 'chaos':
                 counts = self.chaos_shuffle(counts)
             self.smalls += counts[0]
             self.bigs += counts[1]
@@ -1941,14 +1942,20 @@ def shuffle_trap_doors(door_type_pools, paths, start_regions_map, all_custom, wo
                 ttl += len(builder.candidates.trap)
             if ttl == 0 and all(len(custom_trap_doors[dungeon]) == 0 for dungeon in pool):
                 continue
-            for dungeon in pool:
-                builder = world.dungeon_layouts[player][dungeon]
-                proportion = len(builder.candidates.trap)
-                calc = 0 if ttl == 0 else int(round(proportion * door_type_pool.traps/ttl))
-                suggested = min(proportion, calc)
-                remaining -= suggested
-                suggestion_map[dungeon] = suggested
-                flex_map[dungeon] = (proportion - suggested) if suggested < proportion else 0
+            if world.door_type_distribution[player] in ('crossed', 'chaos') and len(pool) > 1:
+                caps = {d: len(world.dungeon_layouts[player][d].candidates.trap) for d in pool}
+                suggestion_map = uniform_distribute(pool, caps, door_type_pool.traps)
+                flex_map = {d: caps[d] - suggestion_map[d] for d in pool}
+                remaining = 0
+            else:
+                for dungeon in sorted(pool):
+                    builder = world.dungeon_layouts[player][dungeon]
+                    proportion = len(builder.candidates.trap)
+                    calc = 0 if ttl == 0 else int(round(proportion * door_type_pool.traps/ttl))
+                    suggested = min(proportion, calc)
+                    remaining -= suggested
+                    suggestion_map[dungeon] = suggested
+                    flex_map[dungeon] = proportion - suggested
             for dungeon in pool:
                 builder = world.dungeon_layouts[player][dungeon]
                 valid_traps, trap_number = find_valid_trap_combination(builder, suggestion_map[dungeon],
@@ -2008,14 +2015,20 @@ def shuffle_big_key_doors(door_type_pools, used_doors, start_regions_map, all_cu
         if ttl == 0:
             continue
         remaining = max(0, remaining)
-        for dungeon in pool:
-            builder = world.dungeon_layouts[player][dungeon]
-            proportion = len(builder.candidates.big)
-            calc = int(round(proportion * remaining/ttl))
-            suggested = min(proportion, calc)
-            remaining -= suggested
-            suggestion_map[dungeon] = suggested
-            flex_map[dungeon] = (proportion - suggested) if suggested < proportion else 0
+        if world.door_type_distribution[player] in ('crossed', 'chaos') and len(pool) > 1:
+            caps = {d: len(world.dungeon_layouts[player][d].candidates.big) for d in pool}
+            suggestion_map = uniform_distribute(pool, caps, door_type_pool.bigs)
+            flex_map = {d: caps[d] - suggestion_map[d] for d in pool}
+            remaining = 0
+        else:
+            for dungeon in sorted(pool):
+                builder = world.dungeon_layouts[player][dungeon]
+                proportion = len(builder.candidates.big)
+                calc = int(round(proportion * remaining/ttl))
+                suggested = min(proportion, calc)
+                remaining -= suggested
+                suggestion_map[dungeon] = suggested
+                flex_map[dungeon] = proportion - suggested
         for dungeon in pool:
             builder = world.dungeon_layouts[player][dungeon]
             valid_doors, bk_number = find_valid_bk_combination(builder, suggestion_map[dungeon],
@@ -2172,16 +2185,24 @@ def shuffle_bomb_dash_doors(door_type_pools, used_doors, start_regions_map, all_
             ttl += len(builder.candidates.bomb_dash)
         if ttl == 0:
             continue
-        for dungeon in pool:
-            builder = world.dungeon_layouts[player][dungeon]
-            proportion = len(builder.candidates.bomb_dash)
-            calc = int(round(proportion * door_type_pool.bombable/ttl))
-            suggested_bomb = min(proportion, calc)
-            remaining_bomb -= suggested_bomb
-            calc = int(round(proportion * door_type_pool.dashable/ttl))
-            suggested_dash = min(proportion, calc)
-            remaining_dash -= suggested_dash
-            suggestion_map[dungeon] = suggested_bomb, suggested_dash
+        if world.door_type_distribution[player] in ('crossed', 'chaos') and len(pool) > 1:
+            caps = {d: len(world.dungeon_layouts[player][d].candidates.bomb_dash) for d in pool}
+            bomb_map = uniform_distribute(pool, caps, remaining_bomb)
+            dash_map = uniform_distribute(pool, caps, remaining_dash)
+            suggestion_map = {d: (bomb_map[d], dash_map[d]) for d in pool}
+            remaining_bomb = 0
+            remaining_dash = 0
+        else:
+            for dungeon in sorted(pool):
+                builder = world.dungeon_layouts[player][dungeon]
+                proportion = len(builder.candidates.bomb_dash)
+                calc = int(round(proportion * door_type_pool.bombable/ttl))
+                suggested_bomb = min(proportion, calc)
+                calc = int(round(proportion * door_type_pool.dashable/ttl))
+                suggested_dash = min(proportion, calc)
+                remaining_bomb -= suggested_bomb
+                remaining_dash -= suggested_dash
+                suggestion_map[dungeon] = suggested_bomb, suggested_dash
         for dungeon in pool:
             builder = world.dungeon_layouts[player][dungeon]
             bomb_doors, dash_doors, bd_number = find_valid_bd_combination(builder, suggestion_map[dungeon], world, player)
@@ -2258,7 +2279,7 @@ def find_current_key_doors(builder):
 
 
 def find_trappable_candidates(builder, world, player):
-    if world.door_type_mode[player] not in ['original', 'big']:  # all, chaos
+    if world.door_type_mode[player] not in ['original', 'big']:  # all
         r_set = builder.master_sector.region_set()
         filtered_doors = [ext.door for r in r_set for ext in world.get_region(r, player).exits
                           if ext.door and ext.door.type in [DoorType.Interior, DoorType.Normal]]
@@ -2545,7 +2566,7 @@ def is_trap_door_blocked(door):
 
 
 def find_big_key_candidates(builder, start_regions, used, world, player):
-    if world.door_type_mode[player] != 'original':  # big, all, chaos
+    if world.door_type_mode[player] != 'original':  # big, all
         # traverse dungeon and find candidates
         candidates = []
         checked_doors = set()
@@ -4869,7 +4890,17 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
         # todo: do it based on which dungeon are in this pool
 
         dungeon_builders.update(create_dungeon_builders_prototype(pool, sector_pool, portal_pool, world, player))
-        door_type_pools.append((pool, DoorTypePool(pool, world, player)))
+        door_type_pools.append(pool)
+
+    dist = world.door_type_distribution[player]
+    if dist == 'vanilla':
+        door_type_pools = [([d], DoorTypePool([d], world, player)) for pool in door_type_pools for d in pool]
+    elif dist in ('crossed', 'chaos'):
+        all_dungeons = [d for pool in door_type_pools for d in pool]
+        door_type_pools = [(all_dungeons, DoorTypePool(all_dungeons, world, player))]
+    else:
+        door_type_pools = [(pool, DoorTypePool(pool, world, player)) for pool in door_type_pools]
+
     update_forced_keys(dungeon_builders, entrances_map, world, player)
 
     main_dungeon_generation_prototype(dungeon_builders, flags, world, player)

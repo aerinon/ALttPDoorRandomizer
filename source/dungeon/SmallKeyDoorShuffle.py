@@ -19,7 +19,8 @@ from Utils import ncr, kth_combination
 
 from source.dungeon.NewKeyLogic import analyze_dungeon, calc_extras
 from source.dungeon.KeyPlacement import create_exhaustive_placement_rules, important_location
-from source.dungeon.DungeonGenerationCommon import special_bk_regions
+from source.dungeon.DungeonGenerationCommon import special_bk_regions, uniform_distribute
+
 
 def shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_custom, world, player):
     max_computation = 35  # this is the main limit for the number of key doors
@@ -47,22 +48,36 @@ def shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_
             total_keys -= builder.key_drop_cnt
             ttl += builder.key_doors_num
         remaining = max(0, remaining)
-        for dungeon in pool:
-            builder = world.dungeon_layouts[player][dungeon]
-            if ttl == 0:
-                calculated = 0
-            else:
-                calculated = int(round(builder.key_doors_num*total_keys/ttl))
-            max_keys = max(0, builder.location_cnt - calc_used_dungeon_items(builder, world, player))
-            cand_len = max(0, len(builder.candidates.small) - builder.key_drop_cnt)
-            limit = min(max_keys, cand_len, max_computation)
-            suggested = min(calculated, limit)
-            key_door_num = min(suggested + builder.key_drop_cnt, max_computation)
-            combo_size = ncr(len(builder.candidates.small), key_door_num)
-            suggestion_map[dungeon] = builder.key_doors_num = key_door_num
-            remaining -= key_door_num + builder.key_drop_cnt
-            builder.combo_size = combo_size
-            flex_map[dungeon] = (limit - key_door_num) if key_door_num < limit else 0
+        if world.door_type_distribution[player] in ('crossed', 'chaos') and len(pool) > 1:
+            caps = {}
+            for dungeon in pool:
+                builder = world.dungeon_layouts[player][dungeon]
+                max_keys = max(0, builder.location_cnt - calc_used_dungeon_items(builder, world, player))
+                cand_len = max(0, len(builder.candidates.small) - builder.key_drop_cnt)
+                caps[dungeon] = min(max_keys, cand_len, max_computation)
+            suggested_map = uniform_distribute(pool, caps, total_keys)
+            for dungeon in pool:
+                builder = world.dungeon_layouts[player][dungeon]
+                key_door_num = min(suggested_map[dungeon] + builder.key_drop_cnt, max_computation)
+                combo_size = ncr(len(builder.candidates.small), key_door_num)
+                suggestion_map[dungeon] = builder.key_doors_num = key_door_num
+                remaining -= key_door_num + builder.key_drop_cnt
+                builder.combo_size = combo_size
+                flex_map[dungeon] = (caps[dungeon] - key_door_num) if key_door_num < caps[dungeon] else 0
+        else:
+            for dungeon in sorted(pool):
+                builder = world.dungeon_layouts[player][dungeon]
+                max_keys = max(0, builder.location_cnt - calc_used_dungeon_items(builder, world, player))
+                cand_len = max(0, len(builder.candidates.small) - builder.key_drop_cnt)
+                limit = min(max_keys, cand_len, max_computation)
+                calculated = 0 if ttl == 0 else int(round(builder.key_doors_num*total_keys/ttl))
+                suggested = min(calculated, limit)
+                key_door_num = min(suggested + builder.key_drop_cnt, max_computation)
+                combo_size = ncr(len(builder.candidates.small), key_door_num)
+                suggestion_map[dungeon] = builder.key_doors_num = key_door_num
+                remaining -= key_door_num + builder.key_drop_cnt
+                builder.combo_size = combo_size
+                flex_map[dungeon] = (limit - key_door_num) if key_door_num < limit else 0
         for dungeon in pool:
             builder = world.dungeon_layouts[player][dungeon]
             if total_adjustable:

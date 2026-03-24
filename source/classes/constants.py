@@ -108,6 +108,7 @@ SETTINGSTOPROCESS = {
       "dungeon_shuffle_algorithm": "dungeon_shuffle_algorithm",
       "dungeonintensity": "intensity",
       "door_type_mode": "door_type_mode",
+      "door_type_distribution": "door_type_distribution",
       "trap_door_mode": "trap_door_mode",
       "smaller_dungeon_gen": "smaller_dungeon_gen",
       "decoupledoors": "decoupledoors",

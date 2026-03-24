@@ -53,7 +53,20 @@
       "options": [
         "original",
         "big",
-        "all",
+        "all"
+      ],
+      "config": {
+        "width": 45,
+        "padx": [20,0]
+      }
+    },
+    "door_type_distribution": {
+      "type": "selectbox",
+      "default": "pooled",
+      "options": [
+        "vanilla",
+        "pooled",
+        "crossed",
         "chaos"
       ],
       "config": {

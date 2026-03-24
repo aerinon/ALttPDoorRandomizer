@@ -84,7 +84,11 @@
     "randomizer.dungeon.door_type_mode.original": "Small Key Doors, Bomb Doors, Dash Doors",
     "randomizer.dungeon.door_type_mode.big": "Adds Big Key Doors",
     "randomizer.dungeon.door_type_mode.all": "Adds Trap Doors",
-    "randomizer.dungeon.door_type_mode.chaos": "Increases all door types",
+    "randomizer.dungeon.door_type_distribution": "Door Type Distribution",
+    "randomizer.dungeon.door_type_distribution.vanilla": "Vanilla (Per-Dungeon Counts)",
+    "randomizer.dungeon.door_type_distribution.pooled": "Pooled (Redistribute Within Pool)",
+    "randomizer.dungeon.door_type_distribution.crossed": "Crossed (Redistribute Across All Dungeons)",
+    "randomizer.dungeon.door_type_distribution.chaos": "Chaos (Redistribute With Randomized Totals)",
 
     "randomizer.dungeon.trap_door_mode": "Trap Door Removal",
     "randomizer.dungeon.trap_door_mode.vanilla": "No Removal",
