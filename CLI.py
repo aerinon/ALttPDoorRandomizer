@@ -142,7 +142,7 @@ def parse_cli(argv, no_defaults=False):
                          'heartbeep', 'remote_items', 'shopsanity', 'dropshuffle', 'pottery', 'keydropshuffle',
                          'mixed_travel', 'standardize_palettes', 'code', 'reduce_flashing', 'shuffle_sfx',
                          'msu_resume', 'collection_rate', 'colorizepots', 'decoupledoors', 'door_type_mode',
-                         'trap_door_mode', 'key_logic_algorithm', 'door_self_loops', 'any_enemy_logic', 'aga_randomness',
+                         'door_type_distribution', 'trap_door_mode', 'key_logic_algorithm', 'door_self_loops', 'any_enemy_logic', 'aga_randomness',
                          'money_balance']:
                 value = getattr(defaults, name) if getattr(playerargs, name) is None else getattr(playerargs, name)
                 if player == 1:
@@ -221,6 +221,7 @@ def parse_settings():
         'dungeon_shuffle_algorithm': 'classic',
         'intensity': 2,
         'door_type_mode': 'original',
+        'door_type_distribution': 'pooled',
         'trap_door_mode': 'optional',
         'key_logic_algorithm': 'partial',
         'decoupledoors': False,
