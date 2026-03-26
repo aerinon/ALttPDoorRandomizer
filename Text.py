@@ -1924,9 +1924,9 @@ class TextTable(object):
         text['catfish'] = CompressedTextMapper.convert("You woke me from my nap! Take this, and get out!")
         text['catfish_after_item'] = CompressedTextMapper.convert("I don't have anything else for you!\nTake this!")
         # 12C
-        text['lumberjack_right'] = CompressedTextMapper.convert("One of us always lies.")
-        text['lumberjack_left'] = CompressedTextMapper.convert("One of us always tells the truth.")
-        text['lumberjack_left_post_agahnim'] = CompressedTextMapper.convert("One of us likes peanut butter.")
+        text['lumberjack_left'] = CompressedTextMapper.convert("One of us always lies.")
+        text['lumberjack_right'] = CompressedTextMapper.convert("One of us always tells the truth.")
+        text['lumberjack_left_have_l2sword'] = CompressedTextMapper.convert("One of us likes peanut butter.")
         text['fighting_brothers_right'] = CompressedTextMapper.convert("I walled off my brother Leo\n\nWhat a dingus.\n")
         # 130
         text['fighting_brothers_right_opened'] = CompressedTextMapper.convert("Now I should probably talk to him…")
