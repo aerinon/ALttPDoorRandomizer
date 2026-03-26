@@ -1737,6 +1737,9 @@ text:
     'death_mountain_bullied_with_pearl': "\n       egg"
     'thief_desert_rupee_cave': "Te a oescesrva hmevswe h atv sfed ra es htstebz rudtw."
     'thief_ice_rupee_cave': "hysysm ert eeltesle hntecpiei re,o tlatta' h uzaon on"
+    'fighting_brothers_right': "DO NOT OPEN\n        THE WALL!\nA great evil is sealed behind it!"
+    'fighting_brothers_right_opened': "OK Gotta Go!"
+    'fighting_brothers_left': "Does he have my 50 rupees yet..."
     'blacksmiths_shop_before_saving': "It's a bad time to lose my partner. I'm sure there are tons of frogs out there this time of year."
     'witch_bring_mushroom': "I'm brewing up a magical egg dye and I could use a mushroom."
     'blinds_hut_dude': "They say baskets are more accessible than traditional chests."
@@ -1744,10 +1747,12 @@ text:
     'kakariko_saharalasa_wife_sword_story': "A wicked root has taken hold of this world. A dark gardener tends to it.\nAre you up to the task?\n  ≥ Yes\n    No\n{CHOICE}"
     'kakariko_saharalasa_wife_closing': "It'll take more than a gardener to defeat a gardener."
     'kakariko_saharalasa_after_master_sword': "Ah! You bear the Master Sword!\nNow you may cut down the evil at its root."
-    'kakariko_flophouse_man_no_flippers': "Never gonna give you up, never gonna let you down, never gonna run around and desert you."
-    'kakariko_flophouse_man': "Never gonna give you up, never gonna let you down, never gonna run around and desert you."
+    'running_man': "Never gonna give you up, never gonna let you down, never gonna run around and desert you."
+    'kakariko_flophouse_man_no_flippers': "Remember to Like, Comment, and Subscribe!"
+    'kakariko_flophouse_man': "Remember to Like, Comment, and Subscribe!"
     'kakariko_saharalasa_grandson_next': "Did you see that Song Instrument Shuffle is on AVIANART as a post-gen option?"
     'houlihan_room': "2026 Easter Festive:\nOverworld: codemann8\nDungeons: Aerinon\nMagazine: codemann8\nWebsite: HiimCody1\nGFX: Fish_waffle64"
+    'sign_east_death_mountain_bridge': "Basket turns are a myth."
 telepathic_tiles:
   "0x5F": "0x130" # Maiden_crystal_1 index
   "0x118": "0x131" # Maiden_crystal_2 index
