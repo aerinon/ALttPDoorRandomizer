@@ -45,10 +45,10 @@ from source.enemizer.Enemizer import write_enemy_shuffle_settings
 
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = 'f1d838125b574639a74cf3de462da7d0'
+RANDOMIZERBASEHASH = '17e19fe2d62915e58dcf31e71524ce29'
 
 limited_run_hashes = {
-    '2604' : '682b0d0edd788538d468cbef7d2e775b',
+    '2604' : 'e311163abb5a81a7a0bdc159dcd013d7',
 }
 
 class JsonRom(object):
@@ -1933,6 +1933,21 @@ def write_limited_data(rom, world, player):
     if world.limited_run[player] == '2604':
         egg_goal_amount = world.limited_run_args[player]['egg_goal']
         rom.write_bytes(0x180167, int16_as_bytes(egg_goal_amount)) # egg goal
+        write_int16(rom, snes_to_pc(0xA2C000+(0x6B*2)), 0x0080) # egg not count for collection rate
+        egg_palette = [0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x04, 0x04, 0x04, 0x05]
+        egg_palette = random.choice(egg_palette)
+        if egg_palette == 0x05:
+            write_int16(rom, snes_to_pc(0xA2C600+(0x6B*2)), 0x1020) # egg custom gfx
+        else:
+            write_int16(rom, snes_to_pc(0xA2C600+(0x6B*2)), 0x1C60) # egg custom gfx
+        rom.write_byte(snes_to_pc(0xA2BC00+0x6B), egg_palette) # egg palette
+        rom.write_byte(snes_to_pc(0xA2BD00+0x6B), egg_palette) # egg palette
+        write_int16(rom, snes_to_pc(0xA2C000+(0xB8*2)), 0x0000) # Puzzle prize not count for collection rate
+        write_int16(rom, snes_to_pc(0xA2C000+(0xB9*2)), 0x0000) # Puzzle prize not count for collection rate
+        write_int16(rom, snes_to_pc(0xA2C000+(0xBA*2)), 0x0000) # Puzzle prize not count for collection rate
+        write_int16(rom, snes_to_pc(0xA2C600+(0xB8*2)), 0x9DE0) # Puzzle prize gfx (Boomerang)
+        write_int16(rom, snes_to_pc(0xA2C600+(0xB9*2)), 0x9D80) # Puzzle prize gfx (Book)
+        write_int16(rom, snes_to_pc(0xA2C600+(0xBA*2)), 0x9DE0) # Puzzle prize gfx (Silver Boomerang)
         # banana fixes
         rom.write_byte(snes_to_pc(0x86DB0F), 0xED) # gfx offset
         rom.write_byte(snes_to_pc(0x8DB35C), 0x59) # palette
