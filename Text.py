@@ -1591,9 +1591,9 @@ class TextTable(object):
         text['uncle_leaving_text'] = CompressedTextMapper.convert("I'm just going out for a pack of smokes.")
         text['uncle_dying_sewer'] = CompressedTextMapper.convert("I've fallen and I can't get up, take this.")
         text['tutorial_guard_1'] = CompressedTextMapper.convert("Only adults should travel at night.")
-        # 10
         text['tutorial_guard_2'] = CompressedTextMapper.convert("You can press X to see the Map.")
         text['tutorial_guard_3'] = CompressedTextMapper.convert("Press the A button to lift things by you.")
+        # 10
         text['tutorial_guard_4'] = CompressedTextMapper.convert("When you has a sword, press B to slash it.")
         text['tutorial_guard_5'] = CompressedTextMapper.convert("このメッセージはニホンゴでそのまま") # on purpose
         text['tutorial_guard_6'] = CompressedTextMapper.convert("Are we really still reading these?")
@@ -1608,9 +1608,9 @@ class TextTable(object):
         text['priest_info'] = CompressedTextMapper.convert("So, I'm the dude that will protect Zelda. Don't worry, I got this covered.")
         text['zelda_sanctuary_before_leave'] = CompressedTextMapper.convert("Be careful!")
         text['telepathic_intro'] = CompressedTextMapper.convert("{NOBORDER}\n{SPEED6}\nHey, come find me and help me!")
-        # 20
         text['telepathic_reminder'] = CompressedTextMapper.convert("{NOBORDER}\n{SPEED6}\nI'm in the castle basement.")
         text['zelda_go_to_throne'] = CompressedTextMapper.convert("Go north to the throne.")
+        # 20
         text['zelda_push_throne'] = CompressedTextMapper.convert("Let's push it from the left!")
         text['zelda_switch_room_pull'] = CompressedTextMapper.convert("Pull this lever using A.")
         text['zelda_save_lets_go'] = CompressedTextMapper.convert("Let's get out of here!")
@@ -1625,9 +1625,9 @@ class TextTable(object):
         text['kakariko_saharalasa_wife_closing'] = CompressedTextMapper.convert("Anywho, I have things to do. You see those 2 ovens?\n\nYeah 2!\nWho has 2 ovens nowadays?")
         text['kakariko_saharalasa_after_master_sword'] = CompressedTextMapper.convert("Cool sword!\n\n\n…\n\n\n…\n\n\nPlease save us")
         text['kakariko_alert_guards'] = CompressedTextMapper.convert("GUARDS! HELP!\nThe creeper\n@ is here!")
-        # 30
         text['sahasrahla_quest_have_pendants'] = CompressedTextMapper.convert("{BOTTOM}\nCool beans, but I think you should mosey on over to the lost woods.")
         text['sahasrahla_quest_have_master_sword'] = CompressedTextMapper.convert("{BOTTOM}\nThat's a pretty sword, but I'm old, forgetful, and old. Why don't you go do all the hard work while I hang out in this hut.")
+        # 30
         text['sahasrahla_quest_information'] = CompressedTextMapper.convert(
             "{BOTTOM}\n"
             + "Sahasrahla, I am. You would do well to find the 3 pendants from the 3 dungeons in the Light World.\n"
@@ -1648,9 +1648,9 @@ class TextTable(object):
         text['sign_lost_woods'] = CompressedTextMapper.convert("\n↑ Lost Woods")
         text['sign_zoras'] = CompressedTextMapper.convert("Danger!\nDeep water!\nZoras!")
         text['sign_outside_magic_shop'] = CompressedTextMapper.convert("Welcome to the Magic Shoppe")
-        # 40
         text['sign_death_mountain_cave_back'] = CompressedTextMapper.convert("Cave away from sky cabbages")
         text['sign_east_of_links_house'] = CompressedTextMapper.convert("↓Lake Hylia\n\n Also, a shop")
+        # 40
         text['sign_south_of_lumberjacks'] = CompressedTextMapper.convert("← Kakariko\n  Village")
         text['sign_east_of_desert'] = CompressedTextMapper.convert("← Desert\n\n     It's hot.")
         text['sign_east_of_sanctuary'] = CompressedTextMapper.convert("↑→ Potions!\n\nWish waterfall")
@@ -1665,9 +1665,9 @@ class TextTable(object):
         text['witch_assistant_no_empty_bottle'] = CompressedTextMapper.convert("Gotta use your stuff before you can get more.")
         text['witch_assistant_informational'] = CompressedTextMapper.convert("Red is life\nGreen is magic\nBlue is both\nI'll heal you for free though.")
         text['witch_assistant_no_bottle_buying'] = CompressedTextMapper.convert("If only you had something to put that in, like a bottle…")
-        # 50
         text['potion_shop_no_empty_bottles'] = CompressedTextMapper.convert("Whoa, bucko!\nNo empty bottles.")
         text['item_get_lamp'] = CompressedTextMapper.convert("Lamp! You can see in the dark, and light torches.")
+        # 50
         text['item_get_boomerang'] = CompressedTextMapper.convert("Boomerang! Press START to select it.")
         text['item_get_bow'] = CompressedTextMapper.convert("Bow! Join the archer class!")
         text['item_get_shovel'] = CompressedTextMapper.convert("Shovel! Can you dig it?")
@@ -1682,9 +1682,9 @@ class TextTable(object):
         text['item_get_book'] = CompressedTextMapper.convert("Book! Are you well read?")
         text['item_get_moonpearl'] = CompressedTextMapper.convert("Moon Pearl! Rabbit Be Gone!")
         text['item_get_compass'] = CompressedTextMapper.convert("A compass! I can now find the boss.")
-        # 60
         text['item_get_map'] = CompressedTextMapper.convert("Yo! You found a MAP! Press X to see it.")
         text['item_get_ice_rod'] = CompressedTextMapper.convert("Ice Rod! Time to chill out!")
+        # 60
         text['item_get_fire_rod'] = CompressedTextMapper.convert("Fire Rod! I'm burning for you!")
         text['item_get_ether'] = CompressedTextMapper.convert("Ether! Let's cool things down!")
         text['item_get_bombos'] = CompressedTextMapper.convert("Bombos! Explosions, fire, burn it all!")
@@ -1699,9 +1699,9 @@ class TextTable(object):
         text['item_get_titans_mitts'] = CompressedTextMapper.convert("Mitts! Lift ALL the rocks!")
         text['item_get_magic_mirror'] = CompressedTextMapper.convert("Mirror! Take some time to reflect on this moment!")
         text['item_get_fake_mastersword'] = CompressedTextMapper.convert("It's the Master Sword! …or not…\n\n         FOOL!")
-        # 70
         text['post_item_get_mastersword'] = CompressedTextMapper.convert("{NOBORDER}\n{SPEED6}\n@, you got the sword!\n{CHANGEMUSIC}\nNow let's go beat up Agahnim!")
         text['item_get_red_potion'] = CompressedTextMapper.convert("Red Potion! Heal yourself")
+        # 70
         text['item_get_green_potion'] = CompressedTextMapper.convert("Green Potion! Magic refill!")
         text['item_get_blue_potion'] = CompressedTextMapper.convert("Blue Potion! Heal and restore!")
         text['item_get_bug_net'] = CompressedTextMapper.convert("Bug Net! Let's catch stuff!")
@@ -1716,9 +1716,9 @@ class TextTable(object):
         text['talking_tree_info_start'] = CompressedTextMapper.convert("Whoa! I can talk again!")
         text['talking_tree_info_1'] = CompressedTextMapper.convert("Yank on the pitchfork in the center of town, ya heard it here.")
         text['talking_tree_info_2'] = CompressedTextMapper.convert("Ganon is such a dingus, no one likes him, ya heard it here.")
-        # 80
         text['talking_tree_info_3'] = CompressedTextMapper.convert("There is a portal near the Lost Woods, ya heard it here.")
         text['talking_tree_info_4'] = CompressedTextMapper.convert("Use bombs to quickly kill the Hinox, ya heard it here.")
+        # 80
         text['talking_tree_other'] = CompressedTextMapper.convert("I can breathe!")
         text['item_get_pendant_power_alt'] = CompressedTextMapper.convert("We have the Pendant of Power! How robust!")
         text['item_get_pendant_wisdom_alt'] = CompressedTextMapper.convert("We have the Pendant of Wisdom! How astute!")
@@ -1733,9 +1733,9 @@ class TextTable(object):
         text['pond_item_test_no'] = CompressedTextMapper.convert("You sure?\n  ≥ Oh yeah\n    Um\n{CHOICE}")
         text['pond_item_test_no_no'] = CompressedTextMapper.convert("Well, I don't want it, so take it back.")
         text['pond_item_boomerang'] = CompressedTextMapper.convert("I don't much like you, so have this worse Boomerang.")
-        # 90
         text['pond_item_shield'] = CompressedTextMapper.convert("I grant you the ability to block fireballs. Don't lose this to a pikit!")
         text['pond_item_silvers'] = CompressedTextMapper.convert("So, wouldn't it be nice to kill Ganon? These should help in the final phase.")
+        # 90
         text['pond_item_bottle_filled'] = CompressedTextMapper.convert("Bottle Filled!\nMoney Saved!")
         text['pond_item_sword'] = CompressedTextMapper.convert("Thank you for the sword, here is a stick of butter.")
         text['pond_of_wishing_happiness'] = CompressedTextMapper.convert("Happiness up!\nYou are now\nᚌᚋ happy!")
@@ -1750,9 +1750,9 @@ class TextTable(object):
         text['mountain_old_man_drop_off'] = CompressedTextMapper.convert("Here's a thing to help you, good luck!")
         text['mountain_old_man_in_his_cave_pre_agahnim'] = CompressedTextMapper.convert("You need to beat the tower at the top of the mountain.")
         text['mountain_old_man_in_his_cave'] = CompressedTextMapper.convert("You can find stuff in the tower at the top of this mountain.\nCome see me if you'd like to be healed.")
-        # A0
         text['mountain_old_man_in_his_cave_post_agahnim'] = CompressedTextMapper.convert("You should be heading to the castle… you have a portal there now.\nSay hi anytime you like.")
         text['tavern_old_man_awake'] = CompressedTextMapper.convert("Life? Love? Happiness? The question you should really ask is: Was this generated by Stoops Alu or Stoops Jet?")
+        # A0
         text['tavern_old_man_unactivated_flute'] = CompressedTextMapper.convert("You should play that flute for the weathervane, cause reasons.")
         text['tavern_old_man_know_tree_unactivated_flute'] = CompressedTextMapper.convert("You should play that flute for the weathervane, cause reasons.")
         text['tavern_old_man_have_flute'] = CompressedTextMapper.convert("Life? Love? Happiness? The question you should really ask is: Was this generated by Stoops Alu or Stoops Jet?")
@@ -1767,9 +1767,9 @@ class TextTable(object):
         text['sign_east_of_bomb_shop'] = CompressedTextMapper.convert("\n← Bomb Shoppe")
         text['sign_east_of_mire'] = CompressedTextMapper.convert("\n← Misery Mire\n no way in.\n no way out.")
         text['sign_village_of_outcasts'] = CompressedTextMapper.convert("Have a Trulie Awesome Day!")
-        # B0
         text['sign_before_wishing_pond'] = CompressedTextMapper.convert("Waterfall\nup ahead\nMake wishes")
         text['sign_before_catfish_area'] = CompressedTextMapper.convert("→↑ Have you met Woeful Ike?")
+        # B0
         text['castle_wall_guard'] = CompressedTextMapper.convert("Looking for a Princess? Look downstairs.")
         text['gate_guard'] = CompressedTextMapper.convert("No Lonks Allowed!")
         text['telepathic_tile_eastern_palace'] = CompressedTextMapper.convert("{NOBORDER}\nYou need a Bow to get past the red Eyegore. derpy")
@@ -1789,9 +1789,9 @@ class TextTable(object):
                                                                            "  ~~~2022~~~\nAndy\n\n"
                                                                            "  ~~~2021~~~\nprdwong")
         text['telepathic_tile_palace_of_darkness'] = CompressedTextMapper.convert("{NOBORDER}\nThis is a funny looking Enemizer")
-        # C0
         text['telepathic_tile_desert_bonk_torch_room'] = CompressedTextMapper.convert("{NOBORDER}\nThings can be knocked down, if you fancy yourself a dashing dude.")
         text['telepathic_tile_castle_tower'] = CompressedTextMapper.convert("{NOBORDER}\nYou can reflect Agahnim's energy with Sword, Bug-net or Hammer.")
+        # C0
         text['telepathic_tile_ice_large_room'] = CompressedTextMapper.convert("{NOBORDER}\nAll right stop collaborate and listen\nIce is back with my brand new invention")
         text['telepathic_tile_turtle_rock'] = CompressedTextMapper.convert("{NOBORDER}\nYou shall not pass… without the red cane")
         text['telepathic_tile_ice_entrance'] = CompressedTextMapper.convert("{NOBORDER}\nYou can use Fire Rod or Bombos to pass.")
@@ -1814,9 +1814,9 @@ class TextTable(object):
         text['game_race_boy_success'] = CompressedTextMapper.convert("Nice!\nYou can have this trash!")
         text['game_race_boy_failure'] = CompressedTextMapper.convert("Too slow!\nI keep my\nprecious!")
         text['game_race_boy_already_won'] = CompressedTextMapper.convert("You already have your prize, dingus!")
-        # D0
         text['game_race_boy_sneaky'] = CompressedTextMapper.convert("Thought you could sneak in, eh?")
         text['bottle_vendor_choice'] = CompressedTextMapper.convert("I gots bottles.\nYous gots 100 rupees?\n  ≥ I want\n    no way!")
+        # D0
         text['bottle_vendor_get'] = CompressedTextMapper.convert("Nice! Hold it up son! Show the world what you got!")
         text['bottle_vendor_no'] = CompressedTextMapper.convert("Fine! I didn't want your money anyway.")
         text['bottle_vendor_already_collected'] = CompressedTextMapper.convert("Dude! You already have it.")
@@ -1831,9 +1831,9 @@ class TextTable(object):
         text['blacksmiths_bogart_sword'] = CompressedTextMapper.convert("We're going to have to take it to work on it.")
         text['blacksmiths_get_sword'] = CompressedTextMapper.convert("Sword is donw. Now, back to our bread!")
         text['blacksmiths_shop_before_saving'] = CompressedTextMapper.convert("I lost my friend. Help me find him!")
-        # E0
         text['blacksmiths_shop_saving'] = CompressedTextMapper.convert("You found him! Colour me happy! Come back right away and we will bang on your sword.")
         text['blacksmiths_collect_frog'] = CompressedTextMapper.convert("Ribbit! Ribbit! Let's find my partner. To the shop!")
+        # E0
         text['blacksmiths_still_working'] = CompressedTextMapper.convert("Something this precious takes time… Come back later.")
         text['blacksmiths_saving_bows'] = CompressedTextMapper.convert("Thanks!\n\nThanks!")
         text['blacksmiths_hammer_anvil'] = CompressedTextMapper.convert("Dernt Take Er Jerbs!")
@@ -1850,6 +1850,7 @@ class TextTable(object):
         text['shop_fortune_teller_lw_hint_5'] = CompressedTextMapper.convert("{BOTTOM}\nBy the black cats, The Cape can pass through the barrier")
         text['shop_fortune_teller_lw_hint_6'] = CompressedTextMapper.convert("{BOTTOM}\nBy the black cats, Spin, Hammer, or Net to hurt Agahnim")
         text['shop_fortune_teller_lw_hint_7'] = CompressedTextMapper.convert("{BOTTOM}\nBy the black cats, You can jump in the well by the blacksmiths")
+        # F0
         text['shop_fortune_teller_lw_no_rupees'] = CompressedTextMapper.convert("{BOTTOM}\nThe black cats are hungry, come back with rupees")
         text['shop_fortune_teller_lw'] = CompressedTextMapper.convert("{BOTTOM}\nWelcome to the Fortune Shoppe!\nFancy a read?\n  ≥I must know\n   Negative\n{CHOICE}")
         text['shop_fortune_teller_lw_post_hint'] = CompressedTextMapper.convert("{BOTTOM}\nFor ᚋᚌ rupees\nIt is done.\nBe gone!")
@@ -1864,9 +1865,9 @@ class TextTable(object):
         text['shop_fortune_teller_lw_hint_15'] = CompressedTextMapper.convert("{BOTTOM}\nBy the black cats, Silver Arrows will defeat Ganon in his final phase")
         text['dark_sanctuary'] = CompressedTextMapper.convert("For 20 rupees I'll tell you something?\nHow about it?\n  ≥ Yes\n    No\n{CHOICE}")
         text['dark_sanctuary_hint_0'] = CompressedTextMapper.convert("I once was a tea kettle, but then I moved up in the world, and now you can see me as this. Makes you wonder. What I could be next time.")
-        # 100
         text['dark_sanctuary_no'] = CompressedTextMapper.convert("Then go away!")
         text['dark_sanctuary_hint_1'] = CompressedTextMapper.convert("There is a thief in the desert, he can open creepy chests that follow you. But now that we have that out of the way, Do you like my hair? I've spent eons getting it this way.")
+        # 100
         text['dark_sanctuary_yes'] = CompressedTextMapper.convert("With Crystals 5&6, you can find a great fairy in the pyramid.\n\nFlomp Flomp, Whizzle Whomp")
         text['dark_sanctuary_hint_2'] = CompressedTextMapper.convert(
             "All I can say is that my life is pretty plain,\n"
@@ -1886,9 +1887,9 @@ class TextTable(object):
         text['hylian_text_3'] = CompressedTextMapper.convert("^^ ^%=^= =%=\n=%% =%%=^\n==%^= %=^^%")
         text['tablet_ether_book'] = CompressedTextMapper.convert("Can you make things fall out of the sky? With the Master Sword, you can!")
         text['tablet_bombos_book'] = CompressedTextMapper.convert("Can you make things fall out of the sky? With the Master Sword, you can!")
-        # 110
         text['magic_bat_wake'] = CompressedTextMapper.convert("You bum! I was sleeping! Where's my magic bolts?")
         text['magic_bat_give_half_magic'] = CompressedTextMapper.convert("How you like me now?")
+        # 110
         text['intro_main'] = CompressedTextMapper.convert(
             "{INTRO}\n Episode  III\n{PAUSE3}\n A Link to\n   the Past\n"
             + "{PAUSE3}\n  Randomizer\n{PAUSE3}\nAfter mostly disregarding what happened in the first two games.\n"
@@ -1910,9 +1911,9 @@ class TextTable(object):
         text['kiki_second_extortion_yes'] = CompressedTextMapper.convert("Yay! Rupees!\nOkay, let's do this!")
         text['kiki_first_extortion'] = CompressedTextMapper.convert("I'm Kiki, I like rupees, may I have 10?\nHow about it?\n  ≥ Yes\n    No\n{CHOICE}")
         text['kiki_first_extortion_yes'] = CompressedTextMapper.convert("Nice. I'll tag along with you for a bit.")
-        # 120
         text['kiki_first_extortion_no'] = CompressedTextMapper.convert("Pfft. I have no reason to hang. See ya!")
         text['kiki_leaving_screen'] = CompressedTextMapper.convert("No no no no no! We should play by my rules! Goodbye…")
+        # 120
         text['blind_in_the_cell'] = CompressedTextMapper.convert("You saved me!\nPlease get me out of here!")
         text['blind_by_the_light'] = CompressedTextMapper.convert("Aaaahhhh~!\nS-so bright~!")
         text['blind_not_that_way'] = CompressedTextMapper.convert("No! Don't go that way!")
@@ -1923,14 +1924,13 @@ class TextTable(object):
         text['aginah_have_better_sword'] = CompressedTextMapper.convert("Pandas are very vicious animals. Never forget…\n\n\n\n\nI never will")
         text['catfish'] = CompressedTextMapper.convert("You woke me from my nap! Take this, and get out!")
         text['catfish_after_item'] = CompressedTextMapper.convert("I don't have anything else for you!\nTake this!")
-        # 12C
         text['lumberjack_left'] = CompressedTextMapper.convert("One of us always lies.")
         text['lumberjack_right'] = CompressedTextMapper.convert("One of us always tells the truth.")
         text['lumberjack_left_have_l2sword'] = CompressedTextMapper.convert("One of us likes peanut butter.")
         text['fighting_brothers_right'] = CompressedTextMapper.convert("I walled off my brother Leo\n\nWhat a dingus.\n")
-        # 130
         text['fighting_brothers_right_opened'] = CompressedTextMapper.convert("Now I should probably talk to him…")
         text['fighting_brothers_left'] = CompressedTextMapper.convert("Did you come from my brothers room?\n\nAre we cool?")
+        # 130
         text['maiden_crystal_1'] = CompressedTextMapper.convert("{SPEED2}\n{BOTTOM}\n{NOBORDER}\nI have a pretty red dress.\n{SPEED1}\nJust thought I would tell you.")
         text['maiden_crystal_2'] = CompressedTextMapper.convert("{SPEED2}\n{BOTTOM}\n{NOBORDER}\nI have a pretty blue dress.\n{SPEED1}\nJust thought I would tell you.")
         text['maiden_crystal_3'] = CompressedTextMapper.convert("{SPEED2}\n{BOTTOM}\n{NOBORDER}\nI have a pretty gold dress.\n{SPEED1}\nJust thought I would tell you.")
@@ -1947,7 +1947,7 @@ class TextTable(object):
         text['agahnim_hide_and_seek_found'] = CompressedTextMapper.convert("Peek-a-boo!")
         text['agahnim_defeated'] = CompressedTextMapper.convert("Arrrgggghhh. Well you're coming with me!")
         text['agahnim_final_meeting'] = CompressedTextMapper.convert("You have done well to come this far. Now, die!")
-        # 142
+        # 140
         text['zora_meeting'] = CompressedTextMapper.convert("What do you want?\n  ≥ Flippers\n    Nothin'\n{CHOICE}")
         text['zora_tells_cost'] = CompressedTextMapper.convert("Fine! But they aren't cheap. You got 500 rupees?\n  ≥ Duh\n    Oh carp\n{CHOICE}")
         text['zora_get_flippers'] = CompressedTextMapper.convert("Here's some Flippers for you! Swim little fish, swim.")
@@ -1962,9 +1962,9 @@ class TextTable(object):
         text['pond_of_wishing_return_item'] = CompressedTextMapper.convert("Okay. Here's your item back, cause I can't use it. I'm stuck in this fountain")
         text['pond_of_wishing_throw'] = CompressedTextMapper.convert("How many?\n  ≥ᚌᚋ rupees\n   ᚎᚍ rupees\n{CHOICE}")
         text['pond_pre_item_silvers'] = CompressedTextMapper.convert("I like you, so here's a thing you can use to beat up Ganon.")
-        # 150
         text['pond_of_wishing_great_luck'] = CompressedTextMapper.convert("\nis great luck")
         text['pond_of_wishing_good_luck'] = CompressedTextMapper.convert("\n is good luck")
+        # 150
         text['pond_of_wishing_meh_luck'] = CompressedTextMapper.convert("\n is meh luck")
         # Repurposed to no items in Randomizer
         text['pond_of_wishing_bad_luck'] = CompressedTextMapper.convert("Why come in here and pretend like you have something this fountain wants? Come back with bottles!")
@@ -1980,9 +1980,9 @@ class TextTable(object):
         text['death_mountain_bully_no_pearl'] = CompressedTextMapper.convert("Add garlic, ginger and apple and cook for 2 minutes. Add carrots, potatoes, garam masala and curry powder and stir well. Add tomato paste, stir well and slowly add red wine and bring to a boil. Add sugar, soy sauce and water, stir and bring to a boil again.")
         text['death_mountain_bully_with_pearl'] = CompressedTextMapper.convert("I think I forgot how to smile…")
         text['shop_darkworld_enter'] = CompressedTextMapper.convert("It's dangerous outside, buy my crap for safety.")
-        # 160
         text['game_chest_village_of_outcasts'] = CompressedTextMapper.convert("Pay 30 rupees, open 2 chests. Are you lucky?\nSo, Play game?\n  ≥ Play\n    Never!\n{CHOICE}")
         text['game_chest_no_cash'] = CompressedTextMapper.convert("So, like, you need 30 rupees.\nSilly!")
+        # 160
         text['game_chest_not_played'] = CompressedTextMapper.convert("You want to play a game?\nTalk to me.")
         text['game_chest_played'] = CompressedTextMapper.convert("You've opened the chests!\nTime to go.")
         text['game_chest_village_of_outcasts_play'] = CompressedTextMapper.convert("Alright, brother!\nGo play!")
@@ -1997,9 +1997,9 @@ class TextTable(object):
         text['shop_first_no_bottle_buy'] = CompressedTextMapper.convert("Why does no one own bottles? Go find one first!")
         text['shop_buy_no_space'] = CompressedTextMapper.convert("You are carrying to much crap, go use some of it first!")
         text['ganon_fall_in'] = CompressedTextMapper.convert("You drove\naway my other\nself, Agahnim,\ntwo times…\nBut, I won't\ngive you the\nTriforce.\nI'll defeat\nyou!")
-        # 170
         text['ganon_phase_3'] = CompressedTextMapper.convert("Can you beat\nmy darkness\ntechnique?")
         text['lost_woods_thief'] = CompressedTextMapper.convert("Have you seen Andy?\n\nHe was out looking for our prized Ether medallion.\nI wonder when he will be back?")
+        # 170
         text['blinds_hut_dude'] = CompressedTextMapper.convert("I'm just some dude. This is Blind's hut.")
         text['end_triforce'] = CompressedTextMapper.convert("{SPEED2}\n{MENU}\n{NOBORDER}\n     G G")
         text['toppi_fallen'] = CompressedTextMapper.convert("Ouch!\n\nYou Jerk!")
@@ -2014,9 +2014,9 @@ class TextTable(object):
         text['kakariko_powdered_chicken'] = CompressedTextMapper.convert("Smallhacker…\n\n\nWas hiding, you found me!\n\n\nOkay, you can leave now.")
         text['game_chest_south_of_kakariko'] = CompressedTextMapper.convert("Pay 20 rupees, open 1 chest. Are you lucky?\nSo, Play game?\n  ≥ Play\n    Never!\n{CHOICE}")
         text['game_chest_play_yes'] = CompressedTextMapper.convert("Good luck then")
-        # 180
         text['game_chest_play_no'] = CompressedTextMapper.convert("Well fine, I didn't want your rupees.")
         text['game_chest_lost_woods'] = CompressedTextMapper.convert("Pay 100 rupees open 1 chest. Are you lucky?\nSo, Play game?\n  ≥ Play\n    Never!\n{CHOICE}")
+        # 180
         text['kakariko_flophouse_man_no_flippers'] = CompressedTextMapper.convert("I really hate mowing my yard.\nI moved my house and everyone else's to avoid it.\n{PAGEBREAK}\nI hope you don't mind.")
         text['kakariko_flophouse_man'] = CompressedTextMapper.convert("I really hate mowing my yard.\nI moved my house and everyone else's to avoid it.\n{PAGEBREAK}\nI hope you don't mind.")
         text['menu_start_2'] = CompressedTextMapper.convert("{MENU}\n{SPEED0}\n≥@'s House\n Sanctuary\n{CHOICE3}", False)
@@ -2032,7 +2032,6 @@ class TextTable(object):
         # Start of new text data
         text['ganon_fall_in_alt'] = CompressedTextMapper.convert("You think you are ready to face me?\n\nI will not die unless you complete your goals. Dingus!")
         text['ganon_phase_3_alt'] = CompressedTextMapper.convert("Got wax in your ears? I cannot die!")
-        # 190
         text['sign_east_death_mountain_bridge'] = CompressedTextMapper.convert("Glitched\ntournament\nwinners\n{HARP}\n"
                                                                                "~~~HMG 2025~~~\nSkele\n"
                                                                                "~~~No Logic 2024~~~\ntam\n\n"
@@ -2042,6 +2041,7 @@ class TextTable(object):
                                                                                "~~~OWG 2019~~~\nGlan\n\n"
                                                                                "~~~OWG 2018~~~\nChristosOwen\nthe numpty")
         text['fish_money'] = CompressedTextMapper.convert("It's a secret to everyone.")
+        # 190
         text['sign_ganons_tower'] = CompressedTextMapper.convert("You need all 7 crystals to enter.")
         text['sign_ganon'] = CompressedTextMapper.convert("You need all 7 crystals to beat Ganon.")
         text['ganon_phase_3_no_bow'] = CompressedTextMapper.convert("You have no bow. Dingus!")
@@ -2058,6 +2058,7 @@ class TextTable(object):
         text['limited_run_message_5'] = CompressedTextMapper.convert("{NOTEXT}", False)
         text['limited_run_message_6'] = CompressedTextMapper.convert("{NOTEXT}", False)
         text['limited_run_message_7'] = CompressedTextMapper.convert("{NOTEXT}", False)
+        # 1A0
         text['limited_run_message_8'] = CompressedTextMapper.convert("{NOTEXT}", False)
         text['limited_run_message_9'] = CompressedTextMapper.convert("{NOTEXT}", False)
         text['end_pad_data'] = bytearray([0xfb])
