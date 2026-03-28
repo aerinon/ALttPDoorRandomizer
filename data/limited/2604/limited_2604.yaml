@@ -1685,7 +1685,8 @@ sprites:
     - ["Overlord", "0x07", "0x1A", "0x00", "FallingBridge"]
 text:
     # custom texts
-    'shop_fortune_teller_lw_hint_0': "A new harmony flows from the flute, calling you fourth to distant lands"
+    'dark_flute_boy_flute_not_found': "My one last wish is to hear the melody of the flute one last time."
+    'dark_flute_boy_after_shovel_get': "{NOBORDER}\nA new harmony flows from the flute, calling you fourth to distant lands"
     'kiki_first_extortion': "OoOo, banana! Gimme 10 bananas and I'll help you out."
     'lost_woods_thief': "I've been hearing a rustling up in the rafters.\nBut I'm too lazy to do anything about it."
     'limited_run_message_0': "{NOBORDER}\nThe heck was that? There's gotta be something around here that we can throw at that thing before we jump in."
@@ -1758,6 +1759,22 @@ text:
     'kakariko_saharalasa_grandson_next': "Did you see that Song Instrument Shuffle is on AVIANART as a post-gen option?"
     'houlihan_room': "2026 Easter Festive:\nOverworld: codemann8\nDungeons: Aerinon\nMagazine: codemann8\nWebsite: HiimCody1\nGFX: Fish_waffle64"
     'sign_east_death_mountain_bridge': "Basket turns are a myth."
+    'shop_fortune_teller_lw_hint_0': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_1': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_2': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_3': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_4': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_5': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_6': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_7': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_8': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_9': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_10': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_11': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_12': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_13': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_14': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
+    'shop_fortune_teller_lw_hint_15': "I have no hints for you, but I'll make sure your health is in tip-tip shape."
 telepathic_tiles:
   "0x5F": "0x130" # Maiden_crystal_1 index
   "0x118": "0x131" # Maiden_crystal_2 index
