@@ -1799,6 +1799,11 @@ def patch_rom(world, rom, player, team, is_mystery=False, rom_header=None):
             if room.player == player and room.modified:
                 if room.index in world.data_tables[player].room_list:
                     t = [DoorObject(x[0], x[1]) for x in room.doorList]
+                    # Preserve custom-room-only doors (added in YAML but not known to door shuffle)
+                    shuffled_positions = {x[0] for x in room.doorList}
+                    for door in world.data_tables[player].room_list[room.index].doors:
+                        if door.pos not in shuffled_positions:
+                            t.append(door)
                     world.data_tables[player].room_list[room.index].doors = t
                 else:
                     rom.write_bytes(room.address(), room.rom_data())
