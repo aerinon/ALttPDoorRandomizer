@@ -1062,7 +1062,17 @@ class PotSecretTable(object):
                         if colorize:
                             if room in data_tables.room_list:
                                 room_object = data_tables.room_list[room]
-                                room_object.find_all_pots()[list_idx].change_type(Shuffled_Pot)
+                                target_col = pot.x // 2
+                                target_row = pot.y * 2
+                                matched = next(
+                                    (obj for obj in room_object.find_all_pots()
+                                     if obj.data[0] >> 2 == target_col and obj.data[1] >> 2 == target_row),
+                                    None
+                                )
+                                if matched is not None:
+                                    matched.change_type(Shuffled_Pot)
+                                else:
+                                    room_object.find_all_pots()[list_idx].change_type(Shuffled_Pot)
                             elif pot.obj_ref:
                                 pot.obj_ref.change_type(Shuffled_Pot)
                                 pot.obj_ref.write_to_rom(rom)
