@@ -3114,7 +3114,9 @@ class Spoiler(object):
                          'race': self.world.settings.world_rep['meta']['race'],
                          'user_notes': self.world.settings.world_rep['meta']['user_notes'],
                          'code': {p: Settings.make_code(self.world, p) for p in range(1, self.world.players + 1)},
-                         'seed': self.world.seed
+                         'seed': self.world.seed,
+                         'limited_run': self.world.limited_run,
+                         'limited_run_args': self.world.limited_run_args
                          }
 
         for p in range(1, self.world.players + 1):
@@ -3379,6 +3381,11 @@ class Spoiler(object):
                     outfile.write('Mirror Scroll:'.ljust(line_width) + '%s\n' % yn(self.metadata['mirrorscroll'][player]))
                     outfile.write('Hints:'.ljust(line_width) + '%s\n' % yn(self.metadata['hints'][player]))
                     outfile.write('Race:'.ljust(line_width) + '%s\n' % yn(self.world.settings.world_rep['meta']['race']))
+                    if self.metadata['limited_run'][player] != 'none':
+                        outfile.write('Limited Run:'.ljust(line_width) + '%s\n' % self.metadata['limited_run'][player])
+                        if self.metadata['limited_run_args'][player]:
+                            for k, v in self.metadata['limited_run_args'][player].items():
+                                outfile.write(('  ' + k + ':').ljust(line_width) + '%s\n' % v)
             
             if self.startinventory:
                 outfile.write('Starting Inventory:'.ljust(line_width))
