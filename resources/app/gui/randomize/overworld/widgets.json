@@ -12,7 +12,7 @@
     },
     "crossed": {
       "type": "selectbox",
-      "default": "none",
+      "default": "vanilla",
       "options": [
         "none",
         "grouped",

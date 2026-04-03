@@ -19,7 +19,6 @@
     },
     "shuffleganon": {
       "type": "checkbox",
-      "default": true,
       "config": {
         "padx": [20,0]
       }
