@@ -1,5 +1,8 @@
 # Changelog
 
+# 0.7.1.0
+- 2026 Easter Festive
+
 # 0.7.0.3
 - Further updates and new yamls for Grid OW Shuffle
 - Further customizer options for Grid OW Shuffle like defining screens that should stay together
