@@ -2,7 +2,7 @@
   "widgets": {
     "prizeshuffle": {
       "type": "selectbox",
-      "default": "default",
+      "default": "none",
       "options": [
         "none",
         "dungeon",

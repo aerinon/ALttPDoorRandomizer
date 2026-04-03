@@ -151,6 +151,7 @@
     },
     "colorizepots": {
       "type": "checkbox",
+      "default": true,
       "config": {
         "padx": [50,0]
       }
