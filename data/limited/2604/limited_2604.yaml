@@ -1691,6 +1691,7 @@ text:
     'lost_woods_thief': "I've been hearing a rustling up in the rafters.\nBut I'm too lazy to do anything about it."
     'limited_run_message_0': "{NOBORDER}\nThe heck was that? There's gotta be something around here that we can throw at that thing before we jump in."
     'ganon_phase_3': "You think you can toss me aside, just like that?!"
+    'limited_run_message_1': "Thanks for finding all of my eggs!\nNow I'll give you a big fat smooch.\n{HARP}\n\nThanks for playing and I hope you enjoyed the festive"
     'sign_rain_north_of_links_house': "Historical Note: Of all the sages, Logi was considered the most formidable in direct combat — a warrior first, scholar second."
     'sign_north_of_links_house': "Magical Resonance: The crystals emit a faint humming sound that varies in pitch based on the maiden's emotional state."
     'sign_path_to_death_mountain': "Structural Survey: A compromised section of masonry within the Ice Palace may conceal the mechanism."
