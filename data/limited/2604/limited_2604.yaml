@@ -498,6 +498,8 @@ rooms:
       - [ ThickRailH, "0x12", "0x0B", "0x03"]
       - [ ThickRailH, "0x05", "0x34", "0x03"]
       - [ ThickRailH, "0x12", "0x34", "0x00"]
+      - [ ThickRailV, "0x0C", "0x34", "0x01"]
+      - [ ThickRailV, "0x12", "0x07", "0x01"]
       - [ ThickRailV, "0x09", "0x0B", "0x0A"]
       - [ ThickRailV, "0x16", "0x0B", "0x0A"]
       - [ ThickRailV, "0x16", "0x18", "0x0C"]
@@ -1718,7 +1720,7 @@ text:
     'talking_tree_info_1': "That second crystal... the pitch off it keeps spiking—sudden, fierce, then quiet again. Like someone trying very hard to contain herself."
     'talking_tree_info_2': "Arlene? No, she's not kin to the old man of the mountain. Different bloodline entirely."
     'talking_tree_info_3': "The old man of the mountain's granddaughter loved the sea. Always down by the shore, that one, collecting shells and watching the waves"
-    'talking_tree_info_4': "They took Arlene first... then came back for Ellia. One right after the other, poor souls."
+    'talking_tree_info_4': "They took Arlene suddenly... then came back for Ellia. One right after the other, poor souls."
     'talking_tree_other': "I have never been much interested in ancient lore."
     'maiden_crystal_1': "Mechanism Theory: Each statue corresponds to a crystal numbered from left to right. Ancient texts suggest the magic seal can only be broken by activating them in the primordial sequence - the order in which the seven sages first mastered their elements at the dawn of the age."
     'maiden_crystal_2': ">" # link's face, hint to map room
