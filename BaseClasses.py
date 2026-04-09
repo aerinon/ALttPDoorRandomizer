@@ -663,7 +663,10 @@ class CollectionState(object):
                     rrp[new_region] = new_crystal_state
                     for conn in new_region.exits:
                         bc[conn] = new_crystal_state
-                        queue.append((conn, new_crystal_state))
+                        if conn.connected_region and conn.connected_region.type == RegionType.Dungeon:
+                            queue.append((conn, new_crystal_state))
+                        else:
+                            queue.appendleft((conn, new_crystal_state))
 
                 self.path[new_region] = (new_region.name, self.path.get(connection, None))
 
