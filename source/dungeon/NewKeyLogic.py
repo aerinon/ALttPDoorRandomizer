@@ -1,7 +1,8 @@
+import types
 from collections import deque, defaultdict
 from typing import Optional, Deque, Tuple
 
-from BaseClasses import DoorType, Door, CrystalBarrier
+from BaseClasses import DoorType, Door, CrystalBarrier, RegionType
 from DungeonGenerator import ExplorationState, blind_boss_unavail
 from KeyDoorShuffle import KeyCounter
 from KeyDoorShuffle import find_big_chest_locations, dungeon_table, open_a_door, important_location
@@ -9,6 +10,28 @@ from KeyDoorShuffle import find_outside_connection, prize_relevance, expand_key_
 from source.dungeon.KeyPlacement import create_exhaustive_placement_rules
 from Regions import dungeon_events
 from source.dungeon.DungeonStitcherV2 import special_big_key_doors
+
+
+def _make_subset_key_layout(key_layout, filtered_start_regions):
+    """Proxy for key_layout with filtered start_regions; mutable fields are fresh scratch objects."""
+    proxy = types.SimpleNamespace()
+    proxy.start_regions = filtered_start_regions
+    proxy.found_doors = set()       # scratch
+    proxy.prize_relevant = None     # scratch
+    proxy.event_starts = key_layout.event_starts
+    proxy.flat_prop = key_layout.flat_prop
+    proxy.sector = key_layout.sector
+    proxy.proposal = key_layout.proposal
+
+    kl_proxy = types.SimpleNamespace()
+    kl_proxy.bk_doors = set()              # scratch
+    kl_proxy.dungeon = key_layout.key_logic.dungeon
+    kl_proxy.small_key_name = key_layout.key_logic.small_key_name
+    kl_proxy.bk_name = key_layout.key_logic.bk_name
+    proxy.key_logic = kl_proxy
+
+    proxy.max_chests = key_layout.max_chests
+    return proxy
 
 
 class NewKeyLogic(object):
@@ -37,6 +60,13 @@ class NewKeyLogic(object):
         self.can_reach_cache = {}
         self.crystal_switch_reachable = {}
 
+        # Portal accessibility data
+        self.start_regions = []       # [(start_region, gateway_region), ...] — lobby + first OW-connected dungeon region
+        self.portal_subset_cache = {} # {frozenset(start_regions): NewKeyLogic} — lazily built subset logics
+        self._key_layout = None       # stored for lazy subset rebuild
+        self._world = None
+        self._player = None
+
     def get_relevant_regions_and_locations(self):
         if self.relevant_regions or self.relevant_locations:
             return self.relevant_regions, self.relevant_locations
@@ -55,6 +85,43 @@ class NewKeyLogic(object):
                 locations.update(sphere.locations)
         self.relevant_regions = list(regions)
         self.relevant_locations = list(locations)
+
+    def _get_accessible_portals(self, state, player):
+        """Returns frozenset of portals whose gateway region is in rrp, or None if no filtering is needed."""
+        if not self.start_regions:
+            return None  # portal data not precomputed (fast_logic path)
+        if len(self.start_regions) == 1:
+            return None  # single portal — no filtering needed
+        rrp = state.reachable_regions[player]
+        accessible = frozenset(sr for sr, gw in self.start_regions if gw in rrp)
+        return accessible
+
+    def _get_or_build_subset_logic(self, accessible_portals):
+        if accessible_portals in self.portal_subset_cache:
+            return self.portal_subset_cache[accessible_portals]
+
+        key_layout = self._key_layout
+        world = self._world
+        player = self._player
+
+        filtered_starts = [sr for sr in key_layout.start_regions if sr in accessible_portals]
+        subset_layout = _make_subset_key_layout(key_layout, filtered_starts)
+        counters = create_key_counters(subset_layout, world, player)
+
+        subset_logic = NewKeyLogic()
+        # bk state is portal-independent — copy from parent
+        subset_logic.bk_regions = self.bk_regions
+        subset_logic.bk_locations = self.bk_locations
+        subset_logic.bk_doors = self.bk_doors
+        subset_logic.blind_boss_restriction = self.blind_boss_restriction
+        subset_logic.attic_required = self.attic_required
+        subset_logic.maiden_required = self.maiden_required
+        # start_regions left empty — subset logic never recurses
+
+        _build_spheres_for_counters(subset_logic, counters, subset_layout, world, player)
+
+        self.portal_subset_cache[accessible_portals] = subset_logic
+        return subset_logic
 
     def build_cache_key(self, state, dungeon_logic, player):
         sk_name = dungeon_logic.small_key_name
@@ -85,27 +152,35 @@ class NewKeyLogic(object):
                     placing_dungeon_key = True
                     break
 
-
         cache_key = (smalls_in_hand, big_in_hand, small_loc_name_set, big_loc_name, placing_dungeon_key)
         return cache_key, small_locations, big_location
 
     def can_reach(self, entrance, state, dungeon_logic, player):
         cache_key, small_locations, big_location = self.build_cache_key(state, dungeon_logic, player)
-        # given the key, have we calculated this already?
-        if cache_key not in self.can_reach_cache:
-            self.calculate_reachability(cache_key, small_locations, big_location, dungeon_logic, player)
-        reachable_regions, reachable_locations = self.can_reach_cache[cache_key]
+        accessible_portals = self._get_accessible_portals(state, player)
+        logic = self
+        # OW→Dungeon entry must use full logic so portal gateway regions enter rrp correctly.
+        if (accessible_portals is not None and accessible_portals
+                and accessible_portals != frozenset(sr for sr, _ in self.start_regions)
+                and entrance.parent_region.type == RegionType.Dungeon):
+            logic = self._get_or_build_subset_logic(accessible_portals)
+        if cache_key not in logic.can_reach_cache:
+            logic.calculate_reachability(cache_key, small_locations, big_location, dungeon_logic, player)
+        reachable_regions, reachable_locations = logic.can_reach_cache[cache_key]
         # the entrances connected region must be in the reachable regions
         # and it must not be a locked door or they must have at least one key to waste
         # this may not be sufficient consider vanilla GT
-        return entrance.connected_region in reachable_regions and (entrance.name not in self.door_minimums or cache_key[0] > 0)
+        return entrance.connected_region in reachable_regions and (entrance.name not in logic.door_minimums or cache_key[0] > 0)
 
     def query_reachability(self, state, dungeon_logic, player):
         cache_key, small_locations, big_location = self.build_cache_key(state, dungeon_logic, player)
-        # given the key, have we calculated this already?
-        if cache_key not in self.can_reach_cache:
-            self.calculate_reachability(cache_key, small_locations, big_location, dungeon_logic, player)
-        return self.can_reach_cache[cache_key]
+        accessible_portals = self._get_accessible_portals(state, player)
+        logic = self
+        if accessible_portals is not None and accessible_portals and accessible_portals != frozenset(sr for sr, _ in self.start_regions):
+            logic = self._get_or_build_subset_logic(accessible_portals)
+        if cache_key not in logic.can_reach_cache:
+            logic.calculate_reachability(cache_key, small_locations, big_location, dungeon_logic, player)
+        return logic.can_reach_cache[cache_key]
 
     # notes, smalls_in_hand can include some of the small_locations, small_locations may have been checked already - this affects cache_key
     # perhaps we should always start at the root sphere, skipping ahead can be problematic if you have enough keys, but not the big key to reach those later spheres
@@ -120,7 +195,7 @@ class NewKeyLogic(object):
         queue = deque([(s, smalls_in_hand, big_in_hand, small_locations) for s in sphere_list])
         while len(queue) > 0:
             sphere, unspent_keys, current_big, small_locations_left = queue.popleft()
-            accessible_locations = sphere.get_accessible_locations(self)
+            accessible_locations = sphere.get_accessible_locations()
             # check if big key is in an accessible location
             big_key_grabbable = not current_big and big_location is not None and big_location in accessible_locations
             # check if we can traverse to a bk_child_sphere
@@ -378,7 +453,7 @@ class KeySphere(object):
 
         self.accessible_locations = None
 
-    def get_accessible_locations(self, key_logic):
+    def get_accessible_locations(self):
         if self.accessible_locations is None:
             self.accessible_locations = list(self.locations)
         return self.accessible_locations
@@ -520,6 +595,23 @@ def calc_extras(amount_needed, dungeon_name, world, player):
     return extras
 
 
+def _find_gateway_region(start_region):
+    """Walk back from start_region to find the first region with a direct OW entrance."""
+    visited = {start_region}
+    queue = deque([start_region])
+    while queue:
+        region = queue.popleft()
+        if any(ext.parent_region.type in (RegionType.LightWorld, RegionType.DarkWorld)
+               for ext in region.entrances):
+            return region
+        for ext in region.entrances:
+            pr = ext.parent_region
+            if pr not in visited and pr.type == RegionType.Dungeon:
+                visited.add(pr)
+                queue.append(pr)
+    return start_region  # fallback — no OW entrance found, use start_region itself
+
+
 def determine_small_key_logic_exhaustive(key_layout, world, player):
     if key_layout.key_counters is None:
         key_layout.key_counters = create_key_counters(key_layout, world, player)
@@ -531,14 +623,24 @@ def determine_small_key_logic_exhaustive(key_layout, world, player):
         key_layout.item_locations.update([l for l in counter.other_locations if l.forced_big_key()])
         key_layout.all_locations.update(key_layout.item_locations)
         key_layout.all_locations.update(counter.other_locations)
-    key_logic = key_layout.key_logic
-    new_logic = key_logic.new_logic
+    new_logic = key_layout.key_logic.new_logic
+    _build_spheres_for_counters(new_logic, counters, key_layout, world, player)
+
+    # Store data needed for lazy portal-subset rebuilds
+    new_logic.start_regions = [(sr, _find_gateway_region(sr)) for sr in key_layout.start_regions]
+    new_logic._key_layout = key_layout
+    new_logic._world = world
+    new_logic._player = player
+
+
+def _build_spheres_for_counters(new_logic, counters, key_layout, world, player):
+    """Build the key sphere graph onto new_logic. Does not update key_layout location sets."""
     new_logic.door_minimums = [door.name for door in key_layout.flat_prop]
     complete_region_set = set()
     complete_location_set = set()
     self_locking_doors = set()
 
-    code, root = next((code, key_counter) for code, key_counter in key_layout.key_counters.items()
+    code, root = next((code, key_counter) for code, key_counter in counters.items()
                        if key_counter.used_keys == 0 and not key_counter.big_key_opened)
     queue: Deque[Tuple[str, KeyCounter, Optional[KeySphere]]] = deque([(code, root, None)])
     while len(queue) > 0:
