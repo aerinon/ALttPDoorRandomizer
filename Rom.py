@@ -942,6 +942,7 @@ def patch_rom(world, rom, player, team, is_mystery=False):
         'Single Bomb': 0xDC, 'Bombs (4)': 0xDD,
         'Bombs (8)': 0xDE, 'Arrows (5)': 0xE1, 'Arrows (10)': 0xE2
     }  #weights, if desired 13, 1, 9, 7, 6, 3, 6, 7, 1, 2, 5, 3
+    possible_memory_locations_to_prizes = {v: k for k, v in possible_prizes.items()}
     uniform_prizes = list(possible_prizes.values())
     prizes[-7:] = random.sample(prizes, 7)
 
@@ -983,20 +984,62 @@ def patch_rom(world, rom, player, team, is_mystery=False):
         dig_prizes = [prize_replacements.get(prize, prize) for prize in dig_prizes]
     rom.write_bytes(0x180100, dig_prizes)
 
-    # write tree pull prizes
-    rom.write_byte(0xEFBD4, prizes.pop())
-    rom.write_byte(0xEFBD5, prizes.pop())
-    rom.write_byte(0xEFBD6, prizes.pop())
+        # store drops for spoiler log
+    tree_pull_tier_one = prizes.pop()
+    tree_pull_tier_two = prizes.pop()
+    tree_pull_tier_three = prizes.pop()
+    rupee_crab_first = prizes.pop()
+    rupee_crab_final = prizes.pop()
+    stun_prize = prizes.pop()
+    fish_prize = prizes.pop()
+
+    player_name = '' if world.players == 1 else str(' (' + world.get_player_names(player) + ')')
+    drops_section = {
+        f'Drops{player_name}': {
+            "PullTree": {
+                "Tier1": possible_memory_locations_to_prizes[tree_pull_tier_one],
+                "Tier2": possible_memory_locations_to_prizes[tree_pull_tier_two],
+                "Tier3": possible_memory_locations_to_prizes[tree_pull_tier_three],
+            },
+            "RupeeCrab": {
+                "Main": possible_memory_locations_to_prizes[rupee_crab_first],
+                "Final": possible_memory_locations_to_prizes[rupee_crab_final],
+            },
+            "Stun": possible_memory_locations_to_prizes[stun_prize],
+            "FishSave": possible_memory_locations_to_prizes[fish_prize],
+        }
+    }
+    world.spoiler.drops.update(drops_section)
+
+    prize_packs_section = {
+        f'PrizePacks{player_name}': {}
+    }
+    prize_pack_values = list(zip(*[iter(prizes[0:56])] * 8))
+    for group_index, prize_pack_set in enumerate(prize_pack_values, 1):
+        group_name = f'EnemyGroup{group_index}'
+        prize_pack_sprites = [possible_memory_locations_to_prizes[prize] for prize in prize_pack_set]
+        prize_pack_name = get_prize_pack_name(prize_pack_sprites)
+        drop_order = ', '.join(prize_pack_sprites)
+        prize_packs_section[f'PrizePacks{player_name}'][group_name] = {
+            f'PrizePackName': prize_pack_name,
+            f'DropOrder': drop_order,
+        }
+    world.spoiler.prize_packs.update(prize_packs_section)
+
+    # write out tree prizes
+    rom.write_byte(0xEFBD4, tree_pull_tier_one)
+    rom.write_byte(0xEFBD5, tree_pull_tier_two)
+    rom.write_byte(0xEFBD6, tree_pull_tier_three)
 
     # rupee crab prizes
-    rom.write_byte(0x329C8, prizes.pop())  # first prize
-    rom.write_byte(0x329C4, prizes.pop())  # final prize
+    rom.write_byte(0x329C8, rupee_crab_first)  # first prize
+    rom.write_byte(0x329C4, rupee_crab_final)  # final prize
 
     # stunned enemy prize
-    rom.write_byte(0x37993, prizes.pop())
+    rom.write_byte(0x37993, stun_prize)
 
     # saved fish prize
-    rom.write_byte(0xE82CC, prizes.pop())
+    rom.write_byte(0xE82CC, fish_prize)
 
     # fill enemy prize packs
     rom.write_bytes(0x37A78, prizes)
@@ -1327,6 +1370,11 @@ def patch_rom(world, rom, player, team, is_mystery=False):
     rom.write_byte(0x180020, digging_game_rng)
     rom.write_byte(0xEFD95, digging_game_rng)
     glitches_enabled = world.logic[player] in ['owglitches', 'hybridglitches', 'nologic']
+
+    # record number of digs for spoiler log
+    player_name = '' if world.players == 1 else str(' (' + world.get_player_names(player) + ')')
+    world.spoiler.dig_game_digs[player_name] = digging_game_rng
+
     rom.write_byte(0x1800A3, 0x01)  # enable correct world setting behaviour after agahnim kills
     rom.write_byte(0x1800A4, 0x01 if not glitches_enabled else 0x00)  # enable POD EG fix
     rom.write_byte(0x180042, 0x01 if world.save_and_quit_from_boss else 0x00)  # Allow Save and Quit after boss kill
@@ -1479,6 +1527,23 @@ try:
     import RaceRom
 except ImportError:
     RaceRom = None
+
+
+def get_prize_pack_name(prize_pack_set):
+    if prize_pack_set[0] == "Small Heart":  # Heart
+        if prize_pack_set[1] == "Fairy":  # Fairy
+            return "LargeVarietyPack"
+        return "HeartsPack"
+    if prize_pack_set[0] == "Rupees (5)":  # RupeeBlue
+        return "RupeesPack"
+    if prize_pack_set[0] == "Single Bomb":  # BombRefill1
+        return "BombsPack"
+    if prize_pack_set[0] == "Small Magic":  # MagicRefillSmall
+        return "SmallVarietyPack"
+    if prize_pack_set[0] == "Big Magic":  # MagicRefillFull
+        return "MagicPack"
+    if prize_pack_set[0] == "Arrows (5)":  # ArrowRefill5
+        return "ArrowsPack"
 
 def patch_race_rom(rom):
     rom.write_bytes(0x180213, [0x01, 0x00]) # Tournament Seed
@@ -1861,6 +1926,9 @@ def write_strings(rom, world, player, team):
             "    Crosskeys\n"
             "    Tournament\n"
             "    Winners\n{HARP}\n"
+            "    ~~~2025~~~\n      humbugh\n\n"
+            "    ~~~2024~~~\n    Gammachuu\n\n"
+            "    ~~~2023~~~\n    WallKicks\n\n"
             "    ~~~2022~~~\n     Schulzer\n\n"
             "    ~~~2021~~~\n      Goomba\n\n"
             "    ~~~2020~~~\n    Linlinlin\n\n"
@@ -2201,7 +2269,12 @@ def write_strings(rom, world, player, team):
 
     # this is what shows after getting the green pendant item in rando
     tt['sahasrahla_quest_have_master_sword'] = Sahasrahla2_texts[random.randint(0, len(Sahasrahla2_texts) - 1)]
-    tt['blind_by_the_light'] = Blind_texts[random.randint(0, len(Blind_texts) - 1)]
+    blind_by_the_light_text = Blind_texts[random.randint(0, len(Blind_texts) - 1)]
+    tt['blind_by_the_light'] = blind_by_the_light_text
+    player_name = '' if world.players == 1 else str(' (' + world.get_player_names(player) + ')')
+    world.spoiler.ingame_texts[player_name] = {
+        'Blind Pun': str(blind_by_the_light_text).replace('\n', ' ')
+    }
 
     if world.goal[player] in ['triforcehunt']:
         tt['ganon_fall_in_alt'] = 'Why are you even here?\n You can\'t even hurt me! Get the Triforce Pieces.'
