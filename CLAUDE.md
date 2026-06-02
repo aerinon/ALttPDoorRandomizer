@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Repository**: https://github.com/aerinon/ALttPDoorRandomizer
 - **Python Version**: 3.10+
-- **Current Branch**: DoorDevUnstable (dev branch: NewGeneration)
+- **Current Branch**: NewGeneration (active feature development branch)
 - **Discord**: #door-rando and #bug-reports channels at ALTTP Randomizer discord
 
 ## Development Commands
@@ -212,8 +212,8 @@ Use `TestSuite.py` for batch generation testing across modes (Open/Standard/Inve
 - **Pseudo Boots**: Allows dashing but gates certain sequence breaks
 
 ### Branch Structure
-- **DoorDev**: Main development branch (use for PRs)
-- **DoorDevUnstable**: Current working branch
+- **NewGeneration**: Active feature development branch — all new features branch from here, PRs target here
+- **DoorDev** / **DoorDevUnstable**: Maintenance branches kept in sync with each other
 - **Dev/Master**: Do NOT use for PRs
 
 ### Git Workflow
