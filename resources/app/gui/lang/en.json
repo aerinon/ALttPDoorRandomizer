@@ -76,6 +76,7 @@
     "randomizer.dungeon.dungeonintensity.1": "1: Normal Supertile and Spiral Stairs",
     "randomizer.dungeon.dungeonintensity.2": "2: Open Edges, Straight Stairs and In-Room Stairs",
     "randomizer.dungeon.dungeonintensity.3": "3: Dungeon Lobbies",
+    "randomizer.dungeon.dungeonintensity.4": "4: Pits and Warp Tiles",
     "randomizer.dungeon.dungeonintensity.random": "Random",
 
     "randomizer.dungeon.smaller_dungeon_gen": "Smaller Dungeon Generation",

@@ -443,7 +443,7 @@ def set_world_options(world, args, fish):
     world.any_enemy_logic = args.any_enemy_logic.copy()
     world.beemizer = {player: str(args.beemizer[player]) for player in range(1, world.players + 1)}
     world.dungeon_shuffle_algorithm = args.dungeon_shuffle_algorithm.copy()
-    world.intensity = {player: random.randint(1, 3) if args.intensity[player] == 'random' else int(args.intensity[player]) for player in range(1, world.players + 1)}
+    world.intensity = {player: random.randint(1, 4) if args.intensity[player] == 'random' else int(args.intensity[player]) for player in range(1, world.players + 1)}
     world.door_type_mode = args.door_type_mode.copy()
     world.door_type_distribution = args.door_type_distribution.copy()
     world.trap_door_mode = args.trap_door_mode.copy()

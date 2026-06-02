@@ -249,6 +249,7 @@
       "1:       Shuffles normal doors and spiral staircases",
       "2:       And shuffles open edges and both types of straight staircases",
       "3:       And shuffles dungeon lobbies",
+      "4:       And shuffles pit falls and warp tiles",
       "random:  Picks one of those at random"
     ],
     "smaller_dungeon_gen" : [ "Enable smaller dungeon generation to reduce door density. (default: %(default)s)" ],

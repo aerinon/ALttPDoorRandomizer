@@ -832,10 +832,10 @@ class DoorFlags:
         self.ladder: bool = False
         self.edges: str = 'none'
         self.lobbies: bool = False
+        self.pit_warps: str = 'none'  # none | pits | warps | both
         self.vanilla_traps: bool = False
         self.stair_loops: bool = False
         self.decoupled: bool = False
-        self.warps_pits: bool = False  # NotYetImplemented
         self.cave_interiors: bool = False  # NotYetImplemented
         self.intratile: bool = False   # NotYetImplemented
 
@@ -860,6 +860,8 @@ class DoorFlags:
                 self.edges = 'both'
             if world.intensity[player] >= 3:
                 self.lobbies = True
+            if world.intensity[player] >= 4:
+                self.pit_warps = 'both'
         self.std_flag = world.mode[player] == 'standard'
         self.rupee_bow_flag = world.bow_mode[player].startswith('retro')  # rupee bow
         self.world, self.player = world, player
@@ -882,6 +884,8 @@ class DoorFlags:
             self.edges = intensity['edges']
         if 'lobbies' in intensity:
             self.lobbies = intensity['lobbies']
+        if 'pit_warps' in intensity:
+            self.pit_warps = intensity['pit_warps']
 
 
 def score_door(item):

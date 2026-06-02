@@ -196,7 +196,7 @@
   },
   "intensity": {
     "choices":[
-      "3", "2", "1", "random"
+      "4", "3", "2", "1", "random"
     ]
   },
   "smaller_dungeon_gen": {
