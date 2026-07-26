@@ -203,6 +203,7 @@ def main(args, seed=None, fish=None):
         if world.mode[player] == 'standard' and world.enemy_shuffle[player] != 'none':
             if hasattr(world,"escape_assist") and player in world.escape_assist:
                 world.escape_assist[player].append('bombs') # enemized escape assumes infinite bombs available and will likely be unbeatable without it
+                world.escape_assist[player].append('arrows')               
 
         if args.usestartinventory[player]:
             for tok in filter(None, args.startinventory[player].split(',')):
