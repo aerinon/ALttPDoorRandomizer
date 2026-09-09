@@ -98,77 +98,7 @@ def main(args, seed=None, fish=None):
     if args.securerandom:
         world.seed = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(9))
 
-    world.boots_hint = args.boots_hint.copy()
-    world.remote_items = args.remote_items.copy()
-    world.mapshuffle = args.mapshuffle.copy()
-    world.compassshuffle = args.compassshuffle.copy()
-    world.keyshuffle = args.keyshuffle.copy()
-    world.bigkeyshuffle = args.bigkeyshuffle.copy()
-    world.bombbag = args.bombbag.copy()
-    world.flute_mode = args.flute_mode.copy()
-    world.bow_mode = args.bow_mode.copy()
-    world.crystals_needed_for_ganon = {player: random.randint(0, 7) if args.crystals_ganon[player] == 'random' else int(args.crystals_ganon[player]) for player in range(1, world.players + 1)}
-    world.crystals_needed_for_gt = {player: random.randint(0, 7) if args.crystals_gt[player] == 'random' else int(args.crystals_gt[player]) for player in range(1, world.players + 1)}
-    world.crystals_ganon_orig = args.crystals_ganon.copy()
-    world.crystals_gt_orig = args.crystals_gt.copy()
-    world.open_pyramid = args.openpyramid.copy()
-    world.boss_shuffle = args.shufflebosses.copy()
-    world.enemy_shuffle = args.shuffleenemies.copy()
-    world.enemy_health = args.enemy_health.copy()
-    world.enemy_damage = args.enemy_damage.copy()
-    world.any_enemy_logic = args.any_enemy_logic.copy()
-    world.beemizer = {player: str(args.beemizer[player]) for player in range(1, world.players + 1)}
-    world.intensity = {player: random.randint(1, 3) if args.intensity[player] == 'random' else int(args.intensity[player]) for player in range(1, world.players + 1)}
-    world.door_type_mode = args.door_type_mode.copy()
-    world.trap_door_mode = args.trap_door_mode.copy()
-    world.key_logic_algorithm = args.key_logic_algorithm.copy()
-    world.decoupledoors = args.decoupledoors.copy()
-    world.door_self_loops = args.door_self_loops.copy()
-    world.experimental = args.experimental.copy()
-    world.dungeon_counters = args.dungeon_counters.copy()
-    world.fish = fish
-    world.shopsanity = args.shopsanity.copy()
-    world.dropshuffle = args.dropshuffle.copy()
-    world.pottery = args.pottery.copy()
-    world.potshuffle = args.shufflepots.copy()
-    world.mixed_travel = args.mixed_travel.copy()
-    world.standardize_palettes = args.standardize_palettes.copy()
-    world.shufflelinks = args.shufflelinks.copy()
-    world.shuffletavern = args.shuffletavern.copy()
-    world.skullwoods = args.skullwoods.copy()
-    world.linked_drops = args.linked_drops.copy()
-    world.pseudoboots = args.pseudoboots.copy()
-    world.mirrorscroll = args.mirrorscroll.copy()
-    world.overworld_map = args.overworld_map.copy()
-    world.take_any = args.take_any.copy()
-    world.restrict_boss_items = args.restrict_boss_items.copy()
-    world.collection_rate = args.collection_rate.copy()
-    world.colorizepots = args.colorizepots.copy()
-    world.aga_randomness = args.aga_randomness.copy()
-    world.money_balance = args.money_balance.copy()
-
-    world.treasure_hunt_count = {}
-    world.treasure_hunt_total = {}
-    for p in args.triforce_goal:
-        if int(args.triforce_goal[p]) != 0 or int(args.triforce_pool[p]) != 0 or int(args.triforce_goal_min[p]) != 0 or int(args.triforce_goal_max[p]) != 0 or int(args.triforce_pool_min[p]) != 0 or int(args.triforce_pool_max[p]) != 0:
-            if int(args.triforce_goal[p]) != 0:
-                world.treasure_hunt_count[p] = int(args.triforce_goal[p])
-            elif int(args.triforce_goal_min[p]) != 0 and int(args.triforce_goal_max[p]) != 0:
-                world.treasure_hunt_count[p] = random.randint(int(args.triforce_goal_min[p]), int(args.triforce_goal_max[p]))
-            else:
-                world.treasure_hunt_count[p] = 8 if world.goal[p] == 'trinity' else 20
-            if int(args.triforce_pool[p]) != 0:
-                world.treasure_hunt_total[p] = int(args.triforce_pool[p])
-            elif int(args.triforce_pool_min[p]) != 0 and int(args.triforce_pool_max[p]) != 0:
-                world.treasure_hunt_total[p] = random.randint(max(int(args.triforce_pool_min[p]), world.treasure_hunt_count[p] + int(args.triforce_min_difference[p])), min(int(args.triforce_pool_max[p]), world.treasure_hunt_count[p] + int(args.triforce_max_difference[p])))
-            else:
-                world.treasure_hunt_total[p] = 10 if world.goal[p] == 'trinity' else 30
-        else:
-            # this will be handled in ItemList.py and custom item pool is used to determine the numbers
-            world.treasure_hunt_count[p], world.treasure_hunt_total[p] = 0, 0
-
-    world.rom_seeds = {player: random.randint(0, 999999999) for player in range(1, world.players + 1)}
-    world.finish_init()
+    set_world_options(world, args, fish)
 
     # custom settings - these haven't been promoted to full settings yet
     in_progress_settings = ['force_enemy', 'free_lamp_cone']
@@ -467,6 +397,80 @@ def main(args, seed=None, fish=None):
 #    print_wiki_doors_by_region(dungeon_regions,world,1)
 
     return world
+
+
+def set_world_options(world, args, fish):
+    world.boots_hint = args.boots_hint.copy()
+    world.remote_items = args.remote_items.copy()
+    world.mapshuffle = args.mapshuffle.copy()
+    world.compassshuffle = args.compassshuffle.copy()
+    world.keyshuffle = args.keyshuffle.copy()
+    world.bigkeyshuffle = args.bigkeyshuffle.copy()
+    world.bombbag = args.bombbag.copy()
+    world.flute_mode = args.flute_mode.copy()
+    world.bow_mode = args.bow_mode.copy()
+    world.crystals_needed_for_ganon = {player: random.randint(0, 7) if args.crystals_ganon[player] == 'random' else int(args.crystals_ganon[player]) for player in range(1, world.players + 1)}
+    world.crystals_needed_for_gt = {player: random.randint(0, 7) if args.crystals_gt[player] == 'random' else int(args.crystals_gt[player]) for player in range(1, world.players + 1)}
+    world.crystals_ganon_orig = args.crystals_ganon.copy()
+    world.crystals_gt_orig = args.crystals_gt.copy()
+    world.open_pyramid = args.openpyramid.copy()
+    world.boss_shuffle = args.shufflebosses.copy()
+    world.enemy_shuffle = args.shuffleenemies.copy()
+    world.enemy_health = args.enemy_health.copy()
+    world.enemy_damage = args.enemy_damage.copy()
+    world.any_enemy_logic = args.any_enemy_logic.copy()
+    world.beemizer = {player: str(args.beemizer[player]) for player in range(1, world.players + 1)}
+    world.intensity = {player: random.randint(1, 3) if args.intensity[player] == 'random' else int(args.intensity[player]) for player in range(1, world.players + 1)}
+    world.door_type_mode = args.door_type_mode.copy()
+    world.trap_door_mode = args.trap_door_mode.copy()
+    world.key_logic_algorithm = args.key_logic_algorithm.copy()
+    world.decoupledoors = args.decoupledoors.copy()
+    world.door_self_loops = args.door_self_loops.copy()
+    world.experimental = args.experimental.copy()
+    world.dungeon_counters = args.dungeon_counters.copy()
+    world.fish = fish
+    world.shopsanity = args.shopsanity.copy()
+    world.dropshuffle = args.dropshuffle.copy()
+    world.pottery = args.pottery.copy()
+    world.potshuffle = args.shufflepots.copy()
+    world.mixed_travel = args.mixed_travel.copy()
+    world.standardize_palettes = args.standardize_palettes.copy()
+    world.shufflelinks = args.shufflelinks.copy()
+    world.shuffletavern = args.shuffletavern.copy()
+    world.skullwoods = args.skullwoods.copy()
+    world.linked_drops = args.linked_drops.copy()
+    world.pseudoboots = args.pseudoboots.copy()
+    world.mirrorscroll = args.mirrorscroll.copy()
+    world.overworld_map = args.overworld_map.copy()
+    world.take_any = args.take_any.copy()
+    world.restrict_boss_items = args.restrict_boss_items.copy()
+    world.collection_rate = args.collection_rate.copy()
+    world.colorizepots = args.colorizepots.copy()
+    world.aga_randomness = args.aga_randomness.copy()
+    world.money_balance = args.money_balance.copy()
+
+    world.treasure_hunt_count = {}
+    world.treasure_hunt_total = {}
+    for p in args.triforce_goal:
+        if int(args.triforce_goal[p]) != 0 or int(args.triforce_pool[p]) != 0 or int(args.triforce_goal_min[p]) != 0 or int(args.triforce_goal_max[p]) != 0 or int(args.triforce_pool_min[p]) != 0 or int(args.triforce_pool_max[p]) != 0:
+            if int(args.triforce_goal[p]) != 0:
+                world.treasure_hunt_count[p] = int(args.triforce_goal[p])
+            elif int(args.triforce_goal_min[p]) != 0 and int(args.triforce_goal_max[p]) != 0:
+                world.treasure_hunt_count[p] = random.randint(int(args.triforce_goal_min[p]), int(args.triforce_goal_max[p]))
+            else:
+                world.treasure_hunt_count[p] = 8 if world.goal[p] == 'trinity' else 20
+            if int(args.triforce_pool[p]) != 0:
+                world.treasure_hunt_total[p] = int(args.triforce_pool[p])
+            elif int(args.triforce_pool_min[p]) != 0 and int(args.triforce_pool_max[p]) != 0:
+                world.treasure_hunt_total[p] = random.randint(max(int(args.triforce_pool_min[p]), world.treasure_hunt_count[p] + int(args.triforce_min_difference[p])), min(int(args.triforce_pool_max[p]), world.treasure_hunt_count[p] + int(args.triforce_max_difference[p])))
+            else:
+                world.treasure_hunt_total[p] = 10 if world.goal[p] == 'trinity' else 30
+        else:
+            # this will be handled in ItemList.py and custom item pool is used to determine the numbers
+            world.treasure_hunt_count[p], world.treasure_hunt_total[p] = 0, 0
+
+    world.rom_seeds = {player: random.randint(0, 999999999) for player in range(1, world.players + 1)}
+    world.finish_init()
 
 
 def copy_world(world):
