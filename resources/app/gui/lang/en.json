@@ -89,6 +89,7 @@
     "randomizer.dungeon.key_logic_algorithm.dangerous": "Dangerous",
     "randomizer.dungeon.key_logic_algorithm.partial": "Partial Protection",
     "randomizer.dungeon.key_logic_algorithm.strict": "Strict",
+    "randomizer.dungeon.key_logic_algorithm.static": "Static (Entrance Randomizer)",
 
     "randomizer.dungeon.experimental": "Enable Experimental Features",
 

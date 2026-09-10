@@ -263,7 +263,8 @@
       "Key Logic Algorithm (default: %(default)s)",
       "dangerous: Key usage must follow logic for safety",
       "partial: Partial protection when using certain minor glitches",
-      "strict:  Ensure small keys are available"
+      "strict:  Ensure small keys are available",
+      "static:  Entrance randomizer key rules; vanilla doors and key drops only"
     ],
     "decoupledoors" : [ "Door entrances and exits are decoupled" ],
     "door_self_loops" : [ "Spiral stairs are allowed to self-loop" ],

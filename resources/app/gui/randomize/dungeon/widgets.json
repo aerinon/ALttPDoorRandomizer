@@ -6,7 +6,8 @@
       "options": [
         "partial",
         "strict",
-        "dangerous"
+        "dangerous",
+        "static"
       ],
       "config": {
         "padx": [20,0],
