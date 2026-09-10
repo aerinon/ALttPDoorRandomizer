@@ -24,14 +24,14 @@ PRIZES = ['Green Pendant', 'Red Pendant', 'Blue Pendant', 'Beat Agahnim 1', 'Bea
           'Crystal 1', 'Crystal 2', 'Crystal 3', 'Crystal 4', 'Crystal 5', 'Crystal 6', 'Crystal 7']
 
 
-def build_vanilla_world(mode='open', logic='noglitches'):
+def build_vanilla_world(mode='open', logic='noglitches', customizer=None):
     player = 1
     args = parse_cli(['--mode', mode, '--logic', logic, '--shuffle', 'vanilla', '--door_shuffle', 'vanilla',
                       '--intensity', '1', '--suppress_rom', '--spoiler', 'none'])
     world = World(args.multi, args.shuffle, args.door_shuffle, args.logic, args.mode, args.swords,
                   args.difficulty, args.item_functionality, args.timer, args.progressive, args.goal, args.algorithm,
                   args.accessibility, args.shuffleganon, args.custom, args.customitemarray, args.hints, args.spoiler)
-    world.customizer = None
+    world.customizer = customizer
     world.seed = 1
     set_world_options(world, args, BabelFish(lang='en'))
     world.difficulty_requirements[player] = difficulties[world.difficulty[player]]
