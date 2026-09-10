@@ -65,6 +65,18 @@ class TestStaticKeyLogic(unittest.TestCase):
         finally:
             self.place('Ganons Tower - Map Chest', None)
 
+    def test_ganons_tower_bottom_always_three_keys(self):
+        gt = 'Ganons Tower'
+        bottom = ["Ganons Tower - Bob's Chest", 'Ganons Tower - Big Key Chest', 'Ganons Tower - Big Chest',
+                  'Ganons Tower - Big Key Room - Left', 'Ganons Tower - Big Key Room - Right']
+        for where in bottom + ['Ganons Tower - Randomizer Room - Top Left', 'Ganons Tower - Compass Room - Top Left']:
+            self.place(where, 'Big Key (Ganons Tower)')
+            try:
+                for name in bottom:
+                    self.assertEqual(self.min_keys(name, gt), 3, f'{name} with big key at {where}')
+            finally:
+                self.place(where, None)
+
     def test_hyrule_castle_open_mode(self):
         self.assertEqual(self.min_keys('Hyrule Castle - Boomerang Chest', 'Hyrule Castle'), 1)
         self.assertEqual(self.min_keys("Hyrule Castle - Zelda's Chest", 'Hyrule Castle'), 1)

@@ -93,6 +93,20 @@ def static_door_rules(world, player):
                 spec['big_key_in'] = [spec['big_key_in']]
             specs[door] = spec
     apply_key_rule_specs(world, player, specs, chest_counting=True, validate=False)
+    # the analysis's own conditionals would let doors open with fewer keys than the table says
+    for door_name, spec in specs.items():
+        door = world.get_door(door_name, player)
+        for d, d_spec in ((door, spec), (door.dest, specs.get(door.dest.name, {}) if door.dest else None)):
+            key_logic = next((kl for kl in world.key_logic[player].values() if d and d.name in kl.door_rules), None)
+            if key_logic is None or d_spec is None:
+                continue
+            rule = key_logic.door_rules[d.name]
+            if 'big_key_in' not in d_spec:
+                rule.new_rules.pop((KeyRuleType.Lock, key_logic.bk_name), None)
+                rule.alternate_small_key, rule.alternate_big_key_loc = None, set()
+            if 'small_key_in' not in d_spec:
+                rule.new_rules.pop(KeyRuleType.AllowSmall, None)
+                rule.allow_small, rule.small_location = False, None
 
 
 def set_static_key_rules(world, player):
