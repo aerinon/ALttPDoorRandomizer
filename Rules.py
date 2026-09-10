@@ -2387,23 +2387,24 @@ def eval_small_key_door_main(state, door_name, dungeon, player):
     if door_name not in key_logic.door_rules:
         return False
     door_rule = key_logic.door_rules[door_name]
+    has_keys = state.has_sm_key_strict if key_logic.chest_counting else state.has_sm_key
     door_openable = False
     for ruleType, number in door_rule.new_rules.items():
         if door_openable:
             return True
         if ruleType == KeyRuleType.WorstCase:
-            door_openable |= state.has_sm_key(key_logic.small_key_name, player, number)
+            door_openable |= has_keys(key_logic.small_key_name, player, number)
         elif ruleType == KeyRuleType.AllowSmall:
             small_loc_item = door_rule.small_location.item
             if small_loc_item and small_loc_item.name == key_logic.small_key_name and small_loc_item.player == player:
-                door_openable |= state.has_sm_key(key_logic.small_key_name, player, number)
+                door_openable |= has_keys(key_logic.small_key_name, player, number)
         elif isinstance(ruleType, tuple):
             lock, lock_item = ruleType
             # this doesn't track logical locks yet, i.e. hammer locks the item and hammer is there, but the item isn't
             for loc in door_rule.alternate_big_key_loc:
                 spot = state.world.get_location(loc, player)
                 if spot.item and spot.item.name == lock_item:
-                    door_openable |= state.has_sm_key(key_logic.small_key_name, player, number)
+                    door_openable |= has_keys(key_logic.small_key_name, player, number)
                     break
     return door_openable
 
@@ -2415,17 +2416,18 @@ def eval_small_key_door_partial_main(state, door_name, dungeon, player):
     if door_name not in key_logic.door_rules:
         return False
     door_rule = key_logic.door_rules[door_name]
+    has_keys = state.has_sm_key_strict if key_logic.chest_counting else state.has_sm_key
     door_openable = False
     for ruleType, number in door_rule.new_rules.items():
         if door_openable:
             return True
         if ruleType == KeyRuleType.WorstCase:
             number = min(number, door_rule.small_key_num)
-            door_openable |= state.has_sm_key(key_logic.small_key_name, player, number)
+            door_openable |= has_keys(key_logic.small_key_name, player, number)
         elif ruleType == KeyRuleType.AllowSmall:
             small_loc_item = door_rule.small_location.item
             if small_loc_item and small_loc_item.name == key_logic.small_key_name and small_loc_item.player == player:
-                door_openable |= state.has_sm_key(key_logic.small_key_name, player, number)
+                door_openable |= has_keys(key_logic.small_key_name, player, number)
         elif isinstance(ruleType, tuple):
             lock, lock_item = ruleType
             # this doesn't track logical locks yet, i.e. hammer locks the item and hammer is there, but the item isn't
@@ -2433,11 +2435,11 @@ def eval_small_key_door_partial_main(state, door_name, dungeon, player):
                 spot = state.world.get_location(loc, player)
                 if spot.item and spot.item.name == lock_item:
                     number = min(number, door_rule.alternate_small_key)
-                    door_openable |= state.has_sm_key(key_logic.small_key_name, player, number)
+                    door_openable |= has_keys(key_logic.small_key_name, player, number)
                     break
             if state.placing_items and any(lock_item == item.name for item in state.placing_items):
                 number = min(number, door_rule.alternate_small_key)
-                door_openable |= state.has_sm_key(key_logic.small_key_name, player, number)
+                door_openable |= has_keys(key_logic.small_key_name, player, number)
     return door_openable
 
 

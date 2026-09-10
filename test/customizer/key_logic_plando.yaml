@@ -1,0 +1,29 @@
+meta:
+  players: 1
+settings:
+  1:
+    door_shuffle: vanilla
+    shuffle: vanilla
+    mode: open
+doors:
+  1:
+    key_logic:
+      counting: chests
+      doors:
+        GT Torch EN: 0
+        GT Tile Room EN: 4
+        GT Hookshot ES:
+          keys: 4
+          big_key_in: Ganons Tower - Map Chest
+          small_key_in: Ganons Tower - Map Chest
+        GT Double Switch EN: 2
+        GT Firesnake Room SW: 4
+        GT Conveyor Star Pits EN: 4
+        GT Mini Helmasaur Room WN: 3
+        GT Crystal Circles SW: 4
+        PoD Middle Cage N: 1
+        PoD Arena Main NW: 4
+        PoD Falling Bridge WN: 6
+        PoD Basement Ledge Up Stairs: 6
+        PoD Compass Room SE: 6
+        PoD Dark Pegs WN: 6
