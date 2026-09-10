@@ -53,6 +53,9 @@ def set_rules(world, player):
         standard_rules(world, player)
     else:
         misc_key_rules(world, player)
+    if world.key_logic_algorithm[player] == 'static':
+        from source.dungeon.StaticKeyLogic import set_static_key_rules
+        set_static_key_rules(world, player)
 
     bomb_rules(world, player)
     pot_rules(world, player)

@@ -1410,13 +1410,20 @@ def apply_custom_key_rules(world, player):
         logger.warning('key_logic customization ignored for player %s: universal keys do not use door rules', player)
         return
     if world.key_logic_algorithm[player] == 'strict':
-        raise Exception('key_logic customization requires the partial or dangerous key logic algorithm')
+        raise Exception('key_logic customization requires the partial, dangerous or static key logic algorithm')
     chest_counting = custom['counting'] == 'chests'
+    if world.key_logic_algorithm[player] == 'static' and not chest_counting:
+        raise Exception('key_logic: the static algorithm counts chest keys, set counting: chests')
     if chest_counting and world.dropshuffle[player] != 'none':
         raise Exception('key_logic: counting chests requires unshuffled key drops')
+    apply_key_rule_specs(world, player, custom['doors'], chest_counting, validate=True)
+
+
+def apply_key_rule_specs(world, player, specs, chest_counting, validate):
+    logger = logging.getLogger('')
     layouts = world.key_layout[player]
     resolved, listed = {}, set()
-    for door_name, spec in custom['doors'].items():
+    for door_name, spec in specs.items():
         door = world.get_door(door_name, player)
         dungeon = next((name for name, layout in layouts.items() if door in layout.flat_prop), None)
         if dungeon is None:
@@ -1435,13 +1442,15 @@ def apply_custom_key_rules(world, player):
             key_logic.chest_counting = True
             missing = [d.name for d in layouts[dungeon].flat_prop
                        if d not in resolved and KeyRuleType.WorstCase in key_logic.door_rules.get(d.name, DoorRules(0, True)).new_rules]
-            if missing:
+            if missing and validate:
                 raise Exception(f'key_logic: counting chests needs every key door of {dungeon} listed, missing {missing}')
     for door, (dungeon, spec) in resolved.items():
         layout = layouts[dungeon]
         key_logic = layout.key_logic
         number = spec['keys']
-        if chest_counting:
+        if not validate:
+            floor, ceiling = None, None
+        elif chest_counting:
             floor, ceiling = None, layout.max_chests
         else:
             floor = min((ctr.used_keys + 1 for ctr in layout.key_counters.values() if door in ctr.child_doors),
@@ -1454,7 +1463,7 @@ def apply_custom_key_rules(world, player):
             # unlisted pair side keeps its own floor
             logger.debug('key_logic: %s raised from %s to its minimum of %s keys', door.name, number, floor)
             number = floor
-        if number > ceiling:
+        if ceiling is not None and number > ceiling:
             raise Exception(f'key_logic: {door.name} cannot require {number} keys, {dungeon} only has {ceiling}')
         rule = key_logic.door_rules.get(door.name)
         if rule is None:
@@ -1463,7 +1472,7 @@ def apply_custom_key_rules(world, player):
             if door.dest and door.dest.name in key_logic.door_rules:
                 rule.opposite = key_logic.door_rules[door.dest.name]
                 rule.opposite.opposite = rule
-        elif not chest_counting:
+        elif validate and not chest_counting:
             current = min(rule.new_rules.get(KeyRuleType.WorstCase, rule.small_key_num), rule.small_key_num)
             if number < current:
                 logger.warning('key_logic: %s lowered from %s to %s keys, the analysis considered that a risk',
