@@ -1043,20 +1043,24 @@ def balance_money_progression(world):
                 else:
                     difference = 0
                     target_player = next(p for p in solvent)
+                def rupee_value(location):
+                    return rupee_chart[location.item.name] if location.item.name in rupee_chart else 0
                 while difference > 0:
                     swap_targets = [x for x in unchecked_locations if x not in sphere_locations and x.item.name.startswith('Rupees') and x.item.player == target_player]
-                    if len(swap_targets) == 0:
+                    best_swap = max(swap_targets, key=rupee_value) if swap_targets else None
+                    best_value = rupee_value(best_swap) if best_swap else 300
+                    increase_targets = [x for x in balance_locations[target_player] if rupee_value(x) < best_value]
+                    if len(increase_targets) == 0 and best_swap is not None:
+                        # every later rupee is worth no more than what the early spheres already hold; mint a 300 instead
                         best_swap, best_value = None, 300
-                    else:
-                        best_swap = max(swap_targets, key=lambda t: rupee_chart[t.item.name])
-                        best_value = rupee_chart[best_swap.item.name]
-                    increase_targets = [x for x in balance_locations[target_player] if x.item.name in rupee_chart and rupee_chart[x.item.name] < best_value]
+                        increase_targets = [x for x in balance_locations[target_player] if rupee_value(x) < best_value]
                     if len(increase_targets) == 0:
-                        increase_targets = [x for x in balance_locations[target_player] if (rupee_chart[x.item.name] if x.item.name in rupee_chart else 0) < best_value]
-                    if len(increase_targets) == 0:
-                        raise Exception('No early sphere swaps for rupees - money grind would be required - bailing for now')
-                    best_target = min(increase_targets, key=lambda t: rupee_chart[t.item.name] if t.item.name in rupee_chart else 0)
-                    old_value = rupee_chart[best_target.item.name] if best_target.item.name in rupee_chart else 0
+                        logger.warning(f'Player {target_player} is {difference:.0f} rupees short and no early location can hold more money - a money grind may be required')
+                        wallet[target_player] += difference
+                        difference = 0
+                        break
+                    best_target = min(increase_targets, key=rupee_value)
+                    old_value = rupee_value(best_target)
                     if best_swap is None:
                         logger.debug(f'Upgrading {best_target.item.name} @ {best_target.name} for 300 Rupees')
                         best_target.item = ItemFactory('Rupees (300)', best_target.item.player)
