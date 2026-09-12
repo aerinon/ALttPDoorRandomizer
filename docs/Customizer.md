@@ -150,7 +150,7 @@ Chris Houlihan and Links House should be specified together or not at all.
 
 ### doors
 
-This must be defined by player. Each player number should be listed with the appropriate sections. This section has three primary subsections: `lobbies` and `doors`.
+This must be defined by player. Each player number should be listed with the appropriate sections. This section has three primary subsections: `lobbies`, `doors` and `key_logic`.
 
 `lobbies` lists the doors by which each dungeon is entered
 
@@ -180,6 +180,30 @@ You'll note that sub-tile door do not need to be listed, but if you want them to
  ##### Known Issue
  
  If you specify a door type and those doors cannot be a stateful door due to the nature of the supertile (or you've placed too many on the supertile) an exception is thrown. 
+
+`key_logic` overrides the number of small keys the logic requires to open a small key door. Normally the key logic analysis computes this number; this section lets a preset set it, for example to test a key logic scenario.
+
+```
+key_logic:
+  counting: chests
+  doors:
+    GT Tile Room EN: 3
+    GT Hookshot ES:
+      keys: 4
+      big_key_in: Ganons Tower - Map Chest
+      with_big_key: 3
+      small_key_in: Ganons Tower - Map Chest
+      with_small_key: 3
+    Hyrule Dungeon Map Room Key Door S: 1
+```
+
+`counting` is `all` (default), where a number is the total keys of that dungeon the player must hold, drop keys included, or `chests`, where only chest keys count and drops are ignored. `chests` matches the entrance randomizer's key rules and needs unshuffled key drops; 0 then means the drops on the way cover the door.
+
+`doors` maps a door name, as used in the `doors` section, to a number or to a mapping with `keys` and optional conditionals: `big_key_in` names one chest or a list of chests, and `with_big_key` is the number that applies while the big key sits in one of them (default one fewer than `keys`); `small_key_in` and `with_small_key` do the same for a small key behind the door. A plain number keeps the conditionals the analysis found for that door, lowered to one below the new number.
+
+The door must be a small key door in the final layout (list it under `doors` with `type: Key Door` to force one). Either side of a paired door may be named; the other side gets the same number, without conditionals, unless it is listed on its own.
+
+With `counting: all` the number must be at least the fewest keys any route could have used before reaching the door plus one, and at most the dungeon's total key count; an unlisted pair side below its own minimum takes that minimum. With `counting: chests` the ceiling is the dungeon's chest key count. Anything outside the range throws an exception. The section only affects the `partial` and `dangerous` key logic algorithms. It is ignored with universal keys and throws with `strict`, which never reads door rules. Key placement rules are not changed, so a preset that the placement validator considers a keylock still fails generation. When a generated seed is exported as a customizer file, this section is filled in with the numbers the logic used, one entry per door side, without conditionals.
 
 ### medallions
 

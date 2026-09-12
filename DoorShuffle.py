@@ -20,7 +20,8 @@ from DungeonGenerator import create_dungeon_builders, split_dungeon_builder, sim
 from DungeonGenerator import dungeon_portals, dungeon_drops, connect_doors, count_reserved_locations
 from DungeonGenerator import valid_region_to_explore
 from KeyDoorShuffle import analyze_dungeon, build_key_layout, validate_key_layout, determine_prize_lock
-from KeyDoorShuffle import validate_bk_layout, DoorRules
+from KeyDoorShuffle import validate_bk_layout, DoorRules, apply_custom_key_rules
+from source.dungeon.StaticKeyLogic import static_door_rules
 from Utils import ncr, kth_combination
 
 
@@ -51,6 +52,9 @@ def link_doors(world, player):
             world.get_door("Skull Pinball WS", player).no_exit()
             world.swamp_patch_required[player] = orig_swamp_patch
             link_doors_prep(world, player)
+    if world.key_logic_algorithm[player] == 'static':
+        static_door_rules(world, player)
+    apply_custom_key_rules(world, player)
 
 
 def link_doors_prep(world, player):

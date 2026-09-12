@@ -63,6 +63,7 @@ class KeyLogic(object):
         self.dungeon = dungeon_name
         self.sm_doors = {}
         self.prize_location = None
+        self.chest_counting = False  # door numbers count chest keys only, drops excluded
 
     def check_placement(self, unplaced_keys, wild_keys, reached_keys, self_locking_keys,
                         big_key_loc=None, prize_loc=None, cr_count=7):
@@ -1398,6 +1399,105 @@ def set_paired_rules(key_logic, world, player):
         door = world.get_door(d_name, player)
         if door.dest.name in key_logic.door_rules.keys():
             rule.opposite = key_logic.door_rules[door.dest.name]
+
+
+def apply_custom_key_rules(world, player):
+    custom = world.customizer.get_key_logic(player) if world.customizer else None
+    if not custom or not custom['doors']:
+        return
+    logger = logging.getLogger('')
+    if world.keyshuffle[player] == 'universal':
+        logger.warning('key_logic customization ignored for player %s: universal keys do not use door rules', player)
+        return
+    if world.key_logic_algorithm[player] == 'strict':
+        raise Exception('key_logic customization requires the partial, dangerous or static key logic algorithm')
+    chest_counting = custom['counting'] == 'chests'
+    if world.key_logic_algorithm[player] == 'static' and not chest_counting:
+        raise Exception('key_logic: the static algorithm counts chest keys, set counting: chests')
+    if chest_counting and world.dropshuffle[player] != 'none':
+        raise Exception('key_logic: counting chests requires unshuffled key drops')
+    apply_key_rule_specs(world, player, custom['doors'], chest_counting, validate=True)
+
+
+def apply_key_rule_specs(world, player, specs, chest_counting, validate):
+    logger = logging.getLogger('')
+    layouts = world.key_layout[player]
+    resolved, listed = {}, set()
+    for door_name, spec in specs.items():
+        door = world.get_door(door_name, player)
+        dungeon = next((name for name, layout in layouts.items() if door in layout.flat_prop), None)
+        if dungeon is None:
+            raise Exception(f'key_logic: {door_name} is not a small key door in this layout. '
+                            f'List it under doors with "type: Key Door" to make it one')
+        resolved[door] = (dungeon, spec)
+        listed.add(door)
+    for door, (dungeon, spec) in list(resolved.items()):
+        partner = layouts[dungeon].key_logic.sm_doors.get(door)
+        if partner and partner not in resolved:
+            resolved[partner] = (dungeon, {'keys': spec['keys']})
+    if chest_counting:
+        # analyzed numbers count drops, so a dungeon is either all preset or untouched
+        for dungeon in {d for d, _ in resolved.values()}:
+            key_logic = layouts[dungeon].key_logic
+            key_logic.chest_counting = True
+            missing = [d.name for d in layouts[dungeon].flat_prop
+                       if d not in resolved and KeyRuleType.WorstCase in key_logic.door_rules.get(d.name, DoorRules(0, True)).new_rules]
+            if missing and validate:
+                raise Exception(f'key_logic: counting chests needs every key door of {dungeon} listed, missing {missing}')
+    for door, (dungeon, spec) in resolved.items():
+        layout = layouts[dungeon]
+        key_logic = layout.key_logic
+        number = spec['keys']
+        if not validate:
+            floor, ceiling = None, None
+        elif chest_counting:
+            floor, ceiling = None, layout.max_chests
+        else:
+            floor = min((ctr.used_keys + 1 for ctr in layout.key_counters.values() if door in ctr.child_doors),
+                        default=None)
+            ceiling = layout.max_chests + layout.max_drops
+        if floor is not None and number < floor:
+            if door in listed:
+                raise Exception(f'key_logic: {door.name} cannot require fewer than {floor} keys, '
+                                f'no route reaches it having used fewer than {floor - 1}')
+            # unlisted pair side keeps its own floor
+            logger.debug('key_logic: %s raised from %s to its minimum of %s keys', door.name, number, floor)
+            number = floor
+        if ceiling is not None and number > ceiling:
+            raise Exception(f'key_logic: {door.name} cannot require {number} keys, {dungeon} only has {ceiling}')
+        rule = key_logic.door_rules.get(door.name)
+        if rule is None:
+            rule = DoorRules(number, True)
+            key_logic.door_rules[door.name] = rule
+            if door.dest and door.dest.name in key_logic.door_rules:
+                rule.opposite = key_logic.door_rules[door.dest.name]
+                rule.opposite.opposite = rule
+        elif validate and not chest_counting:
+            current = min(rule.new_rules.get(KeyRuleType.WorstCase, rule.small_key_num), rule.small_key_num)
+            if number < current:
+                logger.warning('key_logic: %s lowered from %s to %s keys, the analysis considered that a risk',
+                               door.name, current, number)
+        rule.small_key_num = number
+        rule.new_rules[KeyRuleType.WorstCase] = number
+        if 'big_key_in' in spec:
+            rule.alternate_big_key_loc = {world.get_location(name, player) for name in spec['big_key_in']}
+            rule.new_rules[(KeyRuleType.Lock, key_logic.bk_name)] = spec['with_big_key']
+            rule.alternate_small_key = spec['with_big_key']
+        if 'small_key_in' in spec:
+            rule.small_location = world.get_location(spec['small_key_in'], player)
+            rule.allow_small = True
+            rule.new_rules[KeyRuleType.AllowSmall] = spec['with_small_key']
+        # remaining alternatives stay one below the new number
+        for rule_type in list(rule.new_rules.keys()):
+            if rule_type == KeyRuleType.WorstCase:
+                continue
+            if number == 0:
+                del rule.new_rules[rule_type]
+            elif rule.new_rules[rule_type] >= number:
+                rule.new_rules[rule_type] = number - 1
+        if rule.alternate_small_key is not None and rule.alternate_small_key >= number:
+            rule.alternate_small_key = max(number - 1, 0)
+        logger.debug('key_logic: %s (%s) set to %s keys', door.name, dungeon, number)
 
 
 def check_bk_special(regions, world, player):
