@@ -197,7 +197,7 @@ def set_turtle_rock_rules(world, player, keys, big_key_in, small_key_at, or_rule
     tr, chest = 'Turtle Rock', 'Turtle Rock - Big Key Chest'
     # everything but this dungeon's small keys, so its key doors stay shut
     from BaseClasses import CollectionState
-    full = world.get_all_state(keys=False)
+    full = world.get_all_state(keys=True)
     state = CollectionState(world)
     state.prog_items = full.prog_items.copy()
     state.prog_items[(dungeon_keys[tr], player)] = 0
