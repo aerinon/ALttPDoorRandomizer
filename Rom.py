@@ -1544,6 +1544,7 @@ def get_prize_pack_name(prize_pack_set):
         return "MagicPack"
     if prize_pack_set[0] == "Arrows (5)":  # ArrowRefill5
         return "ArrowsPack"
+    return "Unknown"
 
 def patch_race_rom(rom):
     rom.write_bytes(0x180213, [0x01, 0x00]) # Tournament Seed
