@@ -192,6 +192,17 @@ def set_door_number(world, player, door_name, number):
                     del rule.new_rules[rule_type]
 
 
+def allow_door_with_small_key_at(world, player, door_name, location):
+    key_logic = world.key_logic[player]['Turtle Rock']
+    door = world.get_door(door_name, player)
+    for d in (door, key_logic.sm_doors.get(door)):
+        rule = key_logic.door_rules.get(d.name) if d else None
+        if rule:
+            rule.allow_small = True
+            rule.small_location = location
+            rule.new_rules[KeyRuleType.AllowSmall] = 0
+
+
 def set_turtle_rock_rules(world, player, keys, big_key_in, small_key_at, or_rules, allow_small, forbid_item,
                           set_rule, item_name, loc):
     tr, chest = 'Turtle Rock', 'Turtle Rock - Big Key Chest'
@@ -220,6 +231,9 @@ def set_turtle_rock_rules(world, player, keys, big_key_in, small_key_at, or_rule
     if back:
         set_rule(loc(chest), or_rules(keys(tr, 4), small_key_at(tr, chest)))
         set_door_number(world, player, 'TR Crystaroller Down Stairs', 4)
+        # the entrance randomizer's ledge entrance lands in the chest's own region; ours has this door
+        # between, so the chest's own key must open it or the key can never be collected
+        allow_door_with_small_key_at(world, player, 'TR Pokey 2 ES', loc(chest))
         allow_small(tr, chest)
     elif front and middle:
         set_rule(loc(chest), lambda state: state.has_sm_key_strict(dungeon_keys[tr], player, chest_keys_needed(state)))
