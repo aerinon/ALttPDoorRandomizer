@@ -1417,7 +1417,9 @@ def patch_rom(world, rom, player, team, is_mystery=False):
             rom.write_bytes(0x180188, [0x80, 0, 0])  # Zelda respawn refills (magic, bombs, arrows)
             rom.write_bytes(0x18018B, [0x80, 0, 0])  # Mantle respawn refills (magic, bombs, arrows)
             magic_max = 0x80
-        if world.doorShuffle[player] not in ['vanilla', 'basic']:
+        # enemized escapes can logically need a bow or magic that the uncle item didn't supply
+        enemized_vanilla = world.doorShuffle[player] == 'vanilla' and world.enemy_shuffle[player] != 'none'
+        if world.doorShuffle[player] not in ['vanilla', 'basic'] or enemized_vanilla:
             # Uncle respawn refills (magic, bombs, arrows)
             rom.write_bytes(0x180185, [max(magic_small, magic_max), max(bomb_small, bomb_max), max(bow_small, bow_max)])
             # Zelda respawn refills (magic, bombs, arrows)
