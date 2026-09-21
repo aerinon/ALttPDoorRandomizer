@@ -1832,7 +1832,7 @@ def set_big_bomb_rules(world, player):
         # (because otherwise mirror was used to reach the grave, so would cancel a pre-existing mirror spot)
         # to account for insanity, must consider a way to escape without a cave for basic_routes
         # -> (M and Mitts) or ((Mitts or Flute or (M and P and West Dark World access)) and BR)
-        add_rule(world.get_entrance('Pyramid Fairy', player), lambda state: (state.can_lift_heavy_rocks(player) and state.has_Mirror(player)) or ((state.can_lift_heavy_rocks(player) or state.can_flute(player) or (state.can_reach('West Dark World', 'Region', player) and state.has_Pearl(player) and state.has_Mirror(player))) and basic_routes(state)))
+        add_rule(world.get_entrance('Pyramid Fairy', player), lambda state: (state.can_lift_heavy_rocks(player) and state.has_Mirror(player)) or ((state.can_lift_heavy_rocks(player) or state.can_flute(player) or (state.can_reach('Village of Outcasts', 'Region', player) and state.has_Pearl(player) and state.has_Mirror(player))) and basic_routes(state)))
     elif bombshop_entrance.name == 'Waterfall of Wishing':
         # same as the Normal_LW_entrances case except in insanity it's possible you could be here without Flippers which
         # means you need an escape route of either Flippers or Flute
