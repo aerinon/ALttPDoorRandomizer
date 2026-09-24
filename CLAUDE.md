@@ -137,21 +137,6 @@ The dungeon shuffling system uses a three-stage algorithm:
 - Manages big key placement rules
 - Validates minimum key requirements for dungeon completion
 
-### Source Module Organization
-
-```
-source/
-├── dungeon/          # Dungeon generation algorithms and key logic
-├── overworld/        # Entrance shuffling (EntranceShuffle2.py)
-├── item/             # Item placement utilities (FillUtil.py, District.py)
-├── enemizer/         # Enemy randomization system
-├── gui/              # GUI components (tkinter-based)
-├── rom/              # ROM patching utilities
-├── classes/          # Utility classes (BabelFish, CustomSettings)
-├── meta/             # Metadata and build tools
-└── limited/          # Limited run coordination
-```
-
 ### Important Files by Size/Complexity
 
 - **DoorShuffle.py** (~8500 lines): Door shuffling orchestration
@@ -243,15 +228,4 @@ Recent commits show work on:
 
 ## CLI Argument Reference
 
-Key arguments from `resources/app/cli/args.json`:
-- `--doorShuffle [vanilla|basic|partitioned|crossed]`
-- `--intensity [1|2|3]`
-- `--keyshuffle [none|wild|universal]`
-- `--key_logic [partial|strict|dangerous|experimental]`
-- `--algorithm [balanced|vanilla_fill|major_only|dungeon_only|district]`
-- `--logic [noglitches|owglitches|hybridglitches|nologic]`
-- `--mode [open|standard|inverted]`
-- `--shuffle`: Entrance randomizer options (vanilla, simple, restricted, full, crossed, insanity, etc.)
-- `--pottery`: Pot shuffling modes
-- `--shopsanity`: Enable shop item randomization
-- `--enemizer`: Enemy randomization options
+Key arguments are defined in `resources/app/cli/args.json` — check there for the current flag set rather than relying on a copy here.

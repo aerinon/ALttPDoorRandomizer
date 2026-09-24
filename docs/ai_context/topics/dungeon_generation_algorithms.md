@@ -32,17 +32,18 @@ Dungeon generation is responsible for constructing the internal structure of eac
 - Functions like `main_dungeon_builders()` and `create_dungeon_builders_prototype()` generate candidate layouts and log generation attempts.
 - Sectors are described and assigned using [`DungeonGenSectorDesc.py`](../../source/dungeon/DungeonGenSectorDesc.py).
 
-### 3. Transitivity and Constraint Checking
+### 3. Reachability / Stitchability Feasibility Check ("Transitivity")
 
-- [`DungeonGenTransitivity.py`](../../source/dungeon/DungeonGenTransitivity.py) provides logic for ensuring all parts of the dungeon are reachable and that constraints (such as required crystals or boss locations) are satisfied.
-- Transitivity checks prevent unreachable sectors and enforce logical consistency.
+- [`DungeonGenTransitivity.py`](../../source/dungeon/DungeonGenTransitivity.py) answers a yes/no feasibility question: for a given set of sectors, does *any* pairing of their loose door ends exist that connects everything, keeps every part of the dungeon reachable, and satisfies every per-sector constraint (one-way "must enter" doors, crystal-barrier color requirements, dead-end pairing rules, portal placement)?
+- It is not the generator itself — [`DungeonGenLocalSearch.py`](../../source/dungeon/DungeonGenLocalSearch.py) calls it to reject sector groupings that can't actually be stitched together, and [`DungeonStitcherV2.py`](../../source/dungeon/DungeonStitcherV2.py) calls it to validate each portal placement as it commits to a proposal.
+- "Transitivity" is the module's legacy name, describing the transitive-reachability data it works over (`sector.descriptor.reachability`, computed in [`DungeonGenSectorDesc.py`](../../source/dungeon/DungeonGenSectorDesc.py)) rather than its purpose — see the [full algorithm write-up](door_and_dungeon_shuffling_deep_dive.md#reachability--stitchability-feasibility-check--transitivity-dungeongentransitivitypy) for the constraint types, search strategy, and pruning heuristics.
 
 ### 4. Algorithm Variations
 
 - Multiple generation strategies are supported, including:
   - Stitching-based generation
   - Local search with sector descriptors
-  - Transitivity-based validation
+  - Reachability/stitchability feasibility checking ("Transitivity")
 - The system can switch between algorithms based on configuration or randomization mode.
 
 ---
