@@ -537,12 +537,13 @@ def pair_existing_key_doors(world, player, door_a, door_b):
 
 
 def choose_portals(world, player):
-    if world.doorShuffle[player] != ['vanilla']:
+    if world.doorShuffle[player] != 'vanilla':
         shuffle_flag = world.doorShuffle[player] != 'basic'
         allowed = {name: set(group[0]) for group in world.dungeon_pool[player] for name in group[0]}
 
         # key drops allow the big key in the right place in Desert Tiles 2
-        bk_shuffle = world.bigkeyshuffle[player] or world.pottery[player] not in ['none', 'cave']
+        bk_shuffle = (world.bigkeyshuffle[player] or world.pottery[player] not in ['none', 'cave']
+                      or world.door_type_mode[player] in ['big', 'all', 'chaos'])
         std_flag = world.mode[player] == 'standard'
         # roast incognito doors
         world.get_room(0x60, player).delete(5)
