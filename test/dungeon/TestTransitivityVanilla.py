@@ -59,7 +59,6 @@ class TestTransitivityVanilla(unittest.TestCase):
     def test_pairs_intensity_3(self):
         self.check(3, pairs=True)
 
-    @unittest.expectedFailure  # search effort: 5 pairs hit the 20k-iteration cap (plan: Open work, search effort)
     def test_pairs_intensity_4(self):
         self.check(4, pairs=True)
 
@@ -67,7 +66,7 @@ class TestTransitivityVanilla(unittest.TestCase):
 class TestTransitivitySearchBudget(unittest.TestCase):
     """Every vanilla single and pair should be decided within TIME_BUDGET."""
 
-    @unittest.expectedFailure  # search effort: Misery Mire pairs take 2-20s at intensity 4 (plan: Open work, search effort)
+    @unittest.expectedFailure  # search effort: a few pairs still take over 2s at intensity 4 (plan: Open work, search effort)
     def test_vanilla_within_budget(self):
         slow = []
         for intensity in (3, 4):

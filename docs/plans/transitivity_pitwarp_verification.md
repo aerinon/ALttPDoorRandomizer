@@ -21,24 +21,30 @@ Further Transitivity changes after the conversion:
 - Crystal back-propagation uses the descriptor's arrival state (`c_prop`): a barrier on the way fixes the color, so only an unforced path carries Either. This removed every remaining wrong True in vanilla pairs.
 - Pit doors are exempt from two two-way heuristics in `now_impossible`: forced-loop classification and the forced-door cost in the branch balance. `check_for_forced_connections` no longer treats a lone needed Terminal whose feeding pit lies in its own sector as a dead loop.
 
+Search-effort changes:
+
+- Terminals are never merged by `winnow_doors_to_check`: its static shape key ignores which pit sources are still unused behind a landing, so equally shaped Terminals are not interchangeable. This was the main cause of the 20k-iteration cap at intensity 4 (vanilla slow set: about 184,000 `now_impossible` calls down to 4,329).
+- `some_door_never_reachable` (relaxed reachability bound, ignoring crystals and partner counts; everything a reached sector could ever reach counts as reachable) prunes states where some remaining door can never be reached.
+
 Results (`PYTHONHASHSEED=0`, seed 1, crossed, experimental; verified = witness checker reports no problems):
 
 | | Intensity 3 | Intensity 4 |
 |---|---|---|
 | 13 vanilla dungeons | 13 verified | 13 verified |
-| 78 vanilla pairs | 78 verified | 73 verified, 5 hit the 20k-iteration cap |
+| 78 vanilla pairs | 78 verified | 78 verified |
 | Real LocalSearch calls, seeds 1–12 (every True checked) | 260 calls, 195 True, 0 wrong | 506 calls, 156 True, 0 wrong |
-| Seeds whose balancing completes (1–12) | 10 | 6 (the rest hit the 20k cap) |
+| Seeds whose balancing completes (1–16) | 16 | 12 (the other 4 hit the 20k cap) |
 | Small crossed sets vs. exhaustive solver (300 pairable, crystal-free) | 4 of 226 solvable wrongly False (1.8%) | 1 of 185 (0.5%) |
-| Seeds 1–16 run through stitching (NewGeneration path) | 11 stitched, 2 stitcher timeouts (Turtle Rock, no pits), 3 hit the 20k cap | 3 stitched (seeds 4, 9, 16), 2 stitcher timeouts, 11 hit the 20k cap |
-| Stitched layouts: every region reachable over the applied connections | all | all (58 pit sources connected per seed) |
+| Seeds 1–16 run through stitching (NewGeneration path) | 11 stitched, 2 stitcher timeouts (Turtle Rock, no pits), 3 hit the 20k cap | 8 stitched, 2 stitcher timeouts, 6 hit the 20k cap (4 in balancing, 2 in the stitcher's portal assignment) |
+| Stitched layouts: every region reachable over the applied connections | all | 7 of 8 (58 pit sources connected per seed); seed 15 misses `Hera 5F Pot Block` |
 
 False verdicts only narrow randomness; the policy is no wrong True anywhere and a wrong-False rate within 3% on the small-set comparison (`TestTransitivityOracle`). No neutral sector holds pit doors (`is_sector_neutral` rejects them), so splicing one-way sectors is not exercised; `TestTerminalGroups` guards that.
 
 Open work, correctness done first:
 
-1. **Search effort.** The 20k-iteration cap stops most intensity-4 seeds and some intensity-3 seeds, during balancing or during the stitcher's portal assignment (pre-existing at intensity 3: the Desert Palace Front call from seed 3 hits the cap on the pre-pit code too). Target: generation success no worse than the "2.0.0 2025" tab of the stability matrix (NewGen, 12/10/25, overall 80.95%), measured with `TestSuite.py`.
+1. **Search effort.** The 4 intensity-4 seeds (of 16) still capped all end with the only unlanded pit sources being Ice Backwards Room's Blue-gated holes (`Ice Backwards Room Hole`, `Ice Crystal Block Hole`) while that sector is only entered in Orange. The sets may be impossible; no check reasons about which crystal colors remain reachable, so the search cannot prove it. A crystal-aware bound is the next lever and needs a soundness design (switches, back-propagation, Either). Target: generation success no worse than the "2.0.0 2025" tab of the stability matrix (NewGen, 12/10/25, overall 80.95%), measured with `TestSuite.py`. In one environment (Python 3.14 venv) the classic path scores 65.3% on this branch, 64.0% on its base and 65.9% on the sheet's own commit `e0a3c0d8`: the branch is at parity, and the gap to the sheet is environmental. The branch shifts some failures from item fill to "Keylock detected" (68 vs 38 across a full run) without changing the success rate; cause not yet determined.
 2. **Stitcher timeouts** ("Generation taking too long", 1000 proposals) occur at both intensities and are not pit-specific so far.
+3. **Stitcher crystal model is more permissive than item logic.** In intensity-4 seed 15 the stitcher's `ExplorationState` reaches the Hera 5F cluster in both colors, while the item logic's rules (`CollectionState.traverse_world`, mirrored by the witness checker) reach it only in Blue, so `Hera 5F Pot Block` (behind an Orange barrier) is accepted by the stitcher but unreachable in logic. Every source region feeding the cluster is Blue-only in both models, so the difference arises inside the cluster; not yet shown to be pit-specific.
 
 ## Pit Model
 

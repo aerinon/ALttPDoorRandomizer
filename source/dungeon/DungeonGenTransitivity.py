@@ -571,6 +571,10 @@ class Transitivity:
                 continue  # a pit source is never attached as a hanger
             constraint_flag = any(door in c.doors for c in self.unsatisfied_constraints)
             reach_key = (hanger_key(door), constraint_flag) + c_info.shape_map[door]
+            if door.type == DoorType.Terminal:
+                # the static shape ignores which pit sources are still unused behind a landing, so equally shaped
+                # terminals are not interchangeable; offer each one
+                reach_key += (door.name,)
             reachability_dict[reach_key] = door  # If reachability is the same, the door will be overwritten
         return list(reachability_dict.values())  # Get the doors from the dictionary
 
@@ -797,6 +801,8 @@ class Transitivity:
             return True
         if c_info.big_key and not c_info.big_key.satisfied(self.connection_map, c_info.door_matches):
             return True
+        if self.some_door_never_reachable(c_info):
+            return True
 
         remaining_set = set(self.remaining_doors)
 
@@ -906,6 +912,42 @@ class Transitivity:
         # if all(d not in self.unconnected_doors and d not in self.remaining_doors for d in c_info.switch_doors):
         #     if all()
         return False
+
+    def some_door_never_reachable(self, c_info):
+        """Relaxed reachability bound: a remaining door that no sequence of connections can reach makes the state
+        impossible. Ignores crystals and how many partners are left, so it never rejects a solvable state."""
+        reached = set(self.unconnected_doors) | set(self.connection_map)
+        # a sector already entered can still open more doors later (e.g. a different crystal state), so everything its
+        # reached doors could ever reach counts as reachable
+        for d in list(reached):
+            if d in c_info.door_sector_map:
+                reached.update(x for x, c, f in c_info.door_sector_map[d].descriptor.reachability.get(d, []))
+        hooks = {hook_from_door(d) for d in reached if d not in self.connection_map and hook_from_door(d) is not None}
+        pending = [d for d in self.remaining_doors if d not in reached]
+        changed = True
+        while pending and changed:
+            changed = False
+            still_pending = []
+            for d in pending:
+                if d in reached:
+                    continue
+                hanger = hanger_from_door(d)
+                if hanger is None or hanger not in hooks:
+                    still_pending.append(d)
+                    continue
+                sector = c_info.door_sector_map[d]
+                entered = {x for x, c, f in sector.descriptor.reachability.get(d, [])}
+                entered.add(d)
+                for p in sector.portals:
+                    if p.door in c_info.dependent_lookup:
+                        entered.add(c_info.dependent_lookup[p.door])
+                for x in entered - reached:
+                    reached.add(x)
+                    if hook_from_door(x) is not None:
+                        hooks.add(hook_from_door(x))
+                changed = True
+            pending = still_pending
+        return any(d not in reached for d in pending)
 
     def quick_door_matches_check(self, c_info):
         if len(self.remaining_doors) == 0:
