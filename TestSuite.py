@@ -6,6 +6,7 @@ import argparse
 from collections import OrderedDict
 
 cpu_threads = multiprocessing.cpu_count()
+key_logic = {'experimental': 'experimental', 'classic': 'partial'}  # the new generation runs with experimental key logic
 py_version = f"{sys.version_info.major}.{sys.version_info.minor}"
 
 
@@ -15,7 +16,8 @@ def main(args=None):
     task_mapping = []
     tests = OrderedDict()
 
-    successes.append(f"Testing {args.dr} DR with {args.count} Tests" + (f" (intensity={args.tense})" if args.dr in ['basic', 'crossed'] else ""))
+    successes.append(f"Testing {args.dr} DR{f' ({args.algorithm})' if args.algorithm else ''} with {args.count} Tests"
+                     + (f" (intensity={args.tense})" if args.dr in ['basic', 'crossed'] else ""))
     print(successes[0])
 
     max_attempts = args.count
@@ -30,6 +32,8 @@ def main(args=None):
                      ['Inv ', ' --mode inverted']]:
 
             basecommand = f"python DungeonRandomizer.py --door_shuffle {args.dr} --intensity {args.tense} --suppress_rom --spoiler none"
+            if args.algorithm:
+                basecommand += f" --dungeon_shuffle_algorithm {args.algorithm} --key_logic_algorithm {key_logic[args.algorithm]}"
 
             def gen_seed():
                 taskcommand = basecommand + " " + command + mode[1]
@@ -112,15 +116,21 @@ if __name__ == "__main__":
 
     cpu_threads = args.cpu_threads
 
-    for dr in [['vanilla', args.count if args.count else 2, 1],
-               ['basic', args.count if args.count else 5, 3],
-               ['crossed', args.count if args.count else 10, 3]]:
+    count = args.count
+    # [door shuffle, dungeon algorithm (None: no generation), seed count, max intensity]
+    # the new algorithm is the main target; classic (no intensity 4) is a lighter regression check
+    for dr in [['vanilla', None, count if count else 2, 1],
+               ['basic', 'experimental', count if count else 5, 3],
+               ['crossed', 'experimental', count if count else 10, 3],
+               ['basic', 'classic', count if count else 2, 3],
+               ['crossed', 'classic', count if count else 5, 3]]:
 
-        for tense in range(1, dr[2] + 1):
+        for tense in range(1, dr[3] + 1):
             args = argparse.Namespace()
             args.dr = dr[0]
+            args.algorithm = dr[1]
             args.tense = tense
-            args.count = dr[1]
+            args.count = dr[2]
             s, errors = main(args=args)
             if successes:
                 successes += [""] * 2
@@ -128,7 +138,8 @@ if __name__ == "__main__":
             print()
 
             if errors:
-                with open(f"{dr[0]}{(f'-{tense}' if dr[0] in ['basic', 'crossed'] else '')}-errors.txt", 'w') as stream:
+                prefix = f"{dr[1]}-" if dr[1] else ""
+                with open(f"{prefix}{dr[0]}{(f'-{tense}' if dr[0] in ['basic', 'crossed'] else '')}-errors.txt", 'w') as stream:
                     for error in errors:
                         stream.write(error[0] + "\n")
                         stream.write(error[1] + "\n")
