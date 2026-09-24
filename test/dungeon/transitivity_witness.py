@@ -156,6 +156,9 @@ def check_witness(solution):
     cmap = solution.state.connection_map
     considered = solution.considered_doors
     problems, group_terminal = check_pairings(cmap, considered)
+    for a, b in solution.state.initial_connections:
+        if cmap.get(a) is not b and cmap.get(b) is not a:
+            problems.append(f'initial connection not kept: {a.name} <-> {b.name}')
     if solution.c_info is None:
         return problems
 

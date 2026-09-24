@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from source.dungeon.DungeonGenLocalSearch import default_lobby_drops, drop_is_gated
+from source.dungeon.DungeonGenLocalSearch import default_lobby_drops
 from source.dungeon.DungeonGenTransitivity import ConstraintInfo, find_transitivity_solution
 from test.dungeon.transitivity_harness import DUNGEONS, capture_sectors, hard_timeout, make_builder, sectors_by_dungeon
 from test.dungeon.transitivity_oracle import crystal_free, oracle_solvable, pairable
@@ -16,11 +16,9 @@ def differential(intensity, seed=20260923, cases=CASES):
     sectors, flags = capture_sectors(intensity)
     grouped = sectors_by_dungeon(sectors)
     portals = {n: [s for s in grouped[n] if s.portals and any(not p.destination for p in s.portals)] for n in DUNGEONS}
-    world, player = sectors[0].regions[0].world, sectors[0].regions[0].player
     pool = [s for s in sectors if not s.portals and s.outstanding_doors and crystal_free(s)
             and not s.descriptor.is_neutral
-            and not any(r.name in default_lobby_drops and drop_is_gated(r.name, world, player) for r in s.regions)]
-    # a gated drop stays in its vanilla dungeon (LocalSearch); Transitivity does not model reaching it from elsewhere
+            and not any(r.name in default_lobby_drops for r in s.regions)]  # drop lobbies stay in their dungeon
     rng = random.Random(seed)
     disagreements, bad_witness, skipped, verdicts = [], [], 0, {True: 0, False: 0}
     sampled = 0

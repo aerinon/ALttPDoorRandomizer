@@ -159,8 +159,6 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
     # handles drop down lobbies - lock down for now - technically can move to a different
     if drop_lobbies_locked(info.flags):
         lock_down_default_sectors(default_lobby_drops)
-    else:
-        lock_down_default_sectors({k: v for k, v in default_lobby_drops.items() if drop_is_gated(k, world, player)})
 
     if world.mode[player] == 'standard':
         exclude_sector(find_sector('Swamp Lobby', info.sector_pool), info, dungeon_aliases['Hyrule Castle'])
@@ -917,16 +915,10 @@ def drop_parent_region(drop_region, world, player):
     return parent
 
 
-def drop_is_gated(drop_region, world, player):
-    """A drop whose overworld side is only reached by leaving its vanilla dungeon (Skull Back Drop). Neither
-    Transitivity nor the stitcher models reaching it through another dungeon yet, so for now it stays in its vanilla
-    dungeon (stop-gap until drops can move between dungeons)."""
-    return drop_parent_region(drop_region, world, player).name in world.inaccessible_regions[player]
-
-
 def drop_lobbies_locked(flags):
-    """Overworld drop-down lobbies stay in their vanilla dungeon unless both lobbies and pits/warps shuffle."""
-    return flags.pit_warps == 'none' or not flags.lobbies
+    """Overworld drop-down lobbies stay in their vanilla dungeon. They may move once both lobbies and pits/warps
+    shuffle, but reaching a moved drop is not modeled yet (pitwarps Phase 3), so they stay locked until then."""
+    return True  # Phase 3: flags.pit_warps == 'none' or not flags.lobbies
 
 
 def cnt_non_bk_locations(sector):

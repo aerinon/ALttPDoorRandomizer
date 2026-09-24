@@ -3,7 +3,6 @@ import unittest
 from collections import Counter
 
 from BaseClasses import DoorType
-from source.dungeon.DungeonGenLocalSearch import default_lobby_drops, drop_is_gated
 from source.dungeon.DungeonGenerationCommon import GenerationException
 from test.dungeon.transitivity_harness import DUNGEONS, capture_sectors, make_builder, sectors_by_dungeon, timed_check
 
@@ -25,6 +24,15 @@ class TestTerminalGroups(unittest.TestCase):
                 self.assertEqual([], [t for t, n in terminals.items() if n > 1], 'duplicate terminal names')
                 self.assertEqual(set(terminals), groups)
 
+    def test_every_pit_source_is_in_a_sector(self):
+        # a source whose region is missing from the dungeon's region list is never shuffled and is left unconnected
+        sectors, flags = capture_sectors(4)
+        world = sectors[0].regions[0].world
+        in_sectors = {d for s in sectors for d in s.outstanding_doors}
+        sources = [d for d in world.doors if d.type in ONE_WAY and d.group is not None]
+        # collapsing keeps only each group's representative as an outstanding door
+        self.assertEqual([], sorted(d.name for d in sources if d not in in_sectors and d.group_rep not in in_sectors))
+
     def test_no_neutral_sector_holds_pits(self):
         # Transitivity drops neutral sectors and splices them in later; that is unverified for one-way pits
         sectors, flags = capture_sectors(4)
@@ -32,15 +40,6 @@ class TestTerminalGroups(unittest.TestCase):
             if s.descriptor.is_neutral:
                 with self.subTest(sector=s.sector_key()):
                     self.assertFalse(any(d.type in ONE_WAY + (DoorType.Terminal,) for d in s.outstanding_doors))
-
-
-class TestDropLobbies(unittest.TestCase):
-
-    def test_only_skull_back_drop_is_gated_on_the_vanilla_overworld(self):
-        # its overworld side is reached only by leaving Skull Woods, so it may not move to another dungeon
-        sectors, flags = capture_sectors(4)
-        world, player = sectors[0].regions[0].world, sectors[0].regions[0].player
-        self.assertEqual(['Skull Back Drop'], [d for d in default_lobby_drops if drop_is_gated(d, world, player)])
 
 
 def vanilla_cases(intensity, pairs):

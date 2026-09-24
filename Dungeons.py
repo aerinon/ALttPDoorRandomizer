@@ -149,7 +149,7 @@ ice_regions = [
     'Ice Stalfos Hint', 'Ice Conveyor', 'Ice Conveyor - Crystal', 'Ice Bomb Jump Ledge', 'Ice Bomb Jump Catwalk',
     'Ice Narrow Corridor', 'Ice Right H', 'Ice Bomb Drop - Top',
     'Ice Pengator Trap', 'Ice Spike Cross', 'Ice Firebar', 'Ice Falling Square', 'Ice Spike Room', 'Ice Hammer Block',
-    'Ice Tongue Pull', 'Ice Freezors', 'Ice Freezors Ledge', 'Ice Tall Hint', 'Ice Hookshot Ledge',
+    'Ice Tongue Pull', 'Ice Freezors', 'Ice Freezors Ledge', 'Ice Freezors Shared Pit', 'Ice Tall Hint', 'Ice Hookshot Ledge',
     'Ice Hookshot Balcony', 'Ice Spikeball', 'Ice Lonely Freezor', 'Iced T', 'Ice Catwalk', 'Ice Many Pots',
     'Ice Crystal Right', 'Ice Crystal Left', 'Ice Crystal Block', 'Ice Big Chest View', 'Ice Big Chest Landing',
     'Ice Backwards Room', 'Ice Anti-Fairy', 'Ice Switch Room', 'Ice Refill', 'Ice Refill - Crystal',

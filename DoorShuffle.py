@@ -1649,8 +1649,8 @@ def palette_assignment(world, player):
             room.palette = tuple[1]
             if tuple[2]:
                 leading_door = world.get_door(tuple[2], player)
-                ent = next(iter(leading_door.entrance.parent_region.entrances))
-                if ent.door and door.roomIndex:
+                ent = next(iter(leading_door.entrance.parent_region.entrances), None)  # none: room cut off
+                if ent and ent.door and door.roomIndex:
                     room = world.get_room(door.roomIndex, player)
                     room.palette = tuple[1]
 

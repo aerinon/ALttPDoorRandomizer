@@ -439,9 +439,26 @@ def valid_portal(door, match_door, c_info, init=True):
     dest_portal = all(p.destination for p in c_info.door_sector_map[match_door].portals) or not init
     return (door.portalAble
             and (not c_info.flags.vanilla_traps or not door.blocked or is_boss_trap(door))
+            and not (door.deadEnd and init and may_be_primary_portal(match_door, c_info))
             and (dest_portal or ((not hc_flag or not door.standard_restricted)
                                 and (not rupee_bow_flag or not door.rupee_bow_restricted)
                                 and (c_info.flags.bk_shuffle_flag or not door.bk_shuffle_req or builder.split_flag))))
+
+
+def violates_restriction(a, b, c_info):
+    """An initial connection pins both of its doors to each other."""
+    return c_info.restricted_doors.get(a, b) is not b or c_info.restricted_doors.get(b, a) is not a
+
+
+def may_be_primary_portal(match_door, c_info):
+    """The stitcher picks the primary portal at random from these and never gives it a dead-end door."""
+    portal = next((p for p in c_info.door_sector_map[match_door].portals if p.door == match_door), None)
+    if portal is None or portal.destination:
+        return False
+    if portal.dependent is None:
+        return True
+    # a dependent portal is chosen only when it is the builder's sole non-destination portal
+    return not any(not p.destination and p is not portal for s in c_info.sector_list for p in s.portals)
 
 
 class ConstraintType(Enum):
@@ -526,7 +543,7 @@ class Transitivity:
                 connectable_doors.append(connection)
                 break
             forced_connection = self.is_door_forced(possibles, doors_to_check_set)
-            if forced_connection and self.can_fall(d):
+            if forced_connection and self.can_fall(d) and not violates_restriction(forced_connection, d, c_info):
                 connectable_doors.append((forced_connection, d))
                 break  # short-circuit, we'll just use this one anyway
         # for door, info in c_info.dependent_portals.items():

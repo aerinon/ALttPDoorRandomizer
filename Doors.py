@@ -1535,7 +1535,8 @@ def create_doors(world, player):
     world.get_door('Skull 1 Lobby S', player).dungeonLink = 'Skull Woods'
     world.get_door('Skull Map Room SE', player).dungeonLink = 'Skull Woods'
     world.get_door('Skull Spike Corner SW', player).dungeonLink = 'Skull Woods'
-    world.get_door('Skull Spike Corner SW', player).dead_end()
+    if not pits_shuffled(world, player):  # otherwise Skull Final Drop Hole may lead on instead of to the boss
+        world.get_door('Skull Spike Corner SW', player).dead_end()
     world.get_door('Thieves Pot Alcove Bottom SW', player).dead_end()
     world.get_door('Ice Conveyor SW', player).dead_end(allowPassage=True)
     world.get_door('Mire Right Bridge SE', player).dead_end(allowPassage=True)
@@ -1573,6 +1574,12 @@ def create_doors(world, player):
     world.get_door('GT Double Switch Entry to Ranged Switches', player).barred('CrystalSwitchTricks')
     world.get_door('GT Double Switch Left to Exit Bypass', player).barred('CrystalSwitchTricks')
     world.get_door('GT Double Switch Pot Corners to Ranged Switches', player).barred('CrystalSwitchTricks')
+
+
+def pits_shuffled(world, player):
+    from source.dungeon.DungeonGenLocalSearch import DoorFlags
+    return (world.doorShuffle[player] != 'vanilla' and world.dungeon_shuffle_algorithm[player] != 'classic'
+            and DoorFlags.for_player(world, player).pit_warps in ('pits', 'both'))
 
 
 def create_portals(world, player):
