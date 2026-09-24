@@ -1,5 +1,5 @@
 
-from BaseClasses import Door, DoorType, Direction, CrystalBarrier, Portal
+from BaseClasses import Door, DoorType, Direction, CrystalBarrier, Entrance, Portal
 from RoomData import PairedDoor
 
 # constants
@@ -33,6 +33,7 @@ Nrml = DoorType.Normal
 StrS = DoorType.StraightStairs
 Hole = DoorType.Hole
 Warp = DoorType.Warp
+Trml = DoorType.Terminal
 Sprl = DoorType.SpiralStairs
 Lddr = DoorType.Ladder
 Open = DoorType.Open
@@ -790,9 +791,10 @@ def create_doors(world, player):
         create_door(player, 'Ice Tongue Pull WS', Intr).dir(We, 0x3f, Bot, High).pos(0),
         create_door(player, 'Ice Tongue Pull Up Ladder', Lddr).dir(No, 0x3f, 2, High),
         create_door(player, 'Ice Freezors Up Ladder', Lddr).dir(No, 0x7e, 4, High),
+        create_door(player, 'Ice Freezors Pit Path', Lgcl),
         create_door(player, 'Ice Freezors Hole', Hole),
-        create_door(player, 'Ice Freezors Bomb Hole', Hole), # combine these two? -- they have to lead to the same spot
-        create_door(player, 'Ice Freezors Ledge Hole', Hole),
+        create_door(player, 'Ice Freezors Bomb Hole', Hole),
+        create_door(player, 'Ice Freezors Ledge Pit Path', Lgcl),
         create_door(player, 'Ice Freezors Ledge ES', Intr).dir(Ea, 0x7e, Bot, High).pos(1),
         create_door(player, 'Ice Tall Hint WS', Intr).dir(We, 0x7e, Bot, High).pos(1),
         create_door(player, 'Ice Tall Hint EN', Nrml).dir(Ea, 0x7e, Top, High).pos(2),
@@ -1283,6 +1285,7 @@ def create_doors(world, player):
     world.doors += doors
     world.initialize_doors(doors)
 
+    create_terminal_doors(world, player)
     create_paired_doors(world, player)
 
     # swamp events
@@ -1674,6 +1677,31 @@ def assign_entrances(world, player):
 def controller_door(controller, dependent):
     dependent.controller = controller
     controller.dependents.append(dependent)
+
+
+def create_terminal_doors(world, player):
+    import os
+    import yaml
+    terminal_doors = []
+    data_path = os.path.join(os.path.dirname(__file__), 'data', 'terminals.yaml')
+    with open(data_path) as f:
+        data = yaml.safe_load(f)
+
+    all_terminals = data.get('pits', []) + data.get('warps', [])
+    for entry in all_terminals:
+        name = entry['name']
+        dest = world.get_region(entry['region'], player)
+        t = Door(player, name, Trml)
+        ent = Entrance(player, name, dest)
+        dest.entrances.append(ent)
+        t.entrance = ent
+        ent.door = t
+        terminal_doors.append(t)
+        for source_name in entry['sources']:
+            world.get_door(source_name, player).group = name
+
+    world.doors += terminal_doors
+    world.initialize_doors(terminal_doors)
 
 
 def create_door(player, name, door_type):

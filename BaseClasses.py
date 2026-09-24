@@ -1734,6 +1734,7 @@ class DoorType(Enum):
     Warp = 7
     Interior = 8
     Logical = 9
+    Terminal = 10
 
 
 @unique
@@ -1755,12 +1756,16 @@ class Hook(Enum):
     Stairs = 4
     PitWarp = 5
     NormalPortal = 6
-    Landing = 7
+    Landing = 7  # used by the legacy DungeonGenerator only; pits use PitWarp in both directions
 
     def __lt__(self, other):
         return self.value < other.value
 
 
+# hook_from_door is a self-description: it names a door's OWN direction (a North door's hook
+# is North). Contrast hang_dir_map in source/dungeon/DungeonGenerationCommon.py, which describes
+# the opposite direction a door is searching for. Two doors connect when one's hanger equals
+# the other's hook.
 hook_dir_map = {
     Direction.North: Hook.North,
     Direction.South: Hook.South,
@@ -1775,13 +1780,13 @@ def hook_from_door(door):
     if door.type in [DoorType.Normal, DoorType.Open, DoorType.StraightStairs, DoorType.Ladder, DoorType.Interior]:
         return hook_dir_map[door.direction]
     if door.type in [DoorType.Hole, DoorType.Warp]:
-        return Hook.PitWarp
-    return None
+        return Hook.PitWarp  # a pit source can only be left through
+    return None  # includes Terminal: a landing cannot be left through
 
 
 class Polarity:
     def __init__(self):
-        self.vector = [0, 0, 0]
+        self.vector = [0, 0, 0, 0]
 
     def __len__(self):
         return len(self.vector)
@@ -1814,6 +1819,8 @@ class Polarity:
         h *= 43 + (spot if spot >= 0 else spot + 100)
         spot = self.vector[2]
         h *= 73 + (spot if spot >= 0 else spot + 100)
+        spot = self.vector[3]
+        h *= 97 + (spot if spot >= 0 else spot + 100)
         return h
 
     def is_neutral(self):
@@ -1852,7 +1859,8 @@ pol_idx = {
 pol_idx_2 = {
     0: 'Add',
     1: 'Add',
-    2: 'Mod'
+    2: 'Mod',
+    3: 'Add'
 }
 pol_inc = {
     'Pos': lambda x: x + 1,
@@ -1874,6 +1882,7 @@ class PolSlot(Enum):
     NorthSouth = 0
     EastWest = 1
     Stairs = 2
+    PitWarp = 3
 
 
 class CrystalBarrier(FastEnum):
@@ -1941,6 +1950,10 @@ class Door(object):
         self.dependents = []
         self.dead = False
         self.traversal_only = False
+        self.group = None  # pitwarp group identifier; all Hole/Warp doors in a group share one Terminal
+        self.group_rep = None  # the group's representative source door; the only one outstanding in its sector
+        self.group_barrier = None  # on the representative: the crystal barrier governing a fall through the group
+        self.group_members = None  # on the representative: every physical source door of the group
 
         # a list of glitches need to use the transition
         self.glitches_needed = []
@@ -2159,16 +2172,25 @@ class Sector(object):
 
     def polarity(self):
         pol = Polarity()
+        groups_seen = set()
         for door in self.outstanding_doors:
-            idx, inc = pol_idx[door.direction]
-            pol.vector[idx] = pol_inc[inc](pol.vector[idx])
+            if door.direction in pol_idx:
+                idx, inc = pol_idx[door.direction]
+                pol.vector[idx] = pol_inc[inc](pol.vector[idx])
+            elif door.type in [DoorType.Hole, DoorType.Warp]:
+                if door.group not in groups_seen:
+                    groups_seen.add(door.group)
+                    pol.vector[3] = pol_inc['Pos'](pol.vector[3])
+            elif door.type == DoorType.Terminal:
+                pol.vector[3] = pol_inc['Neg'](pol.vector[3])
         return pol
 
     def magnitude(self):
-        magnitude = [0, 0, 0]
+        magnitude = [0, 0, 0, 0]
         for door in self.outstanding_doors:
-            idx, inc = pol_idx[door.direction]
-            magnitude[idx] = magnitude[idx] + 1
+            if door.direction in pol_idx:
+                idx, inc = pol_idx[door.direction]
+                magnitude[idx] = magnitude[idx] + 1
         return magnitude
 
     def hook_magnitude(self):

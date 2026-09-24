@@ -5,7 +5,7 @@ from BaseClasses import hook_from_door
 from Regions import dungeon_events, flooded_keys_reverse
 from Utils import append_to_yaml, clear_file
 from source.dungeon.DungeonGenerationCommon import hanger_from_door
-from source.dungeon.DungeonGenerationCommon import GenerationException, is_boss_trap
+from source.dungeon.DungeonGenerationCommon import GenerationException, is_boss_trap, crystal_allows, pit_barrier
 from source.dungeon.DungeonStitcher import ExplorableDoor
 
 
@@ -75,9 +75,9 @@ class SectorDescriptor:
                     state.extend_reachable_state(p.door, cs_override=CrystalBarrier.Orange)
                     self.state_cache[p.door] = state
                     for explorable in state.unattached_doors:
-                        if explorable.door == DoorType.Logical or explorable.door not in self.sector.outstanding_doors:
-                                continue
-                        self.reachability[p.door].append((explorable.door, explorable.crystal, explorable.flag))
+                        if explorable.door == DoorType.Logical:
+                            continue
+                        self.add_reachable(p.door, explorable)
                     # self.reachability[None].append((p.door, CrystalBarrier.Orange, CrystalBarrier.Null))
                     skip_doors.add(p.door)
             # todo: dependent portals
@@ -95,10 +95,12 @@ class SectorDescriptor:
                 self.orange_reachability[door].extend([region for region, crystal in state.visited_map.items() if crystal[0] in [CrystalBarrier.Null, CrystalBarrier.Orange, CrystalBarrier.Both]])
             for explorable in state.unattached_doors:
                 # skip sanc mirror route in this calc and doors reached via overworld
-                if explorable.door == DoorType.Logical or explorable.door not in self.sector.outstanding_doors:
+                if explorable.door == DoorType.Logical:
                     continue
+                if explorable.door.type == DoorType.Terminal and explorable.door != door:
+                    continue  # terminals are entry points only; a terminal reaches itself like any entry door
                 # crystal = self.resolve_crystal_prop(explorable.crystal, state.visited_map[explorable.door.entrance.parent_region])
-                self.reachability[door].append((explorable.door, explorable.crystal, explorable.flag))
+                self.add_reachable(door, explorable)
             self.state_cache[door] = state
 
         for door, reach_list in self.reachability.items():
@@ -109,11 +111,38 @@ class SectorDescriptor:
                 has_portal = 'src' if all(not p.destination for p in self.sector.portals) else 'dest'
             self.shape_construct[door] = (valid_portal,has_portal) + tuple(sorted((ctr.items())))
 
+        for door in self.sector.outstanding_doors:
+            if door not in self.shape_construct:
+                self.shape_construct[door] = (False, 'no')
+
         self.classify()
+
+    def add_reachable(self, start, explorable):
+        """Records an outstanding door reached from start. Reaching any source of a pit group reaches the group's
+        representative; when several sources are reached, keep the state that can cross the group's barrier."""
+        door = explorable.door.group_rep if explorable.door.group_rep is not None else explorable.door
+        if door not in self.sector.outstanding_doors:
+            return
+        entry = (door, explorable.crystal, explorable.flag)
+        reach_list = self.reachability[start]
+        if door.group_rep is None:
+            reach_list.append(entry)  # ordinary doors keep one entry per crystal state reached
+            return
+        existing = next((i for i, (d, c, f) in enumerate(reach_list) if d == door), None)
+        if existing is None:
+            reach_list.append(entry)
+        elif (door.group_rep is not None and not crystal_allows(pit_barrier(door), reach_list[existing][1])
+              and crystal_allows(pit_barrier(door), explorable.crystal)):
+            reach_list[existing] = entry
 
     def classify(self):
         total_needed = len(self.sector.outstanding_doors)
-        unreached = set(self.sector.outstanding_doors)
+        unreached = {d for d in self.sector.outstanding_doors if d.type != DoorType.Terminal}
+        # terminals are always mandatory entry points
+        for door in self.sector.outstanding_doors:
+            if door.type == DoorType.Terminal:
+                self.must_enter_reqs.append(door)
+                unreached.difference_update({d for d, c, f in self.reachability.get(door, [])})
         if total_needed == 1 and not self.sector.portals:
             self.dead_end = True
         else: #elif not self.sector.portals or all(p.destination for p in self.sector.portals):
@@ -129,7 +158,8 @@ class SectorDescriptor:
                 for source, reach_list in self.reachability.items():
                     for reach in reach_list:
                         reversed_reachability[reach[0]].append(source)
-                must_access = [dest for dest, source_list in reversed_reachability.items() if len(source_list) == 1]
+                must_access = [dest for dest, source_list in reversed_reachability.items()
+                               if len(source_list) == 1 and dest.type not in [DoorType.Hole, DoorType.Warp, DoorType.Terminal]]
                 reached = set()
                 for dest in must_access:
                     self.must_enter_reqs.append(dest)
@@ -503,6 +533,10 @@ class SimpleExplorationState:
                         self.append_door_to_list(door, self.event_doors)
                     else:
                         self.append_door_to_list(door, self.avail_doors, False)
+        for ent in region.entrances:
+            door = ent.door
+            if door is not None and door.type == DoorType.Terminal and not door.dest:
+                self.append_door_to_list(door, self.unattached_doors)
 
     # Visited Truth Table
     # Note: self.crystal or state.crystal should never be "Both", this indicates a forcing thing

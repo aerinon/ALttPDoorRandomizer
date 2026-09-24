@@ -1,0 +1,331 @@
+# Terminal door definitions for pit/warp shuffle.
+# 'name' must be unique — entries marked DUPLICATE need renaming.
+# 'region' is the destination region in the world graph.
+# 'sources' lists all source doors that land at this terminal when shuffled.
+# 'rom' is placeholder for Phase 5 ROM coordinate data.
+
+pits:
+  - name: Eastern Fairies Terminal
+    region: Eastern Fairies
+    sources:
+      - Eastern Courtyard Potholes
+    rom: ~
+
+  - name: Hera Up Stairs Landing Terminal
+    region: Hera Up Stairs Landing
+    sources:
+      - Hera Beetles Holes Front
+      - Hera Beetles Holes Landing
+    rom: ~
+
+  - name: Hera Down Stairs Landing Terminal
+    region: Hera Down Stairs Landing
+    sources:
+      - Hera Startile Corner Holes Front
+      - Hera Startile Corner Holes Landing
+    rom: ~
+
+  - name: Hera Back Terminal
+    region: Hera Back
+    sources:
+      - Hera Startile Wide Holes
+    rom: ~
+
+  - name: Hera Startile Wide Terminal
+    region: Hera Startile Wide
+    sources:
+      - Hera 4F Holes
+      - Hera Big Chest Landing Holes
+    rom: ~
+
+  - name: Hera Big Chest Landing Terminal
+    region: Hera Big Chest Landing
+    sources:
+      - Hera 5F Star Hole
+    rom: ~
+
+  - name: Hera Fairies Terminal
+    region: Hera Fairies
+    sources:
+      - Hera 5F Pothole Chain
+    rom: ~
+
+  - name: Hera 4F Terminal
+    region: Hera 4F
+    sources:
+      - Hera 5F Normal Holes
+    rom: ~
+
+  - name: Hera 5F Pit Terminal
+    region: Hera 5F
+    sources:
+      - Hera Boss Outer Hole
+      - Hera Boss Inner Hole
+    rom: ~
+
+  - name: PoD Stalfos Basement Right Terminal
+    region: PoD Stalfos Basement
+    sources:
+      - PoD Pit Room Freefall
+    rom: ~
+
+  - name: PoD Basement Ledge Terminal
+    region: PoD Basement Ledge
+    sources:
+      - PoD Pit Room Bomb Hole
+    rom: ~
+
+  - name: PoD Stalfos Basement Left Terminal
+    region: PoD Stalfos Basement
+    sources:
+      - PoD Big Key Landing Hole
+    rom: ~
+
+  - name: Swamp Barrier Ledge Terminal
+    region: Swamp Barrier Ledge
+    sources:
+      - Swamp Attic Right Pit
+    rom: ~
+
+  - name: Swamp West Ledge Terminal
+    region: Swamp West Ledge
+    sources:
+      - Swamp Attic Left Pit
+    rom: ~
+
+  - name: Skull Boss Terminal
+    region: Skull Boss
+    sources:
+      - Skull Final Drop Hole
+    rom: ~
+
+  - name: Ice Stalfos Hint Terminal
+    region: Ice Stalfos Hint
+    sources:
+      - Ice Bomb Drop Hole
+    rom: ~
+
+  - name: Ice Tall Hint Terminal
+    region: Ice Tall Hint
+    sources:
+      - Ice Falling Square Hole
+    rom: ~
+
+  - name: Ice Big Chest Landing Terminal
+    region: Ice Big Chest Landing
+    sources:
+      - Ice Freezors Hole
+      - Ice Freezors Bomb Hole
+    rom: ~
+
+  - name: Ice Switch Room Terminal
+    region: Ice Switch Room
+    sources:
+      - Ice Crystal Block Hole
+      - Ice Crystal Right Blue Hole
+    rom: ~
+
+  - name: Ice Fairy Terminal
+    region: Ice Fairy
+    sources:
+      - Ice Backwards Room Hole
+    rom: ~
+
+  - name: Ice Boss Terminal
+    region: Ice Boss
+    sources:
+      - Ice Antechamber Hole
+    rom: ~
+
+  - name: Mire BK Chest Ledge Terminal
+    region: Mire BK Chest Ledge
+    sources:
+      - Mire Attic Hint Hole
+    rom: ~
+
+  - name: Mire Conveyor Barrier Terminal
+    region: Mire Conveyor Barrier
+    sources:
+      - Mire Torches Top Holes
+    rom: ~
+
+  - name: Mire Warping Pool Terminal
+    region: Mire Warping Pool
+    sources:
+      - Mire Torches Bottom Holes
+    rom: ~
+
+  - name: GT Ice Armos Terminal
+    region: GT Ice Armos
+    sources:
+      - GT Bob's Room Hole
+    rom: ~
+
+  - name: GT Staredown Terminal
+    region: GT Staredown
+    sources:
+      - GT Falling Torches Hole
+    rom: ~
+
+  - name: GT Moldorm Pit Terminal
+    region: GT Moldorm Pit
+    sources:
+      - GT Moldorm Hole
+    rom: ~
+
+warps:
+  - name: Eastern Courtyard Terminal
+    region: Eastern Courtyard
+    sources:
+      - Eastern Fairies' Warp
+    rom: ~
+
+  - name: Hera 5F Warp Terminal
+    region: Hera 5F
+    sources:
+      - Hera Fairies' Warp
+    rom: ~
+
+  - name: PoD Warp Room Left Terminal
+    region: PoD Warp Room
+    sources:
+      - PoD Warp Hint Warp
+    rom: ~
+
+  - name: PoD Warp Hint Terminal
+    region: PoD Warp Hint
+    sources:
+      - PoD Warp Room Warp
+    rom: ~
+
+  - name: PoD Warp Room Right Terminal
+    region: PoD Warp Room
+    sources:
+      - PoD Stalfos Basement Warp
+    rom: ~
+
+  - name: PoD Dark Alley Terminal
+    region: PoD Dark Alley
+    sources:
+      - PoD Callback Warp
+    rom: ~
+
+  - name: Ice Anti-Fairy Terminal
+    region: Ice Anti-Fairy
+    sources:
+      - Ice Fairy Warp
+    rom: ~
+
+  - name: Mire BK Door Room Terminal
+    region: Mire BK Door Room
+    sources:
+      - Mire Lone Warp Warp
+    rom: ~
+
+  - name: Mire Square Rail Terminal
+    region: Mire Square Rail
+    sources:
+      - Mire Warping Pool Warp
+    rom: ~
+
+  - name: GT Conveyor Star Pits Terminal
+    region: GT Conveyor Star Pits
+    sources:
+      - GT Compass Room Warp
+    rom: ~
+
+  - name: GT Firesnake Room Terminal
+    region: GT Firesnake Room
+    sources:
+      - GT Spike Crystals Warp
+    rom: ~
+
+  - name: GT Warp Maze - Rando Rail Terminal
+    region: GT Warp Maze - Rando Rail
+    sources:
+      - GT Warp Maze - Left Section Warp
+    rom: ~
+
+  - name: GT Warp Maze - Main Rails MidLeft Terminal
+    region: GT Warp Maze - Main Rails
+    sources:
+      - GT Warp Maze - Mid Section Left Warp
+    rom: ~
+
+  - name: GT Warp Maze - Main Rails MidRight Terminal
+    region: GT Warp Maze - Main Rails
+    sources:
+      - GT Warp Maze - Mid Section Right Warp
+    rom: ~
+
+  - name: GT Warp Maze - Main Rails Right Terminal
+    region: GT Warp Maze - Main Rails
+    sources:
+      - GT Warp Maze - Right Section Warp
+    rom: ~
+
+  - name: GT Warp Maze - Pot Rail Terminal
+    region: GT Warp Maze - Pot Rail
+    sources:
+      - GT Warp Maze - Pit Exit Warp
+    rom: ~
+
+  - name: GT Warp Maze - Left Section Terminal
+    region: GT Warp Maze - Left Section
+    sources:
+      - GT Warp Maze - Rail Choice Left Warp
+    rom: ~
+
+  - name: GT Warp Maze - Mid Section Top Terminal
+    region: GT Warp Maze - Mid Section
+    sources:
+      - GT Warp Maze - Rail Choice Right Warp
+    rom: ~
+
+  - name: GT Warp Maze - Mid Section LeftMost Terminal
+    region: GT Warp Maze - Mid Section
+    sources:
+      - GT Warp Maze - Rando Rail Warp
+    rom: ~
+
+  - name: GT Warp Maze - Pit Section Terminal
+    region: GT Warp Maze - Pit Section
+    sources:
+      - GT Warp Maze - Main Rails Best Warp
+    rom: ~
+
+  - name: GT Warp Maze - Mid Section MidLeft Terminal
+    region: GT Warp Maze - Mid Section
+    sources:
+      - GT Warp Maze - Main Rails Mid Left Warp
+    rom: ~
+
+  - name: GT Warp Maze - Mid Section MidRight Terminal
+    region: GT Warp Maze - Mid Section
+    sources:
+      - GT Warp Maze - Main Rails Mid Right Warp
+    rom: ~
+
+  - name: GT Warp Maze - Right Section Top Terminal
+    region: GT Warp Maze - Right Section
+    sources:
+      - GT Warp Maze - Main Rails Right Top Warp
+    rom: ~
+
+  - name: GT Warp Maze - Right Section Bottom Terminal
+    region: GT Warp Maze - Right Section
+    sources:
+      - GT Warp Maze - Main Rails Right Mid Warp
+    rom: ~
+
+  - name: GT Warp Maze Exit Section Terminal
+    region: GT Warp Maze Exit Section
+    sources:
+      - GT Warp Maze - Pot Rail Warp
+    rom: ~
+
+  - name: GT Invisible Bridges Terminal
+    region: GT Invisible Bridges
+    sources:
+      - GT Hidden Star Warp
+    rom: ~

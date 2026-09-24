@@ -9,7 +9,7 @@ import time
 import zlib
 import base64
 
-from BaseClasses import World, CollectionState, Item, Region, Location, Shop, Entrance, Settings
+from BaseClasses import World, CollectionState, Item, Region, Location, Shop, Entrance, Settings, DoorType
 from Bosses import place_bosses
 from Items import ItemFactory
 from KeyDoorShuffle import validate_key_placement
@@ -621,6 +621,8 @@ def copy_world(world):
         for location in copied_region.locations:
             location.parent_region = copied_region
         for entrance in region.entrances:
+            if entrance.door is not None and entrance.door.type == DoorType.Terminal:
+                continue  # a terminal's entrance is not a region exit; the pit source's exit carries the edge
             ret.get_entrance(entrance.name, entrance.player).connect(copied_region)
 
     # fill locations
@@ -673,6 +675,8 @@ def copy_world(world):
     for region in world.regions:
         copied_region = ret.get_region(region.name, region.player)
         for entrance in region.entrances:
+            if entrance.door is not None and entrance.door.type == DoorType.Terminal:
+                continue  # a terminal's entrance is not a region exit; the pit source's exit carries the edge
             ent = ret.get_entrance(entrance.name, entrance.player)
             if (ent.connected_region != copied_region):
                 ent.connect(copied_region)

@@ -19,7 +19,7 @@ from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
 from source.dungeon.DungeonStitcherV2 import create_dungeon
 from source.dungeon.NewKeyLogic import analyze_dungeon as analyze_dungeon_new
 from source.dungeon.SmallKeyDoorShuffle import shuffle_small_key_doors as shuffle_small_key_doors_v2
-from source.dungeon.DungeonGenerationCommon import uniform_distribute
+from source.dungeon.DungeonGenerationCommon import uniform_distribute, collapse_pit_groups
 
 from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths, drop_entrances
 from DungeonGenerator import create_dungeon_builders, split_dungeon_builder, simple_dungeon_builder, default_dungeon_entrances
@@ -73,9 +73,9 @@ def link_doors_prep(world, player):
 
     # These connections are here because they are currently unable to be shuffled
     for exitName, regionName in falldown_pits:
-        connect_simple_door(world, exitName, regionName, player)
+        connect_terminal_door(world, exitName, regionName, player)
     for exitName, regionName in dungeon_warps:
-        connect_simple_door(world, exitName, regionName, player)
+        connect_terminal_door(world, exitName, regionName, player)
 
     if world.intensity[player] < 2:
         for entrance, ext in open_edges:
@@ -222,6 +222,10 @@ def create_door_spoiler(world, player):
                                 logger.warning('This is a bug during door spoiler')
                     elif not isinstance(door_b, Region):
                         logger.warning('Door not connected: %s', door_a.name)
+                elif door_a and door_a.type in [DoorType.Hole, DoorType.Warp] and door_a.group_rep is not None and door_a not in done:
+                    done.add(door_a)  # shuffled pit: one-way to the landing region
+                    if isinstance(door_a.dest, Region):
+                        world.spoiler.set_door(door_a.name, door_a.dest.name, 'entrance', player, builder.name)
                 if valid_connection(connect, std_flag, world, player) and connect not in visited:
                     visited.add(connect)
                     reg_queue.append(connect)
@@ -422,6 +426,15 @@ def connect_simple_door(world, exit_name, region_name, player):
     d = world.check_for_door(exit_name, player)
     if d is not None:
         d.dest = region
+
+
+def connect_terminal_door(world, exit_name, region_name, player):
+    connect_simple_door(world, exit_name, region_name, player)
+    source = world.check_for_door(exit_name, player)
+    if source and source.group:
+        terminal = world.check_for_door(source.group, player)
+        if terminal:
+            terminal.dest = terminal.entrance.parent_region
 
 
 def connect_simple_door_to_region(exit_door, region):
@@ -1775,6 +1788,11 @@ def convert_to_sectors(region_names, world, player):
                                 matching_sectors.append(existing)
             else:
                 if door and not door.controller and not door.dest and not door.entranceFlag and door.type != DoorType.Logical:
+                    outstanding_doors.append(door)
+        for region in region_chunk:
+            for ent in region.entrances:
+                door = ent.door
+                if door and door.type == DoorType.Terminal and not door.dest:
                     outstanding_doors.append(door)
         sector = Sector()
         if not new_sector:
@@ -3899,6 +3917,8 @@ logical_connections = [
     ('Ice Bomb Jump Catwalk Orange Barrier', 'Ice Bomb Jump Ledge'),
     ('Ice Right H Path', 'Ice Hammer Block'),
     ('Ice Hammer Block Path', 'Ice Right H'),
+    ('Ice Freezors Pit Path', 'Ice Freezors Shared Pit'),
+    ('Ice Freezors Ledge Pit Path', 'Ice Freezors Shared Pit'),
     ('Ice Hookshot Ledge Path', 'Ice Hookshot Balcony'),
     ('Ice Hookshot Balcony Path', 'Ice Hookshot Ledge'),
     ('Ice Crystal Right Orange Barrier', 'Ice Crystal Left'),
@@ -4164,7 +4184,6 @@ falldown_pits = [
     ('Ice Bomb Drop Hole', 'Ice Stalfos Hint'),
     ('Ice Falling Square Hole', 'Ice Tall Hint'),
     ('Ice Freezors Hole', 'Ice Big Chest View'),
-    ('Ice Freezors Ledge Hole', 'Ice Big Chest View'),
     ('Ice Freezors Bomb Hole', 'Ice Big Chest Landing'),
     ('Ice Crystal Block Hole', 'Ice Switch Room'),
     ('Ice Crystal Right Blue Hole', 'Ice Switch Room'),
@@ -4175,7 +4194,7 @@ falldown_pits = [
     ('Mire Torches Bottom Holes', 'Mire Warping Pool'),
     ('GT Bob\'s Room Hole', 'GT Ice Armos'),
     ('GT Falling Torches Hole', 'GT Staredown'),
-    ('GT Moldorm Hole', 'GT Moldorm Pit')
+    ('GT Moldorm Hole', 'GT Moldorm Pit'),
 ]
 
 dungeon_warps = [
@@ -4836,12 +4855,6 @@ def prep_world_for_doors_prototype(world, player):
     for edge_a, edge_b in interior_doors:
         connect_interior_doors(edge_a, edge_b, world, player)
 
-    # These connections are here because they are currently unable to be shuffled
-    for exitName, regionName in falldown_pits:
-        connect_simple_door(world, exitName, regionName, player)
-    for exitName, regionName in dungeon_warps:
-        connect_simple_door(world, exitName, regionName, player)
-
     create_dungeon_pool(world, player)
 
     if not world.doorShuffle[player] == 'vanilla':
@@ -4850,6 +4863,10 @@ def prep_world_for_doors_prototype(world, player):
         unmark_ugly_smalls(world, player)
     if world.doorShuffle[player] == 'vanilla':
         find_inaccessible_regions(world, player)
+        for exitName, regionName in falldown_pits:
+            connect_terminal_door(world, exitName, regionName, player)
+        for exitName, regionName in dungeon_warps:
+            connect_terminal_door(world, exitName, regionName, player)
         for entrance, ext in open_edges:
             connect_two_way(world, entrance, ext, player)
         for entrance, ext in straight_staircases:
@@ -4894,10 +4911,7 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
     dungeon_builders = {}
     door_type_pools = []
 
-    flags = DoorFlags().from_world(world, player)
-    # custom intensity settings
-    if world.customizer and world.customizer.get_custom_intensity(player):
-        flags.from_custom(world.customizer.get_custom_intensity(player))
+    flags = DoorFlags.for_player(world, player)
     handle_intensity_settings(flags, world, player)
     connect_custom(world, player)
     customize_lobbies(world, player)
@@ -4907,6 +4921,7 @@ def main_dungeon_pool_prototype(dungeon_pool, world, player):
     for pool, region_list in dungeon_pool:
         sectors = convert_to_sectors(region_list, world, player)
         merge_sectors(sectors, world, player)
+        collapse_pit_groups(sectors)
         sector_pool, portal_pool = sector_portal_pools(sectors)
         # todo: analyze portal not based on inaccessible regions
         # todo: do it based on which dungeon are in this pool
@@ -4986,6 +5001,12 @@ def handle_intensity_settings(flags, world, player):
         world.get_room(0x62, player).change(1, DoorKind.DungeonEntrance)
     if world.mode[player] == 'standard':
         make_portal_vanilla(world.get_portal('Sanctuary', player), world, player)
+    if flags.pit_warps not in ('pits', 'both'):
+        for exitName, regionName in falldown_pits:
+            connect_terminal_door(world, exitName, regionName, player)
+    if flags.pit_warps not in ('warps', 'both'):
+        for exitName, regionName in dungeon_warps:
+            connect_terminal_door(world, exitName, regionName, player)
 
 
 def customize_lobbies(world, player):

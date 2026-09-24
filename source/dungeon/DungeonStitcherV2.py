@@ -18,7 +18,9 @@ def create_dungeon(builder, flags, world, player):
     queue = collections.deque(proposed_map.items())
     while len(queue) > 0:
         a, b = queue.popleft()
-        if a == b or world.decoupledoors[player]:
+        if is_pit_source(a):
+            connect_pit(a, b)  # one-way: no reverse entry to remove
+        elif a == b or world.decoupledoors[player]:
             connect_doors_one_way(a, b)
         else:
             connect_doors(a, b)
@@ -248,9 +250,11 @@ def create_random_proposal(doors_to_connect, world, player):
     secondary_bucket = collections.defaultdict(list)
     for name, door in doors_to_connect.items():
         door, idx = door
+        if is_pit_source(door) or is_terminal(door):
+            continue  # paired by propose_pits
         primary_bucket[hook_from_door(door)].append(door)
         secondary_bucket[hook_from_door(door)].append(door)
-    proposal = {}
+    proposal = propose_pits(doors_to_connect)
     while True:
         hooks_left, left = [], 0
         for hook in hooks:
@@ -291,6 +295,8 @@ def proposal_hash(doors_to_connect, proposed_map):
     hash_code = ''
     for name, door_pair in doors_to_connect.items():
         door, idx = door_pair
+        if is_terminal(door):
+            continue  # a pit is a one-way entry keyed by its source
         hash_code += str(idx) + str(doors_to_connect[proposed_map[door].name][1])
     return hash_code
 
@@ -327,9 +333,17 @@ def modify_proposal(proposed_map, explored_state, doors_to_connect, hash_code_se
                 break
             attempt = random.choice(possible_swaps)
             possible_swaps.remove(attempt)
+            if is_pit_source(attempt):
+                opp_hook_len = len(unvisited_terminals(proposed_map, explored_state))
+                continue
             opp_hook = type_map[hook_from_door(attempt)]
             opp_hook_len = len(unvisted_bucket[opp_hook])
         if opp_hook_len == 0:
+            itr += 1
+            continue
+        if is_pit_source(attempt):
+            swap_pit(proposed_map, attempt, random.choice(unvisited_terminals(proposed_map, explored_state)))
+            hash_code = proposal_hash(doors_to_connect, proposed_map)
             itr += 1
             continue
         unvisted_bucket[opp_hook].sort(key=lambda d: d.name)
@@ -355,7 +369,9 @@ def modify_proposal(proposed_map, explored_state, doors_to_connect, hash_code_se
         hash_code = proposal_hash(doors_to_connect, proposed_map)
         itr += 1
 
-    if not world.decoupledoors[player]:
+    if is_pit_source(attempt):
+        logger.debug(f'   Re-landing {attempt.name} -> {proposed_map[attempt].name}')
+    elif not world.decoupledoors[player]:
         logger.debug(f'   Re-linking {attempt.name} <-> {new_door.name}')
         logger.debug(f'   Re-linking {old_attempt.name} <-> {old_target.name}')
     else:
@@ -598,6 +614,64 @@ def connect_simple_door(exit_door, region):
     exit_door.dest = region
 
 
+def is_pit_source(door):
+    return door.type in [DoorType.Hole, DoorType.Warp]
+
+
+def is_terminal(door):
+    return door.type == DoorType.Terminal
+
+
+def landing_region(terminal):
+    return terminal.entrance.parent_region
+
+
+def proposal_key(door):
+    """A pit group is one edge: every physical source is proposed and explored through its representative."""
+    return door.group_rep if is_pit_source(door) and door.group_rep is not None else door
+
+
+def proposed_target(door, proposed_map, world, player):
+    """Region reached by leaving through door under the proposal, or its existing connection."""
+    key = proposal_key(door)
+    if key in proposed_map:
+        partner = proposed_map[key]
+        if is_terminal(partner):
+            return landing_region(partner)  # a terminal's entrance is not a region exit
+        return world.get_entrance(partner.name, player).parent_region
+    return world.get_entrance(door.name, player).connected_region
+
+
+def propose_pits(doors_to_connect):
+    """Randomly lands each pit group (by representative) on its own terminal; pits and warps share one pool."""
+    sources = [d for d, idx in doors_to_connect.values() if is_pit_source(d)]
+    terminals = [d for d, idx in doors_to_connect.values() if is_terminal(d)]
+    if len(sources) != len(terminals):
+        raise GenerationException(f'{len(sources)} pit groups but {len(terminals)} terminals; balance should match them')
+    random.shuffle(terminals)
+    return dict(zip(sources, terminals))
+
+
+def unvisited_terminals(proposed_map, explored_state):
+    return [t for s, t in proposed_map.items() if is_pit_source(s) and not explored_state.visited_at_all(landing_region(t))]
+
+
+def swap_pit(proposed_map, source, terminal):
+    """Lands source on terminal; the group that held terminal takes source's old terminal."""
+    other = next(s for s, t in proposed_map.items() if t == terminal and is_pit_source(s))
+    proposed_map[other], proposed_map[source] = proposed_map[source], terminal
+
+
+def connect_pit(source, terminal):
+    """Connects every physical source of the group to the terminal's landing region (one-way)."""
+    landing = landing_region(terminal)
+    for member in source.group_members or [source]:
+        member.entrance.connect(landing)
+        member.dest = landing
+    terminal.dest = landing
+    logging.getLogger('').debug(f'Pit: {source.name} group -> {terminal.name}')
+
+
 special_big_key_doors = ['Hyrule Dungeon Cellblock Door', "Thieves Blind's Cell Door"]
 std_special_big_key_doors = ['Hyrule Castle Throne Room Tapestry'] + special_big_key_doors
 
@@ -787,8 +861,9 @@ class ExplorationState(object):
 
     def add_all_doors_check_proposed(self, region, proposed_map, valid_doors, flag, world, player, exception):
         for door in get_doors(world, region, player):
-            if door in proposed_map and door.name in valid_doors:
-                self.visited_doors.add(door)
+            key = proposal_key(door)
+            if key in proposed_map and key.name in valid_doors:
+                self.visited_doors.add(key)
             if door.blocked and exception(door):
                 self.pinball_used = True
             if self.can_traverse(door, exception):
@@ -810,8 +885,9 @@ class ExplorationState(object):
     # same as above but traps are ignored, and flag is not used
     def add_all_doors_check_proposed_2(self, region, proposed_map, valid_doors, bk_relevant, world, player):
         for door in get_doors(world, region, player):
-            if door in proposed_map and door.name in valid_doors:
-                self.visited_doors.add(door)
+            key = proposal_key(door)
+            if key in proposed_map and key.name in valid_doors:
+                self.visited_doors.add(key)
             if self.can_traverse_ignore_traps(door):
                 if door.controller is not None:
                     door = door.controller
@@ -835,8 +911,9 @@ class ExplorationState(object):
     # same as above but traps are checked for
     def add_all_doors_check_proposed_3(self, region, proposed_map, valid_doors, bk_relevant, world, player):
         for door in get_doors(world, region, player):
-            if door in proposed_map and door.name in valid_doors:
-                self.visited_doors.add(door)
+            key = proposal_key(door)
+            if key in proposed_map and key.name in valid_doors:
+                self.visited_doors.add(key)
             if self.can_traverse(door):
                 if door.controller is not None:
                     door = door.controller
@@ -1026,10 +1103,7 @@ def extend_reachable_state_improved(search_regions, state, proposed_map, all_reg
                                  else local_state.count_locations_exclude_specials(world, player) == 0)
                 if big_not_found:
                     continue  # we can't open this door
-        if explorable_door.door in proposed_map:
-            connect_region = world.get_entrance(proposed_map[explorable_door.door].name, player).parent_region
-        else:
-            connect_region = world.get_entrance(explorable_door.door.name, player).connected_region
+        connect_region = proposed_target(explorable_door.door, proposed_map, world, player)
         if connect_region is not None:
             if valid_region_to_explore_in_regions(connect_region, all_regions, world, player) and not local_state.visited(
                     connect_region):
@@ -1055,10 +1129,7 @@ def extend_reachable_state_lenient(search_regions, state, proposed_map, all_regi
             if bk_relevant and (not special_big_key_found(local_state) if local_state.big_key_special
             else local_state.count_locations_exclude_specials(world, player) == 0):
                 continue
-        if explorable_door.door in proposed_map:
-            connect_region = world.get_entrance(proposed_map[explorable_door.door].name, player).parent_region
-        else:
-            connect_region = world.get_entrance(explorable_door.door.name, player).connected_region
+        connect_region = proposed_target(explorable_door.door, proposed_map, world, player)
         if connect_region is not None:
             if (valid_region_to_explore_in_regions(connect_region, all_regions, world, player)
                     and not local_state.visited(connect_region)):

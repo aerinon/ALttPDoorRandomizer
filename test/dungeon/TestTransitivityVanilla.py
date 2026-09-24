@@ -1,7 +1,36 @@
 import itertools
 import unittest
+from collections import Counter
 
+from BaseClasses import DoorType
+from source.dungeon.DungeonGenerationCommon import GenerationException
 from test.dungeon.transitivity_harness import DUNGEONS, capture_sectors, make_builder, sectors_by_dungeon, timed_check
+
+TIME_BUDGET = 2.0  # seconds; matches the slow-call warning threshold in DungeonGenTransitivity
+ONE_WAY = (DoorType.Hole, DoorType.Warp)
+
+
+class TestTerminalGroups(unittest.TestCase):
+
+    def test_groups_and_terminals_are_one_to_one(self):
+        sectors, flags = capture_sectors(4)
+        grouped = sectors_by_dungeon(sectors)
+        for name in DUNGEONS:
+            doors = [d for s in grouped[name] for d in s.outstanding_doors]
+            groups = {d.group for d in doors if d.type in ONE_WAY}
+            terminals = Counter(d.name for d in doors if d.type == DoorType.Terminal)
+            with self.subTest(dungeon=name):
+                self.assertNotIn(None, groups, 'every Hole/Warp must belong to a group')
+                self.assertEqual([], [t for t, n in terminals.items() if n > 1], 'duplicate terminal names')
+                self.assertEqual(set(terminals), groups)
+
+    def test_no_neutral_sector_holds_pits(self):
+        # Transitivity drops neutral sectors and splices them in later; that is unverified for one-way pits
+        sectors, flags = capture_sectors(4)
+        for s in sectors:
+            if s.descriptor.is_neutral:
+                with self.subTest(sector=s.sector_key()):
+                    self.assertFalse(any(d.type in ONE_WAY + (DoorType.Terminal,) for d in s.outstanding_doors))
 
 
 def vanilla_cases(intensity, pairs):
@@ -24,9 +53,31 @@ class TestTransitivityVanilla(unittest.TestCase):
     def test_singles_intensity_3(self):
         self.check(3, pairs=False)
 
+    def test_singles_intensity_4(self):
+        self.check(4, pairs=False)
+
     def test_pairs_intensity_3(self):
         self.check(3, pairs=True)
 
+    @unittest.expectedFailure  # search effort: 5 pairs hit the 20k-iteration cap (plan: Open work, search effort)
+    def test_pairs_intensity_4(self):
+        self.check(4, pairs=True)
 
-if __name__ == '__main__':
-    unittest.main()
+
+class TestTransitivitySearchBudget(unittest.TestCase):
+    """Every vanilla single and pair should be decided within TIME_BUDGET."""
+
+    @unittest.expectedFailure  # search effort: Misery Mire pairs take 2-20s at intensity 4 (plan: Open work, search effort)
+    def test_vanilla_within_budget(self):
+        slow = []
+        for intensity in (3, 4):
+            for pairs in (False, True):
+                for label, builder, sector_list, flags in vanilla_cases(intensity, pairs):
+                    try:
+                        verdict, elapsed = timed_check(builder, sector_list, flags, limit=120)
+                    except GenerationException:
+                        slow.append((intensity, label, 'cap'))
+                        continue
+                    if elapsed >= TIME_BUDGET:
+                        slow.append((intensity, label, round(elapsed, 1)))
+        self.assertEqual([], slow)

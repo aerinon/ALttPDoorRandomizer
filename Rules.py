@@ -505,14 +505,17 @@ def global_rules(world, player):
     set_rule(world.get_location('Ice Palace - Freezor Chest', player), lambda state: state.can_melt_things(player))
     set_rule(world.get_entrance('Ice Hookshot Ledge Path', player), lambda state: state.has('Hookshot', player))
     set_rule(world.get_entrance('Ice Hookshot Balcony Path', player), lambda state: state.has('Hookshot', player))
+    # the dropped block only helps if it falls into Ice Switch Room within the same dungeon (block state resets otherwise)
+    if block_drop_reaches_switch_room(world, player):
+        switch_rule = lambda state: state.has('Cane of Somaria', player) or state.has('Convenient Block', player)
+    else:
+        switch_rule = lambda state: state.has('Cane of Somaria', player)
     if not world.get_door('Ice Switch Room SE', player).entranceFlag:
-        set_rule(world.get_entrance('Ice Switch Room SE', player), lambda state: state.has('Cane of Somaria', player) or state.has('Convenient Block', player))
+        set_rule(world.get_entrance('Ice Switch Room SE', player), switch_rule)
     if is_trapped('Ice Switch Room ES'):
-        set_rule(world.get_entrance('Ice Switch Room ES', player),
-                 lambda state: state.has('Cane of Somaria', player) or state.has('Convenient Block', player))
+        set_rule(world.get_entrance('Ice Switch Room ES', player), switch_rule)
     if is_trapped('Ice Switch Room NE'):
-        set_rule(world.get_entrance('Ice Switch Room NE', player),
-                 lambda state: state.has('Cane of Somaria', player) or state.has('Convenient Block', player))
+        set_rule(world.get_entrance('Ice Switch Room NE', player), switch_rule)
     set_defeat_dungeon_boss_rule(world.get_location('Ice Palace - Boss', player))
     set_defeat_dungeon_boss_rule(world.get_location('Ice Palace - Prize', player))
 
@@ -833,6 +836,15 @@ def global_rules(world, player):
         add_rule(world.get_location('Ganon', player), lambda state: state.has_crystals(world.crystals_needed_for_ganon[player], player))
 
     set_rule(world.get_entrance('Ganon Drop', player), lambda state: state.has_beam_sword(player))  # need to damage ganon to get tiles to drop
+
+
+def block_drop_reaches_switch_room(world, player):
+    """Ice Block Drop pushes the block through Ice Crystal Block Hole; with pits shuffled it may land elsewhere, or in
+    another dungeon, where it no longer sits in Ice Switch Room."""
+    block_room = world.get_region('Ice Crystal Block', player)
+    switch_room = world.get_region('Ice Switch Room', player)
+    hole = world.get_entrance('Ice Crystal Block Hole', player)
+    return hole.connected_region is switch_room and block_room.dungeon == switch_room.dungeon
 
 
 def bomb_rules(world, player):

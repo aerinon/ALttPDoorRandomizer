@@ -131,10 +131,12 @@ def count_conn_needed_supplied(sector, conn_needed, conn_supplied):
     for door in sector.outstanding_doors:
         # todo: destination sectors like skull 2 west should be
         if (door.blocked or door.dead or sector.adj_outflow() <= 1) and not sector.is_entrance_sector():
-            conn_needed[hook_from_door(door)] += 1
+            if hook_from_door(door) is not None:  # a landing has no hook
+                conn_needed[hook_from_door(door)] += 1
         # todo: stonewall
         else:  # todo: dungeons that need connections... skull, tr, hc, desert (when edges are done)
-            conn_supplied[hanger_from_door(door)] += 1
+            if hanger_from_door(door) is not None:  # a pit source has no hanger
+                conn_supplied[hanger_from_door(door)] += 1
 
 
 def find_sector(r_name, sectors):
@@ -289,6 +291,10 @@ def assign_non_hc_sectors(dungeon_map, non_hc_sectors, global_pole):
         assign_sector(sector_list[i], builder, non_hc_sectors, global_pole)
 
 
+# hanger_from_door is a search key: it names the OPPOSITE direction, i.e. the type of door
+# this one needs to connect to (a North door hangs on a South door). Contrast hook_dir_map
+# in BaseClasses.py, which describes a door's own direction. Two doors connect when one's
+# hanger equals the other's hook.
 hang_dir_map = {
     Direction.North: Hook.South,
     Direction.South: Hook.North,
@@ -302,7 +308,67 @@ def hanger_from_door(door):
         return Hook.Stairs
     if door.type in [DoorType.Normal, DoorType.Open, DoorType.StraightStairs, DoorType.Ladder]:
         return hang_dir_map[door.direction]
-    return None
+    if door.type == DoorType.Terminal:
+        return Hook.PitWarp  # a landing is entered from a pit source
+    return None  # includes Hole/Warp: a pit source cannot be entered
+
+
+# A pit is one-way, so a door may lack a hook or a hanger. That means "impossible in that direction"
+# and must never become a lookup key; these raise so a missed two-way assumption fails loudly.
+def hook_key(door):
+    hook = hook_from_door(door)
+    if hook is None:
+        raise GenerationException(f'{door.name} has no hook; handle the one-way direction explicitly')
+    return hook
+
+
+def hanger_key(door):
+    hanger = hanger_from_door(door)
+    if hanger is None:
+        raise GenerationException(f'{door.name} has no hanger; handle the one-way direction explicitly')
+    return hanger
+
+
+def crystal_allows(barrier, state):
+    """Mirrors CollectionState.valid_crystal for generation crystal states (Null behaves as Orange)."""
+    if not barrier or barrier == CrystalBarrier.Either or state in [CrystalBarrier.Either, CrystalBarrier.Both]:
+        return True
+    return barrier == (CrystalBarrier.Orange if state == CrystalBarrier.Null else state)
+
+
+def pit_barrier(door):
+    """The crystal barrier that governs falling through a pit source (its group's, once groups are collapsed)."""
+    return door.group_barrier if door.group_rep is not None else door.crystal
+
+
+def collapse_pit_groups(sectors):
+    """A pit group is one edge: keep one representative source per group as the sector's outstanding door."""
+    group_sector = {}
+    for sector in sectors:
+        members = defaultdict(list)
+        for d in sector.outstanding_doors:
+            if d.type in [DoorType.Hole, DoorType.Warp] and d.group is not None:
+                members[d.group].append(d)
+        for group, doors in members.items():
+            if group in group_sector and group_sector[group] is not sector:
+                raise GenerationException(f'Pit group {group} spans sectors {group_sector[group].sector_key()} and '
+                                          f'{sector.sector_key()}; sector formation should keep a group together')
+            group_sector[group] = sector
+            barriers = {d.crystal for d in doors if d.crystal}
+            if len(barriers) > 1:
+                raise GenerationException(f'Pit group {group} mixes crystal barriers {sorted(barriers)}; unsupported')
+            rep = min(doors, key=lambda d: d.name)
+            rep.group_barrier = next(iter(barriers)) if barriers else None
+            rep.group_members = sorted(doors, key=lambda d: d.name)
+            for d in doors:
+                d.group_rep = rep
+            sector.outstanding_doors = [d for d in sector.outstanding_doors if d.group_rep is None or d.group_rep is d]
+
+
+def can_connect(hanger_door, hook_door):
+    """True when hanger_door can be attached onto (entered from) hook_door."""
+    hanger = hanger_from_door(hanger_door)
+    return hanger is not None and hanger == hook_from_door(hook_door)
 
 # ------------------------------ #
 #       Generation Classes
@@ -388,8 +454,8 @@ def sum_polarity(sector_list):
 class GlobalPolarity:
 
     def __init__(self, candidate_sectors):
-        self.positives = [0, 0, 0]
-        self.negatives = [0, 0, 0]
+        self.positives = [0, 0, 0, 0]
+        self.negatives = [0, 0, 0, 0]
         self.evens = 0
         self.odds = 0
         for sector in candidate_sectors:

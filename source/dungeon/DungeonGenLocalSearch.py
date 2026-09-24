@@ -29,7 +29,7 @@ def create_dungeon_builders_prototype(dungeon_pool, sector_pool, portal_pool, wo
 
 def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player):
     dungeon_pool = list(pool)
-    flags = DoorFlags().from_world(world, player)
+    flags = DoorFlags.for_player(world, player)
     portal_assignments = defaultdict(list)
 
     # vanilla assignment
@@ -157,7 +157,7 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
     lock_down_default_sectors(dungeon_boss_regions)
 
     # handles drop down lobbies - lock down for now - technically can move to a different
-    if not info.flags.warps_pits or not info.flags.lobbies:
+    if drop_lobbies_locked(info.flags):
         lock_down_default_sectors(default_lobby_drops)
 
     if world.mode[player] == 'standard':
@@ -846,6 +846,14 @@ class DoorFlags:
         self.world, self.player = None, None
 
 
+    @classmethod
+    def for_player(cls, world, player):
+        """The player's door flags: intensity from world settings, then any customizer intensity overrides."""
+        flags = cls().from_world(world, player)
+        if world.customizer and world.customizer.get_custom_intensity(player):
+            flags.from_custom(world.customizer.get_custom_intensity(player))
+        return flags
+
     def from_world(self, world, player):
         self.vanilla_traps = world.trap_door_mode[player] == 'vanilla'
         self.stair_loops = world.door_self_loops[player]
@@ -896,6 +904,11 @@ def score_door(item):
         score += 100
     return score
 
+def drop_lobbies_locked(flags):
+    """Overworld drop-down lobbies stay in their vanilla dungeon unless both lobbies and pits/warps shuffle."""
+    return flags.pit_warps == 'none' or not flags.lobbies
+
+
 def cnt_non_bk_locations(sector):
     count = 0
     for region in sector.regions:
@@ -926,6 +939,7 @@ class Balance:
         self.dead_stairs = 0
         self.one_ways = 0
         self.landings = 0
+        self._pit_groups_seen = set()
         self.connectables = 0
 
         self.dead_ends = 0
@@ -1012,9 +1026,12 @@ class Balance:
                 self.ttl_stairs += 1
                 if len(sector.outstanding_doors) == 1:
                     self.dead_stairs += 1
-            elif d.type in [DoorType.Warp, DoorType.Hole]:
-                self.one_ways += 1
-            # todo: landing types
+            elif d.type in [DoorType.Hole, DoorType.Warp]:
+                if d.group not in self._pit_groups_seen:
+                    self._pit_groups_seen.add(d.group)
+                    self.one_ways += 1
+            elif d.type == DoorType.Terminal:
+                self.landings += 1
 
     def extend(self, sector_list):
         for s in sector_list:
@@ -1063,7 +1080,7 @@ class Balance:
             return False
         if self.east != self.west:
             return False
-        if self.landings < self.one_ways:
+        if self.landings != self.one_ways:
             return False
         if not self.stair_balanced():
             return False
@@ -1125,7 +1142,7 @@ class Balance:
     def charge(self, include_t=True):
         charge = abs(self.north - self.south)
         charge += abs(self.east - self.west)
-        charge += max(self.one_ways - self.landings, 0)
+        charge += abs(self.one_ways - self.landings)
         charge += 0 if self.stair_balanced() else 1
         charge += 0 if self.crystal_needed == 0 or self.crystal_provided > 0 else self.crystal_needed
         charge += 0 if self.branches >= self.dead_ends else self.dead_ends
