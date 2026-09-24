@@ -36,7 +36,7 @@ Results (`PYTHONHASHSEED=0`, seed 1, crossed, experimental; verified = witness c
 | Seeds whose balancing completes (1–16) | 16 | 12 (the other 4 hit the 20k cap) |
 | Small crossed sets vs. exhaustive solver (300 pairable, crystal-free) | 4 of 226 solvable wrongly False (1.8%) | 1 of 185 (0.5%) |
 | Seeds 1–16 run through stitching (NewGeneration path) | 11 stitched, 2 stitcher timeouts (Turtle Rock, no pits), 3 hit the 20k cap | 8 stitched, 2 stitcher timeouts, 6 hit the 20k cap (4 in balancing, 2 in the stitcher's portal assignment) |
-| Stitched layouts: every region reachable over the applied connections | all | 7 of 8 (58 pit sources connected per seed); seed 15 misses `Hera 5F Pot Block` |
+| Stitched layouts: every region reachable over the applied connections | all | all 8 (58 pit sources connected per seed) |
 
 False verdicts only narrow randomness; the policy is no wrong True anywhere and a wrong-False rate within 3% on the small-set comparison (`TestTransitivityOracle`). No neutral sector holds pit doors (`is_sector_neutral` rejects them), so splicing one-way sectors is not exercised; `TestTerminalGroups` guards that.
 
@@ -44,7 +44,6 @@ Open work, correctness done first:
 
 1. **Search effort.** The 4 intensity-4 seeds (of 16) still capped all end with the only unlanded pit sources being Ice Backwards Room's Blue-gated holes (`Ice Backwards Room Hole`, `Ice Crystal Block Hole`) while that sector is only entered in Orange. The sets may be impossible; no check reasons about which crystal colors remain reachable, so the search cannot prove it. A crystal-aware bound is the next lever and needs a soundness design (switches, back-propagation, Either). Target: generation success no worse than the "2.0.0 2025" tab of the stability matrix (NewGen, 12/10/25, overall 80.95%), measured with `TestSuite.py`. In one environment (Python 3.14 venv) the classic path scores 65.3% on this branch, 64.0% on its base and 65.9% on the sheet's own commit `e0a3c0d8`: the branch is at parity, and the gap to the sheet is environmental. The branch shifts some failures from item fill to "Keylock detected" (68 vs 38 across a full run) without changing the success rate; cause not yet determined.
 2. **Stitcher timeouts** ("Generation taking too long", 1000 proposals) occur at both intensities and are not pit-specific so far.
-3. **Stitcher crystal model is more permissive than item logic.** In intensity-4 seed 15 the stitcher's `ExplorationState` reaches the Hera 5F cluster in both colors, while the item logic's rules (`CollectionState.traverse_world`, mirrored by the witness checker) reach it only in Blue, so `Hera 5F Pot Block` (behind an Orange barrier) is accepted by the stitcher but unreachable in logic. Every source region feeding the cluster is Blue-only in both models, so the difference arises inside the cluster; not yet shown to be pit-specific.
 
 ## Pit Model
 
@@ -93,7 +92,7 @@ A sector set is transitive when there exists a connection of **all** its outstan
 
 Transitivity stops when every door is *reached* (`remaining_doors` empty), leaving some reached doors unpaired. For normal doors this is equivalent to full pairing: LocalSearch only calls Transitivity on sets that already pass Balance (polarity and parity), so leftover reached doors can always be paired among themselves without changing reachability. For pits it is equivalent only if groups stay intact, which the witness checker verifies.
 
-The witness checker walks the world region graph with the crystal rules of `CollectionState.traverse_world` (`valid_crystal`, barrier doors, `c_switch` doors), the descriptor trap rule (`trap_door_mode`), controller/dependent doors (Ice Cross push blocks), dependent portals, and overworld drops. It ignores key and item requirements.
+The witness checker walks the world region graph with the crystal rules of `CollectionState.traverse_world` (`valid_crystal`, barrier doors, `c_switch` doors), the descriptor trap rule (`trap_door_mode`), controller/dependent doors (Ice Cross push blocks), dependent portals, and overworld drops. Re-entering a lobby from the overworld resets the crystal state to Orange, even when the lobby was already reached from inside. It ignores key and item requirements.
 
 Consequence for Task 3: randomly sampled subsets do not pass Balance, so the oracle uses the same "every door reached" criterion (plus the group rules) rather than full pairing.
 

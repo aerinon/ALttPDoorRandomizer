@@ -117,9 +117,13 @@ def explore_with_dependents(c_info, cmap, group_terminal, allowed):
                 continue
             for p in sector.portals:
                 enabled = c_info.dependent_lookup.get(p.door)
-                if enabled is not None and enabled.entrance.parent_region not in reached:
-                    explore([enabled.entrance.parent_region], cmap, group_terminal, allowed, respect_traps, reached)
-                    changed = True
+                if enabled is None:
+                    continue
+                # re-entering from the overworld resets the crystal state to Orange, even if already reached inside
+                region = enabled.entrance.parent_region
+                before = reached.get(region)
+                explore([region], cmap, group_terminal, allowed, respect_traps, reached)
+                changed |= reached.get(region) != before
     return reached
 
 
