@@ -6,7 +6,7 @@ import time
 from BaseClasses import CrystalBarrier, DoorType, Hook, RegionType, Sector, Portal
 from BaseClasses import hook_from_door, flooded_keys
 from Regions import dungeon_events, flooded_keys_reverse
-from source.dungeon.DungeonGenLocalSearch import default_lobby_drops
+from source.dungeon.DungeonGenLocalSearch import default_lobby_drops, drop_parent_region
 from source.dungeon.DungeonGenTransitivity import do_transitivity_check
 from source.dungeon.DungeonGenSectorDesc import SectorDescriptor
 
@@ -113,11 +113,7 @@ def determine_entrance_regions(builder, flags, world, player):
             continue
         if any(drop_region in s.region_set() for s in builder.sectors):
             region = world.get_region(drop_region, player)
-            parent_region = next((x.parent_region for x in region.entrances
-                                if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]
-                                or x.parent_region.name == 'Sewer Drop'), None)
-            if parent_region.name == 'Sewer Drop':
-                parent_region = next(x.parent_region for x in parent_region.entrances)
+            parent_region = drop_parent_region(drop_region, world, player)
             # access to the parent_region may be gated by this dungeon, don't depend on it
             # possible exception? drop down like skull back in insanity entrance modes? Do I need to detect that?
             if parent_region.name not in world.inaccessible_regions[player] or single_entrance_flag:

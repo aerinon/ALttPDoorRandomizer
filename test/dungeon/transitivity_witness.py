@@ -89,29 +89,53 @@ def explore(starts, cmap, group_terminal, allowed, respect_traps=True, rrp=None)
     return rrp
 
 
-def start_regions(c_info):
-    """Start portals, plus regions entered by an overworld drop (an entrance from outside the dungeon)."""
-    starts = []
-    for s in c_info.init_portals:
-        portal_regions = [r for r in s.regions if r.name.endswith(' Portal')]
-        starts.extend(portal_regions or s.regions)
+def _overworld_drops(c_info):
+    """(region, overworld parent) for regions entered from outside the dungeon, other than portals."""
+    drops = []
     for s in c_info.sector_list:
         for r in s.regions:
             if r.name.endswith(' Portal'):
                 continue
-            if any(e.parent_region is not None and e.parent_region.type != RegionType.Dungeon
-                   for e in r.entrances):
-                starts.append(r)
+            parent = next((e.parent_region for e in r.entrances
+                           if e.parent_region is not None and e.parent_region.type != RegionType.Dungeon), None)
+            if parent is not None:
+                drops.append((r, parent))
+    return drops
+
+
+def _gated(region):
+    return region.name in region.world.inaccessible_regions[region.player]
+
+
+def start_regions(c_info):
+    """Start portals, plus regions entered by an overworld drop from an accessible overworld region."""
+    starts = []
+    for s in c_info.init_portals:
+        portal_regions = [r for r in s.regions if r.name.endswith(' Portal')]
+        starts.extend(portal_regions or s.regions)
+    starts.extend(r for r, parent in _overworld_drops(c_info) if not _gated(parent))
     return starts
+
+
+def _overworld_side(portal_region):
+    return next((e.connected_region for e in portal_region.exits
+                 if e.connected_region is not None and e.connected_region.type != RegionType.Dungeon), None)
 
 
 def explore_with_dependents(c_info, cmap, group_terminal, allowed):
     """Entering the sector of an enabling portal makes its dependent portal's door reachable via the overworld."""
     respect_traps = c_info.flags.vanilla_traps
     reached = explore(start_regions(c_info), cmap, group_terminal, allowed, respect_traps)
+    gated_drops = [(r, parent) for r, parent in _overworld_drops(c_info) if _gated(parent)]
     changed = True
     while changed:
         changed = False
+        # a drop from a gated overworld region needs a reached portal of this dungeon that leads out onto it
+        outside = {_overworld_side(r) for r in reached if r.name.endswith(' Portal')}
+        for region, parent in gated_drops:
+            if parent in outside and region not in reached:
+                explore([region], cmap, group_terminal, allowed, respect_traps, reached)
+                changed = True
         for sector in c_info.sector_list:
             if not any(r in reached for r in sector.regions):
                 continue

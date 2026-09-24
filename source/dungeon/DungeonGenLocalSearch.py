@@ -5,7 +5,7 @@ import os
 from collections import defaultdict, deque
 
 
-from BaseClasses import Direction, CrystalBarrier, DoorType, Door, Hook, Entrance, Sector
+from BaseClasses import Direction, CrystalBarrier, DoorType, Door, Hook, Entrance, RegionType, Sector
 from Regions import create_dungeon_region
 from Utils import clear_file
 from source.dungeon.DungeonGenerationCommon import DungeonBuilder, GenerationException, define_sector_features, dungeon_portals
@@ -159,6 +159,8 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
     # handles drop down lobbies - lock down for now - technically can move to a different
     if drop_lobbies_locked(info.flags):
         lock_down_default_sectors(default_lobby_drops)
+    else:
+        lock_down_default_sectors({k: v for k, v in default_lobby_drops.items() if drop_is_gated(k, world, player)})
 
     if world.mode[player] == 'standard':
         exclude_sector(find_sector('Swamp Lobby', info.sector_pool), info, dungeon_aliases['Hyrule Castle'])
@@ -903,6 +905,24 @@ def score_door(item):
     if score == longest:
         score += 100
     return score
+
+def drop_parent_region(drop_region, world, player):
+    """The overworld region an overworld drop-down lobby falls from."""
+    region = world.get_region(drop_region, player)
+    parent = next((x.parent_region for x in region.entrances
+                   if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]
+                   or x.parent_region.name == 'Sewer Drop'), None)
+    if parent is not None and parent.name == 'Sewer Drop':
+        parent = next(x.parent_region for x in parent.entrances)
+    return parent
+
+
+def drop_is_gated(drop_region, world, player):
+    """A drop whose overworld side is only reached by leaving its vanilla dungeon (Skull Back Drop). Neither
+    Transitivity nor the stitcher models reaching it through another dungeon yet, so for now it stays in its vanilla
+    dungeon (stop-gap until drops can move between dungeons)."""
+    return drop_parent_region(drop_region, world, player).name in world.inaccessible_regions[player]
+
 
 def drop_lobbies_locked(flags):
     """Overworld drop-down lobbies stay in their vanilla dungeon unless both lobbies and pits/warps shuffle."""

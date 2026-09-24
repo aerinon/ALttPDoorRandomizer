@@ -3,6 +3,7 @@ import unittest
 from collections import Counter
 
 from BaseClasses import DoorType
+from source.dungeon.DungeonGenLocalSearch import default_lobby_drops, drop_is_gated
 from source.dungeon.DungeonGenerationCommon import GenerationException
 from test.dungeon.transitivity_harness import DUNGEONS, capture_sectors, make_builder, sectors_by_dungeon, timed_check
 
@@ -31,6 +32,15 @@ class TestTerminalGroups(unittest.TestCase):
             if s.descriptor.is_neutral:
                 with self.subTest(sector=s.sector_key()):
                     self.assertFalse(any(d.type in ONE_WAY + (DoorType.Terminal,) for d in s.outstanding_doors))
+
+
+class TestDropLobbies(unittest.TestCase):
+
+    def test_only_skull_back_drop_is_gated_on_the_vanilla_overworld(self):
+        # its overworld side is reached only by leaving Skull Woods, so it may not move to another dungeon
+        sectors, flags = capture_sectors(4)
+        world, player = sectors[0].regions[0].world, sectors[0].regions[0].player
+        self.assertEqual(['Skull Back Drop'], [d for d in default_lobby_drops if drop_is_gated(d, world, player)])
 
 
 def vanilla_cases(intensity, pairs):

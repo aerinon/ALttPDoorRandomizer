@@ -24,26 +24,33 @@ Further Transitivity changes after the conversion:
 Search-effort changes:
 
 - Terminals are never merged by `winnow_doors_to_check`: its static shape key ignores which pit sources are still unused behind a landing, so equally shaped Terminals are not interchangeable. This was the main cause of the 20k-iteration cap at intensity 4 (vanilla slow set: about 184,000 `now_impossible` calls down to 4,329).
-- `some_door_never_reachable` (relaxed reachability bound, ignoring crystals and partner counts; everything a reached sector could ever reach counts as reachable) prunes states where some remaining door can never be reached.
+- `some_door_never_reachable` is a relaxed reachability bound over (door, crystal color): starting from every reached door and its known colors, it walks sector reachability (respecting barriers and arrival states), crosses actual connections, and assumes any compatible unconnected partner, aggregated per hook type, so partner counts are ignored. Dependent portals add Orange (overworld re-entry), pits fall in their barrier color, and Terminals are never left. A remaining door reachable in no color makes the state impossible. The door-type index is built once per `ConstraintInfo`.
+- `propagate_colors` spreads newly reached colors through existing connections after each `connect_door`, so a door reached first in Orange and later in Blue is upgraded everywhere downstream. `door_states` keeps the color each connected door was reached in. This resolved the Ice Backwards Room caps (Blue-gated holes whose sector was known only in Orange).
 
-Results (`PYTHONHASHSEED=0`, seed 1, crossed, experimental; verified = witness checker reports no problems):
+Generation changes:
+
+- Drop-down lobbies still move at intensity 4, except a drop whose overworld side is an inaccessible region (`drop_is_gated`; on the vanilla overworld only Skull Back Drop, whose forest is reached only by leaving Skull Woods). Neither Transitivity nor the stitcher models reaching a drop through another dungeon, so a moved Skull Back Drop could never be stitched; it caused every intensity-4 stitcher timeout. `drop_parent_region` is shared by LocalSearch and the stitcher.
+- Item logic: `Convenient Block` (from `Ice Block Drop`) opens Ice Switch Room only when `Ice Crystal Block Hole` lands in Ice Switch Room within the same dungeon (`block_drop_reaches_switch_room`); the block state resets otherwise.
+
+Results (`PYTHONHASHSEED=0`, crossed, experimental, seed 1 unless a range is given; verified = witness checker reports no problems):
 
 | | Intensity 3 | Intensity 4 |
 |---|---|---|
 | 13 vanilla dungeons | 13 verified | 13 verified |
 | 78 vanilla pairs | 78 verified | 78 verified |
-| Real LocalSearch calls, seeds 1–12 (every True checked) | 260 calls, 195 True, 0 wrong | 506 calls, 156 True, 0 wrong |
-| Seeds whose balancing completes (1–16) | 16 | 12 (the other 4 hit the 20k cap) |
-| Small crossed sets vs. exhaustive solver (300 pairable, crystal-free) | 4 of 226 solvable wrongly False (1.8%) | 1 of 185 (0.5%) |
-| Seeds 1–16 run through stitching (NewGeneration path) | 11 stitched, 2 stitcher timeouts (Turtle Rock, no pits), 3 hit the 20k cap | 8 stitched, 2 stitcher timeouts, 6 hit the 20k cap (4 in balancing, 2 in the stitcher's portal assignment) |
-| Stitched layouts: every region reachable over the applied connections | all | all 8 (58 pit sources connected per seed) |
+| Real LocalSearch calls, seeds 1–12 (every True checked) | 399 calls, 193 True, 0 wrong | 384 calls, 185 True, 0 wrong (2 seeds hit the cap) |
+| Seeds 1–40 through stitching (NewGeneration path) | 35 stitched, 5 hit the 20k cap | 32 stitched, 8 hit the 20k cap |
+| Stitched layouts: every region reachable over the applied connections | all | all |
+| Small crossed sets vs. exhaustive solver (300 pairable, crystal-free, no gated drop) | 3 of 220 solvable wrongly False (1.4%) | 1 of 188 (0.5%) |
 
 False verdicts only narrow randomness; the policy is no wrong True anywhere and a wrong-False rate within 3% on the small-set comparison (`TestTransitivityOracle`). No neutral sector holds pit doors (`is_sector_neutral` rejects them), so splicing one-way sectors is not exercised; `TestTerminalGroups` guards that.
 
 Open work, correctness done first:
 
-1. **Search effort.** The 4 intensity-4 seeds (of 16) still capped all end with the only unlanded pit sources being Ice Backwards Room's Blue-gated holes (`Ice Backwards Room Hole`, `Ice Crystal Block Hole`) while that sector is only entered in Orange. The sets may be impossible; no check reasons about which crystal colors remain reachable, so the search cannot prove it. A crystal-aware bound is the next lever and needs a soundness design (switches, back-propagation, Either). Target: generation success no worse than the "2.0.0 2025" tab of the stability matrix (NewGen, 12/10/25, overall 80.95%), measured with `TestSuite.py`. In one environment (Python 3.14 venv) the classic path scores 65.3% on this branch, 64.0% on its base and 65.9% on the sheet's own commit `e0a3c0d8`: the branch is at parity, and the gap to the sheet is environmental. The branch shifts some failures from item fill to "Keylock detected" (68 vs 38 across a full run) without changing the success rate; cause not yet determined.
-2. **Stitcher timeouts** ("Generation taking too long", 1000 proposals) occur at both intensities and are not pit-specific so far.
+Out of scope: general Transitivity search effort. The remaining 20k-iteration caps are mostly two-way-door search (intensity 3 caps 5 of 40 seeds too; Ganons Tower, Agahnims Tower and Swamp Palace caps expand almost only two-way doors, Eastern Palace and Thieves Town are the pit-heavy ones). The generation target is the "2.0.0 2025" tab of the stability matrix (overall 80.95%); in one environment (Python 3.14 venv) `TestSuite.py` scores the branch at parity with its base (65.3% vs 64.0%, and 65.9% on the sheet's commit `e0a3c0d8`), so the gap to the sheet is environmental. The branch shifts some failures from item fill to "Keylock detected" (68 vs 38 across a full run) without changing the success rate; cause not yet determined.
+
+1. **Drops gated through another dungeon.** The Skull Back Drop lock is a temporary stop-gap; the goal is for it to move freely. Moving drops between dungeons is a later phase: Transitivity and the stitcher must treat a gated drop as enabled once the dungeon reaches a portal onto its overworld region (the witness checker already models this). Other drops are free starts in the stitcher but not in Transitivity (false negatives only).
+2. **Full intensity-4 generation** stops in `finish_dungeon_setup` (custom trap doors: "Bad dungeon ..."), before item rules run.
 
 ## Pit Model
 

@@ -121,6 +121,13 @@ def do_transitivity_check_main(builder, sector_list, flags, initial_connections=
     return None
 
 
+def crystal_bits(state):
+    """Blue = 1, Orange = 2; Null behaves as Orange."""
+    if state in [CrystalBarrier.Either, CrystalBarrier.Both]:
+        return 3
+    return 1 if state == CrystalBarrier.Blue else 2
+
+
 def is_one_way(door):
     return door.type in [DoorType.Hole, DoorType.Warp, DoorType.Terminal]
 
@@ -409,6 +416,22 @@ class EscapeCheck:
         return False
 
 
+def _door_type_index(self):
+    """Doors by hanger type and by hook type, built once per ConstraintInfo."""
+    if getattr(self, '_type_index', None) is None:
+        by_hanger, by_hook = defaultdict(list), defaultdict(list)
+        for d in self.door_sector_map:
+            if hanger_from_door(d) is not None:
+                by_hanger[hanger_key(d)].append(d)
+            if hook_from_door(d) is not None:
+                by_hook[hook_key(d)].append(d)
+        self._type_index = (by_hanger, by_hook)
+    return self._type_index
+
+
+ConstraintInfo.door_type_index = _door_type_index
+
+
 def valid_portal(door, match_door, c_info, init=True):
     builder = c_info.builder
     hc_flag = c_info.flags.std_flag and 'Hyrule Castle' in builder.name
@@ -446,6 +469,7 @@ class Transitivity:
         self.door_path = []  # door choices made to get to this point
         self.connection_map = {}  # hard connections made
         self.crystal_switch_included = False
+        self.door_states = {}  # crystal state each connected door was crossed in
 
         # which constraints are satisfied and remaining?
         self.unsatisfied_constraints = list(constraint_list)
@@ -458,6 +482,7 @@ class Transitivity:
         copy.door_path.extend(self.door_path)
         copy.connection_map.update(self.connection_map)
         copy.crystal_switch_included = self.crystal_switch_included
+        copy.door_states.update(self.door_states)
         copy.satisfied_constraints.extend(self.satisfied_constraints)
         return copy
 
@@ -747,6 +772,9 @@ class Transitivity:
                                 visited.add((target, target_crystal))
                                 backprop_queue.append((target, target_crystal))
 
+        changed = {hanger, hook} | {d for d, st in t.unconnected_doors.items() if self.unconnected_doors.get(d) != st}
+        t.propagate_colors(c_info, changed)
+
         # deal with enabled portals
         for p in c_info.door_sector_map[hanger].portals:
             if p.door in c_info.dependent_lookup:
@@ -784,8 +812,62 @@ class Transitivity:
             else:
                 new_unsatisfied_constraints.append(constraint)
         t.unsatisfied_constraints = new_unsatisfied_constraints
+        t.door_states[hook] = hook_cs
+        t.door_states[hanger] = crystal_prop
 
         return t
+
+    def propagate_colors(self, c_info, changed):
+        """Carries every crystal color a door is reached in through the sector walks and the connections already made,
+        so a color that arrives later still reaches the doors behind it (back-propagation alone only spreads Either).
+        The previous state was already propagated, so the walk starts from the doors this connection changed."""
+        blue, orange = 1, 2
+        bits = {d: crystal_bits(s) for d, s in self.door_states.items()}
+        for d, s in self.unconnected_doors.items():
+            bits[d] = bits.get(d, 0) | crystal_bits(s)
+        queue = deque((d, bits[d]) for d in changed if d in bits)
+        grown = set()
+
+        def add(door, new_bits):
+            old = bits.get(door, 0)
+            if new_bits and old | new_bits != old:
+                bits[door] = old | new_bits
+                grown.add(door)
+                queue.append((door, new_bits))
+
+        while queue:
+            door, door_bits = queue.popleft()
+            sector = c_info.door_sector_map.get(door)
+            if sector is None:
+                continue
+            for x, arrive, req in sector.descriptor.reachability.get(door, []):
+                for c in (blue, orange):
+                    if not door_bits & c or (req == CrystalBarrier.Blue and c == orange) or (req == CrystalBarrier.Orange and c == blue):
+                        continue
+                    add(x, 3 if arrive in [CrystalBarrier.Either, CrystalBarrier.Both]
+                        else blue if arrive == CrystalBarrier.Blue else orange if arrive == CrystalBarrier.Orange else c)
+            partner = self.connection_map.get(door)
+            if partner is None or door.type == DoorType.Terminal:
+                continue  # unconnected, or a landing (cannot be left through)
+            if door.type in [DoorType.Hole, DoorType.Warp]:
+                barrier = pit_barrier(door)
+                fall = 0
+                for c in (blue, orange):
+                    if door_bits & c and crystal_allows(barrier, CrystalBarrier.Blue if c == blue else CrystalBarrier.Orange):
+                        fall |= 3 if barrier == CrystalBarrier.Either else crystal_bits(barrier) if barrier else c
+                add(partner, fall)
+            else:
+                add(partner, door_bits)
+        for d in grown:
+            state = CrystalBarrier.Both if bits[d] == 3 else CrystalBarrier.Blue if bits[d] == blue else CrystalBarrier.Orange
+            if d in self.remaining_doors and d.type != DoorType.Terminal:
+                self.remaining_doors.remove(d)  # newly walkable in a color that arrived later
+                self.unconnected_doors[d] = state
+            elif d in self.unconnected_doors:
+                if self.unconnected_doors[d] not in [CrystalBarrier.Either, CrystalBarrier.Both]:
+                    self.unconnected_doors[d] = state
+            elif d in self.door_states and self.door_states[d] not in [CrystalBarrier.Either, CrystalBarrier.Both]:
+                self.door_states[d] = state
 
     def now_impossible(self, c_info, visited_states):
         if frozenset(self.connection_map.items()) in visited_states:
@@ -914,40 +996,69 @@ class Transitivity:
         return False
 
     def some_door_never_reachable(self, c_info):
-        """Relaxed reachability bound: a remaining door that no sequence of connections can reach makes the state
-        impossible. Ignores crystals and how many partners are left, so it never rejects a solvable state."""
-        reached = set(self.unconnected_doors) | set(self.connection_map)
-        # a sector already entered can still open more doors later (e.g. a different crystal state), so everything its
-        # reached doors could ever reach counts as reachable
-        for d in list(reached):
-            if d in c_info.door_sector_map:
-                reached.update(x for x, c, f in c_info.door_sector_map[d].descriptor.reachability.get(d, []))
-        hooks = {hook_from_door(d) for d in reached if d not in self.connection_map and hook_from_door(d) is not None}
-        pending = [d for d in self.remaining_doors if d not in reached]
-        changed = True
-        while pending and changed:
-            changed = False
-            still_pending = []
-            for d in pending:
-                if d in reached:
-                    continue
-                hanger = hanger_from_door(d)
-                if hanger is None or hanger not in hooks:
-                    still_pending.append(d)
-                    continue
-                sector = c_info.door_sector_map[d]
-                entered = {x for x, c, f in sector.descriptor.reachability.get(d, [])}
-                entered.add(d)
-                for p in sector.portals:
-                    if p.door in c_info.dependent_lookup:
-                        entered.add(c_info.dependent_lookup[p.door])
-                for x in entered - reached:
-                    reached.add(x)
-                    if hook_from_door(x) is not None:
-                        hooks.add(hook_from_door(x))
-                changed = True
-            pending = still_pending
-        return any(d not in reached for d in pending)
+        """Relaxed reachability bound over (door, crystal color): a remaining door that no sequence of connections can
+        reach in either color makes the state impossible. Any compatible partner counts and partner counts are ignored,
+        so it never rejects a solvable state."""
+        blue, orange = 1, 2
+        by_hanger, by_hook = c_info.door_type_index()
+        colors = {}
+        queue = deque()
+        attach = defaultdict(int)  # hook type -> colors an unconnected door of that hook offers to hangers
+        offer = defaultdict(int)  # hanger type -> colors an unconnected hanger brings to hooks of that type
+
+        def add(door, bits):
+            old = colors.get(door, 0)
+            if bits and old | bits != old:
+                colors[door] = old | bits
+                queue.append((door, bits))
+
+        def spread(table, key, bits, targets):
+            old = table[key]
+            if bits and old | bits != old:
+                table[key] = old | bits
+                for x in targets:
+                    if x not in self.connection_map:
+                        add(x, bits)
+
+        for d, state in list(self.unconnected_doors.items()) + list(self.door_states.items()):
+            add(d, crystal_bits(state))
+        while queue:
+            door, bits = queue.popleft()
+            sector = c_info.door_sector_map.get(door)
+            if sector is None:
+                continue
+            # walk the sector from this door, respecting barriers on the way
+            for x, arrive, req in sector.descriptor.reachability.get(door, []):
+                for c in (blue, orange):
+                    if not bits & c or (req == CrystalBarrier.Blue and c == orange) or (req == CrystalBarrier.Orange and c == blue):
+                        continue
+                    add(x, 3 if arrive in [CrystalBarrier.Either, CrystalBarrier.Both]
+                        else blue if arrive == CrystalBarrier.Blue else orange if arrive == CrystalBarrier.Orange else c)
+            for p in sector.portals:
+                if p.door in c_info.dependent_lookup:
+                    add(c_info.dependent_lookup[p.door], orange)  # re-entered from the overworld
+            if door.type == DoorType.Terminal:
+                continue  # a landing cannot be left through
+            if door.type in [DoorType.Hole, DoorType.Warp]:
+                barrier = pit_barrier(door)
+                fall = 0
+                for c in (blue, orange):
+                    if bits & c and crystal_allows(barrier, CrystalBarrier.Blue if c == blue else CrystalBarrier.Orange):
+                        fall |= 3 if barrier == CrystalBarrier.Either else crystal_bits(barrier) if barrier else c
+                if door in self.connection_map:
+                    add(self.connection_map[door], fall)
+                else:
+                    spread(attach, (Hook.PitWarp, 'pit'), fall, by_hanger[Hook.PitWarp])
+                continue
+            # two-way: cross into the actual partner, or any compatible unconnected partner
+            if door in self.connection_map:
+                add(self.connection_map[door], bits)
+                continue
+            if hook_from_door(door) is not None:
+                spread(attach, hook_key(door), bits, [x for x in by_hanger[hook_key(door)] if not is_one_way(x)])
+            if hanger_from_door(door) is not None:
+                spread(offer, hanger_key(door), bits, [x for x in by_hook[hanger_key(door)] if not is_one_way(x)])
+        return any(colors.get(d, 0) == 0 for d in self.remaining_doors)
 
     def quick_door_matches_check(self, c_info):
         if len(self.remaining_doors) == 0:
