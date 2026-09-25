@@ -42,7 +42,7 @@ from source.enemizer.Enemizer import write_enemy_shuffle_settings
 
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
-RANDOMIZERBASEHASH = 'a882ed16dce1cb84f366afd69788e8f2'
+RANDOMIZERBASEHASH = 'f453db900fe60c28bac00a7b8873789f'
 
 
 class JsonRom(object):
@@ -660,6 +660,7 @@ def patch_rom(world, rom, player, team, is_mystery=False):
              door.player == player and door.type in [DoorType.Normal, DoorType.SpiralStairs,
                                                      DoorType.Open, DoorType.StraightStairs, DoorType.Ladder]:
             rom.write_bytes(door.getAddress(), door.dest.getTarget(door))
+    write_pitwarps(world, rom, player)
     for paired_door in world.paired_doors[player]:
         rom.write_bytes(paired_door.address_a(world, player), paired_door.rom_data_a(world, player))
         rom.write_bytes(paired_door.address_b(world, player), paired_door.rom_data_b(world, player))
@@ -1555,6 +1556,40 @@ def patch_race_rom(rom):
 
     if 'RaceRom' in sys.modules:
         RaceRom.encrypt(rom)
+
+LANDING_ZONE_DATA = 0xA7C940  # dr_baserom PitWarps: 61 rows of 25 bytes, one per pit/warp source
+LANDING_ZONE_ROW_SIZE = 25
+
+
+def pitwarp_row_bytes(landing):
+    """One LandingZoneData row from a terminal's captured landing (dr_baserom pitwarp generator interface)."""
+    if landing['room_id_a0'] > 0xFF:
+        raise ValueError(f"landing room {landing['room_id_a0']:#x} does not fit the row's room word")
+    data = []
+    # scroll: BG2 ($E2/$E8) is the camera; the ROM writes it to both BG1 and BG2 and BG1 is derived from it
+    for key in ['room_id_a0', 'link_y_20', 'link_x_22', 'scroll_x_e2', 'scroll_y_e8', 'camera_y_618', 'camera_x_61c']:
+        data += int16_as_bytes(landing[key])
+    data.append(landing['layer_0476'] + landing['bg_setting_ee'])  # target layer index; the ROM sets $0476 and $EE from it
+    data.append(landing['hv_scroll_a6'] | landing['hv_scroll_a7'] << 2)
+    data.append(landing['scroll_quad_a9'] | landing['scroll_quad_aa'])
+    data += landing['scroll_bounds']
+    if len(data) != LANDING_ZONE_ROW_SIZE:
+        raise ValueError(f'LandingZoneData row is {len(data)} bytes')
+    return data
+
+
+def write_pitwarps(world, rom, player):
+    """Writes the rows of every shuffled pit/warp group, even one that lands on its own terminal: a vanilla fall can
+    land in a different region than the terminal models (fall chains, merged pits), so the row pins the modeled landing.
+    Without pit/warp shuffle nothing is written and every row stays vanilla."""
+    for door in world.doors:
+        if door.player != player or door.pit_terminal is None or door.group_rep is not door:
+            continue
+        vanilla = world.get_door(door.group, player)
+        data = pitwarp_row_bytes(door.pit_terminal.pitwarp_rom['landing'])
+        for row in vanilla.pitwarp_rom['rows']:
+            rom.write_bytes(snes_to_pc(LANDING_ZONE_DATA + row * LANDING_ZONE_ROW_SIZE), data)
+
 
 def write_custom_shops(rom, world, player):
     shops = [shop for shop in world.shops[player] if shop.custom and shop.region.player == player]

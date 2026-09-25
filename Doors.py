@@ -1703,6 +1703,7 @@ def create_terminal_doors(world, player):
         dest.entrances.append(ent)
         t.entrance = ent
         ent.door = t
+        t.pitwarp_rom = entry.get('rom')
         terminal_doors.append(t)
         for source_name in entry['sources']:
             world.get_door(source_name, player).group = name

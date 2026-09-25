@@ -664,6 +664,7 @@ def connect_pit(source, terminal):
     for member in source.group_members or [source]:
         member.entrance.connect(landing)
         member.dest = landing
+        member.pit_terminal = terminal
     terminal.dest = landing
     logging.getLogger('').debug(f'Pit: {source.name} group -> {terminal.name}')
 

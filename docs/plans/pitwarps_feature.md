@@ -13,7 +13,8 @@ randomizable, adds a new intensity level, and integrates with lobby shuffle and 
 ## Current State
 
 - Phases 1 and 2 are implemented (intensity 4 shuffles pits and warps in logic and in dungeon generation).
-  Phase 5 (ROM write) is not started, so an intensity-4 ROM still sends every pit to its vanilla room.
+  Phase 5 (ROM write): the generator writes `LandingZoneData`; the bundled base patch still lacks the PitWarps code, so
+  an intensity-4 ROM sends every pit to its vanilla room until it is rebuilt from dr_baserom's `PitWarps` branch.
 - `data/terminals.yaml` defines 27 pit Terminals (33 sources) and 26 warp Terminals (26 sources).
 - Verification and the Transitivity design history are in `docs/plans/transitivity_pitwarp_verification.md`.
 
@@ -27,7 +28,7 @@ Before writing any ROM output code, run the collector scripts to document:
 - Any coordinate offsets or entry animations that the ROM data structure requires
 
 This data is needed for Phase 5 (ROM write) and to verify the `falldown_pits` /
-`dungeon_warps` lists are complete and correct. Collection is in progress.
+`dungeon_warps` lists are complete and correct. `pit_warp_data_manual.json` holds 75 captured landings.
 
 ---
 
@@ -184,23 +185,57 @@ When `dungeon_entrances: free` (or any redistributed mode) is active:
 
 ## Phase 5 — ROM Write
 
-### 5a. Obtain the ROM data structure spec from the baserom branch
+### 5a. ROM interface
 
-- The ROM pitwarp data structure is reportedly in development elsewhere — obtain its
-  specification before writing code
-- Identify: address in ROM, record format (source room ID, dest room ID, coordinates,
-  entry animation type), table size limits
+The spec is `dr_baserom/docs/design/2026-06-01-pitwarp-generator-interface.md` (branch `PitWarps`). The generator writes only
+`LandingZoneData` at `$A7C940`: 61 rows of 25 bytes, one row per pit/warp source (per room, per screen quadrant, or per
+collision box, fixed by the ROM). A row left at its default room word `$8000` behaves vanilla, so only remapped sources are
+written. Row values come from the captured landings in `pit_warp_data_manual.json` (`transitions`); byte +14 is
+`layer_0476 + bg_setting_ee`, which the ROM writes to `$063C`.
 
-### 5b. Rom.py output
+The source-group-to-row and Terminal-to-capture mappings are in `data/terminals.yaml` (`rom`). Quadrant and collision
+rows are confirmed by in-room position: vanilla keeps Link's in-room position through a pit or warp, so each vanilla
+landing lies in its source's quadrant or box. Four captures have mismatched mirrored scroll registers (Hera Fairies Warp,
+PoD Dark Alley, Skull Boss, Ice Stalfos); they are written as captured, and checking them is ROM-side work for
+playtesting. A pot entered mid-chain in Hera (glitched) uses the row of the room it is in; `$77` has no row and stays
+vanilla.
 
-- Add a `write_pitwarps(world, rom, player)` function in `Rom.py`
-- Write the shuffled pit/warp mapping in the format the data structure expects
-- Vanilla (no shuffle) must produce identical output to unpatched ROM behavior
+Cave interiors are not shuffled yet (cave interior shuffle is planned), so their rows are never written:
+
+| Cave | Room | Rows | Falls in the logic today | Captured landings |
+|------|------|------|--------------------------|-------------------|
+| Spectacle Rock Cave | `$EA` | `16` | Spectacle Rock Cave Drop, Peak Drop | Spec Cave Landing |
+| Bumper Cave | `$EB` | `17` | Bumper Cave Top To Bottom (Cape/Hookshot traversal) | Bumper Cave Landing |
+| Spiral Cave | `$EE` | `18` | Spiral Cave (top to bottom) | Spiral Cave Landing |
+| Paradox Cave | `$EF` | `19` | Paradox Cave Drop | Paradox Landing |
+| Superbunny Cave | `$E8` | `24` left pits (A), `25` right pits (S, X) | none | Superbunny First, Second, Chest Landing |
+| Fairy Ascension Cave | `$ED` | `26` left (A, S, Z), `27` right (X) | Fairy Ascension Cave Drop, Pots | Fairy Ascension Fairy, Pot Ledge, Trick Landing |
+
+These falls are mandatory connections in `EntranceShuffle2`, not Hole/Warp doors. Superbunny and Fairy Ascension have three
+captured landings for two rows each; which landing each row uses is open. Overworld drops (Kakariko Well, the Skull Woods
+drops, Lost Woods, Bat Cave, Sewer, Fairy, Uncle, Pyramid, Lumberjack Tree) have captured landings but no row; their captures
+in `pit_warp_data_manual.json` are for Phase 3.
+
+### 5b. Rom.py output ✓
+
+`write_pitwarps` (`Rom.py`) writes the `LandingZoneData` rows of every shuffled pit/warp group: the rows come from the
+vanilla group's entry in `data/terminals.yaml`, the bytes from the assigned Terminal's `landing` (`pitwarp_row_bytes`). A
+group that lands on its own Terminal is written too, because a vanilla fall can end in a different region than its
+Terminal models: `falldown_pits` sends Hera Beetles and Startile Corner holes to Hera Front, Hera 4F holes and the inner
+Moldorm hole two floors down (fall chains), and Ice Freezors Hole to Ice Big Chest View. The stitcher records the assigned
+Terminal on each source (`Door.pit_terminal`); without pit/warp shuffle (classic, intensity 1-3, or `pit_warps: none`)
+nothing is set, nothing is written, and the vanilla wiring stands. Tests: `TestPitWarpRom.py` (packing checked against a
+hand-packed row; every Terminal mapped; rows distinct and covering every shuffled row; landings equal to their captures;
+writer behavior) and `TestPitWarpRegression.py` (full generation: intensity 3 on both algorithms and intensity 4 with
+`pit_warps: none` keep vanilla landings and write nothing; intensity 4 writes).
 
 ### 5c. Validate output
 
-- Test that vanilla-assignment pitwarp write is byte-for-byte equivalent to unmodified
-  ROM behavior (or matches documented vanilla values from Phase 0 data collection)
+- One remapped row in an intensity-4 ROM decodes to its capture (crossed, seed 3: Eastern Courtyard Potholes, row `$12`,
+  holds the GT Staredown landing).
+- The bundled base patch (`data/base2current.bps`) does not contain the PitWarps code yet (`$A7C940` is zero, not the
+  `$8000` defaults); it needs a rebuild from dr_baserom's `PitWarps` branch before a ROM can be playtested.
+- Not yet run in an emulator.
 
 ---
 
@@ -246,8 +281,7 @@ When `dungeon_entrances: free` (or any redistributed mode) is active:
 - **Pit and warp pools**: One shared pool; any source group may land on any Terminal. No option to separate them.
 - **Same-room landings**: Allowed. Spatial constraints are outside the dungeon algorithm's scope.
 - **Balance feasibility**: Deferred — the algorithm is expected to handle it.
-- **ROM data structure spec**: In active development on a branch of the baserom repo.
-  Obtain spec before Phase 5 begins.
+- **ROM data structure spec**: `LandingZoneData` in the base ROM (see 5a).
 
 ---
 

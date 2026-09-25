@@ -2,330 +2,1234 @@
 # 'name' must be unique — entries marked DUPLICATE need renaming.
 # 'region' is the destination region in the world graph.
 # 'sources' lists all source doors that land at this terminal when shuffled.
-# 'rom' is placeholder for Phase 5 ROM coordinate data.
+# 'rom' is the Phase 5 ROM data (dr_baserom docs/design/2026-06-01-pitwarp-generator-interface.md):
+#   rows: the LandingZoneData rows the ROM reads when one of this entry's sources is used (fixed by the base ROM).
+#   landing: RAM state captured right after landing at this terminal, written into the rows of whichever
+#   source group lands here. Copied from pit_warp_data_manual.json (transitions, 'capture' label).
 
 pits:
   - name: Eastern Fairies Terminal
     region: Eastern Fairies
     sources:
       - Eastern Courtyard Potholes
-    rom: ~
+    rom:
+      rows: [0x12]  # LandingZoneData rows read by this group's sources
+      capture: 'Eastern Cortyard Potholesc'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0089
+        link_y_20: 0x1070
+        link_x_22: 0x12D8
+        scroll_x_e2: 0x1260
+        scroll_y_e8: 0x1003
+        camera_y_618: 0x007B
+        camera_x_61c: 0x00DF
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x10, 0x10, 0x10, 0x11, 0x12, 0x12, 0x12, 0x13]  # $0601, $0603 ... $060F
 
   - name: Hera Up Stairs Landing Terminal
     region: Hera Up Stairs Landing
     sources:
       - Hera Beetles Holes Front
       - Hera Beetles Holes Landing
-    rom: ~
+    rom:
+      rows: [0x1C]  # LandingZoneData rows read by this group's sources
+      capture: 'Hera Front Right Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0077
+        link_y_20: 0x0F58
+        link_x_22: 0x0F68
+        scroll_x_e2: 0x0F00
+        scroll_y_e8: 0x0F00
+        camera_y_618: 0x0178
+        camera_x_61c: 0x017F
+        layer_0476: 0x01
+        bg_setting_ee: 0x01
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x0F, 0x0E, 0x0F, 0x0F, 0x0F, 0x0E, 0x0F, 0x0F]  # $0601, $0603 ... $060F
 
   - name: Hera Down Stairs Landing Terminal
     region: Hera Down Stairs Landing
     sources:
       - Hera Startile Corner Holes Front
       - Hera Startile Corner Holes Landing
-    rom: ~
+    rom:
+      rows: [0x1B]  # LandingZoneData rows read by this group's sources
+      capture: 'Hera Front Left Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0077
+        link_y_20: 0x0F88
+        link_x_22: 0x0E80
+        scroll_x_e2: 0x0E00
+        scroll_y_e8: 0x0F10
+        camera_y_618: 0x0188
+        camera_x_61c: 0x007F
+        layer_0476: 0x01
+        bg_setting_ee: 0x01
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x0F, 0x0E, 0x0F, 0x0F, 0x0E, 0x0E, 0x0E, 0x0F]  # $0601, $0603 ... $060F
 
   - name: Hera Back Terminal
     region: Hera Back
     sources:
       - Hera Startile Wide Holes
-    rom: ~
+    rom:
+      rows: [0x1A]  # LandingZoneData rows read by this group's sources
+      capture: 'Hera Back landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0077
+        link_y_20: 0x0EA8
+        link_x_22: 0x0EF8
+        scroll_x_e2: 0x0E80
+        scroll_y_e8: 0x0E14
+        camera_y_618: 0x008B
+        camera_x_61c: 0x00FF
+        layer_0476: 0x01
+        bg_setting_ee: 0x01
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x0E, 0x0E, 0x0E, 0x0F, 0x0E, 0x0E, 0x0E, 0x0F]  # $0601, $0603 ... $060F
 
   - name: Hera Startile Wide Terminal
     region: Hera Startile Wide
     sources:
       - Hera 4F Holes
       - Hera Big Chest Landing Holes
-    rom: ~
+    rom:
+      rows: [0x05]  # LandingZoneData rows read by this group's sources
+      capture: 'HeraStartiles Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0031
+        link_y_20: 0x0678
+        link_x_22: 0x02F8
+        scroll_x_e2: 0x0280
+        scroll_y_e8: 0x060C
+        camera_y_618: 0x0083
+        camera_x_61c: 0x00FF
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x06, 0x06, 0x06, 0x07, 0x02, 0x02, 0x02, 0x03]  # $0601, $0603 ... $060F
 
   - name: Hera Big Chest Landing Terminal
     region: Hera Big Chest Landing
     sources:
       - Hera 5F Star Hole
-    rom: ~
+    rom:
+      rows: [0x29]  # LandingZoneData rows read by this group's sources
+      capture: 'Hera Big Chest Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0027
+        link_y_20: 0x0488
+        link_x_22: 0x0EF7
+        scroll_x_e2: 0x0E7F
+        scroll_y_e8: 0x041C
+        camera_y_618: 0x0093
+        camera_x_61c: 0x00FE
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x04, 0x04, 0x04, 0x05, 0x0E, 0x0E, 0x0E, 0x0F]  # $0601, $0603 ... $060F
 
   - name: Hera Fairies Terminal
     region: Hera Fairies
     sources:
       - Hera 5F Pothole Chain
-    rom: ~
+    rom:
+      rows: [0x28]  # LandingZoneData rows read by this group's sources
+      capture: 'Hera Fairies Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x00A7
+        link_y_20: 0x1450
+        link_x_22: 0x0EA8
+        scroll_x_e2: 0x0E30
+        scroll_y_e8: 0x1400
+        camera_y_618: 0x0077
+        camera_x_61c: 0x00AF
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x14, 0x14, 0x14, 0x15, 0x0E, 0x0E, 0x0E, 0x0F]  # $0601, $0603 ... $060F
 
   - name: Hera 4F Terminal
     region: Hera 4F
     sources:
       - Hera 5F Normal Holes
-    rom: ~
+    rom:
+      rows: [0x2A]  # LandingZoneData rows read by this group's sources
+      capture: 'Hera 4f Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0027
+        link_y_20: 0x04D8
+        link_x_22: 0x0EE0
+        scroll_x_e2: 0x0E68
+        scroll_y_e8: 0x046C
+        camera_y_618: 0x00E3
+        camera_x_61c: 0x00E7
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x04, 0x04, 0x04, 0x05, 0x0E, 0x0E, 0x0E, 0x0F]  # $0601, $0603 ... $060F
 
   - name: Hera 5F Pit Terminal
     region: Hera 5F
     sources:
       - Hera Boss Outer Hole
       - Hera Boss Inner Hole
-    rom: ~
+    rom:
+      rows: [0x00]  # LandingZoneData rows read by this group's sources
+      capture: 'Hera 5F Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0017
+        link_y_20: 0x0288
+        link_x_22: 0x0EF8
+        scroll_x_e2: 0x0E80
+        scroll_y_e8: 0x021C
+        camera_y_618: 0x0093
+        camera_x_61c: 0x00FF
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x02, 0x02, 0x02, 0x03, 0x0E, 0x0E, 0x0E, 0x0F]  # $0601, $0603 ... $060F
 
   - name: PoD Stalfos Basement Right Terminal
     region: PoD Stalfos Basement
     sources:
       - PoD Pit Room Freefall
-    rom: ~
+    rom:
+      rows: [0x2B]  # LandingZoneData rows read by this group's sources
+      capture: 'PoDPit Room Freefall Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x000A
+        link_y_20: 0x00D6
+        link_x_22: 0x1590
+        scroll_x_e2: 0x1500
+        scroll_y_e8: 0x0069
+        camera_y_618: 0x00E1
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x00, 0x00, 0x00, 0x01, 0x15, 0x14, 0x15, 0x15]  # $0601, $0603 ... $060F
 
   - name: PoD Basement Ledge Terminal
     region: PoD Basement Ledge
     sources:
       - PoD Pit Room Bomb Hole
-    rom: ~
+    rom:
+      rows: [0x2C]  # LandingZoneData rows read by this group's sources
+      capture: 'Pod Basement Ledge Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x000A
+        link_y_20: 0x00A8
+        link_x_22: 0x1470
+        scroll_x_e2: 0x1400
+        scroll_y_e8: 0x003B
+        camera_y_618: 0x00B3
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x00, 0x00, 0x00, 0x01, 0x14, 0x14, 0x14, 0x15]  # $0601, $0603 ... $060F
 
   - name: PoD Stalfos Basement Left Terminal
     region: PoD Stalfos Basement
     sources:
       - PoD Big Key Landing Hole
-    rom: ~
+    rom:
+      rows: [0x2D]  # LandingZoneData rows read by this group's sources
+      capture: 'Pod Baement Landing from Big KEy'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x000A
+        link_y_20: 0x007C
+        link_x_22: 0x154E
+        scroll_x_e2: 0x14D6
+        scroll_y_e8: 0x000F
+        camera_y_618: 0x0087
+        camera_x_61c: 0x0155
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x00, 0x00, 0x00, 0x01, 0x15, 0x14, 0x15, 0x15]  # $0601, $0603 ... $060F
 
   - name: Swamp Barrier Ledge Terminal
     region: Swamp Barrier Ledge
     sources:
       - Swamp Attic Right Pit
-    rom: ~
+    rom:
+      rows: [0x1E]  # LandingZoneData rows read by this group's sources
+      capture: 'Swamp Barrrier LEdge Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0034
+        link_y_20: 0x0678
+        link_x_22: 0x0948
+        scroll_x_e2: 0x08D0
+        scroll_y_e8: 0x060B
+        camera_y_618: 0x0083
+        camera_x_61c: 0x014F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x06, 0x06, 0x06, 0x07, 0x09, 0x08, 0x09, 0x09]  # $0601, $0603 ... $060F
 
   - name: Swamp West Ledge Terminal
     region: Swamp West Ledge
     sources:
       - Swamp Attic Left Pit
-    rom: ~
+    rom:
+      rows: [0x1D]  # LandingZoneData rows read by this group's sources
+      capture: 'Swamp West LEdge Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0034
+        link_y_20: 0x0680
+        link_x_22: 0x0888
+        scroll_x_e2: 0x0810
+        scroll_y_e8: 0x0613
+        camera_y_618: 0x008B
+        camera_x_61c: 0x008F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x06, 0x06, 0x06, 0x07, 0x08, 0x08, 0x08, 0x09]  # $0601, $0603 ... $060F
 
   - name: Skull Boss Terminal
     region: Skull Boss
     sources:
       - Skull Final Drop Hole
-    rom: ~
+    rom:
+      rows: [0x06]  # LandingZoneData rows read by this group's sources
+      capture: 'Skull Booss Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0029
+        link_y_20: 0x0580
+        link_x_22: 0x1380
+        scroll_x_e2: 0x1300
+        scroll_y_e8: 0x0510
+        camera_y_618: 0x0188
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x05, 0x04, 0x05, 0x05, 0x13, 0x12, 0x13, 0x13]  # $0601, $0603 ... $060F
 
   - name: Ice Stalfos Hint Terminal
     region: Ice Stalfos Hint
     sources:
       - Ice Bomb Drop Hole
-    rom: ~
+    rom:
+      rows: [0x04]  # LandingZoneData rows read by this group's sources
+      capture: 'Ice Stalfos Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x003E
+        link_y_20: 0x0668
+        link_x_22: 0x1D80
+        scroll_x_e2: 0x1D00
+        scroll_y_e8: 0x0600
+        camera_y_618: 0x0078
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x06, 0x06, 0x06, 0x07, 0x1D, 0x1C, 0x1D, 0x1D]  # $0601, $0603 ... $060F
 
   - name: Ice Tall Hint Terminal
     region: Ice Tall Hint
     sources:
       - Ice Falling Square Hole
-    rom: ~
+    rom:
+      rows: [0x0B]  # LandingZoneData rows read by this group's sources
+      capture: 'Ice Tall Hint Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x007E
+        link_y_20: 0x0E48
+        link_x_22: 0x1DB0
+        scroll_x_e2: 0x1D00
+        scroll_y_e8: 0x0E00
+        camera_y_618: 0x0078
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x0E, 0x0E, 0x0E, 0x0F, 0x1D, 0x1C, 0x1D, 0x1D]  # $0601, $0603 ... $060F
 
   - name: Ice Big Chest Landing Terminal
     region: Ice Big Chest Landing
     sources:
       - Ice Freezors Hole
       - Ice Freezors Bomb Hole
-    rom: ~
+    rom:
+      rows: [0x0D]  # LandingZoneData rows read by this group's sources
+      capture: 'Ice Big Chest Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x009E
+        link_y_20: 0x1378
+        link_x_22: 0x1CB8
+        scroll_x_e2: 0x1C00
+        scroll_y_e8: 0x130B
+        camera_y_618: 0x0183
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x1C, 0x1C, 0x1C, 0x1D]  # $0601, $0603 ... $060F
 
   - name: Ice Switch Room Terminal
     region: Ice Switch Room
     sources:
       - Ice Crystal Block Hole
       - Ice Crystal Right Blue Hole
-    rom: ~
+    rom:
+      rows: [0x23]  # LandingZoneData rows read by this group's sources
+      capture: 'Ice Switch Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x00BE
+        link_y_20: 0x1778
+        link_x_22: 0x1D70
+        scroll_x_e2: 0x1D00
+        scroll_y_e8: 0x170B
+        camera_y_618: 0x0183
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x17, 0x16, 0x17, 0x17, 0x1D, 0x1C, 0x1D, 0x1D]  # $0601, $0603 ... $060F
 
   - name: Ice Fairy Terminal
     region: Ice Fairy
     sources:
       - Ice Backwards Room Hole
-    rom: ~
+    rom:
+      rows: [0x22]  # LandingZoneData rows read by this group's sources
+      capture: 'Ice Fairies Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x004F
+        link_y_20: 0x0868
+        link_x_22: 0x1FA0
+        scroll_x_e2: 0x1F00
+        scroll_y_e8: 0x0800
+        camera_y_618: 0x0078
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x08, 0x08, 0x08, 0x09, 0x1F, 0x1E, 0x1F, 0x1F]  # $0601, $0603 ... $060F
 
   - name: Ice Boss Terminal
     region: Ice Boss
     sources:
       - Ice Antechamber Hole
-    rom: ~
+    rom:
+      rows: [0x14]  # LandingZoneData rows read by this group's sources
+      capture: 'Ice Boss Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x00DE
+        link_y_20: 0x1AB0
+        link_x_22: 0x1D40
+        scroll_x_e2: 0x1D00
+        scroll_y_e8: 0x1A10
+        camera_y_618: 0x0088
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x1A, 0x1A, 0x1A, 0x1B, 0x1D, 0x1C, 0x1D, 0x1D]  # $0601, $0603 ... $060F
 
   - name: Mire BK Chest Ledge Terminal
     region: Mire BK Chest Ledge
     sources:
       - Mire Attic Hint Hole
-    rom: ~
+    rom:
+      rows: [0x21]  # LandingZoneData rows read by this group's sources
+      capture: 'Mire Bk Chest Ledge Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x00D1
+        link_y_20: 0x1B78
+        link_x_22: 0x0390
+        scroll_x_e2: 0x0300
+        scroll_y_e8: 0x1B0B
+        camera_y_618: 0x0183
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x1B, 0x1A, 0x1B, 0x1B, 0x03, 0x02, 0x03, 0x03]  # $0601, $0603 ... $060F
 
   - name: Mire Conveyor Barrier Terminal
     region: Mire Conveyor Barrier
     sources:
       - Mire Torches Top Holes
-    rom: ~
+    rom:
+      rows: [0x1F]  # LandingZoneData rows read by this group's sources
+      capture: 'Mire Conveyor Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x00D1
+        link_y_20: 0x1A40
+        link_x_22: 0x02A8
+        scroll_x_e2: 0x0200
+        scroll_y_e8: 0x1A00
+        camera_y_618: 0x0078
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x1A, 0x1A, 0x1A, 0x1B, 0x02, 0x02, 0x02, 0x03]  # $0601, $0603 ... $060F
 
   - name: Mire Warping Pool Terminal
     region: Mire Warping Pool
     sources:
       - Mire Torches Bottom Holes
-    rom: ~
+    rom:
+      rows: [0x20]  # LandingZoneData rows read by this group's sources
+      capture: 'MIre Warping Pool Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x00D1
+        link_y_20: 0x1BA0
+        link_x_22: 0x02A0
+        scroll_x_e2: 0x0200
+        scroll_y_e8: 0x1B10
+        camera_y_618: 0x0188
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x1B, 0x1A, 0x1B, 0x1B, 0x02, 0x02, 0x02, 0x03]  # $0601, $0603 ... $060F
 
   - name: GT Ice Armos Terminal
     region: GT Ice Armos
     sources:
       - GT Bob's Room Hole
-    rom: ~
+    rom:
+      rows: [0x0F]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Ice Armos Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x001C
+        link_y_20: 0x03B8
+        link_x_22: 0x19B0
+        scroll_x_e2: 0x1900
+        scroll_y_e8: 0x0310
+        camera_y_618: 0x0188
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x03, 0x02, 0x03, 0x03, 0x19, 0x18, 0x19, 0x19]  # $0601, $0603 ... $060F
 
   - name: GT Staredown Terminal
     region: GT Staredown
     sources:
       - GT Falling Torches Hole
-    rom: ~
+    rom:
+      rows: [0x07]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Staredown Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0096
+        link_y_20: 0x1330
+        link_x_22: 0x0D60
+        scroll_x_e2: 0x0D00
+        scroll_y_e8: 0x1300
+        camera_y_618: 0x0178
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x0D, 0x0C, 0x0D, 0x0D]  # $0601, $0603 ... $060F
 
   - name: GT Moldorm Pit Terminal
     region: GT Moldorm Pit
     sources:
       - GT Moldorm Hole
-    rom: ~
+    rom:
+      rows: [0x09]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Moldorm Pit Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x00A6
+        link_y_20: 0x1498
+        link_x_22: 0x0CB0
+        scroll_x_e2: 0x0C38
+        scroll_y_e8: 0x142B
+        camera_y_618: 0x00A3
+        camera_x_61c: 0x00B7
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x14, 0x14, 0x14, 0x15, 0x0C, 0x0C, 0x0C, 0x0D]  # $0601, $0603 ... $060F
 
 warps:
   - name: Eastern Courtyard Terminal
     region: Eastern Courtyard
     sources:
       - Eastern Fairies' Warp
-    rom: ~
+    rom:
+      rows: [0x0E]  # LandingZoneData rows read by this group's sources
+      capture: 'Eastern Fairies Warp'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x00A9
+        link_y_20: 0x1478
+        link_x_22: 0x133F
+        scroll_x_e2: 0x12C7
+        scroll_y_e8: 0x140B
+        camera_y_618: 0x0083
+        camera_x_61c: 0x0146
+        layer_0476: 0x01
+        bg_setting_ee: 0x01
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x14, 0x14, 0x14, 0x15, 0x13, 0x12, 0x13, 0x13]  # $0601, $0603 ... $060F
 
   - name: Hera 5F Warp Terminal
     region: Hera 5F
     sources:
       - Hera Fairies' Warp
-    rom: ~
+    rom:
+      rows: [0x11]  # LandingZoneData rows read by this group's sources
+      capture: 'Hera Fairies Warp'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0017
+        link_y_20: 0x02B4
+        link_x_22: 0x0EA0
+        scroll_x_e2: 0x0E28
+        scroll_y_e8: 0x0212
+        camera_y_618: 0x0089
+        camera_x_61c: 0x00A7
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x02, 0x02, 0x02, 0x03, 0x0E, 0x0E, 0x0E, 0x0F]  # $0601, $0603 ... $060F
 
   - name: PoD Warp Room Left Terminal
     region: PoD Warp Room
     sources:
       - PoD Warp Hint Warp
-    rom: ~
+    rom:
+      rows: [0x08]  # LandingZoneData rows read by this group's sources
+      capture: 'POd Warp Room from Hint Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0009
+        link_y_20: 0x007A
+        link_x_22: 0x1380
+        scroll_x_e2: 0x1300
+        scroll_y_e8: 0x000D
+        camera_y_618: 0x0085
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x00, 0x00, 0x00, 0x01, 0x13, 0x12, 0x13, 0x13]  # $0601, $0603 ... $060F
 
   - name: PoD Warp Hint Terminal
     region: PoD Warp Hint
     sources:
       - PoD Warp Room Warp
-    rom: ~
+    rom:
+      rows: [0x01]  # LandingZoneData rows read by this group's sources
+      capture: 'POd warp Hint Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x004B
+        link_y_20: 0x0876
+        link_x_22: 0x1762
+        scroll_x_e2: 0x1700
+        scroll_y_e8: 0x0809
+        camera_y_618: 0x0081
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x08, 0x08, 0x08, 0x09, 0x17, 0x16, 0x17, 0x17]  # $0601, $0603 ... $060F
 
   - name: PoD Warp Room Right Terminal
     region: PoD Warp Room
     sources:
       - PoD Stalfos Basement Warp
-    rom: ~
+    rom:
+      rows: [0x02]  # LandingZoneData rows read by this group's sources
+      capture: 'Pod Warp Room from Stalfos Basement Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x0009
+        link_y_20: 0x0076
+        link_x_22: 0x138F
+        scroll_x_e2: 0x1300
+        scroll_y_e8: 0x0009
+        camera_y_618: 0x0081
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x00, 0x00, 0x00, 0x01, 0x13, 0x12, 0x13, 0x13]  # $0601, $0603 ... $060F
 
   - name: PoD Dark Alley Terminal
     region: PoD Dark Alley
     sources:
       - PoD Callback Warp
-    rom: ~
+    rom:
+      rows: [0x03]  # LandingZoneData rows read by this group's sources
+      capture: 'Pod Dark Alley Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x006A
+        link_y_20: 0x0D74
+        link_x_22: 0x1570
+        scroll_x_e2: 0x1500
+        scroll_y_e8: 0x0D07
+        camera_y_618: 0x017F
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x0D, 0x0C, 0x0D, 0x0D, 0x15, 0x14, 0x15, 0x15]  # $0601, $0603 ... $060F
 
   - name: Ice Anti-Fairy Terminal
     region: Ice Anti-Fairy
     sources:
       - Ice Fairy Warp
-    rom: ~
+    rom:
+      rows: [0x0A]  # LandingZoneData rows read by this group's sources
+      capture: 'Ice Anti-Fairy Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x00BE
+        link_y_20: 0x1697
+        link_x_22: 0x1D6F
+        scroll_x_e2: 0x1D00
+        scroll_y_e8: 0x1610
+        camera_y_618: 0x0088
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x16, 0x16, 0x16, 0x17, 0x1D, 0x1C, 0x1D, 0x1D]  # $0601, $0603 ... $060F
 
   - name: Mire BK Door Room Terminal
     region: Mire BK Door Room
     sources:
       - Mire Lone Warp Warp
-    rom: ~
+    rom:
+      rows: [0x13]  # LandingZoneData rows read by this group's sources
+      capture: 'Mire Bk Door Room Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x00B2
+        link_y_20: 0x167A
+        link_x_22: 0x0480
+        scroll_x_e2: 0x0400
+        scroll_y_e8: 0x160D
+        camera_y_618: 0x0085
+        camera_x_61c: 0x007F
+        layer_0476: 0x01
+        bg_setting_ee: 0x01
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x16, 0x16, 0x16, 0x17, 0x04, 0x04, 0x04, 0x05]  # $0601, $0603 ... $060F
 
   - name: Mire Square Rail Terminal
     region: Mire Square Rail
     sources:
       - Mire Warping Pool Warp
-    rom: ~
+    rom:
+      rows: [0x15]  # LandingZoneData rows read by this group's sources
+      capture: 'Mire Square Rail Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x00B1
+        link_y_20: 0x1766
+        link_x_22: 0x0281
+        scroll_x_e2: 0x0200
+        scroll_y_e8: 0x1700
+        camera_y_618: 0x0178
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x17, 0x16, 0x17, 0x17, 0x02, 0x02, 0x02, 0x03]  # $0601, $0603 ... $060F
 
   - name: GT Conveyor Star Pits Terminal
     region: GT Conveyor Star Pits
     sources:
       - GT Compass Room Warp
-    rom: ~
+    rom:
+      rows: [0x10]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Conveyor Star Pits Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x007B
+        link_y_20: 0x0E78
+        link_x_22: 0x1643
+        scroll_x_e2: 0x1600
+        scroll_y_e8: 0x0E0B
+        camera_y_618: 0x0083
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x0E, 0x0E, 0x0E, 0x0F, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Firesnake Room Terminal
     region: GT Firesnake Room
     sources:
       - GT Spike Crystals Warp
-    rom: ~
+    rom:
+      rows: [0x37]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Firesnake Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x007D
+        link_y_20: 0x0E7A
+        link_x_22: 0x1BC0
+        scroll_x_e2: 0x1B00
+        scroll_y_e8: 0x0E0D
+        camera_y_618: 0x0085
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        scroll_bounds: [0x0E, 0x0E, 0x0E, 0x0F, 0x1B, 0x1A, 0x1B, 0x1B]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Rando Rail Terminal
     region: GT Warp Maze - Rando Rail
     sources:
       - GT Warp Maze - Left Section Warp
-    rom: ~
+    rom:
+      rows: [0x3B]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Rando Rail Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x007D
+        link_y_20: 0x0F46
+        link_x_22: 0x1A30
+        scroll_x_e2: 0x1A00
+        scroll_y_e8: 0x0F00
+        camera_y_618: 0x0178
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x0F, 0x0E, 0x0F, 0x0F, 0x1A, 0x1A, 0x1A, 0x1B]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Main Rails MidLeft Terminal
     region: GT Warp Maze - Main Rails
     sources:
       - GT Warp Maze - Mid Section Left Warp
-    rom: ~
+    rom:
+      rows: [0x39]  # LandingZoneData rows read by this group's sources
+      capture: 'Warp Hub Left Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x007D
+        link_y_20: 0x0F85
+        link_x_22: 0x1A60
+        scroll_x_e2: 0x1A00
+        scroll_y_e8: 0x0F10
+        camera_y_618: 0x0188
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x0F, 0x0E, 0x0F, 0x0F, 0x1A, 0x1A, 0x1A, 0x1B]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Main Rails MidRight Terminal
     region: GT Warp Maze - Main Rails
     sources:
       - GT Warp Maze - Mid Section Right Warp
-    rom: ~
+    rom:
+      rows: [0x38]  # LandingZoneData rows read by this group's sources
+      capture: 'Gt Warp Hub Mid Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x007D
+        link_y_20: 0x0F87
+        link_x_22: 0x1A90
+        scroll_x_e2: 0x1A00
+        scroll_y_e8: 0x0F10
+        camera_y_618: 0x0188
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x0F, 0x0E, 0x0F, 0x0F, 0x1A, 0x1A, 0x1A, 0x1B]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Main Rails Right Terminal
     region: GT Warp Maze - Main Rails
     sources:
       - GT Warp Maze - Right Section Warp
-    rom: ~
+    rom:
+      rows: [0x3A]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Warp Hub Right Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x007D
+        link_y_20: 0x0F67
+        link_x_22: 0x1ABF
+        scroll_x_e2: 0x1A00
+        scroll_y_e8: 0x0F00
+        camera_y_618: 0x0178
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x0F, 0x0E, 0x0F, 0x0F, 0x1A, 0x1A, 0x1A, 0x1B]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Pot Rail Terminal
     region: GT Warp Maze - Pot Rail
     sources:
       - GT Warp Maze - Pit Exit Warp
-    rom: ~
+    rom:
+      rows: [0x3C]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Arrow Pot Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x007D
+        link_y_20: 0x0F48
+        link_x_22: 0x1BA0
+        scroll_x_e2: 0x1B00
+        scroll_y_e8: 0x0F00
+        camera_y_618: 0x0178
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x0F, 0x0E, 0x0F, 0x0F, 0x1B, 0x1A, 0x1B, 0x1B]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Left Section Terminal
     region: GT Warp Maze - Left Section
     sources:
       - GT Warp Maze - Rail Choice Left Warp
-    rom: ~
+    rom:
+      rows: [0x2E]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Warp Maze Left Section Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x009B
+        link_y_20: 0x1347
+        link_x_22: 0x1660
+        scroll_x_e2: 0x1600
+        scroll_y_e8: 0x1300
+        camera_y_618: 0x0178
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Mid Section Top Terminal
     region: GT Warp Maze - Mid Section
     sources:
       - GT Warp Maze - Rail Choice Right Warp
-    rom: ~
+    rom:
+      rows: [0x2F]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Warp Maze Mid Top Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x009B
+        link_y_20: 0x1344
+        link_x_22: 0x1690
+        scroll_x_e2: 0x1600
+        scroll_y_e8: 0x1300
+        camera_y_618: 0x0178
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Mid Section LeftMost Terminal
     region: GT Warp Maze - Mid Section
     sources:
       - GT Warp Maze - Rando Rail Warp
-    rom: ~
+    rom:
+      rows: [0x35]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Warp Maze Mid Section Left Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x009B
+        link_y_20: 0x1388
+        link_x_22: 0x1630
+        scroll_x_e2: 0x1600
+        scroll_y_e8: 0x1310
+        camera_y_618: 0x0188
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Pit Section Terminal
     region: GT Warp Maze - Pit Section
     sources:
       - GT Warp Maze - Main Rails Best Warp
-    rom: ~
+    rom:
+      rows: [0x34]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Warp Maze Pit Section Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x009B
+        link_y_20: 0x13B8
+        link_x_22: 0x1631
+        scroll_x_e2: 0x1600
+        scroll_y_e8: 0x1310
+        camera_y_618: 0x0188
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Mid Section MidLeft Terminal
     region: GT Warp Maze - Mid Section
     sources:
       - GT Warp Maze - Main Rails Mid Left Warp
-    rom: ~
+    rom:
+      rows: [0x33]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Warp Maze Mid Section MidLeft Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x009B
+        link_y_20: 0x1387
+        link_x_22: 0x1670
+        scroll_x_e2: 0x1600
+        scroll_y_e8: 0x1310
+        camera_y_618: 0x0188
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Mid Section MidRight Terminal
     region: GT Warp Maze - Mid Section
     sources:
       - GT Warp Maze - Main Rails Mid Right Warp
-    rom: ~
+    rom:
+      rows: [0x30]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Warp Maze Mid Section MidRight Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x009B
+        link_y_20: 0x1388
+        link_x_22: 0x1680
+        scroll_x_e2: 0x1608
+        scroll_y_e8: 0x1310
+        camera_y_618: 0x0188
+        camera_x_61c: 0x0087
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Right Section Top Terminal
     region: GT Warp Maze - Right Section
     sources:
       - GT Warp Maze - Main Rails Right Top Warp
-    rom: ~
+    rom:
+      rows: [0x31]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Warp Maze Right Section Top landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x009B
+        link_y_20: 0x1336
+        link_x_22: 0x16BD
+        scroll_x_e2: 0x1645
+        scroll_y_e8: 0x1300
+        camera_y_618: 0x0178
+        camera_x_61c: 0x00C4
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Right Section Bottom Terminal
     region: GT Warp Maze - Right Section
     sources:
       - GT Warp Maze - Main Rails Right Mid Warp
-    rom: ~
+    rom:
+      rows: [0x32]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Warp Maze Rigth Section Bottom Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x009B
+        link_y_20: 0x1385
+        link_x_22: 0x16C0
+        scroll_x_e2: 0x1648
+        scroll_y_e8: 0x1310
+        camera_y_618: 0x0188
+        camera_x_61c: 0x00C7
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze Exit Section Terminal
     region: GT Warp Maze Exit Section
     sources:
       - GT Warp Maze - Pot Rail Warp
-    rom: ~
+    rom:
+      rows: [0x36]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Warp Maze Exit Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x009B
+        link_y_20: 0x1338
+        link_x_22: 0x17A2
+        scroll_x_e2: 0x1700
+        scroll_y_e8: 0x1300
+        camera_y_618: 0x0178
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x17, 0x16, 0x17, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Invisible Bridges Terminal
     region: GT Invisible Bridges
     sources:
       - GT Hidden Star Warp
-    rom: ~
+    rom:
+      rows: [0x0C]  # LandingZoneData rows read by this group's sources
+      capture: 'GT Invisible Bridges Landing'  # label in pit_warp_data_manual.json
+      landing:
+        room_id_a0: 0x009D
+        link_y_20: 0x137B
+        link_x_22: 0x1B80
+        scroll_x_e2: 0x1B00
+        scroll_y_e8: 0x130E
+        camera_y_618: 0x0186
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x00
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x02
+        scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x1B, 0x1A, 0x1B, 0x1B]  # $0601, $0603 ... $060F

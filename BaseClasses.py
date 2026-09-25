@@ -1954,6 +1954,8 @@ class Door(object):
         self.group_rep = None  # the group's representative source door; the only one outstanding in its sector
         self.group_barrier = None  # on the representative: the crystal barrier governing a fall through the group
         self.group_members = None  # on the representative: every physical source door of the group
+        self.pit_terminal = None  # on a shuffled Hole/Warp source: the Terminal its group lands on
+        self.pitwarp_rom = None  # on a Terminal: its 'rom' entry from data/terminals.yaml (rows and landing)
 
         # a list of glitches need to use the transition
         self.glitches_needed = []

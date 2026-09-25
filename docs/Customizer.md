@@ -182,6 +182,7 @@ Options are:
 * `normal: <none|vertical|horizontal|both>` Inter-room doors
 * `edges: <none|vertical|horizontal|both>` Edge transitions
 * `lobbies: <true|false>` (Note: shuffling lobbies without vertical normal transitions will limit which doors can be used as dungeon entrances.)
+* `pit_warps: <none|pits|warps|both>` Pits and warp tiles within dungeons (intensity 4 shuffles both; the classic dungeon algorithm never shuffles them)
 
 #### lobbies
 

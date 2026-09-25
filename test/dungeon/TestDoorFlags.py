@@ -12,7 +12,7 @@ def stub_world(intensity, custom_intensity=None):
     return SimpleNamespace(
         trap_door_mode={p: 'optional'}, door_self_loops={p: False}, decoupledoors={p: False},
         doorShuffle={p: 'crossed'}, intensity={p: intensity}, mode={p: 'open'}, bow_mode={p: 'progressive'},
-        bigkeyshuffle={p: False}, pottery={p: 'none'}, door_type_mode='original', customizer=customizer)
+        bigkeyshuffle={p: False}, pottery={p: 'none'}, door_type_mode={p: 'original'}, customizer=customizer)
 
 
 class TestDoorFlags(unittest.TestCase):
