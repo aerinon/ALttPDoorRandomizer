@@ -436,10 +436,14 @@ def valid_portal(door, match_door, c_info, init=True):
     builder = c_info.builder
     hc_flag = c_info.flags.std_flag and 'Hyrule Castle' in builder.name
     rupee_bow_flag = hc_flag and c_info.flags.rupee_bow_flag
-    dest_portal = all(p.destination for p in c_info.door_sector_map[match_door].portals) or not init
+    destination = all(p.destination for p in c_info.door_sector_map[match_door].portals)
+    dest_portal = destination or not init
     return (door.portalAble
             and (not c_info.flags.vanilla_traps or not door.blocked or is_boss_trap(door))
             and not (door.deadEnd and init and may_be_primary_portal(match_door, c_info))
+            # a destination portal is left through to reach its overworld side (the stitcher's destination filter)
+            and (not destination or (door.passage and (not c_info.flags.std_flag or not door.standard_restricted)
+                                     and (not rupee_bow_flag or not door.rupee_bow_restricted)))
             and (dest_portal or ((not hc_flag or not door.standard_restricted)
                                 and (not rupee_bow_flag or not door.rupee_bow_restricted)
                                 and (c_info.flags.bk_shuffle_flag or not door.bk_shuffle_req or builder.split_flag))))
