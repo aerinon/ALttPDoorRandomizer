@@ -35,16 +35,17 @@ def main(args=None):
             if args.algorithm:
                 basecommand += f" --dungeon_shuffle_algorithm {args.algorithm} --key_logic_algorithm {key_logic[args.algorithm]}"
 
-            def gen_seed():
-                taskcommand = basecommand + " " + command + mode[1]
+            taskcommand = basecommand + " " + command + mode[1]
+
+            def gen_seed(taskcommand):
                 return subprocess.run(taskcommand, capture_output=True, shell=True, text=True)
 
             for x in range(1, max_attempts + 1):
-                task = pool.submit(gen_seed)
+                task = pool.submit(gen_seed, taskcommand)  # passed now: the loop variables change before the task runs
                 task.success = False
                 task.name = testname
                 task.mode = mode[0]
-                task.cmd = basecommand + " " + command + mode[1]
+                task.cmd = taskcommand
                 task_mapping.append(task)
 
     test("Vanilla   ", "--shuffle vanilla")
