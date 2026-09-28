@@ -36,7 +36,6 @@ class EntrancePool(object):
 class Restrictions(object):
     def __init__(self):
         self.size = None
-        self.must_exit_to_lw = False
         self.fixed = False
         # must_exit_to_dw = False
         # same_world = False
@@ -106,7 +105,7 @@ def link_entrances_new(world, player):
             if special_shuffle == 'drops':
                 handle_skull_woods_drops(avail_pool, pool['entrances'], mode_cfg)
             elif special_shuffle == 'fixed_shuffle':
-                do_fixed_shuffle(avail_pool, pool['entrances'])
+                do_fixed_shuffle(avail_pool, pool['entrances'], mode_cfg)
             elif special_shuffle == 'same_world':
                 do_same_world_shuffle(avail_pool, pool)
             elif special_shuffle == 'simple_connector':
@@ -896,7 +895,7 @@ def handle_skull_woods_entrances(avail, pool):
         avail.skull_handled = True
 
 
-def do_fixed_shuffle(avail, entrance_list):
+def do_fixed_shuffle(avail, entrance_list, mode_cfg):
     max_size = 0
     options = {}
     for i, entrance_set in enumerate(entrance_list):
@@ -905,31 +904,71 @@ def do_fixed_shuffle(avail, entrance_list):
         max_size = max(max_size, size)
         rules = Restrictions()
         rules.size = size
-        if ('Hyrule Castle Entrance (South)' in entrances and
-           avail.world.doorShuffle[avail.player] != 'vanilla'):
-            rules.must_exit_to_lw = True
         if avail.world.is_atgt_swapped(avail.player) and 'Agahnims Tower' in entrances and not avail.world.shuffle_ganon:
             rules.fixed = True
         option = (i, entrances, targets, rules)
         options[i] = option
     choices = dict(options)
-    for i, option in options.items():
+    pinned = {i for i, (key, entrances, targets, rules) in options.items() if rules.fixed or (rules.size and rules.size < max_size)}
+    remaining = dict(options)
+    hc_key = next((i for i, opt in options.items() if 'Hyrule Castle Exit (South)' in opt[2]), None)
+    if hc_key is not None and hc_key not in pinned:
+        # place Hyrule Castle first, so the slots it may take are still free
+        slots = [i for i in options if i not in pinned and hyrule_castle_may_use(avail, options[i][1], mode_cfg)]
+        if not slots:
+            raise Exception('No entrance set left that Hyrule Castle may use')
+        slot = random.choice(slots)
+        connect_fixed_set(options[slot][1], choices.pop(hc_key)[2], avail)
+        del remaining[slot]
+    for i, option in remaining.items():
         key, entrances, targets, rules = option
-        if rules.size and rules.size < max_size:
+        if i in pinned:
             choice = choices[i]
-        elif rules.fixed:
-            choice = choices[i]
-        elif rules.must_exit_to_lw:
-            lw_exits = set(default_lw)
-            lw_exits.update({'Big Bomb Shop', 'Ganons Tower Exit'} if avail.inverted else {'Links House Exit', 'Agahnims Tower Exit'})
-            filtered_choices = {i: opt for i, opt in choices.items() if all(t in lw_exits for t in opt[2])}
-            index, choice = random.choice(list(filtered_choices.items()))
         else:
-            index, choice = random.choice(list(choices.items()))
+            index, choice = random.choice([(j, c) for j, c in choices.items() if j not in pinned or j == i])
         del choices[choice[0]]
-        for t, entrance in enumerate(entrances):
-            target = choice[2][t]
-            connect_two_way(entrance, target, avail)
+        connect_fixed_set(entrances, choice[2], avail)
+
+
+def connect_fixed_set(entrances, targets, avail):
+    for t, entrance in enumerate(entrances):
+        connect_two_way(entrance, targets[t], avail)
+
+
+def entrance_set_world(entrances):
+    if all(e in LW_Entrances for e in entrances):
+        return RegionType.LightWorld
+    if all(e in DW_Entrances for e in entrances):
+        return RegionType.DarkWorld
+    return None
+
+
+def hyrule_castle_may_use(avail, entrances, mode_cfg):
+    """Hyrule Castle stays in the light world with door shuffle, and needs a Sanctuary drop spot in its world when
+    Sanctuary is shuffled with the linked drops (do_holes_and_linked_drops keeps Sanctuary in Hyrule Castle's world)."""
+    world = entrance_set_world(entrances)
+    if avail.world.doorShuffle[avail.player] != 'vanilla' and world != RegionType.LightWorld:
+        return False
+    holes_shuffled = mode_cfg.get('undefined') in {'shuffle', 'swap'}  # leftover entrances, holes included
+    keep_together = mode_cfg.get('keep_drops_together', 'on') == 'on'
+    cross_world = mode_cfg.get('cross_world', 'off') == 'on'
+    if 'Sanctuary Grave' in avail.entrances and holes_shuffled and keep_together and not cross_world:
+        return world in sanctuary_drop_worlds(avail)
+    return True
+
+
+def sanctuary_drop_worlds(avail):
+    """Worlds that still have a linked drop and entrance pair Sanctuary could take."""
+    worlds = set()
+    for hole, linked in linked_drop_map.items():
+        if hole in avail.entrances and linked in avail.entrances and hole in avail.original_entrances:
+            if avail.swapped and linked == 'Sanctuary':
+                continue
+            if linked in LW_Entrances:
+                worlds.add(RegionType.LightWorld)
+            elif linked in DW_Entrances:
+                worlds.add(RegionType.DarkWorld)
+    return worlds
 
 
 def do_same_world_shuffle(avail, pool_def):
