@@ -7,24 +7,30 @@ from source.classes.BabelFish import BabelFish
 
 def generate(seed, *extra):
     args = parse_cli(['--suppress_rom', '--spoiler', 'none', '--loglevel', 'warning', *extra])
-    main(args=args, seed=seed, fish=BabelFish(lang='en'))
+    return main(args=args, seed=seed, fish=BabelFish(lang='en'))
+
+
+def count_300s(world):
+    return sum(1 for loc in world.get_locations() if loc.item and loc.item.name == 'Rupees (300)')
 
 
 class TestMoneyBalance(unittest.TestCase):
-    def test_upgrade_when_later_rupees_are_too_small(self):
-        # seed 202: by the stall every early rupee spot already holds 20 or more and the only rupees left in
-        # later spheres are 5s and 20s, so no swap can add money; the pass must mint 300s instead of bailing
+    def test_vanilla_shop_stock_is_not_a_required_purchase(self):
+        # seed 202 used to count every potion, shield and capacity upgrade in the vanilla shops as a purchase
+        # and came up short on money
         with self.assertLogs('', level='DEBUG') as logs:
-            generate(202)
+            world = generate(202)
         messages = '\n'.join(logs.output)
-        self.assertIn('Upgrading Rupees', messages)
-        self.assertNotIn('money grind', messages)
+        self.assertNotIn('Money balancing needed', messages)
+        self.assertEqual(5, count_300s(world))
 
     def test_crossed_keysanity_seed(self):
         with self.assertLogs('', level='DEBUG') as logs:
-            generate(1, '--shuffle', 'crossed', '--keyshuffle', 'wild', '--bigkeyshuffle', '--mapshuffle',
-                     '--compassshuffle', '--accessibility', 'locations')
-        self.assertNotIn('money grind', '\n'.join(logs.output))
+            world = generate(1, '--shuffle', 'crossed', '--keyshuffle', 'wild', '--bigkeyshuffle', '--mapshuffle',
+                             '--compassshuffle', '--accessibility', 'locations', '--key_logic_algorithm', 'static')
+        messages = '\n'.join(logs.output)
+        self.assertNotIn('money grind', messages)
+        self.assertEqual(5, count_300s(world))
 
 
 if __name__ == '__main__':
