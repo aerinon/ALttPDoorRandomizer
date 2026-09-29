@@ -5039,7 +5039,7 @@ def main_dungeon_generation_prototype(dungeon_builders, flags, world, player):
         connect_doors(sewer_door.dest, throne_door)
         region = world.get_region('Sewer Access Portal', player)
         world.regions.remove(region)
-        b1.master_sector.regions.remove(region)
+        dungeon_builders['Hyrule Castle'].master_sector.regions.remove(region)
 
     for builder in dungeon_builders.values():
         builder.entrance_list = builder.layout_starts = builder.path_entrances = find_accessible_entrances(world, player, builder)
