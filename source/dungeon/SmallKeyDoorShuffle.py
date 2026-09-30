@@ -671,8 +671,27 @@ def log_placement_rules(d_name, key_logic, logger):
 
 
 
+STANDARD_ESCAPE_KEY_DOORS_PER_RESERVED = 5  # one escape location kept free of dungeon items per this many key doors
+
+
+def needs_standard_escape_reservation(builder, world, player):
+    return (world.mode[player] == 'standard' and builder.name == 'Hyrule Castle'
+            and world.doorShuffle[player] not in ['vanilla', 'basic'])
+
+
+def choose_standard_escape_reservation(key_layout, proposal, world, player):
+    """Escape locations kept free of dungeon items (room for required items early), chosen among the locations this
+    proposal leaves reachable without keys, so the key layout is checked with them excluded."""
+    wanted = len(proposal) // STANDARD_ESCAPE_KEY_DOORS_PER_RESERVED
+    start_counter = next(iter(key_layout.key_counters.values()))  # no key doors opened
+    candidates = sorted((loc for loc in start_counter.free_locations
+                         if loc.item is None and not reserved_location(loc, world, player)), key=lambda loc: loc.name)
+    return set(random.sample(candidates, min(wanted, len(candidates))))
+
+
 def exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, start_regions, event_starts, custom, world, player):
     logging.getLogger('').debug(f'Exhaustive: {builder.name}. {key_doors_needed} key doors')
+    escape_reservation = needs_standard_escape_reservation(builder, world, player)
     while key_doors_needed >= 0:
         combinations = ncr(len(key_door_pool), key_doors_needed)
         sample_list = build_sample_list(combinations, 10000)
@@ -688,6 +707,7 @@ def exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, sta
             proposal.extend(custom)
 
             key_layout = _key_layout_setup(builder, event_starts, player, proposal, start_regions, world)
+            reserved = choose_standard_escape_reservation(key_layout, proposal, world, player) if escape_reservation else set()
             if bk_restrictions is None:
                 bk_restrictions = determine_big_key_logic(key_layout, world, player)
             proposed_bk_restrictions = bk_restrictions.copy()
@@ -703,7 +723,7 @@ def exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, sta
                 region_set = builder.master_sector.region_set()
                 bk_required = (builder.bk_door_proposal or any(x in region_set for x in special_bk_regions)
                                or any('- Big Chest' in loc.name for loc in key_layout.item_locations))
-                if not is_key_door_layout_satisfiable(key_layout, proposed_bk_restrictions, bk_required):
+                if not is_key_door_layout_satisfiable(key_layout, proposed_bk_restrictions, bk_required, excluded=reserved):
                     contradiction_exists = True
             if not contradiction_exists:
                 log_placement_rules(builder.name, key_layout.key_logic, logging.getLogger(''))
@@ -711,6 +731,9 @@ def exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, sta
 
         if not contradiction_exists:
             # found a good proposal
+            if escape_reservation:
+                builder.standard_reserved = sorted(loc.name for loc in reserved)
+                world.item_pool_config.reserved_locations[player].update(builder.standard_reserved)
             return proposal, proposed_bk_restrictions
         key_doors_needed -= 1  # lower the key door count and try agin
     raise Exception(f'No valid key door layout found for {builder.name} with {key_doors_needed} key doors')
@@ -755,7 +778,8 @@ def _sanity_check_placement_rules(key_layout, proposed_bk_restrictions):
     return False
 
 
-def is_key_door_layout_satisfiable(key_layout, bk_restrictions, bk_needed=True, print_proposal=True):
+def is_key_door_layout_satisfiable(key_layout, bk_restrictions, bk_needed=True, print_proposal=True, excluded=frozenset()):
+    """excluded: locations that may hold neither a small key nor the big key (e.g. reserved locations)."""
     logger = logging.getLogger('')
     # determine locations the big key could be assigned to, or is it already assigned
     bk_assignment_needed, bk_location = True, None
@@ -770,7 +794,7 @@ def is_key_door_layout_satisfiable(key_layout, bk_restrictions, bk_needed=True, 
         bk_location = next(loc for loc in key_layout.item_locations if loc.item and loc.item.bigkey)
     else:
         candidates = {loc for loc in key_layout.item_locations if not loc.item}
-        possible_bk_locations.extend(candidates.difference(bk_restrictions))
+        possible_bk_locations.extend(candidates.difference(bk_restrictions).difference(excluded))
         if len(possible_bk_locations) == 0:
             return False
         # we could try to be more efficient by choosing a smart order here
@@ -787,7 +811,7 @@ def is_key_door_layout_satisfiable(key_layout, bk_restrictions, bk_needed=True, 
             logger.debug(f'Potential solution found: Small Keys: Anywhere.'
                          f' Big Key at {bk_location.name if bk_location else "Special"}')
             return True  # no rules to check, so satisfied
-        satisfying_key_set = find_contradiction_in_rules(rules_to_check, key_layout.max_chests, bk_location)
+        satisfying_key_set = find_contradiction_in_rules(rules_to_check, key_layout.max_chests, bk_location, excluded)
         if satisfying_key_set is None:
             if not possible_bk_locations:
                 looking_for_satisfaction = False  # no more options - fail this layout
@@ -801,7 +825,7 @@ def is_key_door_layout_satisfiable(key_layout, bk_restrictions, bk_needed=True, 
     return False
 
 
-def find_contradiction_in_rules(rules, num_to_choose, bk_location):
+def find_contradiction_in_rules(rules, num_to_choose, bk_location, excluded=frozenset()):
     all_locations = set()
     for r in rules:
         if r.bk_conditional_set:
@@ -816,6 +840,7 @@ def find_contradiction_in_rules(rules, num_to_choose, bk_location):
     number_allowed = num_to_choose + len(starter_set)
     already_assigned =  {loc for loc in all_locations if loc.item}
     all_locations.difference_update(already_assigned)
+    all_locations.difference_update(excluded)
     all_locations = list(all_locations)
 
     frequency = {loc: 0 for loc in all_locations}

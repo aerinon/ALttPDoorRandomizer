@@ -362,6 +362,8 @@ def count_major_items(config, world, player):
 def standard_reservation(world):
     for player in range(1, world.players + 1):
         if world.mode[player] == 'standard' and world.doorShuffle[player] not in ['vanilla', 'basic']:
+            if getattr(world.dungeon_layouts[player]['Hyrule Castle'], 'standard_reserved', None) is not None:
+                continue  # already reserved while choosing key doors, where the key layout accounts for it
 
             state = CollectionState(world)
             state.sweep_for_events()

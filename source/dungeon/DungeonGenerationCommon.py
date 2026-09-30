@@ -316,6 +316,7 @@ class DungeonBuilder(object):
         self.location_cnt = 0
         self.location_set = set()
         self.key_drop_cnt = 0
+        self.standard_reserved = None  # standard mode, Hyrule Castle: escape locations reserved while choosing key doors
         self.dungeon_items = None  # during fill how many dungeon items are left
         self.free_items = None  # during fill how many dungeon items are left
         self.bk_required = False
