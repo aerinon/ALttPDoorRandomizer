@@ -794,6 +794,10 @@ def analyze_portals_altered(world, player):
         if dungeon == 'Hyrule Castle' and world.mode[player] == 'standard':
             sanc = world.get_portal('Sanctuary', player)
             sanc.destination = True
+            if world.shuffle[player] != 'vanilla':
+                # the escape can't leave the castle (rain state), so East/West must be reached from inside
+                for name in ['Hyrule Castle East', 'Hyrule Castle West']:
+                    world.get_portal(name, player).destination = True
         for target_region, possible_portals in info.required_passage.items():
             if 'Skull 3' in possible_portals and len(possible_portals) > 1:
                 possible_portals.remove('Skull 3')

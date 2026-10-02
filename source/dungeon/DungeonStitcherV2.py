@@ -464,9 +464,15 @@ def determine_paths_for_dungeon(world, player, all_regions, name):
             paths.append(('Hyrule Dungeon Cellblock', 'Sanctuary'))  # note difference here
         if name == 'Hyrule Castle Dungeon':
             paths.append(('Hyrule Dungeon Cellblock', 'Hyrule Castle Throne Room'))
+        if name == 'Hyrule Castle Sewers':
+            # the escape enters the sewers from the throne room; other portals (East/West) can't stand in for it
+            sewer_access = world.get_door('Enter HC (Sewers)', player).dest
+            if sewer_access is not None:
+                paths.append((sewer_access.entrance.parent_region.name, 'Sanctuary'))
         if name in ['Hyrule Castle', 'Hyrule Castle Dungeon']:
             paths.append('Hyrule Dungeon Cellblock')
             entrance = next(x for x in world.dungeon_portals[player] if x.name == 'Hyrule Castle South')
+            paths.append((entrance.door.entrance.parent_region.name, 'Hyrule Dungeon Cellblock'))  # escape starts at the south lobby
             # todo: in non-er, we can use the other portals too
             paths.append(('Hyrule Dungeon Cellblock', entrance.door.entrance.parent_region.name))
             paths.append(('Hyrule Castle Throne Room', [entrance.door.entrance.parent_region.name,
@@ -1072,7 +1078,8 @@ def valid_region_to_explore_in_regions(region, all_regions, world, player):
         return False
     return ((region.type == RegionType.Dungeon and region in all_regions)
             or region.name in world.inaccessible_regions[player]
-            or (region.name == 'Hyrule Castle Ledge' and world.mode[player] == 'standard'))
+            or (region.name == 'Hyrule Castle Ledge' and world.mode[player] == 'standard'
+                and world.shuffle[player] == 'vanilla'))  # the ledge is safe during the escape only with vanilla entrances
 
 
 def valid_region_to_explore(region, name, world, player):
@@ -1080,7 +1087,8 @@ def valid_region_to_explore(region, name, world, player):
         return False
     return ((region.type == RegionType.Dungeon and region.dungeon and region.dungeon.name in name)
             or region.name in world.inaccessible_regions[player]
-            or (region.name == 'Hyrule Castle Ledge' and world.mode[player] == 'standard'))
+            or (region.name == 'Hyrule Castle Ledge' and world.mode[player] == 'standard'
+                and world.shuffle[player] == 'vanilla'))  # the ledge is safe during the escape only with vanilla entrances
 
 
 def get_doors(world, region, player):

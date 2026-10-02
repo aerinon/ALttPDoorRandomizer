@@ -938,7 +938,8 @@ def valid_region_to_explore_in_regions(region, all_regions, world, player):
         return False
     return ((region.type == RegionType.Dungeon and region in all_regions)
             or region.name in world.inaccessible_regions[player]
-            or (region.name == 'Hyrule Castle Ledge' and world.mode[player] == 'standard'))
+            or (region.name == 'Hyrule Castle Ledge' and world.mode[player] == 'standard'
+                and world.shuffle[player] == 'vanilla'))  # the ledge is safe during the escape only with vanilla entrances
 
 
 def valid_region_to_explore(region, name, world, player):
@@ -946,7 +947,8 @@ def valid_region_to_explore(region, name, world, player):
         return False
     return ((region.type == RegionType.Dungeon and region.dungeon and region.dungeon.name in name)
             or region.name in world.inaccessible_regions[player]
-            or (region.name == 'Hyrule Castle Ledge' and world.mode[player] == 'standard'))
+            or (region.name == 'Hyrule Castle Ledge' and world.mode[player] == 'standard'
+                and world.shuffle[player] == 'vanilla'))  # the ledge is safe during the escape only with vanilla entrances
 
 
 def get_doors(world, region, player):
