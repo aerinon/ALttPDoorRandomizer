@@ -44,6 +44,7 @@ class TestPitWarpRomData(unittest.TestCase):
         for e in terminal_entries():
             with self.subTest(terminal=e['name']):
                 self.assertTrue(e['rom']['rows'])
+                self.assertIn('source_room', e['rom'])
                 self.assertEqual(LANDING_ZONE_ROW_SIZE, len(pitwarp_row_bytes(e['rom']['landing'])))
 
     def test_rows_are_distinct_and_cover_every_shuffled_row(self):

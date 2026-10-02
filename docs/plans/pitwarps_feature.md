@@ -55,6 +55,10 @@ intensity:
 - Parsed via `DoorFlags.from_custom()` — same pattern as `lobbies`, `spiral`, etc.
 - Default when intensity=4: `both`; intensity<4: `none`
 - No separate world attribute — lives entirely in `DoorFlags`
+- Every value generates. With `warps` the pits stay vanilla, so a sector can join regions through one-way falls and
+  need several entries (Ice: one of Spike Cross ES/SE or Firebar Down Ladder for the top, and one of Backwards Room
+  Down Stairs or Crystal Right ES for the Blue-gated Ice Fairy Warp); `SectorDescriptor.classify` requires an entry per
+  distinct set of doors that reach a leftover door.
 
 ### 1c. World object wiring ✓
 
@@ -236,6 +240,21 @@ writer behavior) and `TestPitWarpRegression.py` (full generation: intensity 3 on
 - The bundled base patch (`data/base2current.bps`) does not contain the PitWarps code yet (`$A7C940` is zero, not the
   `$8000` defaults); it needs a rebuild from dr_baserom's `PitWarps` branch before a ROM can be playtested.
 - Not yet run in an emulator.
+
+### 5d. Compass boss indicator
+
+The door-shuffle compass shows a red square in one room per dungeon (`CompassBossIndicator`, `$A7F000+id`), written by
+`Rom.write_boss_indicators`. For a boss entered through a door, it marks the room before the boss. Skull Woods and Ice
+Palace are entered by a fall: while that fall is unshuffled, their `boss_indicator` entries (`Skull Spike Corner SW`,
+`Ice Antechamber NE`) mark the room before the vestibule above the boss.
+
+When pits shuffle (`pits_shuffled`: `pit_warps` is `pits` or `both`, as at intensity 4, with a non-classic dungeon
+algorithm), the boss can be fed by a pit in any room, and the vestibule may drop elsewhere. `pit_boss_sources` then
+finds the one shuffled group landing in each region of `DoorShuffle.pit_boss_regions` (raising if there is not exactly
+one); the indicator marks that group's room (`source_room` in its vanilla
+terminal's `rom` block in `data/terminals.yaml`, the room the base ROM's `PitWarpLookupTable` reads its rows for), in
+the slot of the dungeon holding the pit. The vestibule entries are skipped, so they no longer write a room into another
+dungeon's slot. `TestBossIndicator` covers intensity 4, custom `pits`, and intensity 3.
 
 ---
 

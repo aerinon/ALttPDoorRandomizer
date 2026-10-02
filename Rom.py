@@ -17,7 +17,8 @@ except ImportError:
     raise Exception('Could not load BPS module')
 
 from BaseClasses import ShopType, Region, Location, Door, DoorType, RegionType, LocationType
-from DoorShuffle import compass_data, DROptions, boss_indicator, dungeon_portals
+from DoorShuffle import compass_data, DROptions, boss_indicator, pit_boss_regions, dungeon_portals
+from Doors import pits_shuffled
 from Dungeons import dungeon_music_addresses, dungeon_table
 from Regions import location_table, shop_to_location_table, retro_shops
 from RoomData import DoorKind
@@ -665,16 +666,7 @@ def patch_rom(world, rom, player, team, is_mystery=False):
         rom.write_bytes(paired_door.address_a(world, player), paired_door.rom_data_a(world, player))
         rom.write_bytes(paired_door.address_b(world, player), paired_door.rom_data_b(world, player))
     if world.doorShuffle[player] != 'vanilla':
-        for name, pair in boss_indicator.items():
-            dungeon_id, boss_door = pair
-            boss_region = world.get_door(boss_door, player).entrance.parent_region
-            opposite_door = next(iter(x for x in boss_region.entrances if x.name != 'Skull Final Drop WS')).door
-            if opposite_door and isinstance(opposite_door, Door) and opposite_door.roomIndex > -1:
-                dungeon_name = opposite_door.entrance.parent_region.dungeon.name
-                dungeon_id = boss_indicator[dungeon_name][0]
-                rom.write_byte(0x13f000+dungeon_id, opposite_door.roomIndex)
-            elif not opposite_door:
-                rom.write_byte(0x13f000+dungeon_id, 0)  # no supertile preceeding boss
+        write_boss_indicators(world, rom, player)
     if is_mystery:
         dr_flags |= DROptions.Hide_Total
     rom.write_byte(0x138004, dr_flags.value & 0xff)
@@ -1576,6 +1568,41 @@ def pitwarp_row_bytes(landing):
     if len(data) != LANDING_ZONE_ROW_SIZE:
         raise ValueError(f'LandingZoneData row is {len(data)} bytes')
     return data
+
+
+def write_boss_indicators(world, rom, player):
+    """Writes the compass boss indicator: the room before each boss, or for a shuffled fall into the boss, the pit's room."""
+    pit_bosses = pit_boss_sources(world, player)
+    for name, pair in boss_indicator.items():
+        if name in pit_bosses:
+            continue
+        dungeon_id, boss_door = pair
+        boss_region = world.get_door(boss_door, player).entrance.parent_region
+        opposite_door = next(iter(x for x in boss_region.entrances if x.name != 'Skull Final Drop WS')).door
+        if opposite_door and isinstance(opposite_door, Door) and opposite_door.roomIndex > -1:
+            dungeon_name = opposite_door.entrance.parent_region.dungeon.name
+            dungeon_id = boss_indicator[dungeon_name][0]
+            rom.write_byte(0x13f000+dungeon_id, opposite_door.roomIndex)
+        elif not opposite_door:
+            rom.write_byte(0x13f000+dungeon_id, 0)  # no supertile preceeding boss
+    for source in pit_bosses.values():
+        dungeon_id = boss_indicator[source.entrance.parent_region.dungeon.name][0]
+        rom.write_byte(0x13f000+dungeon_id, world.get_door(source.group, player).pitwarp_rom['source_room'])
+
+
+def pit_boss_sources(world, player):
+    """The shuffled pit/warp group that falls into each boss entered by a fall, by boss_indicator name; empty unless
+    pits shuffle (the falls into these bosses are pits)."""
+    if not pits_shuffled(world, player):
+        return {}
+    sources = {}
+    for name, region in pit_boss_regions.items():
+        reps = [d for d in world.doors if d.player == player and d.pit_terminal is not None and d.group_rep is d
+                and d.entrance.connected_region.name == region]
+        if len(reps) != 1:
+            raise ValueError(f'{len(reps)} shuffled pit groups land in {region}, expected 1')
+        sources[name] = reps[0]
+    return sources
 
 
 def write_pitwarps(world, rom, player):

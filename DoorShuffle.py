@@ -4706,6 +4706,9 @@ boss_indicator = {
     'Ganons Tower': (0x1a, 'GT Agahnim 2 SW')
 }
 
+# bosses entered by a fall: with that fall shuffled, the indicator marks the room of the pit that lands in the boss
+pit_boss_regions = {'Skull Woods': 'Skull Boss', 'Ice Palace': 'Ice Boss'}
+
 # tuples: (non-boss, boss)
 # see Utils for other notes
 palette_map = {

@@ -4,6 +4,7 @@
 # 'sources' lists all source doors that land at this terminal when shuffled.
 # 'rom' is the Phase 5 ROM data (dr_baserom docs/design/2026-06-01-pitwarp-generator-interface.md):
 #   rows: the LandingZoneData rows the ROM reads when one of this entry's sources is used (fixed by the base ROM).
+#   source_room: the room of this entry's sources, the room PitWarpLookupTable reads the rows for.
 #   landing: RAM state captured right after landing at this terminal, written into the rows of whichever
 #   source group lands here. Copied from pit_warp_data_manual.json (transitions, 'capture' label).
 
@@ -14,6 +15,7 @@ pits:
       - Eastern Courtyard Potholes
     rom:
       rows: [0x12]  # LandingZoneData rows read by this group's sources
+      source_room: 0xA9
       capture: 'Eastern Cortyard Potholesc'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0089
@@ -38,6 +40,7 @@ pits:
       - Hera Beetles Holes Landing
     rom:
       rows: [0x1C]  # LandingZoneData rows read by this group's sources
+      source_room: 0x31
       capture: 'Hera Front Right Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0077
@@ -62,6 +65,7 @@ pits:
       - Hera Startile Corner Holes Landing
     rom:
       rows: [0x1B]  # LandingZoneData rows read by this group's sources
+      source_room: 0x31
       capture: 'Hera Front Left Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0077
@@ -85,6 +89,7 @@ pits:
       - Hera Startile Wide Holes
     rom:
       rows: [0x1A]  # LandingZoneData rows read by this group's sources
+      source_room: 0x31
       capture: 'Hera Back landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0077
@@ -109,6 +114,7 @@ pits:
       - Hera Big Chest Landing Holes
     rom:
       rows: [0x05]  # LandingZoneData rows read by this group's sources
+      source_room: 0x27
       capture: 'HeraStartiles Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0031
@@ -132,6 +138,7 @@ pits:
       - Hera 5F Star Hole
     rom:
       rows: [0x29]  # LandingZoneData rows read by this group's sources
+      source_room: 0x17
       capture: 'Hera Big Chest Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0027
@@ -155,6 +162,7 @@ pits:
       - Hera 5F Pothole Chain
     rom:
       rows: [0x28]  # LandingZoneData rows read by this group's sources
+      source_room: 0x17
       capture: 'Hera Fairies Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x00A7
@@ -178,6 +186,7 @@ pits:
       - Hera 5F Normal Holes
     rom:
       rows: [0x2A]  # LandingZoneData rows read by this group's sources
+      source_room: 0x17
       capture: 'Hera 4f Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0027
@@ -202,6 +211,7 @@ pits:
       - Hera Boss Inner Hole
     rom:
       rows: [0x00]  # LandingZoneData rows read by this group's sources
+      source_room: 0x07
       capture: 'Hera 5F Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0017
@@ -225,6 +235,7 @@ pits:
       - PoD Pit Room Freefall
     rom:
       rows: [0x2B]  # LandingZoneData rows read by this group's sources
+      source_room: 0x3A
       capture: 'PoDPit Room Freefall Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x000A
@@ -248,6 +259,7 @@ pits:
       - PoD Pit Room Bomb Hole
     rom:
       rows: [0x2C]  # LandingZoneData rows read by this group's sources
+      source_room: 0x3A
       capture: 'Pod Basement Ledge Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x000A
@@ -271,6 +283,7 @@ pits:
       - PoD Big Key Landing Hole
     rom:
       rows: [0x2D]  # LandingZoneData rows read by this group's sources
+      source_room: 0x3A
       capture: 'Pod Baement Landing from Big KEy'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x000A
@@ -294,6 +307,7 @@ pits:
       - Swamp Attic Right Pit
     rom:
       rows: [0x1E]  # LandingZoneData rows read by this group's sources
+      source_room: 0x54
       capture: 'Swamp Barrrier LEdge Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0034
@@ -317,6 +331,7 @@ pits:
       - Swamp Attic Left Pit
     rom:
       rows: [0x1D]  # LandingZoneData rows read by this group's sources
+      source_room: 0x54
       capture: 'Swamp West LEdge Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0034
@@ -340,6 +355,7 @@ pits:
       - Skull Final Drop Hole
     rom:
       rows: [0x06]  # LandingZoneData rows read by this group's sources
+      source_room: 0x39
       capture: 'Skull Booss Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0029
@@ -363,6 +379,7 @@ pits:
       - Ice Bomb Drop Hole
     rom:
       rows: [0x04]  # LandingZoneData rows read by this group's sources
+      source_room: 0x1E
       capture: 'Ice Stalfos Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x003E
@@ -386,6 +403,7 @@ pits:
       - Ice Falling Square Hole
     rom:
       rows: [0x0B]  # LandingZoneData rows read by this group's sources
+      source_room: 0x5E
       capture: 'Ice Tall Hint Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x007E
@@ -410,6 +428,7 @@ pits:
       - Ice Freezors Bomb Hole
     rom:
       rows: [0x0D]  # LandingZoneData rows read by this group's sources
+      source_room: 0x7E
       capture: 'Ice Big Chest Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x009E
@@ -434,6 +453,7 @@ pits:
       - Ice Crystal Right Blue Hole
     rom:
       rows: [0x23]  # LandingZoneData rows read by this group's sources
+      source_room: 0x9E
       capture: 'Ice Switch Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x00BE
@@ -457,6 +477,7 @@ pits:
       - Ice Backwards Room Hole
     rom:
       rows: [0x22]  # LandingZoneData rows read by this group's sources
+      source_room: 0x9E
       capture: 'Ice Fairies Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x004F
@@ -480,6 +501,7 @@ pits:
       - Ice Antechamber Hole
     rom:
       rows: [0x14]  # LandingZoneData rows read by this group's sources
+      source_room: 0xCE
       capture: 'Ice Boss Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x00DE
@@ -503,6 +525,7 @@ pits:
       - Mire Attic Hint Hole
     rom:
       rows: [0x21]  # LandingZoneData rows read by this group's sources
+      source_room: 0x97
       capture: 'Mire Bk Chest Ledge Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x00D1
@@ -526,6 +549,7 @@ pits:
       - Mire Torches Top Holes
     rom:
       rows: [0x1F]  # LandingZoneData rows read by this group's sources
+      source_room: 0x97
       capture: 'Mire Conveyor Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x00D1
@@ -549,6 +573,7 @@ pits:
       - Mire Torches Bottom Holes
     rom:
       rows: [0x20]  # LandingZoneData rows read by this group's sources
+      source_room: 0x97
       capture: 'MIre Warping Pool Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x00D1
@@ -572,6 +597,7 @@ pits:
       - GT Bob's Room Hole
     rom:
       rows: [0x0F]  # LandingZoneData rows read by this group's sources
+      source_room: 0x8C
       capture: 'GT Ice Armos Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x001C
@@ -595,6 +621,7 @@ pits:
       - GT Falling Torches Hole
     rom:
       rows: [0x07]  # LandingZoneData rows read by this group's sources
+      source_room: 0x3D
       capture: 'GT Staredown Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0096
@@ -618,6 +645,7 @@ pits:
       - GT Moldorm Hole
     rom:
       rows: [0x09]  # LandingZoneData rows read by this group's sources
+      source_room: 0x4D
       capture: 'GT Moldorm Pit Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x00A6
@@ -642,6 +670,7 @@ warps:
       - Eastern Fairies' Warp
     rom:
       rows: [0x0E]  # LandingZoneData rows read by this group's sources
+      source_room: 0x89
       capture: 'Eastern Fairies Warp'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x00A9
@@ -665,6 +694,7 @@ warps:
       - Hera Fairies' Warp
     rom:
       rows: [0x11]  # LandingZoneData rows read by this group's sources
+      source_room: 0xA7
       capture: 'Hera Fairies Warp'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0017
@@ -688,6 +718,7 @@ warps:
       - PoD Warp Hint Warp
     rom:
       rows: [0x08]  # LandingZoneData rows read by this group's sources
+      source_room: 0x4B
       capture: 'POd Warp Room from Hint Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0009
@@ -711,6 +742,7 @@ warps:
       - PoD Warp Room Warp
     rom:
       rows: [0x01]  # LandingZoneData rows read by this group's sources
+      source_room: 0x09
       capture: 'POd warp Hint Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x004B
@@ -734,6 +766,7 @@ warps:
       - PoD Stalfos Basement Warp
     rom:
       rows: [0x02]  # LandingZoneData rows read by this group's sources
+      source_room: 0x0A
       capture: 'Pod Warp Room from Stalfos Basement Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x0009
@@ -757,6 +790,7 @@ warps:
       - PoD Callback Warp
     rom:
       rows: [0x03]  # LandingZoneData rows read by this group's sources
+      source_room: 0x0B
       capture: 'Pod Dark Alley Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x006A
@@ -780,6 +814,7 @@ warps:
       - Ice Fairy Warp
     rom:
       rows: [0x0A]  # LandingZoneData rows read by this group's sources
+      source_room: 0x4F
       capture: 'Ice Anti-Fairy Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x00BE
@@ -803,6 +838,7 @@ warps:
       - Mire Lone Warp Warp
     rom:
       rows: [0x13]  # LandingZoneData rows read by this group's sources
+      source_room: 0xB1
       capture: 'Mire Bk Door Room Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x00B2
@@ -826,6 +862,7 @@ warps:
       - Mire Warping Pool Warp
     rom:
       rows: [0x15]  # LandingZoneData rows read by this group's sources
+      source_room: 0xD1
       capture: 'Mire Square Rail Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x00B1
@@ -849,6 +886,7 @@ warps:
       - GT Compass Room Warp
     rom:
       rows: [0x10]  # LandingZoneData rows read by this group's sources
+      source_room: 0x9D
       capture: 'GT Conveyor Star Pits Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x007B
@@ -872,6 +910,7 @@ warps:
       - GT Spike Crystals Warp
     rom:
       rows: [0x37]  # LandingZoneData rows read by this group's sources
+      source_room: 0x9B
       capture: 'GT Firesnake Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x007D
@@ -895,6 +934,7 @@ warps:
       - GT Warp Maze - Left Section Warp
     rom:
       rows: [0x3B]  # LandingZoneData rows read by this group's sources
+      source_room: 0x9B
       capture: 'GT Rando Rail Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x007D
@@ -918,6 +958,7 @@ warps:
       - GT Warp Maze - Mid Section Left Warp
     rom:
       rows: [0x39]  # LandingZoneData rows read by this group's sources
+      source_room: 0x9B
       capture: 'Warp Hub Left Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x007D
@@ -941,6 +982,7 @@ warps:
       - GT Warp Maze - Mid Section Right Warp
     rom:
       rows: [0x38]  # LandingZoneData rows read by this group's sources
+      source_room: 0x9B
       capture: 'Gt Warp Hub Mid Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x007D
@@ -964,6 +1006,7 @@ warps:
       - GT Warp Maze - Right Section Warp
     rom:
       rows: [0x3A]  # LandingZoneData rows read by this group's sources
+      source_room: 0x9B
       capture: 'GT Warp Hub Right Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x007D
@@ -987,6 +1030,7 @@ warps:
       - GT Warp Maze - Pit Exit Warp
     rom:
       rows: [0x3C]  # LandingZoneData rows read by this group's sources
+      source_room: 0x9B
       capture: 'GT Arrow Pot Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x007D
@@ -1010,6 +1054,7 @@ warps:
       - GT Warp Maze - Rail Choice Left Warp
     rom:
       rows: [0x2E]  # LandingZoneData rows read by this group's sources
+      source_room: 0x7D
       capture: 'GT Warp Maze Left Section Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x009B
@@ -1033,6 +1078,7 @@ warps:
       - GT Warp Maze - Rail Choice Right Warp
     rom:
       rows: [0x2F]  # LandingZoneData rows read by this group's sources
+      source_room: 0x7D
       capture: 'GT Warp Maze Mid Top Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x009B
@@ -1056,6 +1102,7 @@ warps:
       - GT Warp Maze - Rando Rail Warp
     rom:
       rows: [0x35]  # LandingZoneData rows read by this group's sources
+      source_room: 0x7D
       capture: 'GT Warp Maze Mid Section Left Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x009B
@@ -1079,6 +1126,7 @@ warps:
       - GT Warp Maze - Main Rails Best Warp
     rom:
       rows: [0x34]  # LandingZoneData rows read by this group's sources
+      source_room: 0x7D
       capture: 'GT Warp Maze Pit Section Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x009B
@@ -1102,6 +1150,7 @@ warps:
       - GT Warp Maze - Main Rails Mid Left Warp
     rom:
       rows: [0x33]  # LandingZoneData rows read by this group's sources
+      source_room: 0x7D
       capture: 'GT Warp Maze Mid Section MidLeft Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x009B
@@ -1125,6 +1174,7 @@ warps:
       - GT Warp Maze - Main Rails Mid Right Warp
     rom:
       rows: [0x30]  # LandingZoneData rows read by this group's sources
+      source_room: 0x7D
       capture: 'GT Warp Maze Mid Section MidRight Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x009B
@@ -1148,6 +1198,7 @@ warps:
       - GT Warp Maze - Main Rails Right Top Warp
     rom:
       rows: [0x31]  # LandingZoneData rows read by this group's sources
+      source_room: 0x7D
       capture: 'GT Warp Maze Right Section Top landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x009B
@@ -1171,6 +1222,7 @@ warps:
       - GT Warp Maze - Main Rails Right Mid Warp
     rom:
       rows: [0x32]  # LandingZoneData rows read by this group's sources
+      source_room: 0x7D
       capture: 'GT Warp Maze Rigth Section Bottom Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x009B
@@ -1194,6 +1246,7 @@ warps:
       - GT Warp Maze - Pot Rail Warp
     rom:
       rows: [0x36]  # LandingZoneData rows read by this group's sources
+      source_room: 0x7D
       capture: 'GT Warp Maze Exit Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x009B
@@ -1217,6 +1270,7 @@ warps:
       - GT Hidden Star Warp
     rom:
       rows: [0x0C]  # LandingZoneData rows read by this group's sources
+      source_room: 0x7B
       capture: 'GT Invisible Bridges Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x009D
