@@ -766,43 +766,58 @@ def figure_out_must_exits_cross_world(entrances, exits, avail):
 
 
 def do_same_world_connectors(lw_entrances, dw_entrances, caves, avail):
+    """Most restrictive first: caves bound to one world go before free ones, then the largest. A placement that fixes a
+    dungeon's other exits to its world is rejected if that would leave a world without room for its waiting caves."""
     random.shuffle(lw_entrances)
     random.shuffle(dw_entrances)
     random.shuffle(caves)
+    caves = [(cave,) if isinstance(cave, str) else tuple(cave) for cave in caves]
+    free = {'LightWorld': lw_entrances, 'DarkWorld': dw_entrances}
     while caves:
-        # connect highest-exit-count caves first, prevent issue where we have 2 or 3 exits across worlds left to fill
-        cave_candidate = (None, 0)
-        for i, cave in enumerate(caves):
-            if isinstance(cave, str):
-                cave = (cave,)
-            if len(cave) > cave_candidate[1]:
-                cave_candidate = (i, len(cave))
-        cave = caves.pop(cave_candidate[0])
-
-        if isinstance(cave, str):
-            cave = (cave,)
-        target, restriction = None, None
-        if any(x in avail.same_world_restricted for x in cave):
-            restriction = next(avail.same_world_restricted[x] for x in cave if x in avail.same_world_restricted)
-            target = lw_entrances if restriction == 'LightWorld' else dw_entrances
-        if target is None:
-            target = lw_entrances if random.randint(0, 1) == 0 else dw_entrances
-
-        # check if we can still fit the cave into our target group
-        if len(target) < len(cave):
-            if restriction:
-                raise Exception('Not enough entrances for restricted cave, algorithm needs revision (main)')
-            # need to use other set
-            target = lw_entrances if target is dw_entrances else dw_entrances
-
+        caves.sort(key=lambda c: (cave_restriction(c, avail) is None, -len(c)))  # stable: ties keep the shuffled order
+        cave = caves.pop(0)
+        restriction = cave_restriction(cave, avail)
+        worlds = [restriction] if restriction else random.sample(['LightWorld', 'DarkWorld'], 2)
+        world = next((w for w in worlds if leaves_room(cave, w, caves, free, avail)), None)
+        if world is None:
+            raise Exception('Not enough entrances for restricted cave, algorithm needs revision (main)')
+        target = free[world]
         for ext in cave:
             # todo: for decoupled, need to split the avail decoupled entrances into lw/dw
-            # if decoupled:
-            #     choice = random.choice(avail.decoupled_entrances)
-            #     connect_exit(ext, choice, avail)
-            #     avail.decoupled_entrances.remove()
-            # else:
             connect_two_way(target.pop(), ext, avail)
+        avail.same_world_restricted.update(sibling_restrictions(cave, world, caves, avail))
+
+
+def cave_restriction(cave, avail):
+    return next((avail.same_world_restricted[x] for x in cave if x in avail.same_world_restricted), None)
+
+
+def sibling_restrictions(cave, world, waiting, avail):
+    """A dungeon's exits stay in one world: placing one fixes its waiting siblings to that world."""
+    waiting_exits = {x for c in waiting for x in c}
+    restrictions = {}
+    for dungeon_exits, drops in dungeon_restriction_checks:
+        if any(x in dungeon_exits for x in cave):
+            for x in dungeon_exits:
+                if x in waiting_exits and x not in avail.same_world_restricted:
+                    restrictions[x] = world
+    return restrictions
+
+
+def leaves_room(cave, world, waiting, free, avail):
+    """After placing cave in world, every waiting cave bound to a world (including bindings this placement creates)
+    still fits there."""
+    left = {w: len(entrances) for w, entrances in free.items()}
+    left[world] -= len(cave)
+    if left[world] < 0:
+        return False
+    added = sibling_restrictions(cave, world, waiting, avail)
+    demand = {w: 0 for w in free}
+    for c in waiting:
+        bound = cave_restriction(c, avail) or next((added[x] for x in c if x in added), None)
+        if bound:
+            demand[bound] += len(c)
+    return all(left[w] >= demand[w] for w in free)
 
 
 def do_same_world_possible_connectors(lw_entrances, dw_entrances, possibles, avail):
