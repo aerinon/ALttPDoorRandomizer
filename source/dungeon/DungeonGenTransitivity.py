@@ -10,7 +10,7 @@ from BaseClasses import CrystalBarrier, Direction
 from Utils import flatten
 
 from source.dungeon.DungeonGenerationCommon import hanger_from_door, hook_from_door, is_boss_trap, GenerationException
-from source.dungeon.DungeonGenSectorDesc import CrystalConstraint
+from source.dungeon.DungeonGenSectorDesc import CrystalConstraint, SimpleExplorationState
 
 logger = logging.getLogger('tlogger')
 # for handler in logger.handlers[:]:
@@ -71,7 +71,7 @@ def do_transitivity_check_main(builder, sector_list, flags, initial_connections=
     for conn in initial_options:
         init_t = t.connect_door(conn, c_info)
         if not init_t.now_impossible(c_info, visited):
-            if not init_t.unsatisfied_constraints and not init_t.remaining_doors:
+            if init_t.is_complete(c_info):
                 # neutral_conns = [d for d, t in init_t.connection_map.items() if not d.traversal_only and not t.traversal_only]
                 return True  # that was easy
             priority = init_t.priority()
@@ -91,7 +91,7 @@ def do_transitivity_check_main(builder, sector_list, flags, initial_connections=
         for conn in new_options:
             new_t = current.connect_door(conn, c_info)
             if not new_t.now_impossible(c_info, visited):
-                if not new_t.unsatisfied_constraints and not new_t.remaining_doors:
+                if new_t.is_complete(c_info):
                     ttl_time = time.process_time() - start_time
                     if iterations > 10000 or ttl_time > 2:
                         logger.warning(f'Transitivity check took {iterations} iterations in {ttl_time}s for "true" result')
@@ -168,6 +168,8 @@ class ConstraintInfo:
             if s.descriptor.is_neutral and not s.portals:
                 self.constraints.append(Constraint(ConstraintType.Neutral, s.outstanding_doors, None))
 
+        self.escape = EscapeCheck(sector_list, flags) if flags.std_flag and builder.name == 'Hyrule Castle Dungeon' else None
+
         for d, dep_info in self.dependent_portals.items():
             sector, enabling_portal = dep_info
             self.dependent_lookup[enabling_portal.door] = d
@@ -217,6 +219,99 @@ class ConstraintInfo:
                    or (d.blocked and potential_is_special)):
                     continue
                 self.door_matches[d].append(potential_match)
+
+
+# a mirror scroll respawn resets the crystal state to Orange
+ESCAPE_START_COLORS = (CrystalBarrier.Orange,)
+
+
+class EscapeCheck:
+    """Standard escape in the Hyrule Castle Dungeon builder: the mirror scroll returns Link to Cellblock or Throne Room,
+    so both must lead back to the south lobby (Throne Room may go through Cellblock) and Cellblock must reach Throne
+    Room. Walks only cross connections a witness has made, entering each sector through its directional reachability."""
+
+    def __init__(self, sector_list, flags):
+        regions = {r.name: r for s in sector_list for r in s.regions}
+        self.cellblock = regions['Hyrule Dungeon Cellblock']
+        self.throne_room = regions['Hyrule Castle Throne Room']
+        self.portal = next(p for s in sector_list for p in s.portals if p.name == 'Hyrule Castle South')
+        self.sector_of = {r: s for s in sector_list for r in s.regions}
+        self.v_trap_flag = flags.vanilla_traps
+        self.start_states = {r: self.explore_from(r) for r in [self.cellblock, self.throne_room]}
+
+    def explore_from(self, region):
+        start_door = next(ext.door for ext in region.exits if ext.door is not None)
+        state = SimpleExplorationState(self.v_trap_flag)
+        state.extend_reachable_state(start_door)
+        outstanding = self.sector_of[region].outstanding_doors
+        reach = [(e.door, e.crystal, e.flag) for e in state.unattached_doors if e.door in outstanding]
+        return state.visited_map, reach
+
+    def lobby(self, connection_map):
+        door = self.portal.door
+        if door.traversal_only:
+            return connection_map[door].entrance.parent_region if door in connection_map else None
+        return door.entrance.parent_region
+
+    def satisfied(self, connection_map, matches=None):
+        """With matches (door -> possible partners), a door not yet connected may lead into any unconnected partner:
+        an over-approximation, so a False means no completion of this state can satisfy the escape."""
+        lobby = self.lobby(connection_map)
+        if lobby is None and matches is None:
+            return False
+        lobby_targets = {lobby} if lobby else set()  # an unknown lobby can't be checked yet
+        reqs = [(self.cellblock, lobby_targets), (self.cellblock, {self.throne_room}),
+                (self.throne_room, lobby_targets | {self.cellblock})]
+        for color in ESCAPE_START_COLORS:
+            walks = {root: self.walk(root, color, connection_map, matches) for root in [self.cellblock, self.throne_room]}
+            if not all(self.found(walks[root], targets) for root, targets in reqs if targets):
+                return False
+        return True
+
+    def walk(self, start, color, connection_map, matches=None):
+        """The (region map, color) of every entry made walking from a root region."""
+        visited_map, reach = self.start_states[start]
+        entries = [(visited_map, color)]
+        queue, seen = deque([(reach, color)]), set()
+        while queue:
+            reach, color = queue.popleft()
+            for door, new_color, required in reach:
+                if not crystal_allows(required, color):
+                    continue
+                if door in connection_map:
+                    partners = [connection_map[door]]
+                elif matches is not None:
+                    partners = [m for m in matches[door] if m not in connection_map]
+                else:
+                    continue
+                color_after = new_color if new_color not in [CrystalBarrier.Null, CrystalBarrier.Both] else color
+                for entered in partners:
+                    descriptor = self.sector_of[entered.entrance.parent_region].descriptor
+                    state = descriptor.state_cache.get(entered)
+                    if entered.traversal_only or state is None:
+                        continue  # leaving the dungeon, or a door that can't be entered (e.g. a pit source)
+                    if (entered, color_after) in seen:
+                        continue
+                    seen.add((entered, color_after))
+                    entries.append((state.visited_map, color_after))
+                    queue.append((descriptor.reachability[entered], color_after))
+        return entries
+
+    @staticmethod
+    def found(entries, targets):
+        for visited_map, color in entries:
+            for region in targets:
+                if region in visited_map:
+                    visited_color = visited_map[region][0]
+                    if visited_color in [CrystalBarrier.Null, CrystalBarrier.Both, CrystalBarrier.Either, color]:
+                        return True
+        return False
+
+
+def crystal_allows(required, color):
+    if required == CrystalBarrier.Blue and color in [CrystalBarrier.Orange, CrystalBarrier.Null]:
+        return False
+    return not (required == CrystalBarrier.Orange and color == CrystalBarrier.Blue)
 
 
 def valid_portal(door, match_door, c_info, init=True):
@@ -419,6 +514,11 @@ class Transitivity:
             return 1
         return 0
 
+    def is_complete(self, c_info):
+        if self.unsatisfied_constraints or self.remaining_doors:
+            return False
+        return c_info.escape is None or c_info.escape.satisfied(self.connection_map)
+
     def priority(self):
         # return 0
         # doors_left = len(self.remaining_doors) + len(self.unconnected_doors)
@@ -576,6 +676,8 @@ class Transitivity:
             return True
 
         if self.quick_door_matches_check(c_info):
+            return True
+        if c_info.escape and not c_info.escape.satisfied(self.connection_map, c_info.door_matches):
             return True
 
         remaining_set = set(self.remaining_doors)
