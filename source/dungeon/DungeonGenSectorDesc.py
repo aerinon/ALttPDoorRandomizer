@@ -135,19 +135,20 @@ class SectorDescriptor:
                     self.must_enter_reqs.append(dest)
                     reached.update([d for d, c, f in self.reachability[dest]])
                 unreached.difference_update(reached)
-                if len(unreached) > 0:
-                    covers_all = []
-                    for source, dest_list in self.reachability.items():
-                        door_set = set(d for d, c, f in dest_list if d in unreached)
-                        if len(door_set) == len(unreached):
-                            covers_all.append(source)
-                    if not covers_all:
-                        raise GenerationException("Some edge case where you need to separate door to cover all: " + self.sector)
-                    if len(covers_all) == 1:
-                        d = next(iter(covers_all))
-                        self.must_enter_reqs.insert(0, d)
-                    else:
-                        self.must_enter_reqs.insert(0, tuple(covers_all))
+                # each door left needs an entry that reaches it: one requirement per distinct set of such entries,
+                # skipping sets that contain a smaller one (meeting the smaller meets them)
+                entry_sets = []
+                for door in [d for d in self.sector.outstanding_doors if d in unreached]:  # stable order
+                    if not reversed_reachability[door]:
+                        raise GenerationException(f'{door.name} is not reachable from any entry: {self.sector}')
+                    entry_set = frozenset(reversed_reachability[door])
+                    if entry_set not in entry_sets:
+                        entry_sets.append(entry_set)
+                minimal = [e for e in entry_sets if not any(other < e for other in entry_sets)]
+                order = list(self.reachability)
+                for entry_set in reversed(minimal):
+                    entries = sorted(entry_set, key=order.index)
+                    self.must_enter_reqs.insert(0, entries[0] if len(entries) == 1 else tuple(entries))
 
         if all(len(reach_list) == total_needed for source, reach_list in self.reachability.items()):
             if self.is_sector_neutral():

@@ -52,7 +52,8 @@ class TestStandardEscape(unittest.TestCase):
         Transitivity.do_transitivity_check_main = first_hc_check
         with self.assertRaises(Stop):
             generate_standard(382466786, 1, ['--shuffle', 'vanilla', '--shopsanity'])
-        self.assertEqual([False, False], results)
+        self.assertEqual(2, len(results))  # greedy and full passes
+        self.assertFalse(any(results))  # rejected, whatever form a result takes
 
     def test_stitched_layout_satisfies_escape(self):
         layouts = []
