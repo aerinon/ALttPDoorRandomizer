@@ -2,13 +2,15 @@ import unittest
 from collections import defaultdict
 from types import SimpleNamespace
 
-from BaseClasses import CrystalBarrier
+from BaseClasses import CrystalBarrier, DoorType
 from source.dungeon.DungeonGenSectorDesc import SectorDescriptor
+from source.dungeon.DungeonGenerationCommon import GenerationException
 
 
 class Door:
     def __init__(self, name):
         self.name = name
+        self.type = DoorType.Normal
 
     def __repr__(self):
         return self.name
@@ -47,7 +49,7 @@ class TestSectorClassify(unittest.TestCase):
 
     def test_unreachable_door_raises(self):
         a, b, hole = Door('A'), Door('B'), Door('Hole')
-        with self.assertRaises(Exception):
+        with self.assertRaises(GenerationException):
             classify([a, b, hole], {a: [a, b], b: [a, b]})
 
 
