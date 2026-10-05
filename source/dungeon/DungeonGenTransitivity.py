@@ -766,8 +766,8 @@ class Transitivity:
                 missing_doors = len(doors) - best
                 forced_doors = 0
                 for d in sector.outstanding_doors:
-                    if d in self.unconnected_doors:
-                        continue  # can't be forced if already reached
+                    if d in self.unconnected_doors or d in self.connection_map:
+                        continue  # can't be forced if already reached or connected
                     # if all the things that a door could connect to are already connected or in the sector itself
                     if all(d in self.connection_map or d in sector.outstanding_doors for d in c_info.door_matches[d]):
                         forced_doors += 1
