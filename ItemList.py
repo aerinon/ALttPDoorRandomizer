@@ -521,6 +521,14 @@ fixed_take_anys = [
     'Dark Lake Hylia Ledge Healer Fairy', 'Bonk Fairy (Dark)']
 
 
+def outside_entrance(world, region_name, player):
+    """The cave's door from the overworld; a cave with a back room also has an entrance from inside."""
+    entrance = next((ent for ent in world.get_region(region_name, player).entrances if ent.parent_region.is_outdoors()), None)
+    if entrance is None:
+        raise Exception(f'No outside entrance found for {region_name}')
+    return entrance
+
+
 def set_up_take_anys(world, player, skip_adjustments=False):
     if world.mode[player] == 'inverted':
         if 'Dark Sanctuary Hint' in take_any_locations:
@@ -539,8 +547,7 @@ def set_up_take_anys(world, player, skip_adjustments=False):
     world.regions.append(old_man_take_any)
     world.dynamic_regions.append(old_man_take_any)
 
-    reg = regions.pop()
-    entrance = world.get_region(reg, player).entrances[0]
+    entrance = outside_entrance(world, regions.pop(), player)
     connect_entrance(world, entrance, old_man_take_any, player)
     entrance.target = 0x58
     old_man_take_any.shop = Shop(old_man_take_any, 0x0112, ShopType.TakeAny, 0xE2, True, not world.shopsanity[player], 32)
@@ -564,10 +571,7 @@ def set_up_take_anys(world, player, skip_adjustments=False):
         world.regions.append(take_any)
         world.dynamic_regions.append(take_any)
         target, room_id = random.choice([(0x58, 0x0112), (0x60, 0x010F), (0x46, 0x011F)])
-        reg = regions.pop()
-        entrance = next((ent for ent in world.get_region(reg, player).entrances if ent.parent_region.is_outdoors()), None)
-        if entrance is None:
-            raise Exception(f'No outside entrance found for {reg}')
+        entrance = outside_entrance(world, regions.pop(), player)
         connect_entrance(world, entrance, take_any, player)
         entrance.target = target
         take_any.shop = Shop(take_any, room_id, take_any_type, 0xE3, True, not world.shopsanity[player], 33 + num*2)
