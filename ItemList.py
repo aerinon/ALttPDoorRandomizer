@@ -609,6 +609,7 @@ def connect_entrance(world, entrancename, exitname, player):
 def create_dynamic_shop_locations(world, player):
     for shop in world.shops[player]:
         if shop.region.player == player:
+            choice = shop.type == ShopType.TakeAny and sum(1 for x in shop.inventory if x is not None) > 1
             for i, item in enumerate(shop.inventory):
                 if item is None:
                     continue
@@ -624,7 +625,7 @@ def create_dynamic_shop_locations(world, player):
 
                     if not world.shopsanity[player]:
                         world.push_item(loc, ItemFactory(item['item'], player), False)
-                        loc.event = True
+                        loc.event = not choice  # a take-any gives one item of its choice, so logic can't count on any
                         loc.locked = True
 
 
