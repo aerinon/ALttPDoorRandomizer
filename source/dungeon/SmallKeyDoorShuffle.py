@@ -37,7 +37,7 @@ def shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_
         for dungeon in pool:
             builder = world.dungeon_layouts[player][dungeon]
             if not total_adjustable:
-                builder.total_keys = total_keys
+                builder.total_keys = builder.key_drop_cnt if escape_drops_only(builder, world, player) else total_keys
             find_small_key_door_candidates(builder, start_regions_map[dungeon], used_doors, world, player)
             custom_doors = 0
             if all_custom[dungeon]:
@@ -54,7 +54,7 @@ def shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_
                 builder = world.dungeon_layouts[player][dungeon]
                 max_keys = max(0, builder.location_cnt - calc_used_dungeon_items(builder, world, player))
                 cand_len = max(0, len(builder.candidates.small) - builder.key_drop_cnt)
-                caps[dungeon] = min(max_keys, cand_len, max_computation)
+                caps[dungeon] = 0 if escape_drops_only(builder, world, player) else min(max_keys, cand_len, max_computation)
             suggested_map = uniform_distribute(pool, caps, total_keys)
             for dungeon in pool:
                 builder = world.dungeon_layouts[player][dungeon]
@@ -69,7 +69,7 @@ def shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_
                 builder = world.dungeon_layouts[player][dungeon]
                 max_keys = max(0, builder.location_cnt - calc_used_dungeon_items(builder, world, player))
                 cand_len = max(0, len(builder.candidates.small) - builder.key_drop_cnt)
-                limit = min(max_keys, cand_len, max_computation)
+                limit = 0 if escape_drops_only(builder, world, player) else min(max_keys, cand_len, max_computation)
                 calculated = 0 if ttl == 0 else int(round(builder.key_doors_num*total_keys/ttl))
                 suggested = min(calculated, limit)
                 key_door_num = min(suggested + builder.key_drop_cnt, max_computation)
@@ -303,6 +303,12 @@ def find_valid_combination(builder, target, start_regions, world, player, drop_k
     world.key_logic[player][builder.name] = key_layout.key_logic
     world.key_layout[player][builder.name] = key_layout
     return proposal, len(proposal)
+
+
+def escape_drops_only(builder, world, player):
+    # universal keys are not logical items, so the standard escape can only count on Hyrule Castle's key drops
+    return (world.keyshuffle[player] == 'universal' and world.mode[player] == 'standard'
+            and 'Hyrule Castle' in builder.name)
 
 
 def is_key_layout_agnostic(builder, world, player):

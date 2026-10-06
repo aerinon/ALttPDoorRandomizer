@@ -476,7 +476,9 @@ def analyze_dungeon(key_layout, world, player):
 
     key_logic.prize_location = dungeon_table[key_layout.sector.name].prize
     start_state = determine_big_key_logic(key_layout, world, player)
-    if world.keyshuffle[player] == 'universal' and world.mode[player] != 'standard':
+    # universal keys come from shops, except during the standard escape, which uses Hyrule Castle's own key drops
+    if world.keyshuffle[player] == 'universal' and (world.mode[player] != 'standard'
+                                                   or key_layout.sector.name != 'Hyrule Castle'):
         return
 
     if world.key_logic_algorithm[player] == 'strict' or len(key_layout.proposal) > 8:

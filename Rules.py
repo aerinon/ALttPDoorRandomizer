@@ -2355,7 +2355,16 @@ def add_key_logic_rules(world, player):
     key_logic = world.key_logic[player]
     if any(d_logic.new_logic for d_name, d_logic in key_logic.items()):
         new_key_logic(key_logic, world, player)
-        return
+    else:
+        add_classic_key_logic_rules(key_logic, world, player)
+    if world.keyshuffle[player] == 'universal':
+        for d_name, layout in world.key_layout[player].items():
+            for door in layout.flat_prop:
+                if world.mode[player] != 'standard' or not retro_in_hc(door.entrance):
+                    add_rule(door.entrance, create_key_rule('Small Key (Universal)', player, 1))
+
+
+def add_classic_key_logic_rules(key_logic, world, player):
     eval_func = eval_small_key_door
     if world.key_logic_algorithm[player] == 'strict' and world.keyshuffle[player] == 'wild':
         eval_func = eval_small_key_door_strict
@@ -2387,11 +2396,6 @@ def add_key_logic_rules(world, player):
             if (len(d_logic.bk_doors) == 0 and len(d_logic.bk_chests) <= 1
                and world.accessibility[player] != 'locations'):
                 set_always_allow(big_chest, allow_big_key_in_big_chest(d_logic.bk_name, player))
-    if world.keyshuffle[player] == 'universal':
-        for d_name, layout in world.key_layout[player].items():
-            for door in layout.flat_prop:
-                if world.mode[player] != 'standard' or not retro_in_hc(door.entrance):
-                    add_rule(door.entrance, create_key_rule('Small Key (Universal)', player, 1))
 
 
 # todo: allow smalls, bk_restricted (because small is required), sm_restricted (because big is required?)
