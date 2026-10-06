@@ -248,7 +248,7 @@ def vanilla_key_logic(world, player):
     entrances_map, potentials, connections = determine_entrance_list(world, player)
     enabled_entrances = world.enabled_entrances[player] = {}
     builder_queue = deque(builders)
-    last_key, loops = None, 0
+    deferred, loops = 0, 0
 
     # --- Precompute all potential portals for each builder using dungeon_portals ---
     from DungeonGenerator import dungeon_portals
@@ -263,15 +263,19 @@ def vanilla_key_logic(world, player):
         find_enabled_origins(builder.sectors, enabled_entrances, origin_list, entrances_map, builder.name)
         all_potential_origins = all_potential_portals_map[builder.name]
         enabled = entrances_map[builder.name]
-        if len(origin_list) <= 0 or should_delay_processing(enabled, all_potential_origins, potentials, connections, world, player):
-            if last_key == builder.name or loops > 1000:
+        waiting = len(builder_queue) + 1
+        # a delay holds only while another builder can make progress; after a full cycle without any, delays are ignored
+        if len(origin_list) <= 0 or (deferred < waiting and should_delay_processing(
+                enabled, all_potential_origins, potentials, connections, world, player)):
+            if deferred >= 2 * waiting or loops > 1000:
                 origin_name = (world.get_region(origin_list[0], player).entrances[0].parent_region.name
                                if len(origin_list) > 0 else 'no origin')
                 raise GenerationException(f'Infinite loop detected for "{builder.name}" located at {origin_name}')
             builder_queue.append(builder)
-            last_key = builder.name
+            deferred += 1
             loops += 1
         else:
+            deferred = 0
             find_new_entrances(builder.master_sector, entrances_map, connections, potentials,
                                enabled_entrances, world, player)
             start_regions = convert_regions(origin_list, world, player)
