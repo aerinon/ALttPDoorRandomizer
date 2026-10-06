@@ -144,15 +144,13 @@ class NewKeyLogic(object):
                     big_loc_name = loc.name
         small_loc_name_set = frozenset(small_loc_name_set)
 
-        # placing a dungeon key or not - the self locking sphere
-        placing_dungeon_key = False
-        if state.placing_items:
-            for item in state.placing_items:
-                if item.name == sk_name and item.player == player:
-                    placing_dungeon_key = True
-                    break
+        # the location this dungeon's small key is being placed at, if known - only it can be a self-locking spot
+        placing_spot = None
+        if state.placing_items and state.placing_locations:
+            placing_spot = next((loc for item, loc in state.placing_locations
+                                 if item.name == sk_name and item.player == player), None)
 
-        cache_key = (smalls_in_hand, big_in_hand, small_loc_name_set, big_loc_name, placing_dungeon_key)
+        cache_key = (smalls_in_hand, big_in_hand, small_loc_name_set, big_loc_name, placing_spot)
         return cache_key, small_locations, big_location
 
     def can_reach(self, entrance, state, dungeon_logic, player):
@@ -185,7 +183,7 @@ class NewKeyLogic(object):
     # notes, smalls_in_hand can include some of the small_locations, small_locations may have been checked already - this affects cache_key
     # perhaps we should always start at the root sphere, skipping ahead can be problematic if you have enough keys, but not the big key to reach those later spheres
     def calculate_reachability(self, cache_key, small_locations, big_location, dungeon_logic, player):
-        smalls_in_hand, big_in_hand, small_loc_name_set, big_loc_name, placing_dungeon_key = cache_key
+        smalls_in_hand, big_in_hand, small_loc_name_set, big_loc_name, placing_spot = cache_key
         sphere_list = self.key_spheres[0] # start at root sphere
         # filter to those applicable for current big key status
         sphere_list = [s for s in sphere_list if s.key_counter.big_key_opened == big_in_hand
@@ -227,7 +225,7 @@ class NewKeyLogic(object):
 
             # if we can't spend a key, possible to place in a self-locking sphere?
             total_unspent_keys = unspent_keys + len(smalls_to_grab)
-            if placing_dungeon_key and total_unspent_keys == 0:  # we can't do this twice so only we have exactly zero keys
+            if placing_spot is not None and total_unspent_keys == 0:  # we can't do this twice so only we have exactly zero keys
                 next_unspent_keys = total_unspent_keys - 1  # we are "spending" a key we don't have here (can't open up more doors with it)
                 valid_spheres, non_terminal = [], False
                 for next_sphere in sphere.self_locking_child_spheres:
@@ -237,6 +235,8 @@ class NewKeyLogic(object):
                         continue
 
                     self_locking_location = next(iter(self_locking_locations))
+                    if self_locking_location != placing_spot:
+                        continue  # the key being placed goes somewhere else
                     # Skip if non-small key item has been placed
                     if self_locking_location.item is not None and (not self_locking_location.item.smallkey
                                                                    or self_locking_location.item.name != dungeon_logic.small_key_name
@@ -324,7 +324,7 @@ class NewKeyLogic(object):
     # Get regions reachable with a specific number of keys and big key state.
     def _get_reachable_regions_with_keys(self, key_count, big_key_state, key_layout, player):
         # Build a cache key similar to normal reachability
-        cache_key = (key_count, big_key_state, frozenset(), None, False)
+        cache_key = (key_count, big_key_state, frozenset(), None, None)
 
         # Use existing reachability logic but with empty small locations
         self.calculate_reachability(cache_key, [], None, key_layout.key_logic, player)

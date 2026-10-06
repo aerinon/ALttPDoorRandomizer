@@ -570,6 +570,7 @@ class CollectionState(object):
             self.dungeons_to_check = {player: defaultdict(dict) for player in range(1, parent.players + 1)}
         self.dungeon_limits = None
         self.placing_items = None
+        self.placing_locations = None  # (item, location) pairs for placing_items whose location is known
         # self.trace = None
 
     def can_reach_from(self, spot, start, player=None):
@@ -941,6 +942,7 @@ class CollectionState(object):
                                        for name, checklist in self.dungeons_to_check[player].items()})
             for player in range(1, self.world.players + 1)}
         ret.placing_items = self.placing_items
+        ret.placing_locations = self.placing_locations
         return ret
 
     def apply_dungeon_exploration(self, rrp, player, dungeon_name, checklist):

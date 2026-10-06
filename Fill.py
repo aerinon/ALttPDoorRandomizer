@@ -215,8 +215,17 @@ def verify_spot_to_fill(location, item_to_place, max_exp_state, single_player_pl
 def verify_spot_to_fill_v2(location, item_to_place, max_exp_state, single_player_placement, perform_access_check,
                         key_pool, world):
     if not single_player_placement or location.player == item_to_place.player:
-        if location.can_fill(max_exp_state, item_to_place, perform_access_check):
-            if valid_key_placement(item_to_place, location, key_pool, max_exp_state, world):
+        state = max_exp_state
+        dungeon = location.parent_region.dungeon
+        if item_to_place.smallkey and dungeon and dungeon.name == item_to_place.dungeon:
+            # the key may be spent on a self-locking door only if it is placed behind it: sweep with this spot named
+            state = max_exp_state.copy()
+            state.placing_items = [item_to_place]
+            state.placing_locations = [(item_to_place, location)]
+            state.stale[item_to_place.player] = True
+            state.sweep_for_events()
+        if location.can_fill(state, item_to_place, perform_access_check):
+            if valid_key_placement(item_to_place, location, key_pool, state, world):
                 if valid_bk_placement(location, item_to_place, world):
                     if item_to_place.crystal or valid_dungeon_placement(item_to_place, location, world):
                         return location
