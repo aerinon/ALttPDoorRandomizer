@@ -1570,14 +1570,9 @@ def standard_rules(world, player):
     set_rule(world.get_location('Zelda Pickup', player), lambda state: state.has('Big Key (Escape)', player))
     set_rule(world.get_entrance('Hyrule Castle Tapestry Backwards', player), lambda state: state.has('Zelda Herself', player))
 
-    def check_rule_list(state, r_list):
-        return True if len(r_list) <= 0 else r_list[0](state) and check_rule_list(state, r_list[1:])
-
-    rule_list, debug_path = find_rules_for_zelda_delivery(world, player)
-    set_rule(world.get_entrance('Hyrule Castle Throne Room Tapestry', player),
-             lambda state: state.has('Zelda Herself', player) and check_rule_list(state, rule_list))
-    set_rule(world.get_location('Zelda Drop Off', player),
-             lambda state: state.has('Zelda Herself', player) and check_rule_list(state, rule_list))
+    delivery_rule = zelda_delivery_rule(world, player)
+    set_rule(world.get_entrance('Hyrule Castle Throne Room Tapestry', player), delivery_rule)
+    set_rule(world.get_location('Zelda Drop Off', player), delivery_rule)
 
     for entrance in ['Links House SC', 'Links House ES', 'Central Bonk Rocks SW', 'Hyrule Castle WN', 'Hyrule Castle ES',
                      'Bonk Fairy (Light)', 'Hyrule Castle Main Gate (South)', 'Hyrule Castle Main Gate (North)', 'Hyrule Castle Ledge Drop']:
@@ -1587,31 +1582,28 @@ def standard_rules(world, player):
     set_rule(world.get_entrance('GT Hookshot South Entry to Ranged Crystal', player), lambda state: (state.can_use_bombs(player) and state.has('Zelda Delivered', player)) or state.has('Blue Boomerang', player) or state.has('Red Boomerang', player))  # or state.has('Cane of Somaria', player))
 
 
-def find_rules_for_zelda_delivery(world, player):
-    # path rules for backtracking
-    start_region = world.get_region('Hyrule Dungeon Cellblock', player)
-    queue = deque([(start_region, [], [])])
-    visited = {start_region}
-    blank_state = CollectionState(world)
-    while len(queue) > 0:
-        region, path_rules, path = queue.popleft()
-        for ext in region.exits:
-            connect = ext.connected_region
-            valid_region = connect and connect not in visited and\
-                (connect.type == RegionType.Dungeon or connect.name == 'Hyrule Castle Ledge')
-            if valid_region:
-                rule = ext.access_rule
-                rule_list = list(path_rules)
-                next_path = list(path)
-                if not rule(blank_state):
-                    rule_list.append(rule)
-                    next_path.append(ext.name)
-                if connect.name == 'Hyrule Castle Throne Room':
-                    return rule_list, next_path
-                else:
+def zelda_delivery_rule(world, player):
+    # Zelda follows Link from the Cellblock back to the Throne Room by any route open to him
+    start = world.get_region('Hyrule Dungeon Cellblock', player)
+
+    def delivery_routes(rule_open):
+        queue, visited = deque([start]), {start}
+        while queue:
+            region = queue.popleft()
+            for ext in region.exits:
+                connect = ext.connected_region
+                if (connect and connect not in visited
+                        and (connect.type == RegionType.Dungeon or connect.name == 'Hyrule Castle Ledge')
+                        and rule_open(ext)):
+                    if connect.name == 'Hyrule Castle Throne Room':
+                        return True
                     visited.add(connect)
-                    queue.append((connect, rule_list, next_path))
-    raise Exception('No path to Throne Room found')
+                    queue.append(connect)
+        return False
+
+    if not delivery_routes(lambda ext: True):
+        raise Exception('No path to Throne Room found')
+    return lambda state: state.has('Zelda Herself', player) and delivery_routes(lambda ext: ext.access_rule(state))
 
 
 def set_big_bomb_rules(world, player):
