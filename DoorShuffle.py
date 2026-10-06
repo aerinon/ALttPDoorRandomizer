@@ -364,7 +364,7 @@ def should_delay_processing(enabled_origins, potential_origins, potentials, conn
 
 def _find_portal_for_region(region, world, player):
     return next((p for ent in region.entrances
-                 if (p := world.get_portal_unsafe(ent.parent_region.name.rstrip(' Portal'), player))), None)
+                 if (p := world.get_portal_unsafe(ent.parent_region.name.removesuffix(' Portal'), player))), None)
 
 
 # some useful functions
