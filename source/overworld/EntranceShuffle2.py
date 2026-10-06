@@ -429,7 +429,7 @@ def remove_from_list(t_list, removals):
 def do_holes_and_linked_drops(entrances, exits, avail, cross_world, keep_together):
     holes_to_shuffle = [x for x in entrances if x in drop_map]
 
-    if not avail.world.shuffle_ganon:
+    if not avail.world.shuffle_ganon[avail.player]:
         if avail.inverted and 'Inverted Pyramid Hole' in holes_to_shuffle:
             connect_entrance('Inverted Pyramid Hole', 'Pyramid', avail)
             connect_two_way('Pyramid Entrance', 'Pyramid Exit', avail)
@@ -919,7 +919,7 @@ def do_fixed_shuffle(avail, entrance_list, mode_cfg):
         max_size = max(max_size, size)
         rules = Restrictions()
         rules.size = size
-        if avail.world.is_atgt_swapped(avail.player) and 'Agahnims Tower' in entrances and not avail.world.shuffle_ganon:
+        if avail.world.is_atgt_swapped(avail.player) and 'Agahnims Tower' in entrances and not avail.world.shuffle_ganon[avail.player]:
             rules.fixed = True
         option = (i, entrances, targets, rules)
         options[i] = option
