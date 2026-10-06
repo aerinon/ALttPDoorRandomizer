@@ -138,26 +138,11 @@ choice decides which regions are reachable, and in which crystal color):
 
 ---
 
-## Phase 3 — OW Pit Dropdown with Lobbies
+## Phase 3 — Drop Lobbies
 
-When `intensity >= 3` (lobbies) **and** pitwarps enabled:
-
-- OW "dropdown" entrances (e.g. `Skull Pinball`, `Skull Left Drop`, `Skull Pot Circle`,
-  `Skull Back Drop`, `Sewers Rat Path`) are currently fixed to their dungeon sector
-- When a sector moves to a different dungeon (crossed door shuffle), its OW dropdown
-  must move with it
-- This requires the same kind of dynamic connector logic being built for `dungeon_entrances`
-
-### Tasks
-
-- Identify all OW-facing pit exits (exits that drop the player to the overworld or to a
-  specific dungeon lobby from outside)
-- Mark these in `DungeonGenerationCommon.py` alongside `dungeon_portals`
-- During sector assignment, carry OW pit exits with their sector (not hardcoded to
-  the dungeon)
-- Update `EntranceShuffle2.py` connector logic to account for re-parented OW pit exits
-- Evaluate: do OW pit exits affect inaccessible-region detection? They are one-way in,
-  so they do not provide OW escape — probably safe, but verify
+An overworld hole leads to its Drop Portal, owned by its vanilla dungeon, whose one-way source lands on any Terminal in
+that dungeon; the entrance row carries the landing data. Enabled when lobbies and pits both shuffle. Design:
+`docs/specs/2026-10-06-pitwarps-phase3-drop-lobbies-design.md`.
 
 ---
 
@@ -262,8 +247,7 @@ dungeon's slot. `TestBossIndicator` covers intensity 4, custom `pits`, and inten
 
 ### 7a. Spoiler log
 
-- ✓ The door spoiler lists each shuffled pit source and its landing region (one-way). A dedicated
-  pitwarps section in the spoiler text is still open.
+- ✓ The door spoiler lists each shuffled pit source and its landing region (one-way).
 
 ### 7b. TestSuite.py
 
@@ -281,12 +265,7 @@ dungeon's slot. `TestBossIndicator` covers intensity 4, custom `pits`, and inten
 
 ## Open Questions
 
-1. **OW dropdown world constraint**: If a sector with an OW dropdown moves to the wrong
-   world (e.g., a LW dropdown sector ends up in a DW dungeon), the OW spawn point may
-   not exist or be unreachable. Need a hard constraint in DungeonGenLocalSearch that
-   prevents this, or ensure the portal redistribution algorithm handles it.
-
-2. **Linked drops interaction**: The `dungeon_entrances` design doc distinguishes
+1. **Linked drops interaction**: The `dungeon_entrances` design doc distinguishes
    "linked drops" (Sanctuary, Skull 1, Skull 2 East) from regular drops. Do any
    pitwarp OW exits fall into the linked-drop category? Verify before Phase 4.
 
@@ -294,9 +273,10 @@ dungeon's slot. `TestBossIndicator` covers intensity 4, custom `pits`, and inten
 
 - **Intra- vs inter-dungeon scope**: Controlled by `door_shuffle` mode. Basic shuffles
   within a dungeon; crossed allows pitwarps to cross dungeon boundaries.
-- **Landing zone scope**: Fixed to exactly the current destination regions in
-  `falldown_pits`/`dungeon_warps`. One Terminal door per pit/warp destination, no
-  additional regions eligible.
+- **Landing zone scope**: The destination regions in `falldown_pits`/`dungeon_warps`, plus the five vanilla drop
+  landings once Phase 3 lands. One Terminal door per destination.
+- **Overworld drop world constraint**: None needed. A hole and its Drop Portal never move (entrance shuffle owns the
+  hole, the vanilla dungeon owns the Drop Portal); only the landing does, within the owning dungeon.
 - **Pit and warp pools**: One shared pool; any source group may land on any Terminal. No option to separate them.
 - **Same-room landings**: Allowed. Spatial constraints are outside the dungeon algorithm's scope.
 - **Balance feasibility**: Deferred — the algorithm is expected to handle it.
