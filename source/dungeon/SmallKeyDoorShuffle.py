@@ -312,10 +312,12 @@ def escape_drops_only(builder, world, player):
 
 
 def is_key_layout_agnostic(builder, world, player):
+    # the standard escape must open its key doors before anything outside it is reachable, wherever keys are shuffled to
+    escape = world.mode[player] == 'standard' and 'Hyrule Castle' in builder.name
     return (world.logic[player] == 'nologic'
-            or (world.keyshuffle[player] == 'universal'
-                and (world.mode[player] != 'standard' or 'Hyrule Castle' not in builder.name))
-            or (world.keyshuffle[player] == 'wild' and world.dropshuffle[player] != 'none' and world.pottery[player] not in ['none', 'cave']))
+            or (world.keyshuffle[player] == 'universal' and not escape)
+            or (world.keyshuffle[player] == 'wild' and world.dropshuffle[player] != 'none'
+                and world.pottery[player] not in ['none', 'cave'] and not escape))
 
 
 # eliminate start region if portal marked as destination
