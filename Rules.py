@@ -2404,9 +2404,9 @@ def new_key_logic(key_logic, world, player):
             add_rule(bk_location, create_rule(d_logic.bk_name, player))
         for bk_door in logic.bk_doors:
             add_rule(bk_door, create_rule(d_logic.bk_name, player))
-        if len(logic.bk_regions) == 0 and len(logic.bk_locations) == 1 and world.accessibility[player] != 'locations':
-            big_chest = next(iter(logic.bk_locations))
-            set_always_allow(big_chest, allow_big_key_in_big_chest(d_logic.bk_name, player))
+        if logic.big_chest_allowed_big_key:
+            for big_chest in [loc for loc in logic.bk_locations if 'Big Chest' in loc.name]:
+                set_always_allow(big_chest, allow_big_key_in_big_chest(d_logic.bk_name, player))
         if logic.fast_logic:
             for sk_region, value in logic.region_key_reqs.items():
                 for ent in sk_region.entrances:
@@ -2440,6 +2440,8 @@ def new_key_logic(key_logic, world, player):
         for location in logic.bk_restricted:
             if not location.forced_item:
                 forbid_item(location, d_logic.bk_name, player)
+        for location in d_logic.sm_restricted:
+            forbid_item(location, d_logic.small_key_name, player)
 
 
 def eval_small_key_door_main(state, door_name, dungeon, player):

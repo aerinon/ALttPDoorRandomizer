@@ -41,6 +41,7 @@ class NewKeyLogic(object):
         self.bk_locations = set()
         self.bk_restricted = set()
         self.bk_doors = set()
+        self.big_chest_allowed_big_key = False
 
         self.fast_logic = False
         self.region_key_reqs = {}
@@ -143,6 +144,10 @@ class NewKeyLogic(object):
                     big_location = loc
                     big_loc_name = loc.name
         small_loc_name_set = frozenset(small_loc_name_set)
+        # fill treats unplaced keys as held, so the worst case lets the player hold an unplaced big key
+        if not big_in_hand and big_location is None:
+            big_key = state.world.get_dungeon(dungeon_logic.dungeon, player).big_key
+            big_in_hand = big_key is not None and big_key.location is None
 
         # the location this dungeon's small key is being placed at, if known - only it can be a self-locking spot
         placing_spot = None
@@ -206,7 +211,9 @@ class NewKeyLogic(object):
                 continue  # even if the sphere is visited, we don't continue processing it
             # check if there are small keys in accessible locations
             # need to account for keys found in previous iteration to not double count keys
-            smalls_to_grab = [loc for loc in small_locations_left if loc in accessible_locations]
+            # a big chest opens only with the big key in hand
+            smalls_to_grab = [loc for loc in small_locations_left if loc in accessible_locations
+                              and (current_big or '- Big Chest' not in loc.name)]
             can_spend_key = unspent_keys + len(smalls_to_grab) > 0
             if can_spend_key and sphere.child_sphere:
                 next_sphere_list = [n for n in sphere.child_sphere
@@ -550,13 +557,13 @@ def determine_big_key_logic(key_layout, world, player):
             if ext.door and ext.door.bigKey:
                 key_layout.key_logic.new_logic.bk_doors.add(ext)
 
-
     if world.accessibility[player] != 'none':
         bk_restricted_set = key_layout.key_logic.new_logic.bk_locations.union(find_big_chest_locations(key_layout.all_chest_locations))
         if len(bk_restricted_set) > 1:
             big_chest_allowed_big_key = False
-    if not big_chest_allowed_big_key:
-        key_layout.key_logic.new_logic.bk_locations.update(find_big_chest_locations(key_layout.all_chest_locations))
+    # a big chest always needs the big key; the flag only says whether it may hold the big key itself
+    key_layout.key_logic.new_logic.big_chest_allowed_big_key = big_chest_allowed_big_key
+    key_layout.key_logic.new_logic.bk_locations.update(find_big_chest_locations(key_layout.all_chest_locations))
 
     if key_layout.proposed_bk_restrictions is not None:
         key_layout.key_logic.new_logic.bk_restricted.update(key_layout.proposed_bk_restrictions)
@@ -580,13 +587,18 @@ def determine_small_key_logic_fast(key_layout, start_state, world, player):
             new_logic.region_key_reqs[region] = key_value
             for loc in region.locations:
                 new_logic.location_key_reqs[loc] = key_value
-    possible_key_locs = set(key_layout.all_chest_locations).difference(set(new_logic.location_key_reqs))
+    # every small key goes before any key door: where the big key isn't needed if they fit, else the big key goes
+    # before any key door too and small keys may use what it opens
+    chests = set(key_layout.all_chest_locations)
+    front = {loc for region in key_layout.sector.regions if start_state.visited_at_all(region)
+             for loc in region.locations}
+    front_spots = chests.intersection(front).difference(new_logic.bk_locations)
+    fixed_keys = sum(1 for loc in front if loc.forced_item and loc.forced_item.name == key_layout.key_logic.small_key_name)
     extras = calc_extras(key_value, key_layout.key_logic.dungeon, world, player)
-    key_locs_sans_bk = possible_key_locs.difference(new_logic.bk_locations)
-    if len(key_locs_sans_bk) < key_value + extras:
-       new_logic.bk_restricted.update(new_logic.location_key_reqs.keys())
-    elif len(possible_key_locs) == len(key_layout.proposal):
-        new_logic.bk_restricted.update(possible_key_locs)
+    if len(front_spots) >= key_value + extras - fixed_keys:
+        key_layout.key_logic.sm_restricted.update(chests.difference(front_spots))
+    else:
+        new_logic.bk_restricted.update(chests.difference(front))
 
 
 def calc_extras(amount_needed, dungeon_name, world, player):

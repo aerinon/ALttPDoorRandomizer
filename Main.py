@@ -13,6 +13,7 @@ from BaseClasses import World, CollectionState, Item, Region, Location, Shop, En
 from Bosses import place_bosses
 from Items import ItemFactory
 from KeyDoorShuffle import validate_key_placement
+from source.dungeon.KeylockCheck import find_keylock
 from OverworldGlitchRules import create_owg_connections
 from PotShuffle import shuffle_pots, shuffle_pot_switches
 from Regions import create_regions, create_shops, mark_light_dark_world_regions, create_dungeon_regions, adjust_locations
@@ -299,6 +300,13 @@ def main(args, seed=None, fish=None):
     world.clear_exp_cache()
     if not world.can_beat_game(log_error=True):
         raise RuntimeError(world.fish.translate("cli", "cli", "cannot.beat.game"))
+    for player in range(1, world.players+1):
+        if world.key_logic_algorithm[player] == 'experimental' and world.logic[player] != 'nologic':
+            for key_layout in world.key_layout[player].values():
+                keylock = find_keylock(key_layout, world, player)
+                if keylock:
+                    raise RuntimeError(f'{world.fish.translate("cli", "cli", "keylock.detected")}: '
+                                       f'{key_layout.sector.name} ({keylock})')
 
     for player in range(1, world.players+1):
         if world.shopsanity[player]:

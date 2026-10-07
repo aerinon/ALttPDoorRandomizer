@@ -94,12 +94,17 @@ def fill_dungeons_restrictive(world, shuffled_locations):
         big_state_base.collect(x, True)
     fill(big_state_base, bigs, unplaced_smalls)
     random.shuffle(shuffled_locations)
+    # reach swept while keys were unplaced, and so counted as held, can't carry over once they're placed: the key logic
+    # is not monotone in them, so sweep again from the placements so far
+    world.clear_exp_cache()
+    all_state_base = world.get_all_state()
     small_state_base = all_state_base.copy()
     for x in others:
         small_state_base.collect(x, True)
     fill(small_state_base, smalls, unplaced_smalls)
     random.shuffle(shuffled_locations)
-    fill(all_state_base, others, None)
+    world.clear_exp_cache()
+    fill(world.get_all_state(), others, None)
 
 
 def fill_restrictive(world, base_state, locations, itempool, key_pool=None, single_player_placement=False,
