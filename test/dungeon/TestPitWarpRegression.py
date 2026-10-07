@@ -8,11 +8,11 @@ import yaml
 import Main
 from BaseClasses import DoorType
 from CLI import parse_cli
-from DoorShuffle import boss_indicator, dungeon_warps, falldown_pits, pit_boss_regions
+from DoorShuffle import boss_indicator, drop_falls, dungeon_warps, falldown_pits, pit_boss_regions
 from Rom import pit_boss_sources, write_boss_indicators, write_pitwarps
 from source.classes.BabelFish import BabelFish
 
-VANILLA_LANDINGS = dict(falldown_pits + dungeon_warps)
+VANILLA_LANDINGS = dict(falldown_pits + dungeon_warps + drop_falls)
 SEEDS = range(1, 9)  # generation can fail on a seed; the first that completes is checked
 
 

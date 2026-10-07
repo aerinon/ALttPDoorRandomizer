@@ -6,6 +6,7 @@ import time
 from BaseClasses import CrystalBarrier, DoorType, Hook, RegionType, Sector
 from BaseClasses import hook_from_door, flooded_keys
 from Regions import dungeon_events, flooded_keys_reverse
+from source.dungeon.DropPortals import outside_parent, is_outside, is_drop_portal
 
 
 def pre_validate(builder, entrance_region_names, split_dungeon, world, player):
@@ -58,12 +59,8 @@ def generate_dungeon_find_proposal(builder, entrance_region_names, split_dungeon
                     excluded[region] = None
         elif split_dungeon and builder.sewers_access and builder.sewers_access.entrance.parent_region == region:
             continue
-        drop_region = next((x.parent_region for x in region.entrances
-                           if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]
-                           or x.parent_region.name == 'Sewer Drop'), None)
+        drop_region = next((p for p in map(outside_parent, region.entrances) if is_outside(p)), None)
         if drop_region:  # for holes
-            if drop_region.name == 'Sewer Drop':
-                drop_region = next(x.parent_region for x in drop_region.entrances)
             if (drop_region.name in world.inaccessible_regions[player] and
                region.name not in world.enabled_entrances[player]):
                 excluded[region] = None
@@ -245,7 +242,8 @@ def check_valid(name, exploration_state, proposed_map, doors_to_connect, all_reg
     all_visited = set()
     all_visited.update(exploration_state.visited_blue)
     all_visited.update(exploration_state.visited_orange)
-    if len(all_regions.difference(all_visited)) > 0:
+    rooms = {r for r in all_regions if not is_drop_portal(r)}  # a Drop Portal is an entry, not a room to reach
+    if len(rooms.difference(all_visited)) > 0:
         return False
     if not valid_paths(name, paths, entrance_regions, doors_to_connect, all_regions, proposed_map,
                        bk_special, world, player):

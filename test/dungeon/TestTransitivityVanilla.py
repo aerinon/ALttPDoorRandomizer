@@ -31,7 +31,8 @@ class TestTerminalGroups(unittest.TestCase):
         in_sectors = {d for s in sectors for d in s.outstanding_doors}
         sources = [d for d in world.doors if d.type in ONE_WAY and d.group is not None]
         # collapsing keeps only each group's representative as an outstanding door
-        self.assertEqual([], sorted(d.name for d in sources if d not in in_sectors and d.group_rep not in in_sectors))
+        self.assertEqual([], sorted(d.name for d in sources
+                                    if d.dest is None and d not in in_sectors and d.group_rep not in in_sectors))
 
     def test_no_neutral_sector_holds_pits(self):
         # Transitivity drops neutral sectors and splices them in later; that is unverified for one-way pits

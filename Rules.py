@@ -14,6 +14,7 @@ from source.logic.Rule import RuleFactory
 from source.dungeon.EnemyList import EnemySprite, Sprite
 from source.enemizer.EnemyLogic import special_rules_check, special_rules_for_region, defeat_rule_single
 from source.enemizer.EnemyLogic import defeat_rule_multiple, and_rule as and_rule_new, or_rule as or_rule_new
+from source.dungeon.DropPortals import is_lobby_portal
 
 
 def set_rules(world, player):
@@ -104,7 +105,7 @@ def mirrorless_path_to_castle_courtyard(world, player):
     # If Agahnim is defeated then the courtyard needs to be accessible without using the mirror for the mirror offset glitch.
     # Only considering the secret passage for now (in non-insanity shuffle).  Basically, if it's Ganon you need the master sword.
     start = world.get_entrance('Hyrule Castle Secret Entrance Drop', player)
-    if start.connected_region == world.get_region('Sewer Drop', player):
+    if start.connected_region == world.get_region('Sewers Drop Portal', player):
         return [lambda state: False]  # not handling dungeons for now
     target = world.get_region('Hyrule Castle Courtyard', player)
     seen = {start.parent_region, start.connected_region}
@@ -2138,9 +2139,10 @@ def set_bunny_rules(world, player, inverted):
                             # todo - Is this a bunny pocketable entrance?
                             # Is there an entrance reachable to arm bunny pocket? For now, assume there is
                             if entrance.name in drop_dungeon_entrances:
-                                lobby = entrance.connected_region
+                                lobby = next(ext.connected_region for ext in entrance.connected_region.exits)  # the fall's landing
                             else:
-                                portal_regions = [world.get_region(reg, player) for reg in region.dungeon.regions if reg.endswith('Portal')]
+                                portal_regions = [r for r in (world.get_region(reg, player) for reg in region.dungeon.regions)
+                                                  if is_lobby_portal(r)]
                                 lobby = next(reg.connected_region for portal_reg in portal_regions for reg in portal_reg.exits if reg.name.startswith('Enter '))
                             if lobby.name in bunny_revivable_entrances:
                                 possible_options.append(path_to_access_rule(new_path, entrance))
@@ -2217,12 +2219,12 @@ def set_bunny_rules(world, player, inverted):
                 add_rule(location, get_rule_to_add(region, location))
 
 
-drop_dungeon_entrances = {
-    "Sewer Drop",
-    "Skull Left Drop",
-    "Skull Pinball",
-    "Skull Pot Circle",
-    "Skull Back Drop"
+drop_dungeon_entrances = {  # holes, each leading to a Drop Portal
+    "Sanctuary Grave",
+    "Skull Woods First Section Hole (East)",
+    "Skull Woods First Section Hole (West)",
+    "Skull Woods First Section Hole (North)",
+    "Skull Woods Second Section Hole"
 }
 
 bunny_revivable_entrances = {
@@ -2252,7 +2254,7 @@ bunny_revivable_entrances = {
     "Mire Tile Room", "Mire Conveyor Crystal", "Mire Hub", "TR Dash Bridge",
     "TR Hub", "Eastern Boss", "Eastern Lobby", "Thieves Ambush",
     "Thieves BK Corner", "TR Eye Bridge", "Thieves Lobby", "Tower Lobby",
-    "Sewer Drop", "Skull Left Drop", "Skull Pinball", "Skull Back Drop",
+    "Skull Left Drop", "Skull Pinball", "Skull Back Drop",
     "Skull Pot Circle",  # You automatically get superbunny by dropping
 }
 

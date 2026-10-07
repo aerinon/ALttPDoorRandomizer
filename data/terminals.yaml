@@ -5,8 +5,10 @@
 # 'rom' is the Phase 5 ROM data (dr_baserom docs/design/2026-06-01-pitwarp-generator-interface.md):
 #   rows: the LandingZoneData rows the ROM reads when one of this entry's sources is used (fixed by the base ROM).
 #   source_room: the room of this entry's sources, the room PitWarpLookupTable reads the rows for.
-#   landing: RAM state captured right after landing at this terminal, written into the rows of whichever
-#   source group lands here. Copied from pit_warp_data_manual.json (transitions, 'capture' label).
+#   entrance: instead of rows, for a hole's Drop Portal fall: its EntranceData row (the overworld hole's entrance ID).
+#   landing: RAM state right after landing at this terminal, written into the rows (or the entrance row) of whichever
+#   source group lands here. Copied from pit_warp_data_manual.json (transitions, 'capture' label); the drop landings
+#   have no capture and are decoded from their vanilla EntranceData rows.
 
 pits:
   - name: Eastern Fairies Terminal
@@ -31,6 +33,8 @@ pits:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x00
+        floor_a4: 0x00
+        blockset_aa1: 0x05
         scroll_bounds: [0x10, 0x10, 0x10, 0x11, 0x12, 0x12, 0x12, 0x13]  # $0601, $0603 ... $060F
 
   - name: Hera Up Stairs Landing Terminal
@@ -56,6 +60,8 @@ pits:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x02
+        floor_a4: 0xF8
+        blockset_aa1: 0x05
         scroll_bounds: [0x0F, 0x0E, 0x0F, 0x0F, 0x0F, 0x0E, 0x0F, 0x0F]  # $0601, $0603 ... $060F
 
   - name: Hera Down Stairs Landing Terminal
@@ -81,6 +87,8 @@ pits:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0xFA
+        blockset_aa1: 0x05
         scroll_bounds: [0x0F, 0x0E, 0x0F, 0x0F, 0x0E, 0x0E, 0x0E, 0x0F]  # $0601, $0603 ... $060F
 
   - name: Hera Back Terminal
@@ -105,6 +113,8 @@ pits:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x00
+        floor_a4: 0xFC
+        blockset_aa1: 0x05
         scroll_bounds: [0x0E, 0x0E, 0x0E, 0x0F, 0x0E, 0x0E, 0x0E, 0x0F]  # $0601, $0603 ... $060F
 
   - name: Hera Startile Wide Terminal
@@ -130,6 +140,8 @@ pits:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x00
+        floor_a4: 0xFD
+        blockset_aa1: 0x05
         scroll_bounds: [0x06, 0x06, 0x06, 0x07, 0x02, 0x02, 0x02, 0x03]  # $0601, $0603 ... $060F
 
   - name: Hera Big Chest Landing Terminal
@@ -154,6 +166,8 @@ pits:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x00
+        floor_a4: 0x03
+        blockset_aa1: 0x05
         scroll_bounds: [0x04, 0x04, 0x04, 0x05, 0x0E, 0x0E, 0x0E, 0x0F]  # $0601, $0603 ... $060F
 
   - name: Hera Fairies Terminal
@@ -178,6 +192,8 @@ pits:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x00
+        floor_a4: 0x01
+        blockset_aa1: 0x05
         scroll_bounds: [0x14, 0x14, 0x14, 0x15, 0x0E, 0x0E, 0x0E, 0x0F]  # $0601, $0603 ... $060F
 
   - name: Hera 4F Terminal
@@ -202,6 +218,8 @@ pits:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x00
+        floor_a4: 0x00
+        blockset_aa1: 0x05
         scroll_bounds: [0x04, 0x04, 0x04, 0x05, 0x0E, 0x0E, 0x0E, 0x0F]  # $0601, $0603 ... $060F
 
   - name: Hera 5F Pit Terminal
@@ -227,6 +245,8 @@ pits:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x00
+        floor_a4: 0xF7
+        blockset_aa1: 0x05
         scroll_bounds: [0x02, 0x02, 0x02, 0x03, 0x0E, 0x0E, 0x0E, 0x0F]  # $0601, $0603 ... $060F
 
   - name: PoD Stalfos Basement Right Terminal
@@ -251,6 +271,8 @@ pits:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x00
+        floor_a4: 0xFF
+        blockset_aa1: 0x07
         scroll_bounds: [0x00, 0x00, 0x00, 0x01, 0x15, 0x14, 0x15, 0x15]  # $0601, $0603 ... $060F
 
   - name: PoD Basement Ledge Terminal
@@ -275,6 +297,8 @@ pits:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x00
+        floor_a4: 0xFF
+        blockset_aa1: 0x07
         scroll_bounds: [0x00, 0x00, 0x00, 0x01, 0x14, 0x14, 0x14, 0x15]  # $0601, $0603 ... $060F
 
   - name: PoD Stalfos Basement Left Terminal
@@ -299,6 +323,8 @@ pits:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x00
+        floor_a4: 0xFF
+        blockset_aa1: 0x07
         scroll_bounds: [0x00, 0x00, 0x00, 0x01, 0x15, 0x14, 0x15, 0x15]  # $0601, $0603 ... $060F
 
   - name: Swamp Barrier Ledge Terminal
@@ -323,6 +349,8 @@ pits:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x00
+        floor_a4: 0xFF
+        blockset_aa1: 0x08
         scroll_bounds: [0x06, 0x06, 0x06, 0x07, 0x09, 0x08, 0x09, 0x09]  # $0601, $0603 ... $060F
 
   - name: Swamp West Ledge Terminal
@@ -347,6 +375,8 @@ pits:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x00
+        floor_a4: 0xFF
+        blockset_aa1: 0x08
         scroll_bounds: [0x06, 0x06, 0x06, 0x07, 0x08, 0x08, 0x08, 0x09]  # $0601, $0603 ... $060F
 
   - name: Skull Boss Terminal
@@ -371,6 +401,8 @@ pits:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x02
+        floor_a4: 0xFE
+        blockset_aa1: 0x09
         scroll_bounds: [0x05, 0x04, 0x05, 0x05, 0x13, 0x12, 0x13, 0x13]  # $0601, $0603 ... $060F
 
   - name: Ice Stalfos Hint Terminal
@@ -395,6 +427,8 @@ pits:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x00
+        floor_a4: 0xFE
+        blockset_aa1: 0x0B
         scroll_bounds: [0x06, 0x06, 0x06, 0x07, 0x1D, 0x1C, 0x1D, 0x1D]  # $0601, $0603 ... $060F
 
   - name: Ice Tall Hint Terminal
@@ -419,6 +453,8 @@ pits:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x00
+        floor_a4: 0xFC
+        blockset_aa1: 0x0B
         scroll_bounds: [0x0E, 0x0E, 0x0E, 0x0F, 0x1D, 0x1C, 0x1D, 0x1D]  # $0601, $0603 ... $060F
 
   - name: Ice Big Chest Landing Terminal
@@ -444,6 +480,8 @@ pits:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0xFB
+        blockset_aa1: 0x0B
         scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x1C, 0x1C, 0x1C, 0x1D]  # $0601, $0603 ... $060F
 
   - name: Ice Switch Room Terminal
@@ -469,6 +507,8 @@ pits:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x02
+        floor_a4: 0xFA
+        blockset_aa1: 0x0B
         scroll_bounds: [0x17, 0x16, 0x17, 0x17, 0x1D, 0x1C, 0x1D, 0x1D]  # $0601, $0603 ... $060F
 
   - name: Ice Fairy Terminal
@@ -493,6 +533,8 @@ pits:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x00
+        floor_a4: 0xFA
+        blockset_aa1: 0x0B
         scroll_bounds: [0x08, 0x08, 0x08, 0x09, 0x1F, 0x1E, 0x1F, 0x1F]  # $0601, $0603 ... $060F
 
   - name: Ice Boss Terminal
@@ -517,6 +559,8 @@ pits:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x00
+        floor_a4: 0xF9
+        blockset_aa1: 0x0B
         scroll_bounds: [0x1A, 0x1A, 0x1A, 0x1B, 0x1D, 0x1C, 0x1D, 0x1D]  # $0601, $0603 ... $060F
 
   - name: Mire BK Chest Ledge Terminal
@@ -541,6 +585,8 @@ pits:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x02
+        floor_a4: 0xFF
+        blockset_aa1: 0x0C
         scroll_bounds: [0x1B, 0x1A, 0x1B, 0x1B, 0x03, 0x02, 0x03, 0x03]  # $0601, $0603 ... $060F
 
   - name: Mire Conveyor Barrier Terminal
@@ -565,6 +611,8 @@ pits:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x00
+        floor_a4: 0xFF
+        blockset_aa1: 0x0C
         scroll_bounds: [0x1A, 0x1A, 0x1A, 0x1B, 0x02, 0x02, 0x02, 0x03]  # $0601, $0603 ... $060F
 
   - name: Mire Warping Pool Terminal
@@ -589,6 +637,8 @@ pits:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0xFF
+        blockset_aa1: 0x0C
         scroll_bounds: [0x1B, 0x1A, 0x1B, 0x1B, 0x02, 0x02, 0x02, 0x03]  # $0601, $0603 ... $060F
 
   - name: GT Ice Armos Terminal
@@ -613,6 +663,8 @@ pits:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x02
+        floor_a4: 0xFF
+        blockset_aa1: 0x0E
         scroll_bounds: [0x03, 0x02, 0x03, 0x03, 0x19, 0x18, 0x19, 0x19]  # $0601, $0603 ... $060F
 
   - name: GT Staredown Terminal
@@ -637,6 +689,8 @@ pits:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x02
+        floor_a4: 0x04
+        blockset_aa1: 0x0E
         scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x0D, 0x0C, 0x0D, 0x0D]  # $0601, $0603 ... $060F
 
   - name: GT Moldorm Pit Terminal
@@ -661,7 +715,129 @@ pits:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x00
+        floor_a4: 0x04
+        blockset_aa1: 0x0E
         scroll_bounds: [0x14, 0x14, 0x14, 0x15, 0x0C, 0x0C, 0x0C, 0x0D]  # $0601, $0603 ... $060F
+
+  - name: Skull Pot Circle Terminal
+    region: Skull Pot Circle
+    sources:
+      - Skull Pot Circle Drop Portal Fall
+    rom:
+      entrance: 0x76  # the hole's EntranceData row, not a LandingZoneData row
+      landing:
+        room_id_a0: 0x0058
+        link_y_20: 0x0A69
+        link_x_22: 0x1190
+        scroll_x_e2: 0x1100
+        scroll_y_e8: 0x0A00
+        camera_y_618: 0x0077
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        floor_a4: 0xFF
+        blockset_aa1: 0x09
+        scroll_bounds: [0x0A, 0x0A, 0x0A, 0x0B, 0x11, 0x10, 0x11, 0x11]
+
+  - name: Skull Left Drop Terminal
+    region: Skull Left Drop
+    sources:
+      - Skull Left Drop Drop Portal Fall
+    rom:
+      entrance: 0x77  # the hole's EntranceData row, not a LandingZoneData row
+      landing:
+        room_id_a0: 0x0067
+        link_y_20: 0x0C68
+        link_x_22: 0x0E80
+        scroll_x_e2: 0x0E00
+        scroll_y_e8: 0x0C00
+        camera_y_618: 0x0078
+        camera_x_61c: 0x007F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x00
+        scroll_quad_aa: 0x00
+        floor_a4: 0xFF
+        blockset_aa1: 0x09
+        scroll_bounds: [0x0C, 0x0C, 0x0C, 0x0D, 0x0E, 0x0E, 0x0E, 0x0F]
+
+  - name: Skull Pinball Terminal
+    region: Skull Pinball
+    sources:
+      - Skull Pinball Drop Portal Fall
+    rom:
+      entrance: 0x78  # the hole's EntranceData row, not a LandingZoneData row
+      landing:
+        room_id_a0: 0x0068
+        link_y_20: 0x0C96
+        link_x_22: 0x1100
+        scroll_x_e2: 0x1088
+        scroll_y_e8: 0x0C29
+        camera_y_618: 0x00A1
+        camera_x_61c: 0x0107
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x02
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        floor_a4: 0xFF
+        blockset_aa1: 0x09
+        scroll_bounds: [0x0C, 0x0C, 0x0C, 0x0D, 0x11, 0x10, 0x11, 0x11]
+
+  - name: Skull Back Drop Terminal
+    region: Skull Back Drop
+    sources:
+      - Skull Back Drop Drop Portal Fall
+    rom:
+      entrance: 0x79  # the hole's EntranceData row, not a LandingZoneData row
+      landing:
+        room_id_a0: 0x0056
+        link_y_20: 0x0A68
+        link_x_22: 0x0D40
+        scroll_x_e2: 0x0D00
+        scroll_y_e8: 0x0A00
+        camera_y_618: 0x0077
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x00
+        floor_a4: 0xFF
+        blockset_aa1: 0x09
+        scroll_bounds: [0x0A, 0x0A, 0x0A, 0x0B, 0x0D, 0x0C, 0x0D, 0x0D]
+
+  - name: Sewers Rat Path Terminal
+    region: Sewers Rat Path
+    sources:
+      - Sewers Drop Portal Fall
+    rom:
+      entrance: 0x81  # the hole's EntranceData row, not a LandingZoneData row
+      landing:
+        room_id_a0: 0x0011
+        link_y_20: 0x031A
+        link_x_22: 0x0393
+        scroll_x_e2: 0x0300
+        scroll_y_e8: 0x02AD
+        camera_y_618: 0x0125
+        camera_x_61c: 0x017F
+        layer_0476: 0x00
+        bg_setting_ee: 0x00
+        hv_scroll_a6: 0x00
+        hv_scroll_a7: 0x02
+        scroll_quad_a9: 0x01
+        scroll_quad_aa: 0x02
+        floor_a4: 0xFF
+        blockset_aa1: 0x01
+        scroll_bounds: [0x03, 0x02, 0x03, 0x03, 0x03, 0x02, 0x03, 0x03]
 
 warps:
   - name: Eastern Courtyard Terminal
@@ -686,6 +862,8 @@ warps:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x00
+        floor_a4: 0x00
+        blockset_aa1: 0x05
         scroll_bounds: [0x14, 0x14, 0x14, 0x15, 0x13, 0x12, 0x13, 0x13]  # $0601, $0603 ... $060F
 
   - name: Hera 5F Warp Terminal
@@ -710,6 +888,8 @@ warps:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x00
+        floor_a4: 0x04
+        blockset_aa1: 0x05
         scroll_bounds: [0x02, 0x02, 0x02, 0x03, 0x0E, 0x0E, 0x0E, 0x0F]  # $0601, $0603 ... $060F
 
   - name: PoD Warp Room Left Terminal
@@ -734,6 +914,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x00
+        floor_a4: 0xFF
+        blockset_aa1: 0x07
         scroll_bounds: [0x00, 0x00, 0x00, 0x01, 0x13, 0x12, 0x13, 0x13]  # $0601, $0603 ... $060F
 
   - name: PoD Warp Hint Terminal
@@ -758,6 +940,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x00
+        floor_a4: 0xFF
+        blockset_aa1: 0x07
         scroll_bounds: [0x08, 0x08, 0x08, 0x09, 0x17, 0x16, 0x17, 0x17]  # $0601, $0603 ... $060F
 
   - name: PoD Warp Room Right Terminal
@@ -782,6 +966,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x00
+        floor_a4: 0xFF
+        blockset_aa1: 0x07
         scroll_bounds: [0x00, 0x00, 0x00, 0x01, 0x13, 0x12, 0x13, 0x13]  # $0601, $0603 ... $060F
 
   - name: PoD Dark Alley Terminal
@@ -806,6 +992,8 @@ warps:
         hv_scroll_a7: 0x02
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x02
+        floor_a4: 0xFF
+        blockset_aa1: 0x07
         scroll_bounds: [0x0D, 0x0C, 0x0D, 0x0D, 0x15, 0x14, 0x15, 0x15]  # $0601, $0603 ... $060F
 
   - name: Ice Anti-Fairy Terminal
@@ -830,6 +1018,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x00
+        floor_a4: 0xFA
+        blockset_aa1: 0x0B
         scroll_bounds: [0x16, 0x16, 0x16, 0x17, 0x1D, 0x1C, 0x1D, 0x1D]  # $0601, $0603 ... $060F
 
   - name: Mire BK Door Room Terminal
@@ -854,6 +1044,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x00
+        floor_a4: 0xFF
+        blockset_aa1: 0x0C
         scroll_bounds: [0x16, 0x16, 0x16, 0x17, 0x04, 0x04, 0x04, 0x05]  # $0601, $0603 ... $060F
 
   - name: Mire Square Rail Terminal
@@ -878,6 +1070,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0xFF
+        blockset_aa1: 0x0C
         scroll_bounds: [0x17, 0x16, 0x17, 0x17, 0x02, 0x02, 0x02, 0x03]  # $0601, $0603 ... $060F
 
   - name: GT Conveyor Star Pits Terminal
@@ -902,6 +1096,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x00
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x0E, 0x0E, 0x0E, 0x0F, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Firesnake Room Terminal
@@ -926,6 +1122,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x00
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x0E, 0x0E, 0x0E, 0x0F, 0x1B, 0x1A, 0x1B, 0x1B]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Rando Rail Terminal
@@ -950,6 +1148,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x0F, 0x0E, 0x0F, 0x0F, 0x1A, 0x1A, 0x1A, 0x1B]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Main Rails MidLeft Terminal
@@ -974,6 +1174,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x0F, 0x0E, 0x0F, 0x0F, 0x1A, 0x1A, 0x1A, 0x1B]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Main Rails MidRight Terminal
@@ -998,6 +1200,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x0F, 0x0E, 0x0F, 0x0F, 0x1A, 0x1A, 0x1A, 0x1B]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Main Rails Right Terminal
@@ -1022,6 +1226,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x0F, 0x0E, 0x0F, 0x0F, 0x1A, 0x1A, 0x1A, 0x1B]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Pot Rail Terminal
@@ -1046,6 +1252,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x0F, 0x0E, 0x0F, 0x0F, 0x1B, 0x1A, 0x1B, 0x1B]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Left Section Terminal
@@ -1070,6 +1278,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Mid Section Top Terminal
@@ -1094,6 +1304,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Mid Section LeftMost Terminal
@@ -1118,6 +1330,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Pit Section Terminal
@@ -1142,6 +1356,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Mid Section MidLeft Terminal
@@ -1166,6 +1382,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Mid Section MidRight Terminal
@@ -1190,6 +1408,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Right Section Top Terminal
@@ -1214,6 +1434,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze - Right Section Bottom Terminal
@@ -1238,6 +1460,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x00
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x16, 0x16, 0x16, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Warp Maze Exit Section Terminal
@@ -1262,6 +1486,8 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x17, 0x16, 0x17, 0x17]  # $0601, $0603 ... $060F
 
   - name: GT Invisible Bridges Terminal
@@ -1286,4 +1512,6 @@ warps:
         hv_scroll_a7: 0x00
         scroll_quad_a9: 0x01
         scroll_quad_aa: 0x02
+        floor_a4: 0x00
+        blockset_aa1: 0x0E
         scroll_bounds: [0x13, 0x12, 0x13, 0x13, 0x1B, 0x1A, 0x1B, 0x1B]  # $0601, $0603 ... $060F

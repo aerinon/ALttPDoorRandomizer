@@ -13,7 +13,9 @@ from Dungeons import dungeon_regions, region_starts, standard_starts, split_regi
 from Dungeons import dungeon_bigs, dungeon_hints
 from Items import ItemFactory
 from RoomData import DoorKind, PairedDoor, reset_rooms
-from source.dungeon.DungeonGenLocalSearch import create_dungeon_builders_prototype, DoorFlags
+from source.dungeon.DungeonGenLocalSearch import create_dungeon_builders_prototype, DoorFlags, drop_lobbies_locked
+from source.dungeon.DropPortals import drop_portals, outside_parent, entered_from_outside, is_outside, is_lobby_portal, is_drop_portal
+from source.dungeon.DropPortals import builder_drop_portals
 from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
 from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
 from source.dungeon.DungeonStitcherV2 import create_dungeon
@@ -21,7 +23,7 @@ from source.dungeon.NewKeyLogic import analyze_dungeon as analyze_dungeon_new
 from source.dungeon.SmallKeyDoorShuffle import shuffle_small_key_doors as shuffle_small_key_doors_v2
 from source.dungeon.DungeonGenerationCommon import uniform_distribute, collapse_pit_groups
 
-from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths, drop_entrances
+from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths
 from DungeonGenerator import create_dungeon_builders, split_dungeon_builder, simple_dungeon_builder, default_dungeon_entrances
 from DungeonGenerator import dungeon_portals, dungeon_drops, connect_doors, count_reserved_locations
 from DungeonGenerator import valid_region_to_explore
@@ -75,6 +77,8 @@ def link_doors_prep(world, player):
     for exitName, regionName in falldown_pits:
         connect_terminal_door(world, exitName, regionName, player)
     for exitName, regionName in dungeon_warps:
+        connect_terminal_door(world, exitName, regionName, player)
+    for exitName, regionName in drop_falls:
         connect_terminal_door(world, exitName, regionName, player)
 
     if world.intensity[player] < 2:
@@ -1325,8 +1329,8 @@ def determine_entrance_list_vanilla(world, player):
         for region_name in r_names:
             region = world.get_region(region_name, player)
             for ent in region.entrances:
-                parent = ent.parent_region
-                if (parent.type != RegionType.Dungeon and parent.name != 'Menu') or parent.name == 'Sewer Drop':
+                parent = outside_parent(ent)
+                if parent is not None:
                     if parent.name not in world.inaccessible_regions[player]:
                         entrance_map[key].append(region_name)
                     else:
@@ -1356,8 +1360,8 @@ def determine_entrance_list(world, player):
             else:
                 region = world.get_region(region_name, player)
             for ent in region.entrances:
-                parent = ent.parent_region
-                if (parent.type != RegionType.Dungeon and parent.name != 'Menu') or parent.name == 'Sewer Drop':
+                parent = outside_parent(ent)
+                if parent is not None:
                     std_inaccessible = is_standard_inaccessible(key, portal, world, player)
                     if parent.name not in world.inaccessible_regions[player] and not std_inaccessible:
                         entrance_map[key].append(region_name)
@@ -2390,9 +2394,7 @@ def filter_start_regions(builder, start_regions, world, player):
         portal = next((x for x in world.dungeon_portals[player] if x.door.entrance.parent_region == region), None)
         if portal and portal.destination:
             # make sure that a drop is not accessible for this "destination"
-            drop_region = next((x.parent_region for x in region.entrances
-                                if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]
-                                or x.parent_region.name == 'Sewer Drop'), None)
+            drop_region = next((p for p in map(outside_parent, region.entrances) if is_outside(p)), None)
             if not drop_region:
                 excluded[region] = None
         if portal and not portal.destination:
@@ -2400,17 +2402,13 @@ def filter_start_regions(builder, start_regions, world, player):
             if portal_entrance_region not in builder.path_entrances:
                 excluded[region] = None
         if not portal:
-            drop_region = next((x.parent_region for x in region.entrances
-                                if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]
-                                or x.parent_region.name == 'Sewer Drop'), None)
+            drop_region = next((p for p in map(outside_parent, region.entrances) if is_outside(p)), None)
             if drop_region and drop_region.name in world.inaccessible_regions[player]:
                 excluded[region] = None
         if std_flag and (not portal or portal.find_portal_entrance().parent_region.name != 'Hyrule Castle Courtyard'):
             excluded[region] = None
             if portal is None:
-                entrance = next((x for x in region.entrances
-                                 if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]
-                                 or x.parent_region.name == 'Sewer Drop'), None)
+                entrance = next((x for x in region.entrances if entered_from_outside(x)), None)
                 event_doors[entrance] = None
             else:
                 event_doors[portal.find_portal_entrance()] = None
@@ -2432,7 +2430,8 @@ def validate_trap_layout(proposal, builder, start_regions, paths, world, player)
             return False
     if not world.smaller_dungeon_gen[player]:
         # traps may not cut off rooms, even ones without locations (smaller_dungeon_gen allows excluding them)
-        if any(not state.visited_at_all(r) for r in builder.master_sector.regions):
+        # a Drop Portal is entered only from the overworld; it is an entry, not a room the traps could cut off
+        if any(not state.visited_at_all(r) for r in builder.master_sector.regions if not is_drop_portal(r)):
             return False
     return True
 
@@ -3503,7 +3502,7 @@ def find_inaccessible_regions(world, player):
 
 def find_accessible_entrances(world, player, builder):
     entrances = [region.name for region in (portal.door.entrance.parent_region for portal in world.dungeon_portals[player]) if region.dungeon.name == builder.name]
-    entrances.extend(drop_entrances[builder.name])
+    entrances.extend(builder_drop_portals(builder))
     hc_std = False
 
     if world.mode[player] == 'standard' and builder.name == 'Hyrule Castle':
@@ -3552,7 +3551,7 @@ def find_possible_entrances(world, player, builder):
     entrances = [region.name for region in
                  (portal.door.entrance.parent_region for portal in world.dungeon_portals[player])
                  if region.dungeon.name == builder.name]
-    entrances.extend(drop_entrances[builder.name])
+    entrances.extend(builder_drop_portals(builder))
     if save_quit_start(world, player, builder) and 'Sanctuary' not in entrances:
         entrances.append('Sanctuary')
     return entrances
@@ -3574,7 +3573,7 @@ def create_doors_for_inaccessible_region(inaccessible_region, world, player):
     region = world.get_region(inaccessible_region, player)
     for ext in region.exits:
         create_door(world, player, ext.name, region.name)
-        if ext.connected_region and ext.connected_region.name.endswith(' Portal'):
+        if ext.connected_region and is_lobby_portal(ext.connected_region):
             for more_exts in ext.connected_region.exits:
                 create_door(world, player, more_exts.name, ext.connected_region.name)
 
@@ -4226,6 +4225,9 @@ dungeon_warps = [
     ('GT Hidden Star Warp', 'GT Invisible Bridges')
 ]
 
+# a hole's Drop Portal falls onto its vanilla landing unless drop lobbies shuffle
+drop_falls = [(p.fall, p.landing) for p in drop_portals]
+
 ladders = [
     ('PoD Bow Statue Down Ladder', 'PoD Dark Pegs Up Ladder'),
     ('Ice Big Key Down Ladder', 'Ice Tongue Pull Up Ladder'),
@@ -4870,6 +4872,8 @@ def prep_world_for_doors_prototype(world, player):
             connect_terminal_door(world, exitName, regionName, player)
         for exitName, regionName in dungeon_warps:
             connect_terminal_door(world, exitName, regionName, player)
+        for exitName, regionName in drop_falls:
+            connect_terminal_door(world, exitName, regionName, player)
         for entrance, ext in open_edges:
             connect_two_way(world, entrance, ext, player)
         for entrance, ext in straight_staircases:
@@ -5009,6 +5013,9 @@ def handle_intensity_settings(flags, world, player):
             connect_terminal_door(world, exitName, regionName, player)
     if flags.pit_warps not in ('warps', 'both'):
         for exitName, regionName in dungeon_warps:
+            connect_terminal_door(world, exitName, regionName, player)
+    if drop_lobbies_locked(flags):
+        for exitName, regionName in drop_falls:
             connect_terminal_door(world, exitName, regionName, player)
 
 

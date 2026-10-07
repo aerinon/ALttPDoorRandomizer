@@ -2224,7 +2224,7 @@ class Sector(object):
                 self.branch_factor -= cnt_dead - 1
             for region in self.regions:
                 for ent in region.entrances:
-                    if (ent.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld] and ent.parent_region.name != 'Menu') or ent.parent_region.name == 'Sewer Drop':
+                    if ent.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld] and ent.parent_region.name != 'Menu':
                         self.branch_factor += 1
                         break  # you only ever get one allowance for an entrance region, multiple entrances don't help
         return self.branch_factor
@@ -2246,7 +2246,7 @@ class Sector(object):
             self.entrance_sector = False
             for region in self.regions:
                 for ent in region.entrances:
-                    if ent.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld] or ent.parent_region.name == 'Sewer Drop':
+                    if ent.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]:
                         self.entrance_sector = True
         return self.entrance_sector
 
@@ -2255,7 +2255,7 @@ class Sector(object):
             starts = []
             for region in self.regions:
                 for ent in region.entrances:
-                    if ent.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld] or ent.parent_region.name == 'Sewer Drop':
+                    if ent.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]:
                         starts.append(region)
             return starts
         return None

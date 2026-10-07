@@ -55,7 +55,7 @@ hyrule_castle_regions = [
     'Sewers Rope Room', 'Sewers Dark Cross', 'Sewers Water', 'Sewers Dark Aquabats', 'Sewers Key Rat',
     'Sewers Rat Path', 'Sewers Secret Room Blocked Path', 'Sewers Secret Room', 'Sewers Yet More Rats',
     'Sewers Pull Switch', 'Sanctuary', 'Sanctuary Portal', 'Hyrule Castle West Portal', 'Hyrule Castle South Portal',
-    'Hyrule Castle East Portal'
+    'Hyrule Castle East Portal', 'Sewers Drop Portal'
 ]
 
 eastern_regions = [
@@ -128,7 +128,8 @@ skull_regions = [
     'Skull Lone Pot', 'Skull Small Hall', 'Skull Back Drop', 'Skull 2 West Lobby', 'Skull 2 West Lobby Ledge',
     'Skull X Room', 'Skull 3 Lobby', 'Skull East Bridge', 'Skull West Bridge Nook', 'Skull Star Pits',
     'Skull Torch Room', 'Skull Vines', 'Skull Spike Corner', 'Skull Final Drop', 'Skull Boss',
-    'Skull 1 Portal', 'Skull 2 East Portal', 'Skull 2 West Portal', 'Skull 3 Portal'
+    'Skull 1 Portal', 'Skull 2 East Portal', 'Skull 2 West Portal', 'Skull 3 Portal',
+    'Skull Pot Circle Drop Portal', 'Skull Left Drop Drop Portal', 'Skull Pinball Drop Portal', 'Skull Back Drop Drop Portal'
 ]
 
 thieves_regions = [

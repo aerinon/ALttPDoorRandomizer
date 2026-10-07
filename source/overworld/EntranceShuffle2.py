@@ -1993,10 +1993,10 @@ modes = {
 }
 
 drop_map = {
-    'Skull Woods First Section Hole (East)': 'Skull Pinball',
-    'Skull Woods First Section Hole (West)': 'Skull Left Drop',
-    'Skull Woods First Section Hole (North)': 'Skull Pot Circle',
-    'Skull Woods Second Section Hole': 'Skull Back Drop',
+    'Skull Woods First Section Hole (East)': 'Skull Pinball Drop Portal',
+    'Skull Woods First Section Hole (West)': 'Skull Left Drop Drop Portal',
+    'Skull Woods First Section Hole (North)': 'Skull Pot Circle Drop Portal',
+    'Skull Woods Second Section Hole': 'Skull Back Drop Drop Portal',
 
     'Hyrule Castle Secret Entrance Drop':  'Hyrule Castle Secret Entrance',
     'Kakariko Well Drop': 'Kakariko Well (top)',
@@ -2004,7 +2004,7 @@ drop_map = {
     'North Fairy Cave Drop': 'North Fairy Cave',
     'Lost Woods Hideout Drop': 'Lost Woods Hideout (top)',
     'Lumberjack Tree Tree': 'Lumberjack Tree (top)',
-    'Sanctuary Grave': 'Sewer Drop',
+    'Sanctuary Grave': 'Sewers Drop Portal',
     'Pyramid Hole': 'Pyramid',
     'Inverted Pyramid Hole': 'Pyramid'
 }
@@ -2285,11 +2285,12 @@ Connector_Exit_Set = {
 }
 
 dungeon_restriction_checks = [
-    (['Hyrule Castle Exit (South)', 'Hyrule Castle Exit (West)', 'Hyrule Castle Exit (East)', 'Sanctuary Exit'], ['Sewer Drop']),
+    (['Hyrule Castle Exit (South)', 'Hyrule Castle Exit (West)', 'Hyrule Castle Exit (East)', 'Sanctuary Exit'], ['Sewers Drop Portal']),
     (['Desert Palace Exit (South)', 'Desert Palace Exit (East)', 'Desert Palace Exit (West)', 'Desert Palace Exit (North)'], []),
     (['Turtle Rock Exit (Front)', 'Turtle Rock Isolated Ledge Exit', 'Turtle Rock Ledge Exit (West)', 'Turtle Rock Ledge Exit (East)'], []),
     (['Skull Woods First Section Exit', 'Skull Woods Second Section Exit (East)', 'Skull Woods Second Section Exit (West)', 'Skull Woods Final Section Exit'],
-     ['Skull Pinball', 'Skull Left Drop', 'Skull Pot Circle', 'Skull Back Drop'])
+     ['Skull Pinball Drop Portal', 'Skull Left Drop Drop Portal', 'Skull Pot Circle Drop Portal',
+      'Skull Back Drop Drop Portal'])
  ]
 
 doors_possible_connectors = [
@@ -2414,7 +2415,6 @@ mandatory_connections = [# underworld
                          ('Fairy Ascension Cave Climb', 'Fairy Ascension Cave (Top)'),
                          ('Fairy Ascension Cave Pots', 'Fairy Ascension Cave (Bottom)'),
                          ('Fairy Ascension Cave Drop', 'Fairy Ascension Cave (Drop)'),
-                         ('Sewer Drop', 'Sewers Rat Path'),
                          ('Kakariko Well (top to bottom)', 'Kakariko Well (bottom)'),
                          ('Kakariko Well (top to back)', 'Kakariko Well (back)'),
                          ('Blinds Hideout N', 'Blinds Hideout (Top)'),
@@ -2482,7 +2482,7 @@ default_connections = {'Lost Woods Gamble': 'Lost Woods Gamble',
                        'Bonk Rock Cave': 'Bonk Rock Cave',
                        'Sanctuary': 'Sanctuary Portal',
                        'Sanctuary Exit': 'Light World',
-                       'Sanctuary Grave': 'Sewer Drop',
+                       'Sanctuary Grave': 'Sewers Drop Portal',
                        'Graveyard Cave': 'Graveyard Cave',
                        'Kings Grave': 'Kings Grave',
                        'North Fairy Cave Drop': 'North Fairy Cave',
@@ -2817,11 +2817,11 @@ exit_ids = {'Links House Exit': (0x01, 0x00),
             'North Fairy Cave': 0x7C,
             'Lost Woods Hideout (top)': 0x7A,
             'Lumberjack Tree (top)': 0x7F,
-            'Sewer Drop': 0x81,
-            'Skull Back Drop': 0x79,
-            'Skull Left Drop': 0x77,
-            'Skull Pinball': 0x78,
-            'Skull Pot Circle': 0x76,
+            'Sewers Drop Portal': 0x81,
+            'Skull Back Drop Drop Portal': 0x79,
+            'Skull Left Drop Drop Portal': 0x77,
+            'Skull Pinball Drop Portal': 0x78,
+            'Skull Pot Circle Drop Portal': 0x76,
             'Pyramid': 0x7B}
 
 ow_prize_table = {'Links House': (0x8b1, 0xb2d),

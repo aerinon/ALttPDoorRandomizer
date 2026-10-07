@@ -7,6 +7,7 @@ from Regions import dungeon_events
 from Dungeons import dungeon_keys, dungeon_bigs, dungeon_table
 from DungeonGenerator import ExplorationState, get_special_big_key_doors, count_locations_exclude_big_chest, prize_or_event
 from DungeonGenerator import reserved_location, blind_boss_unavail
+from source.dungeon.DropPortals import is_lobby_portal
 
 
 class KeyLayout(object):
@@ -1868,7 +1869,7 @@ def create_key_counters(key_layout, world, player):
 
 
 def find_outside_connection(region):
-    portal = next((x for x in region.entrances if ' Portal' in x.parent_region.name), None)
+    portal = next((x for x in region.entrances if is_lobby_portal(x.parent_region)), None)
     if portal:
         dungeon_entrance = next(x for x in portal.parent_region.entrances
                                 if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld])

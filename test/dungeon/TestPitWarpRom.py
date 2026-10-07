@@ -20,6 +20,11 @@ def terminal_entries():
     return data['pits'] + data['warps']
 
 
+def row_entries():
+    """Pit/warp terminals; a hole's Drop Portal terminal has an entrance row instead of LandingZoneData rows."""
+    return [e for e in terminal_entries() if 'rows' in e['rom']]
+
+
 class TestPitWarpRowBytes(unittest.TestCase):
 
     def test_row_matches_hand_packed_bytes(self):
@@ -41,14 +46,14 @@ class TestPitWarpRowBytes(unittest.TestCase):
 class TestPitWarpRomData(unittest.TestCase):
 
     def test_every_terminal_has_rows_and_a_landing(self):
-        for e in terminal_entries():
+        for e in row_entries():
             with self.subTest(terminal=e['name']):
                 self.assertTrue(e['rom']['rows'])
                 self.assertIn('source_room', e['rom'])
                 self.assertEqual(LANDING_ZONE_ROW_SIZE, len(pitwarp_row_bytes(e['rom']['landing'])))
 
     def test_rows_are_distinct_and_cover_every_shuffled_row(self):
-        rows = [r for e in terminal_entries() for r in e['rom']['rows']]
+        rows = [r for e in row_entries() for r in e['rom']['rows']]
         self.assertEqual(len(rows), len(set(rows)))
         self.assertEqual(set(range(ROWS)) - UNSHUFFLED_ROWS, set(rows))
 
@@ -56,7 +61,7 @@ class TestPitWarpRomData(unittest.TestCase):
     def test_landings_match_their_captures(self):
         with open(CAPTURES) as f:
             captures = {t['label']: t for t in json.load(f)['transitions']}
-        for e in terminal_entries():
+        for e in row_entries():
             landing, capture = e['rom']['landing'], captures[e['rom']['capture']]
             with self.subTest(terminal=e['name']):
                 bounds = [capture[f'scroll_bound_60{c}'] for c in '13579bdf']

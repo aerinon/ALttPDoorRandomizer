@@ -6,7 +6,7 @@ import time
 from BaseClasses import CrystalBarrier, DoorType, Hook, RegionType, Sector, Portal
 from BaseClasses import hook_from_door, flooded_keys
 from Regions import dungeon_events, flooded_keys_reverse
-from source.dungeon.DungeonGenLocalSearch import default_lobby_drops, drop_parent_region
+from source.dungeon.DropPortals import drop_parent_region, is_drop_portal, sector_drop_portals
 from source.dungeon.DungeonGenTransitivity import do_transitivity_check
 from source.dungeon.DungeonGenSectorDesc import SectorDescriptor
 
@@ -107,17 +107,14 @@ def determine_entrance_regions(builder, flags, world, player):
         else:
             record_entrance_regions(entrance_regions, portal)
 
-    # drop entrances
-    for drop_region in default_lobby_drops:
-        if std_flag and drop_region == 'Sewers Rat Path':
+    # drop entrances: a hole's Drop Portal
+    for region in (r for s in builder.sectors for r in sector_drop_portals(s)):
+        if std_flag and region.name == 'Sewers Drop Portal':
             continue
-        if any(drop_region in s.region_set() for s in builder.sectors):
-            region = world.get_region(drop_region, player)
-            parent_region = drop_parent_region(drop_region, world, player)
-            # access to the parent_region may be gated by this dungeon, don't depend on it
-            # possible exception? drop down like skull back in insanity entrance modes? Do I need to detect that?
-            if parent_region.name not in world.inaccessible_regions[player] or single_entrance_flag:
-                entrance_regions.append(region)
+        parent_region = drop_parent_region(region)
+        # access to the parent_region may be gated by this dungeon, don't depend on it
+        if parent_region.name not in world.inaccessible_regions[player] or single_entrance_flag:
+            entrance_regions.append(region)
 
     return entrance_regions
 
@@ -390,7 +387,8 @@ def check_valid(builder, exploration_state, proposed_map, doors_to_connect, all_
     all_visited = set()
     all_visited.update(exploration_state.visited_blue)
     all_visited.update(exploration_state.visited_orange)
-    if len(all_regions.difference(all_visited)) > 0:
+    rooms = {r for r in all_regions if not is_drop_portal(r)}  # a Drop Portal is an entry, not a room to reach
+    if len(rooms.difference(all_visited)) > 0:
         return False
     if not valid_paths(builder, paths, entrance_regions, doors_to_connect, all_regions, proposed_map,
                        bk_special, world, player):

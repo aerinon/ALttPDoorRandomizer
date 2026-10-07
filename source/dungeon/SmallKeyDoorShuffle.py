@@ -20,6 +20,7 @@ from Utils import ncr, kth_combination
 from source.dungeon.NewKeyLogic import analyze_dungeon, calc_extras
 from source.dungeon.KeyPlacement import create_exhaustive_placement_rules, important_location
 from source.dungeon.DungeonGenerationCommon import special_bk_regions, uniform_distribute
+from source.dungeon.DropPortals import outside_parent, entered_from_outside, is_outside
 
 
 def shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_custom, world, player):
@@ -329,9 +330,7 @@ def filter_start_regions(builder, start_regions, world, player):
         portal = next((x for x in world.dungeon_portals[player] if x.door.entrance.parent_region == region), None)
         if portal and portal.destination:
             # make sure that a drop is not accessible for this "destination"
-            drop_region = next((x.parent_region for x in region.entrances
-                                if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]
-                                or x.parent_region.name == 'Sewer Drop'), None)
+            drop_region = next((p for p in map(outside_parent, region.entrances) if is_outside(p)), None)
             if not drop_region:
                 excluded[region] = None
         if portal and not portal.destination:
@@ -339,17 +338,13 @@ def filter_start_regions(builder, start_regions, world, player):
             if portal_entrance_region not in builder.path_entrances:
                 excluded[region] = None
         if not portal:
-            drop_region = next((x.parent_region for x in region.entrances
-                                if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]
-                                or x.parent_region.name == 'Sewer Drop'), None)
+            drop_region = next((p for p in map(outside_parent, region.entrances) if is_outside(p)), None)
             if drop_region and drop_region.name in world.inaccessible_regions[player]:
                 excluded[region] = None
         if std_flag and (not portal or portal.find_portal_entrance().parent_region.name != 'Hyrule Castle Courtyard'):
             excluded[region] = None
             if portal is None:
-                entrance = next((x for x in region.entrances
-                                 if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]
-                                 or x.parent_region.name == 'Sewer Drop'), None)
+                entrance = next((x for x in region.entrances if entered_from_outside(x)), None)
                 event_doors[entrance] = None
             else:
                 event_doors[portal.find_portal_entrance()] = None

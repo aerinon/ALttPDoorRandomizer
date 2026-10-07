@@ -21,6 +21,7 @@ from source.dungeon.DungeonGenerationCommon import define_sector_features, defau
 from source.dungeon.DungeonGenerationCommon import assign_sector, find_sector, handle_special_sectors, assign_sector_helper
 from source.dungeon.DungeonGenerationCommon import standard_stair_check, hanger_from_door, identify_destination_sectors, calc_allowance_and_dead_ends
 from source.dungeon.DungeonGenerationCommon import handle_non_crossworld_sanctuary, assign_non_hc_sectors, dungeon_portals
+from source.dungeon.DropPortals import outside_parent, is_outside
 
 
 class GraphPiece:
@@ -2568,11 +2569,7 @@ def find_independent_entrances(entrance_regions, world, player):
                     continue
         else:
             r = world.get_region(region, player)
-            access_region = next(x.parent_region for x in r.entrances
-                                 if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]
-                                 or x.parent_region.name == 'Sewer Drop')
-            if access_region.name == 'Sewer Drop':
-                access_region = next(x.parent_region for x in access_region.entrances)
+            access_region = next(p for p in map(outside_parent, r.entrances) if is_outside(p))
             if access_region.name in world.inaccessible_regions[player]:
                 continue
         independents.add(region)

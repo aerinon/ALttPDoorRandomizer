@@ -7,6 +7,7 @@ from collections import deque
 
 from BaseClasses import CollectionState, CrystalBarrier, DoorType, RegionType
 from source.dungeon.DungeonGenerationCommon import hanger_from_door, hook_from_door
+from source.dungeon.DropPortals import drop_parent_region, is_lobby_portal, sector_drop_portals
 
 ONE_WAY = (DoorType.Hole, DoorType.Warp)
 
@@ -90,17 +91,9 @@ def explore(starts, cmap, group_terminal, allowed, respect_traps=True, rrp=None)
 
 
 def _overworld_drops(c_info):
-    """(region, overworld parent) for regions entered from outside the dungeon, other than portals."""
-    drops = []
-    for s in c_info.sector_list:
-        for r in s.regions:
-            if r.name.endswith(' Portal'):
-                continue
-            parent = next((e.parent_region for e in r.entrances
-                           if e.parent_region is not None and e.parent_region.type != RegionType.Dungeon), None)
-            if parent is not None:
-                drops.append((r, parent))
-    return drops
+    """(Drop Portal region, overworld parent of its hole) for every hole leading into the dungeon."""
+    return [(r, drop_parent_region(r)) for s in c_info.sector_list for r in sector_drop_portals(s)
+            if drop_parent_region(r) is not None]
 
 
 def _gated(region):
@@ -111,7 +104,7 @@ def start_regions(c_info):
     """Start portals, plus regions entered by an overworld drop from an accessible overworld region."""
     starts = []
     for s in c_info.init_portals:
-        portal_regions = [r for r in s.regions if r.name.endswith(' Portal')]
+        portal_regions = [r for r in s.regions if is_lobby_portal(r)]
         starts.extend(portal_regions or s.regions)
     starts.extend(r for r, parent in _overworld_drops(c_info) if not _gated(parent))
     return starts
@@ -131,7 +124,7 @@ def explore_with_dependents(c_info, cmap, group_terminal, allowed):
     while changed:
         changed = False
         # a drop from a gated overworld region needs a reached portal of this dungeon that leads out onto it
-        outside = {_overworld_side(r) for r in reached if r.name.endswith(' Portal')}
+        outside = {_overworld_side(r) for r in reached if is_lobby_portal(r)}
         for region, parent in gated_drops:
             if parent in outside and region not in reached:
                 explore([region], cmap, group_terminal, allowed, respect_traps, reached)

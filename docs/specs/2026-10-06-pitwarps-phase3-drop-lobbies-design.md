@@ -30,9 +30,14 @@ Five Drop Portal regions, one per hole:
 | `Skull Pot Circle Drop Portal` | `Skull Woods` (`Skull Woods Front` when split) | `Skull Pot Circle` | `0x76` |
 | `Skull Left Drop Drop Portal` | `Skull Woods` (`Skull Woods Front` when split) | `Skull Left Drop` | `0x77` |
 | `Skull Pinball Drop Portal` | `Skull Woods` (`Skull Woods Front` when split) | `Skull Pinball` | `0x78` |
-| `Skull Back Drop Drop Portal` | `Skull Woods` (`Skull Woods Back` when split) | `Skull Back Drop` | `0x79` |
-| `Sewers Rat Path Drop Portal` (replaces `Sewer Drop`) | `Hyrule Castle` (`Hyrule Castle Sewers` in standard) | `Sewers Rat Path` | `0x81` |
+| `Skull Back Drop Drop Portal` | `Skull Woods` (`Skull Woods Front` when split) | `Skull Back Drop` | `0x79` |
+| `Sewers Drop Portal` (replaces `Sewer Drop`) | `Hyrule Castle` (either standard builder) | `Sewers Rat Path` | `0x81` |
 
+- Split Skull Woods: all four Skull Drop Portals go to `Skull Woods Front`. The back half only ever receives a
+  non-destination portal, so the destination portal that opens Skull Back's forest is always in the front half, and the
+  Back Drop Portal sits with it. The back half keeps its own portal as its way in.
+- Standard: Hyrule Castle splits into `Hyrule Castle Sewers` and `Hyrule Castle Dungeon`; the Rat Path Drop Portal may be
+  placed in either, and is never a start there (see Unreachable drops).
 - Each region has one entrance (the hole) and one exit: a one-way source door, a single-member `Hole` group with a
   `PitWarp` hook. Locked, the source is connected to its vanilla landing, as unshuffled pits are.
 - Entrance shuffle points holes at the Drop Portal regions instead of the landing regions: the hole target tables, the
@@ -65,12 +70,19 @@ Five Drop Portal regions, one per hole:
   rule), through the dependent-portal mechanism: enabling portal door → drop source. With vanilla entrances the Skull
   Back forest opens through Skull 3 or Skull 2 West, whichever is the destination; both belong to Skull Woods, as does
   the drop.
+- **Unreachable drops:** a drop its dungeon cannot use as a start (standard's Rat Path in the escape builders, or under
+  shuffled entrances a hole whose region only another dungeon's portal opens) is still matched to a Terminal, since the
+  ROM needs a landing, but is never a route in for Transitivity or the stitcher. In Transitivity such a source is a free
+  hook: it may be connected to a Terminal without being reached, which satisfies that Terminal's must-enter but adds
+  nothing to the reached set. It may only land on a Terminal whose sector has another outstanding door; completion
+  connects that door from a reached side, so the sector is reached another way. A Terminal alone in its sector (e.g.
+  Skull Boss) is never a free hook's landing. The witness checker treats the connection the same way.
 - **Stitcher:** pit assignment already maps a builder's sources to its Terminals. Drop Portal regions are entrance
   regions for the traversal simulation under the same ungated/gated rule, replacing the `default_lobby_drops` loop.
 - **Key, big key and trap stages:** `find_possible_entrances` and `find_accessible_entrances` use the owning dungeon's
   Drop Portal regions instead of the landing names in `drop_entrances`.
 - **Standard:** the Rat Path drop is not a start for the escape builders (Hyrule Castle Sewers, Hyrule Castle Dungeon);
-  during the escape the sewers are walked from inside.
+  during the escape the sewers are walked from inside. It is handled as an unreachable drop.
 - **Item logic:** the world graph carries hole → Drop Portal → source → landing; no drop-specific rules.
 
 ## ROM
@@ -111,6 +123,10 @@ Entrance tables (bank 02 `EntranceData`), indexed by entrance ID. Word tables, t
 - **Gating:** with Skull Back's drop gated, Transitivity refuses a layout that works only through that drop until a
   destination portal opening the forest is reached, and accepts it once one is.
 - **Standard:** `TestStandardEscape` at intensity 4; the Rat Path drop never counts as a start for the escape builders.
+- **Unreachable drops:** a dungeon whose drop it cannot use still generates, the drop is matched to a Terminal, and that
+  Terminal's sector is reached another way.
+- **Split Skull Woods:** with vanilla entrances, the Back Drop Portal is in the front half with the forest's destination
+  portal, and is a start once that portal is reached.
 - **Generation:** `gen_check` crossed intensity 4, seeds 1–40, before and after; small standard and entrance-shuffle
   sweeps. Stitched layouts reach every region and every drop lands in its owning dungeon. A TestSuite run at the end
   (one at a time across sessions).

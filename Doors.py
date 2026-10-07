@@ -111,6 +111,7 @@ def create_doors(world, player):
         create_door(player, 'Sewers Key Rat NE', Nrml).dir(No, 0x21, Right, High).small_key().pos(0),
         create_door(player, 'Sewers Secret Room Key Door S', Nrml).dir(So, 0x11, Right, High).small_key().pos(2).portal(X, 0x02),
         create_door(player, 'Sewers Rat Path WS', Intr).dir(We, 0x11, Bot, High).pos(1),
+        create_door(player, 'Sewers Drop Portal Fall', Hole),
         create_door(player, 'Sewers Rat Path WN', Intr).dir(We, 0x11, Top, High).pos(0),
         create_door(player, 'Sewers Secret Room ES', Intr).dir(Ea, 0x11, Bot, High).pos(1),
         create_door(player, 'Sewers Secret Room EN', Intr).dir(Ea, 0x11, Top, High).pos(0),
@@ -644,6 +645,10 @@ def create_doors(world, player):
         create_door(player, 'Skull Spike Corner ES', Intr).dir(Ea, 0x39, Bot, High).small_key().pos(1),
         create_door(player, 'Skull Final Drop WS', Intr).dir(We, 0x39, Bot, High).small_key().pos(1),
         create_door(player, 'Skull Final Drop Hole', Hole),
+        create_door(player, 'Skull Pot Circle Drop Portal Fall', Hole),
+        create_door(player, 'Skull Left Drop Drop Portal Fall', Hole),
+        create_door(player, 'Skull Pinball Drop Portal Fall', Hole),
+        create_door(player, 'Skull Back Drop Drop Portal Fall', Hole),
 
         create_door(player, 'Thieves Lobby S', Nrml).dir(So, 0xdb, Mid, High).pos(1).portal(Z, 0x22),
         create_door(player, 'Thieves Lobby N Edge', Open).dir(No, 0xdb, None, Low).edge(7, A, 0x10),

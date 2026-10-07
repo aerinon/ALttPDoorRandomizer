@@ -904,17 +904,6 @@ def score_door(item):
         score += 100
     return score
 
-def drop_parent_region(drop_region, world, player):
-    """The overworld region an overworld drop-down lobby falls from."""
-    region = world.get_region(drop_region, player)
-    parent = next((x.parent_region for x in region.entrances
-                   if x.parent_region.type in [RegionType.LightWorld, RegionType.DarkWorld]
-                   or x.parent_region.name == 'Sewer Drop'), None)
-    if parent is not None and parent.name == 'Sewer Drop':
-        parent = next(x.parent_region for x in parent.entrances)
-    return parent
-
-
 def drop_lobbies_locked(flags):
     """Overworld drop-down lobbies stay in their vanilla dungeon. They may move once both lobbies and pits/warps
     shuffle, but reaching a moved drop is not modeled yet (pitwarps Phase 3), so they stay locked until then."""
