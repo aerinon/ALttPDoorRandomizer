@@ -47,9 +47,7 @@ def determine_entrance_regions(builder, flags, world, player):
     std_flag = world.mode[player] == 'standard'
     hc_flag = std_flag and builder.name == 'Hyrule Castle'
     rupee_bow_flag = hc_flag and world.bow_mode[player].startswith('retro')  # rupee bow
-    bk_shuffle = (world.bigkeyshuffle[player]  # big key can be anywhere
-                  or world.pottery[player] not in ['none', 'cave'] # pottery item can have the big key
-                  or world.door_type_mode in ['big', 'all', 'chaos'])  # big key doors are shuffled
+    bk_shuffle = bk_shuffle_lobbies_allowed(builder, world, player)
 
     single_entrance_flag = False
     if len(builder_portals) == 1:  # only one access
@@ -124,6 +122,14 @@ def determine_entrance_regions(builder, flags, world, player):
                 entrance_regions.append(region)
 
     return entrance_regions
+
+
+def bk_shuffle_lobbies_allowed(builder, world, player):
+    """Whether a lobby that needs the big key to be placeable anywhere (bk_shuffle_req) may hold a portal."""
+    return (world.bigkeyshuffle[player]  # big key can be anywhere
+            or world.pottery[player] not in ['none', 'cave']  # pottery item can have the big key
+            or world.door_type_mode in ['big', 'all', 'chaos']  # big key doors are shuffled
+            or builder.split_flag)  # as in Transitivity's valid_portal
 
 
 def assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, flags, record_portal=True):
