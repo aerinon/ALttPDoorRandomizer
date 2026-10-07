@@ -842,6 +842,8 @@ class DoorFlags:
         self.std_flag: bool = False
         self.rupee_bow_flag: bool = False
         self.bk_shuffle_flag: bool = False
+        self.bk_doors_original: bool = False  # big key doors in their vanilla places and the big key not shuffled
+        self.world, self.player = None, None
 
 
     def from_world(self, world, player):
@@ -860,6 +862,8 @@ class DoorFlags:
                 self.lobbies = True
         self.std_flag = world.mode[player] == 'standard'
         self.rupee_bow_flag = world.bow_mode[player].startswith('retro')  # rupee bow
+        self.world, self.player = world, player
+        self.bk_doors_original = world.door_type_mode[player] == 'original' and not world.bigkeyshuffle[player]
         self.bk_shuffle_flag = (world.bigkeyshuffle[player]  # big key can be anywhere
                                 or world.pottery[player] not in ['none', 'cave'] # pottery item can have the big key
                                 or world.door_type_mode in ['big', 'all', 'chaos'])  # big key doors can be shuffled

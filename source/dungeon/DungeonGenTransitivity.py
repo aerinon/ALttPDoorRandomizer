@@ -169,6 +169,7 @@ class ConstraintInfo:
                 self.constraints.append(Constraint(ConstraintType.Neutral, s.outstanding_doors, None))
 
         self.escape = EscapeCheck(sector_list, flags) if flags.std_flag and builder.name == 'Hyrule Castle Dungeon' else None
+        self.big_key = BigKeyCheck.create(builder, sector_list, flags)
 
         for d, dep_info in self.dependent_portals.items():
             sector, enabling_portal = dep_info
@@ -223,6 +224,89 @@ class ConstraintInfo:
 
 # a mirror scroll respawn resets the crystal state to Orange
 ESCAPE_START_COLORS = (CrystalBarrier.Orange,)
+
+
+class NoBigKeyExplorationState(SimpleExplorationState):
+    """Explores a sector without crossing big key doors."""
+
+    def __init__(self, respect_traps, bk_door_names):
+        super().__init__(respect_traps)
+        self.bk_door_names = bk_door_names
+
+    def append_door_to_list(self, door, door_list, collapse=True, cs_override=None):
+        if door.bigKey or door.name in self.bk_door_names:
+            return
+        super().append_door_to_list(door, door_list, collapse, cs_override)
+
+
+class BigKeyCheck:
+    """Where big keys matter, the stitcher crosses no big key door until it has found a location that could hold the
+    big key: the regions reached from the dungeon's entrances without crossing one must contain such a location."""
+
+    @staticmethod
+    def create(builder, sector_list, flags):
+        from source.dungeon.DungeonStitcherV2 import check_for_special, get_special_big_key_doors
+        world, player = flags.world, flags.player
+        if world is None:  # flags not built from a world
+            return None
+        regions = [r for s in sector_list for r in s.regions]
+        special = check_for_special(regions)
+        if not ((flags.bk_doors_original and not builder.split_flag) or special):
+            return None
+        bk_names = set(get_special_big_key_doors(world, player))
+        if not any(ext.door and (ext.door.bigKey or ext.door.name in bk_names) for r in regions for ext in r.exits):
+            return None
+        return BigKeyCheck(sector_list, flags, special, bk_names)
+
+    def __init__(self, sector_list, flags, special, bk_names):
+        from source.dungeon.DungeonGenLocalSearch import default_lobby_drops
+        self.world, self.player = flags.world, flags.player
+        self.special, self.bk_names = special, bk_names
+        self.v_trap_flag = flags.vanilla_traps
+        self.sector_of = {r: s for s in sector_list for r in s.regions}
+        self.portals = [p for s in sector_list for p in s.portals if not p.destination and p.dependent is None]
+        self.drop_regions = [r for s in sector_list for r in s.regions if r.name in default_lobby_drops
+                             and not (flags.std_flag and r.name == 'Sewers Rat Path')]
+        self.cache = {}
+
+    def explore(self, start_door):
+        if start_door not in self.cache:
+            state = NoBigKeyExplorationState(self.v_trap_flag, self.bk_names)
+            state.extend_reachable_state(start_door)
+            outstanding = self.sector_of[start_door.entrance.parent_region].outstanding_doors
+            self.cache[start_door] = (set(state.visited_map), [e.door for e in state.unattached_doors if e.door in outstanding])
+        return self.cache[start_door]
+
+    def satisfied(self, connection_map, matches=None):
+        """With matches (door -> possible partners), an unconnected door may lead into any unconnected partner: an
+        over-approximation, so a False means no completion of this state can satisfy the check."""
+        from source.dungeon.DungeonStitcherV2 import count_locations_exclude_big_chest
+
+        def partners(door):
+            if door in connection_map:
+                return [connection_map[door]]
+            if matches is not None:
+                return [m for m in matches.get(door, []) if m not in connection_map]
+            return []
+        starts = []
+        for p in self.portals:
+            lobbies = partners(p.door) if p.door.traversal_only else [p.door]
+            starts.extend(lb for lb in lobbies if not lb.traversal_only and lb.entrance.parent_region in self.sector_of)
+        for r in self.drop_regions:
+            starts.extend(ext.door for ext in r.exits if ext.door is not None)
+        regions, seen, queue = set(), set(starts), deque(starts)
+        while queue:
+            visited, reach = self.explore(queue.popleft())
+            regions |= visited
+            for d in reach:
+                for partner in partners(d):
+                    if not partner.traversal_only and partner not in seen and partner.entrance.parent_region in self.sector_of:
+                        seen.add(partner)
+                        queue.append(partner)
+        locations = [loc for r in regions for loc in r.locations]
+        if self.special:
+            return any(loc.forced_big_key() for loc in locations)
+        return count_locations_exclude_big_chest(locations, self.world, self.player) > 0
 
 
 class EscapeCheck:
@@ -517,7 +601,9 @@ class Transitivity:
     def is_complete(self, c_info):
         if self.unsatisfied_constraints or self.remaining_doors:
             return False
-        return c_info.escape is None or c_info.escape.satisfied(self.connection_map)
+        if c_info.escape is not None and not c_info.escape.satisfied(self.connection_map):
+            return False
+        return c_info.big_key is None or c_info.big_key.satisfied(self.connection_map)
 
     def priority(self):
         # return 0
@@ -678,6 +764,8 @@ class Transitivity:
         if self.quick_door_matches_check(c_info):
             return True
         if c_info.escape and not c_info.escape.satisfied(self.connection_map, c_info.door_matches):
+            return True
+        if c_info.big_key and not c_info.big_key.satisfied(self.connection_map, c_info.door_matches):
             return True
 
         remaining_set = set(self.remaining_doors)
