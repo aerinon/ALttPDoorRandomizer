@@ -866,7 +866,7 @@ class DoorFlags:
         self.bk_doors_original = world.door_type_mode[player] == 'original' and not world.bigkeyshuffle[player]
         self.bk_shuffle_flag = (world.bigkeyshuffle[player]  # big key can be anywhere
                                 or world.pottery[player] not in ['none', 'cave'] # pottery item can have the big key
-                                or world.door_type_mode in ['big', 'all', 'chaos'])  # big key doors can be shuffled
+                                or world.door_type_mode[player] in ['big', 'all', 'chaos'])  # big key doors can be shuffled
         return self
 
     def from_custom(self, intensity):
