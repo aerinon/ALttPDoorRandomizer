@@ -3513,13 +3513,18 @@ def find_accessible_entrances(world, player, builder):
             if hc_std and ext.name in ['Hyrule Castle Main Gate (North)', 'Castle Gate Teleporter (Inner)', 'Hyrule Castle Ledge Drop']:  # just skip it
                 continue
             connect = ext.connected_region
-            if connect is None or ext.door and ext.door.blocked:
+            if connect is None or ext.door and ext.door.blocked and not trap_not_final(ext.door, world, player):
                 continue
             if connect.name in entrances and connect not in visited_entrances:
                 visited_entrances.append(connect.name)
             elif connect and connect not in queue and connect not in visited_regions:
                 queue.append(connect)
     return visited_entrances
+
+
+def trap_not_final(door, world, player):
+    # trap door shuffle runs later and may remove this trap, so it shouldn't decide which entrances are reachable
+    return door.trapped and world.trap_door_mode[player] != 'vanilla'
 
 
 def find_possible_entrances(world, player, builder):
