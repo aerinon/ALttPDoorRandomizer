@@ -1856,6 +1856,7 @@ def set_inverted_big_bomb_rules(world, player):
                            'Snitch Lady (East)',
                            'Snitch Lady (West)',
                            'Tavern (Front)',
+                           'Tavern North',
                            'Kakariko Shop',
                            'Mini Moldorm Cave',
                            'Long Fairy Cave',
