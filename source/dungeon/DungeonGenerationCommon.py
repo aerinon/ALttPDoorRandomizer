@@ -611,7 +611,7 @@ dungeon_boss_sectors = {
 
 
 default_dungeon_entrances = {
-    'Hyrule Castle': ['Hyrule Castle Lobby', 'Hyrule Castle West Lobby', 'Hyrule Castle East Lobby', 'Sewers Rat Path',
+    'Hyrule Castle': ['Hyrule Castle Lobby', 'Hyrule Castle West Lobby', 'Hyrule Castle East Lobby', 'Sewers Drop Portal',
                       'Sanctuary'],
     'Eastern Palace': ['Eastern Lobby'],
     'Desert Palace': ['Desert Back Lobby', 'Desert Main Lobby', 'Desert West Lobby', 'Desert East Lobby'],
@@ -619,8 +619,9 @@ default_dungeon_entrances = {
     'Agahnims Tower': ['Tower Lobby'],
     'Palace of Darkness': ['PoD Lobby'],
     'Swamp Palace': ['Swamp Lobby'],
-    'Skull Woods': ['Skull 1 Lobby', 'Skull Pinball', 'Skull Left Drop', 'Skull Pot Circle', 'Skull 2 East Lobby',
-                    'Skull 2 West Lobby', 'Skull Back Drop', 'Skull 3 Lobby'],
+    'Skull Woods': ['Skull 1 Lobby', 'Skull Pinball Drop Portal', 'Skull Left Drop Drop Portal',
+                    'Skull Pot Circle Drop Portal', 'Skull 2 East Lobby', 'Skull 2 West Lobby',
+                    'Skull Back Drop Drop Portal', 'Skull 3 Lobby'],
     'Thieves Town': ['Thieves Lobby'],
     'Ice Palace': ['Ice Lobby'],
     'Misery Mire': ['Mire Lobby'],

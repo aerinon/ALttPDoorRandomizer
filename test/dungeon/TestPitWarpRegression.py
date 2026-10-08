@@ -109,8 +109,10 @@ class TestBossIndicator(unittest.TestCase):
             with self.subTest(boss=name):
                 source = sources[name]
                 self.assertEqual(region, source.entrance.connected_region.name)
-                self.assertEqual(world.get_door(source.group, 1).pitwarp_rom['source_room'],
-                                 rom.writes[indicator_slot(world, region)])
+                vanilla_rom = world.get_door(source.group, 1).pitwarp_rom
+                # a hole falling into the boss has no room before it: it is entered from the overworld
+                expected = vanilla_rom['source_room'] if 'source_room' in vanilla_rom else 0
+                self.assertEqual(expected, rom.writes[indicator_slot(world, region)])
 
     def assert_vestibule_rooms(self, world):
         self.assertEqual({}, pit_boss_sources(world, 1))

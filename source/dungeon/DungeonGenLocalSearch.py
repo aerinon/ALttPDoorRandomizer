@@ -11,6 +11,7 @@ from Utils import clear_file
 from source.dungeon.DungeonGenerationCommon import DungeonBuilder, GenerationException, define_sector_features, dungeon_portals
 from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector, assign_sector_helper, hanger_from_door, hook_from_door, sum_polarity
 from source.dungeon.DungeonGenSectorDesc import create_sector_descriptors
+from source.dungeon.DropPortals import drop_portals
 from source.dungeon.DungeonGenTransitivity import do_transitivity_check as do_transitivity_check_new
 
 # ------------------------------ #
@@ -156,9 +157,15 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
     # this handles boss sectors
     lock_down_default_sectors(dungeon_boss_regions)
 
-    # handles drop down lobbies - lock down for now - technically can move to a different
+    # drop lobbies: locked, a hole's landing stays in its vanilla dungeon; unlocked, its Drop Portal stays with its owner
     if drop_lobbies_locked(info.flags):
         lock_down_default_sectors(default_lobby_drops)
+    else:
+        for drop in drop_portals:
+            sector = find_sector(drop.region, info.sector_pool)
+            if sector:
+                builders = drop_portal_builders(drop, dungeon_map)
+                propose_sector(dungeon_map[random.choice(builders)], sector, info, False, restrict_list=builders)
 
     if world.mode[player] == 'standard':
         exclude_sector(find_sector('Swamp Lobby', info.sector_pool), info, dungeon_aliases['Hyrule Castle'])
@@ -905,9 +912,16 @@ def score_door(item):
     return score
 
 def drop_lobbies_locked(flags):
-    """Overworld drop-down lobbies stay in their vanilla dungeon. They may move once both lobbies and pits/warps
-    shuffle, but reaching a moved drop is not modeled yet (pitwarps Phase 3), so they stay locked until then."""
-    return True  # Phase 3: flags.pit_warps == 'none' or not flags.lobbies
+    """A hole's Drop Portal falls onto its vanilla landing unless lobbies and pits both shuffle (pitwarps Phase 3)."""
+    return not (flags.lobbies and flags.pit_warps in ('pits', 'both'))
+
+
+def drop_portal_builders(drop, dungeon_map):
+    """Skull Woods' Drop Portals go with its front half when it splits (that half holds the destination portal opening
+    Skull Back's forest); the Sewers Drop Portal may sit in either Hyrule Castle builder."""
+    if drop.owner == 'Skull Woods':
+        return ['Skull Woods Front'] if 'Skull Woods Front' in dungeon_map else ['Skull Woods']
+    return [b for b in ['Hyrule Castle', 'Hyrule Castle Sewers', 'Hyrule Castle Dungeon'] if b in dungeon_map]
 
 
 def cnt_non_bk_locations(sector):

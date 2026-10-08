@@ -1587,7 +1587,9 @@ def write_boss_indicators(world, rom, player):
             rom.write_byte(0x13f000+dungeon_id, 0)  # no supertile preceeding boss
     for source in pit_bosses.values():
         dungeon_id = boss_indicator[source.entrance.parent_region.dungeon.name][0]
-        rom.write_byte(0x13f000+dungeon_id, world.get_door(source.group, player).pitwarp_rom['source_room'])
+        vanilla_rom = world.get_door(source.group, player).pitwarp_rom
+        # a hole falling into the boss has no supertile before it (entered from the overworld)
+        rom.write_byte(0x13f000+dungeon_id, vanilla_rom.get('source_room', 0))
 
 
 def pit_boss_sources(world, player):
@@ -1612,6 +1614,8 @@ def write_pitwarps(world, rom, player):
     for door in world.doors:
         if door.player != player or door.pit_terminal is None or door.group_rep is not door:
             continue
+        if 'rows' not in world.get_door(door.group, player).pitwarp_rom:
+            continue  # a hole's fall: its landing goes in the entrance row (write_drop_entrances)
         vanilla = world.get_door(door.group, player)
         data = pitwarp_row_bytes(door.pit_terminal.pitwarp_rom['landing'])
         for row in vanilla.pitwarp_rom['rows']:

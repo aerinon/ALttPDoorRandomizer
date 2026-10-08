@@ -25,6 +25,14 @@ class TestDoorFlags(unittest.TestCase):
         flags = DoorFlags.for_player(stub_world(3, custom_intensity={'pit_warps': 'both'}), 1)
         self.assertEqual('both', flags.pit_warps)
 
-    def test_drop_lobbies_stay_locked_until_moved_drops_are_modeled(self):
-        for intensity in (2, 3, 4):
-            self.assertTrue(drop_lobbies_locked(DoorFlags.for_player(stub_world(intensity), 1)))
+    def test_drop_lobbies_unlock_with_lobbies_and_pits(self):
+        for intensity, locked in [(1, True), (2, True), (3, True), (4, False)]:
+            with self.subTest(intensity=intensity):
+                self.assertEqual(locked, drop_lobbies_locked(DoorFlags.for_player(stub_world(intensity), 1)))
+
+    def test_drop_lobbies_need_both_lobbies_and_pits(self):
+        for custom, locked in [({'pit_warps': 'pits'}, False), ({'pit_warps': 'warps'}, True),
+                               ({'pit_warps': 'both', 'lobbies': False}, True)]:
+            with self.subTest(custom=custom):
+                flags = DoorFlags.for_player(stub_world(4, custom_intensity=custom), 1)
+                self.assertEqual(locked, drop_lobbies_locked(flags))

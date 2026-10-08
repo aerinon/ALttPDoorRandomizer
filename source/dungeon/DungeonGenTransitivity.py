@@ -13,6 +13,7 @@ from source.dungeon.DungeonGenerationCommon import hanger_from_door, hook_from_d
 from source.dungeon.DungeonGenerationCommon import crystal_allows, pit_barrier
 from source.dungeon.DungeonGenerationCommon import is_boss_trap, GenerationException
 from source.dungeon.DungeonGenSectorDesc import CrystalConstraint, SimpleExplorationState
+from source.dungeon.DropPortals import drop_parent_region, is_escape_builder, portal_overworld_side, sector_drop_portals
 
 logger = logging.getLogger('tlogger')
 # for handler in logger.handlers[:]:
@@ -52,6 +53,8 @@ def do_transitivity_check_main(builder, sector_list, flags, initial_connections=
 
     # clear out neutral constraints - a n/s neutral might be needed as a portal (todo: could result in a false negative)
     c_info = ConstraintInfo(builder, sector_list, initial_connections, flags)
+    if c_info.unreachable_landings:
+        return None  # rooms reached only through a hole that is no way in
     neutral_constraints = [x for x in c_info.constraints if x.type == ConstraintType.Neutral]
     neutral_checks = []
     for c in neutral_constraints:
@@ -77,6 +80,10 @@ def do_transitivity_check_main(builder, sector_list, flags, initial_connections=
     visited = set()
     for sector in c_info.init_portals:
         t.append_sector_free(sector, c_info)
+    for fall in c_info.drop_starts + sorted(c_info.free_hooks, key=lambda d: d.name):
+        if fall in t.remaining_doors:  # a hole is entered from the overworld, which resets the crystals
+            t.remaining_doors.remove(fall)
+            t.unconnected_doors[fall] = CrystalBarrier.Orange
     initial_options = t.find_connectable_doors(c_info)
     tiebreaker = itertools.count()
     queue = []
@@ -197,7 +204,8 @@ class ConstraintInfo:
 
         for d, dep_info in self.dependent_portals.items():
             sector, enabling_portal = dep_info
-            self.dependent_lookup[enabling_portal.door] = d
+            self.dependent_lookup.setdefault(enabling_portal.door, []).append(d)
+        self.classify_drops(builder, sector_list, flags)
 
         self.door_constraint_map = defaultdict(list)
         for constraint in self.constraints:
@@ -244,6 +252,59 @@ class ConstraintInfo:
                    or (d.blocked and potential_is_special)):
                     continue
                 self.door_matches[d].append(potential_match)
+
+    def classify_drops(self, builder, sector_list, flags):
+        """Each hole's fall is a start (its overworld side is reachable), a dependent of the portals that lead out onto
+        its overworld side, or neither. A shuffled fall that is neither is a free hook: matched to a Terminal but never
+        a way in. A fall kept inside its sector matters only when some rooms are reached through it alone: as a
+        dependent, one of its portals must be entered; as neither, those rooms are unreachable."""
+        self.drop_starts, self.free_hooks, self.unreachable_landings = [], set(), []
+        init_doors = {p.door for s in self.init_portals for p in s.portals}
+        for s in sector_list:
+            for region in sector_drop_portals(s):
+                fall = next(ext.door for ext in region.exits if ext.door is not None)
+                locked = fall not in s.outstanding_doors
+                if locked and fall not in s.descriptor.locked_drop_landings:
+                    continue
+                way_in, enablers = self.drop_way_in(builder, region, sector_list, flags, init_doors)
+                if way_in == 'start':
+                    self.drop_starts.append(fall)
+                elif way_in == 'dependent' and locked:
+                    entries = [d for p in enablers for d in self.portal_entries(p, sector_list)]
+                    self.constraints.append(Constraint(ConstraintType.MustEnter, entries, None))
+                elif way_in == 'dependent':
+                    for p in enablers:
+                        self.dependent_lookup.setdefault(p.door, []).append(fall)
+                elif locked:
+                    self.unreachable_landings.append(fall)
+                else:
+                    self.free_hooks.add(fall)
+
+    @staticmethod
+    def drop_way_in(builder, region, sector_list, flags, init_doors):
+        """('start' | 'dependent' | None, the portals leading out onto the hole's overworld side)."""
+        world, player = region.world, region.player
+        parent = drop_parent_region(region)
+        if is_escape_builder(builder.name, flags.std_flag) or parent is None:
+            return None, []
+        if parent.name not in world.inaccessible_regions[player]:
+            return 'start', []
+        # a linked portal is held by its lobby's sector and by its emptied portal sector
+        enablers = list({id(p): p for t in sector_list for p in t.portals if portal_overworld_side(p, world) == parent}.values())
+        if any(p.door in init_doors for p in enablers):
+            return 'start', []
+        return ('dependent', enablers) if enablers else (None, [])
+
+    def portal_entries(self, portal, sector_list):
+        """The doors through which reaching a portal is entering: its own, or once linked, those of its lobby's sector
+        (the emptied portal sector holds the portal too)."""
+        if portal.door in self.door_sector_map:
+            return [portal.door]
+        return [d for t in sector_list if portal in t.portals for d in t.outstanding_doors]
+
+    def free_hook_may_land(self, terminal):
+        """A free hook adds nothing to what is reached, so its Terminal's sector must be reachable another way."""
+        return terminal.type == DoorType.Terminal and len(self.door_sector_map[terminal].outstanding_doors) > 1
 
 
 # a mirror scroll respawn resets the crystal state to Orange
@@ -547,6 +608,8 @@ class Transitivity:
                 connectable_doors.append(connection)
                 break
             forced_connection = self.is_door_forced(possibles, doors_to_check_set)
+            if forced_connection and d in c_info.free_hooks and not c_info.free_hook_may_land(forced_connection):
+                continue
             if forced_connection and self.can_fall(d) and not violates_restriction(forced_connection, d, c_info):
                 connectable_doors.append((forced_connection, d))
                 break  # short-circuit, we'll just use this one anyway
@@ -566,6 +629,10 @@ class Transitivity:
                 continue  # a pit source cannot be entered
             for available in doors_to_connect:
                 if available == d:  # might allow self-connecting spirals someday here, not too important for logic though
+                    continue
+                if available in c_info.free_hooks:
+                    if c_info.free_hook_may_land(d) and not violates_restriction(d, available, c_info):
+                        connectable_doors.append((d, available))
                     continue
                 if d in c_info.restricted_doors and c_info.restricted_doors[d] != available:
                     continue
@@ -715,6 +782,13 @@ class Transitivity:
         t.connection_map[hanger] = hook
         if hanger in c_info.switch_doors:
             t.crystal_switch_included = True
+        if hook in c_info.free_hooks:  # matched to the Terminal, but reaches nothing through it
+            t.unconnected_doors.pop(hook)
+            if hanger in t.remaining_doors:
+                t.remaining_doors.remove(hanger)
+            t.unconnected_doors.pop(hanger, None)
+            t.satisfy_constraints(hanger, hook, CrystalBarrier.Null, CrystalBarrier.Null)
+            return t
 
         # deal with reachabale remaining doors/unnconnected doors
         crystal_prop = t.unconnected_doors.pop(hook)  # the hook is always on the reached side
@@ -798,25 +872,32 @@ class Transitivity:
 
         # deal with enabled portals
         for p in c_info.door_sector_map[hanger].portals:
-            if p.door in c_info.dependent_lookup:
-                enabled_door = c_info.dependent_lookup[p.door]
+            for enabled_door in c_info.dependent_lookup.get(p.door, []):
                 if enabled_door in t.remaining_doors:
                     t.unconnected_doors[enabled_door] = CrystalBarrier.Orange
                     t.remaining_doors.remove(enabled_door)
 
         # deal with newly satisfied constraints
+        t.satisfy_constraints(hanger, hook, crystal_prop, hook_cs)
+        t.door_states[hook] = hook_cs
+        t.door_states[hanger] = crystal_prop
+
+        return t
+
+    def satisfy_constraints(self, hanger, hook, crystal_prop, hook_cs):
+        """Moves the constraints this connection meets from unsatisfied to satisfied."""
         new_unsatisfied_constraints = []
-        for constraint in t.unsatisfied_constraints:
+        for constraint in self.unsatisfied_constraints:
             if ConstraintType.Portal == constraint.type and (hook in constraint.doors or hanger in constraint.doors):
-                t.satisfied_constraints.append(constraint)
+                self.satisfied_constraints.append(constraint)
             elif hanger in constraint.doors:
                 if constraint.type in [ConstraintType.MustEnter, ConstraintType.Special, ConstraintType.DeadEnd]:
-                    t.satisfied_constraints.append(constraint)
+                    self.satisfied_constraints.append(constraint)
                 elif constraint.type == ConstraintType.Crystal:
                     needed_color = CrystalBarrier.Blue if constraint.constraint.color == 'blue' else CrystalBarrier.Orange
                     if (not constraint.constraint.contains_color_access(hanger)
                             or crystal_prop in [needed_color, CrystalBarrier.Either, CrystalBarrier.Both]):
-                        t.satisfied_constraints.append(constraint)
+                        self.satisfied_constraints.append(constraint)
                     else:
                         new_unsatisfied_constraints.append(constraint)
                 else:
@@ -827,16 +908,12 @@ class Transitivity:
                     needed_color = CrystalBarrier.Blue if constraint.constraint.color == 'blue' else CrystalBarrier.Orange
                     if (constraint.constraint.contains_color_access(hook)
                             and hook_cs in [needed_color, CrystalBarrier.Either, CrystalBarrier.Both]):
-                        t.satisfied_constraints.append(constraint)
+                        self.satisfied_constraints.append(constraint)
                     else:
                         new_unsatisfied_constraints.append(constraint)
             else:
                 new_unsatisfied_constraints.append(constraint)
-        t.unsatisfied_constraints = new_unsatisfied_constraints
-        t.door_states[hook] = hook_cs
-        t.door_states[hanger] = crystal_prop
-
-        return t
+        self.unsatisfied_constraints = new_unsatisfied_constraints
 
     def propagate_colors(self, c_info, changed):
         """Carries every crystal color a door is reached in through the sector walks and the connections already made,
@@ -1056,8 +1133,8 @@ class Transitivity:
                     add(x, 3 if arrive in [CrystalBarrier.Either, CrystalBarrier.Both]
                         else blue if arrive == CrystalBarrier.Blue else orange if arrive == CrystalBarrier.Orange else c)
             for p in sector.portals:
-                if p.door in c_info.dependent_lookup:
-                    add(c_info.dependent_lookup[p.door], orange)  # re-entered from the overworld
+                for enabled_door in c_info.dependent_lookup.get(p.door, []):
+                    add(enabled_door, orange)  # re-entered from the overworld
             if door.type == DoorType.Terminal:
                 continue  # a landing cannot be left through
             if door.type in [DoorType.Hole, DoorType.Warp]:

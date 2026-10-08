@@ -12,9 +12,11 @@ randomizable, adds a new intensity level, and integrates with lobby shuffle and 
 
 ## Current State
 
-- Phases 1 and 2 are implemented (intensity 4 shuffles pits and warps in logic and in dungeon generation).
-  Phase 5 (ROM write): the generator writes `LandingZoneData`; the bundled base patch still lacks the PitWarps code, so
-  an intensity-4 ROM sends every pit to its vanilla room until it is rebuilt from dr_baserom's `PitWarps` branch.
+- Phases 1, 2, 3 and 5 are implemented: intensity 4 shuffles pits, warps and where overworld holes land, in logic, in
+  dungeon generation and in the ROM. The generator writes `LandingZoneData` for pits and warps and the entrance rows for
+  holes; the base patch with the PitWarps code (from dr_baserom's `PitWarps` branch) is not committed yet.
+- Phase 3 is not done until a playtest seed exercises drops landing away from their vanilla rooms; the next playtest
+  seed covers it.
 - `data/terminals.yaml` defines 27 pit Terminals (33 sources) and 26 warp Terminals (26 sources).
 - Verification and the Transitivity design history are in `docs/plans/transitivity_pitwarp_verification.md`.
 
@@ -138,11 +140,23 @@ choice decides which regions are reachable, and in which crystal color):
 
 ---
 
-## Phase 3 — Drop Lobbies
+## Phase 3 — Drop Lobbies (implemented; done once a playtest seed exercises moved drops)
 
-An overworld hole leads to its Drop Portal, owned by its vanilla dungeon, whose one-way source lands on any Terminal in
-that dungeon; the entrance row carries the landing data. Enabled when lobbies and pits both shuffle. Design:
-`docs/specs/2026-10-06-pitwarps-phase3-drop-lobbies-design.md`.
+An overworld hole leads to its Drop Portal (`source/dungeon/DropPortals.py`), owned by its vanilla dungeon: Skull Woods
+owns Pot Circle, Left Drop, Pinball and Back Drop; Hyrule Castle owns the Sewers drop. The Drop Portal's fall is a `Hole`
+door that lands, one way, on any Terminal in the owning dungeon; five Terminals hold the vanilla landings (entrances
+`$76`–`$79` and `$81`). Enabled when lobbies and pits both shuffle (`drop_lobbies_locked`); otherwise the falls are wired
+vanilla. Design: `docs/specs/2026-10-06-pitwarps-phase3-drop-lobbies-design.md`; generation and verification are in
+`docs/plans/transitivity_pitwarp_verification.md`.
+
+- ROM: `Rom.write_drop_entrances` rewrites each shuffled hole's entrance row from its Terminal's `landing` block in
+  `data/terminals.yaml` (room, scroll and scroll bounds, Link and camera trigger positions, graphics, floor, layer,
+  scroll control, quadrant); the dungeon id, in-door, overworld door tilemap and music stay the owning dungeon's.
+  Unshuffled holes keep their rows. No base ROM change is needed.
+- Spoiler: shuffled drops are listed under Dungeon Lobbies as `<Drop Portal>: <Terminal>`, not in the pit list.
+- Key logic starts its walks at the Drop Portals, so no hole gets a key rule.
+- Tests: `TestDropPortals` (`TestDropPortalKeyLogic`), `TestDropPortalTransitivity`, `TestPitWarpRom`
+  (`TestWriteDropEntrances`).
 
 ---
 
@@ -222,9 +236,8 @@ writer behavior) and `TestPitWarpRegression.py` (full generation: intensity 3 on
 
 - One remapped row in an intensity-4 ROM decodes to its capture (crossed, seed 3: Eastern Courtyard Potholes, row `$12`,
   holds the GT Staredown landing).
-- The bundled base patch (`data/base2current.bps`) does not contain the PitWarps code yet (`$A7C940` is zero, not the
-  `$8000` defaults); it needs a rebuild from dr_baserom's `PitWarps` branch before a ROM can be playtested.
-- Not yet run in an emulator.
+- Playtested in an emulator (crossed, intensity 4, seed 3) with a base patch rebuilt from dr_baserom's `PitWarps`
+  branch.
 
 ### 5d. Compass boss indicator
 
@@ -247,7 +260,8 @@ dungeon's slot. `TestBossIndicator` covers intensity 4, custom `pits`, and inten
 
 ### 7a. Spoiler log
 
-- ✓ The door spoiler lists each shuffled pit source and its landing region (one-way).
+- ✓ The door spoiler lists each shuffled pit source and its landing region (one-way); shuffled drops are listed with
+  the lobbies (Phase 3).
 
 ### 7b. TestSuite.py
 
@@ -257,7 +271,10 @@ dungeon's slot. `TestBossIndicator` covers intensity 4, custom `pits`, and inten
 
 ### 7c. Regression
 
-- Ensure intensity 1–3 seeds are unaffected by the new intensity 4 infrastructure
+- Ensure intensity 1–3 seeds are unaffected by the new intensity 4 infrastructure. Today they are not: the same seed
+  generates differently from NewGeneration, because the trap rule, Drop Portal regions and the Ice Freezors Shared Pit
+  region change sectors and random draws. What still needs checking is that only the draws change: logic stays
+  equivalent and no rule moves (e.g. no key rule lands on a hole).
 - Ensure custom intensity `pit_warps: none` produces identical output to pre-feature
   behavior at any intensity level
 
@@ -299,7 +316,7 @@ Phase 1 (settings) ─┬─── Phase 2 (gen)
 1. **Phase 2** (dungeon generation) — done (logic)
 2. **Phase 5** (ROM write) — obtain ROM spec from baserom branch, implement alongside Phase 2
 3. **Phase 6** (testing & spoiler log) — validate the feature end-to-end with Phases 2+5 complete
-4. **Phase 3** (OW pit dropdowns) — after basic feature is tested and stable
+4. **Phase 3** (OW pit dropdowns) — implemented; done once the next playtest seed exercises moved drops
 5. **Phase 4** — deferred until `dungeon_entrances` Phase 3 is ready to integrate
 
 Phase 4 is explicitly deferred — no work until both pitwarps and `dungeon_entrances` are independently stable.

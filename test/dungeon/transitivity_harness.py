@@ -25,7 +25,7 @@ class CheckTimeout(Exception):
 
 
 @lru_cache(maxsize=None)
-def capture_sectors(intensity, seed=1):
+def capture_sectors(intensity, seed=1, mode='open'):
     """Runs generation until DungeonGenInfo is built, returning the prepared sector pool and flags."""
     result = {}
 
@@ -40,7 +40,7 @@ def capture_sectors(intensity, seed=1):
     try:
         args = parse_cli(['--door_shuffle', 'crossed', '--intensity', str(intensity),
                           '--dungeon_shuffle_algorithm', 'experimental', '--suppress_rom', '--spoiler', 'none',
-                          '--seed', str(seed)])
+                          '--mode', mode, '--seed', str(seed)])
         Main.main(args, seed=seed, fish=BabelFish(lang='en'))
     except _Captured:
         pass

@@ -57,5 +57,21 @@ def sector_drop_portals(sector):
 
 
 def builder_drop_portals(builder):
-    """Names of the Drop Portal regions in a dungeon builder's sectors: the dungeon's hole entrances."""
-    return [r.name for s in builder.sectors for r in sector_drop_portals(s)]
+    """Names of the Drop Portal regions in a dungeon builder's sectors: the dungeon's hole entrances. Once generated,
+    the builder's sectors include its master sector, which holds them all again."""
+    return list(dict.fromkeys(r.name for s in builder.sectors for r in sector_drop_portals(s)))
+
+
+def region_overworld_side(portal_region):
+    """The overworld region a lobby portal region leads out onto (None if it has no overworld exit)."""
+    return next((e.connected_region for e in portal_region.exits
+                 if e.connected_region is not None and e.connected_region.type != RegionType.Dungeon), None)
+
+
+def portal_overworld_side(portal, world):
+    return region_overworld_side(world.get_region(f'{portal.name} Portal', portal.player))
+
+
+def is_escape_builder(builder_name, std_flag):
+    """In standard the escape is walked from inside the castle, so no hole is a way into its builders."""
+    return std_flag and builder_name in ['Hyrule Castle Sewers', 'Hyrule Castle Dungeon']

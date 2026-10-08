@@ -7,7 +7,7 @@ from collections import deque
 
 from BaseClasses import CollectionState, CrystalBarrier, DoorType, RegionType
 from source.dungeon.DungeonGenerationCommon import hanger_from_door, hook_from_door
-from source.dungeon.DropPortals import drop_parent_region, is_lobby_portal, sector_drop_portals
+from source.dungeon.DropPortals import drop_parent_region, is_drop_portal, is_escape_builder, is_lobby_portal, sector_drop_portals
 
 ONE_WAY = (DoorType.Hole, DoorType.Warp)
 
@@ -91,7 +91,10 @@ def explore(starts, cmap, group_terminal, allowed, respect_traps=True, rrp=None)
 
 
 def _overworld_drops(c_info):
-    """(Drop Portal region, overworld parent of its hole) for every hole leading into the dungeon."""
+    """(Drop Portal region, overworld parent of its hole) for every hole that may lead into the dungeon; in standard,
+    none leads into the escape builders."""
+    if is_escape_builder(c_info.builder.name, c_info.flags.std_flag):
+        return []
     return [(r, drop_parent_region(r)) for s in c_info.sector_list for r in sector_drop_portals(s)
             if drop_parent_region(r) is not None]
 
@@ -133,14 +136,14 @@ def explore_with_dependents(c_info, cmap, group_terminal, allowed):
             if not any(r in reached for r in sector.regions):
                 continue
             for p in sector.portals:
-                enabled = c_info.dependent_lookup.get(p.door)
-                if enabled is None:
-                    continue
-                # re-entering from the overworld resets the crystal state to Orange, even if already reached inside
-                region = enabled.entrance.parent_region
-                before = reached.get(region)
-                explore([region], cmap, group_terminal, allowed, respect_traps, reached)
-                changed |= reached.get(region) != before
+                for enabled in c_info.dependent_lookup.get(p.door, []):
+                    if is_drop_portal(enabled.entrance.parent_region):
+                        continue  # a drop is enabled by the overworld rule above, independently of Transitivity's
+                    # re-entering from the overworld resets the crystal state to Orange, even if already reached inside
+                    region = enabled.entrance.parent_region
+                    before = reached.get(region)
+                    explore([region], cmap, group_terminal, allowed, respect_traps, reached)
+                    changed |= reached.get(region) != before
     return reached
 
 
@@ -158,7 +161,8 @@ def check_witness(solution):
     considered_set = set(considered)
     must_reach = {r for s in solution.c_info.sector_list
                   if not s.outstanding_doors or any(d in considered_set for d in s.outstanding_doors)
-                  for r in s.regions}  # sectors dropped as neutral are spliced in later, not reached
+                  for r in s.regions if not is_drop_portal(r)}  # neutral sectors are spliced in later, not reached;
+    # a Drop Portal is an entry, not a room: a free hook's is never reached
     allowed = {r for s in solution.c_info.sector_list for r in s.regions}
     reached = explore_with_dependents(solution.c_info, cmap, group_terminal, allowed)
     for region in sorted(must_reach - set(reached), key=lambda r: r.name):

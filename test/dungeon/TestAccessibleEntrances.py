@@ -37,11 +37,11 @@ class TestAccessibleEntrances(unittest.TestCase):
                                get_region=lambda name, player: self.regions[name])
 
     def test_trap_not_final(self):
-        builder = SimpleNamespace(name='Swamp Palace')
+        builder = SimpleNamespace(name='Swamp Palace', sectors=[])  # sectors: a builder's holes come from its Drop Portals
         self.assertEqual(['Swamp Lobby'], find_accessible_entrances(self.world('optional'), 1, builder))
 
     def test_vanilla_traps_are_final(self):
-        builder = SimpleNamespace(name='Swamp Palace')
+        builder = SimpleNamespace(name='Swamp Palace', sectors=[])  # sectors: a builder's holes come from its Drop Portals
         self.assertEqual([], find_accessible_entrances(self.world('vanilla'), 1, builder))
 
 

@@ -29,7 +29,7 @@ Search-effort changes:
 
 Generation changes:
 
-- Drop-down lobbies stay in their vanilla dungeon at every intensity until pitwarps Phase 3 (`drop_lobbies_locked`). Neither Transitivity nor the trap/key door stages count a moved drop as a start, and a moved Skull Back Drop (whose forest is reached only by leaving Skull Woods) could never be stitched. `drop_parent_region` is shared by LocalSearch and the stitcher.
+- Drop lobbies (pitwarps Phase 3): each overworld hole leads into a Drop Portal region whose fall (a `Hole` door) is matched to a Terminal like a pit. The Drop Portals stay with their owning dungeon (`drop_portal_builders`); where the fall lands moves only when lobbies and pits both shuffle (`drop_lobbies_locked`), and is wired vanilla otherwise. Transitivity classifies each fall (`classify_drops`): ungated (its overworld side is reachable) is a start; gated (Skull Back Drop) depends on the portals onto its overworld side and is a start when one of them is; a fall with no enabling portal, or any fall of a standard-mode escape builder, is a free hook that lands only on a Terminal whose sector has another outstanding door and propagates nothing. A fall kept inside its sector (drops locked) still needs a way in when it is the only way to reach some rooms (its landing, `locked_drop_landings`; Skull Back Drop's room): it is a start, or it depends on a portal onto the hole's overworld side and the plan must enter that portal's sector (MustEnter), or Transitivity returns None. Only portals of the same builder count, since a portal of another dungeon is a bridge only if that dungeon is stitched to pass through. The stitcher follows the same rule (gated falls open when exploration reaches a lobby portal onto their overworld side), and the trap, big key and small key door stages count Drop Portals as entrances (`builder_drop_portals`). Key logic walks start at the Drop Portals, where holes enter (`region_starts`, `split_region_starts`, `dungeon_drops` and `default_dungeon_entrances` name them): a walk from the landing never visits the Drop Portal, so the key logic counted it as locked behind the big key (`bk_regions`) or every small key (`region_key_reqs`) and put that rule on the hole. `drop_parent_region` is shared by LocalSearch and the stitcher; `TestDropPortals` (`TestDropPortalKeyLogic`) and `TestDropPortalTransitivity` cover the model.
 - `Ice Freezors Shared Pit` (the one hole both Ice Freezors and its ledge fall through) is in Ice Palace's region list, so it joins their sector; without it `Ice Freezors Hole` was never shuffled and stayed unconnected (`TestTerminalGroups.test_every_pit_source_is_in_a_sector`).
 - Dead-end portal flags that hold only because a pit leads to the boss are set only when pits do not shuffle (`pits_shuffled`; today only `Skull Spike Corner SW`).
 - Transitivity refuses a dead-end door for any portal the stitcher may pick as primary (`may_be_primary_portal`: a non-destination portal without a dependent, or the builder's sole non-destination portal); the stitcher never gives the primary portal a dead end.
@@ -40,7 +40,7 @@ Generation changes:
   stitcher's candidate filter refuses. Portals connected later in the search (`init=False`) are not covered.
 - Forced connections in `find_connectable_doors` respect initial connections (`violates_restriction`). Before, a forced pairing could override a pinned portal, and the stitcher's portal assignment got a True for a pin the plan did not keep. The witness checker now reports any initial connection the plan does not keep.
 - `bk_shuffle_req` (only `Desert Tiles 2 SE`) keeps a room with no location from becoming a lobby when the big key must be in the dungeon and nothing else can hold it. Big key shuffle, pottery that can hold the big key, shuffled big key doors, or a split dungeon (the other half has locations) make it moot; Transitivity and the stitcher apply the same rule. Before, the stitcher ignored the split exception, and it caused most "No valid portal candidates for Desert Palace Front/Back" failures.
-- Trap doors: without `smaller_dungeon_gen`, a trap layout must keep every region of the dungeon reachable, including rooms without locations (with pits shuffled a room like Ice Antechamber can be a pass-through with no locations). With `smaller_dungeon_gen`, such rooms may be cut off, and the boss palette code tolerates a leading room with no entrances.
+- Trap doors: without `smaller_dungeon_gen`, a trap layout must keep every region of the dungeon reachable, including rooms without locations (with pits shuffled a room like Ice Antechamber can be a pass-through with no locations). Drop Portals are exempt: they are entered only from the overworld. With `smaller_dungeon_gen`, such rooms may be cut off, and the boss palette code tolerates a leading room with no entrances.
 - Item logic: `Convenient Block` (from `Ice Block Drop`) opens Ice Switch Room only when `Ice Crystal Block Hole` lands in Ice Switch Room within the same dungeon (`block_drop_reaches_switch_room`); the block state resets otherwise.
 
 Results (`PYTHONHASHSEED=0`, crossed, experimental, seed 1 unless a range is given; verified = witness checker reports no problems):
@@ -49,19 +49,31 @@ Results (`PYTHONHASHSEED=0`, crossed, experimental, seed 1 unless a range is giv
 |---|---|---|
 | 13 vanilla dungeons | 13 verified | 13 verified |
 | 78 vanilla pairs | 78 verified | 78 verified |
-| Real LocalSearch calls, seeds 1–12 (every True checked) | 399 calls, 193 True, 0 wrong | 384 calls, 185 True, 0 wrong (2 seeds hit the cap) |
-| Seeds 1–40 through stitching (NewGeneration path) | 35 stitched, 5 hit the 20k cap | 32 stitched, 8 hit the 20k cap |
+| Real LocalSearch calls, seeds 1–12 (every True checked) | 281 calls, 194 True, 0 wrong | 309 calls, 171 True, 0 wrong (3 seeds hit the cap); 55 calls hold a drop landing outside its vanilla dungeon, 43 True, 0 wrong |
+| Seeds 1–40 through stitching (`gen_check --stop doors`) | 36 stitched, 4 hit the 20k cap | 27 stitched, 13 hit the 20k cap |
 | Stitched layouts: every region reachable over the applied connections | all | all |
-| Small crossed sets vs. exhaustive solver (300 pairable, crystal-free, no gated drop) | 3 of 220 solvable wrongly False (1.4%) | 1 of 188 (0.5%) |
+| Small crossed sets vs. exhaustive solver (300 pairable, crystal-free, no Drop Portal) | 5 of 220 solvable wrongly False (2.3%) | 1 of 188 (0.5%) |
 
 False verdicts only narrow randomness; the policy is no wrong True anywhere and a wrong-False rate within 3% on the small-set comparison (`TestTransitivityOracle`). No neutral sector holds pit doors (`is_sector_neutral` rejects them), so splicing one-way sectors is not exercised; `TestTerminalGroups` guards that.
 
 Open work, correctness done first:
 
-Out of scope: general Transitivity search effort. The remaining 20k-iteration caps are mostly two-way-door search (intensity 3 caps 5 of 40 seeds too; Ganons Tower, Agahnims Tower and Swamp Palace caps expand almost only two-way doors, Eastern Palace and Thieves Town are the pit-heavy ones). The generation target is the "2.0.0 2025" tab of the stability matrix (overall 80.95%); in one environment (Python 3.14 venv) `TestSuite.py` (classic path at the time) scores the branch at parity with its base (65.3% vs 64.0%, and 65.9% on the sheet's commit `e0a3c0d8`), so the gap to the sheet is environmental. The branch shifts some failures from item fill to "Keylock detected" (68 vs 38 across a full run) without changing the success rate; cause not yet determined.
+Out of scope: general Transitivity search effort. The remaining 20k-iteration caps are mostly two-way-door search (Ganons Tower, Agahnims Tower and Swamp Palace caps expand almost only two-way doors; Eastern Palace and Thieves Town are the pit-heavy ones), and which seeds hit them moves with any change upstream of LocalSearch. The generation target is the "2.0.0 2025" tab of the stability matrix (overall 80.95%).
 
-1. **Moving drop lobbies** (pitwarps Phase 3). Every stage must count a moved drop as a start: Transitivity (not yet), the stitcher (yes, when its overworld side is accessible), and the trap, big key and small key door stages (`find_possible_entrances` uses the vanilla `drop_entrances`). A drop whose overworld side is inaccessible (Skull Back Drop) is enabled only once the dungeon reaches a portal onto that region; the witness checker already models this.
-2. **Full generation** (non-classic dungeon algorithms need `--key_logic_algorithm experimental`), seeds 1–12: intensity 3 completes 11 (1 cap), intensity 4 completes 8 (3 caps, 1 small-key `FillError` in Thieves Town, seed 2, not investigated), the same with and without `smaller_dungeon_gen`. Classic at intensity 3 completes 6, matching `e0a3c0d8` (5, same failures). `TestSuite.py` now runs the experimental algorithm at intensity 1–4 as the main blocks and classic at intensity 1–3 with fewer seeds.
+1. **Portal candidate and `fix_transitivity` failures with drops locked** (crossed intensity 3, seeds 1–40, door stage).
+   Full entrance shuffle stitches 36: 2 caps, 1 "No transitivity solution found during fix_transitivity step for Skull
+   Woods Back" (its Back Drop sector must join Skull Woods Front and no move of up to 4 sectors works), 1 "No valid
+   portal candidates for Skull Woods Front". Simple entrance shuffle in standard stitches 26: 10 caps, 3 "No valid
+   portal candidates for Turtle Rock", 1 for Desert Palace Front. Not investigated; `detect_problematic_forced_scenarios`
+   is gone from the base, so it is not the cause.
+2. **Full generation** (`TestSuite.py --cpu_threads 5`, NewGeneration `eca56663` plus this branch; seeds that ran past
+   15 minutes were stopped and count as failures). Experimental blocks, without the Retro rows: basic intensity 1–4
+   97.0 / 97.6 / 84.8 / 64.8%, crossed 90.0 / 89.4 / 75.5 / 63.9%; most intensity 4 failures are 20k caps. Retro with
+   vanilla entrances fails "No terminal spheres found" in NewKeyLogic (67 seeds across the experimental blocks): the base's
+   `seals_only_its_chest` queries key logic that builds no spheres for universal keys. NewGeneration fixes it in
+   `c6734b99`, which this branch takes at its next rebase. Ten seeds hung past
+   15 minutes (crossed, intensities 1–3, mostly overworld glitches or inverted), not attributed yet. Classic blocks:
+   basic 70.8 / 77.8 / 68.1%, crossed 58.3 / 60.6 / 57.8% (all rows).
 
 ## Pit Model
 
@@ -122,7 +134,7 @@ Run from the repo root with `PYTHONHASHSEED=0` (door hashing is by name, so set 
 |---|---|
 | `test/dungeon/transitivity_harness.py` | Captures the real, prepared sector pool by running `Main.main` until `DungeonGenInfo` is built; hard timeouts |
 | `test/dungeon/transitivity_witness.py` | Independent checker for the connection plan behind a True: pairing and group rules, world-graph reachability with crystal rules, traps, controller doors, dependent portals, drops |
-| `test/dungeon/transitivity_oracle.py` | Exhaustive solver for small sector sets (pairability and portal rules; ignores crystals) |
+| `test/dungeon/transitivity_oracle.py` | Exhaustive solver for small sector sets (pairability, portal rules, and a location before any big key door where big keys matter; ignores crystals) |
 | `test/dungeon/transitivity_replay.py` | Drives Transitivity along a known-valid vanilla path and reports the first check that rejects a step |
 | `test/dungeon/collect_transitivity_corpus.py` | Records every Transitivity call from real LocalSearch runs and checks each True |
 | `test/dungeon/TestTransitivityVanilla.py` | Vanilla dungeons and pairs must be True; terminal-group and neutral-sector tripwires |

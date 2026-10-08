@@ -7,6 +7,7 @@ from Utils import append_to_yaml, clear_file
 from source.dungeon.DungeonGenerationCommon import hanger_from_door
 from source.dungeon.DungeonGenerationCommon import GenerationException, is_boss_trap, crystal_allows, pit_barrier
 from source.dungeon.DungeonStitcher import ExplorableDoor
+from source.dungeon.DropPortals import is_drop_portal, sector_drop_portals
 
 
 def create_sector_descriptors(sector_list, world, player):
@@ -39,6 +40,7 @@ class SectorDescriptor:
         self.orange_reachability = defaultdict(list)
         self.state_cache = {}
         self.crystal_switch_doors = []
+        self.locked_drop_landings = {}  # fall kept inside the sector -> rooms reached only through it
         self.constraints = {}  # disjunction of optional constraints, indexed by Hooks consumed
         self.parity_id = ''
         self.init_parity_id()
@@ -81,6 +83,12 @@ class SectorDescriptor:
                     # self.reachability[None].append((p.door, CrystalBarrier.Orange, CrystalBarrier.Null))
                     skip_doors.add(p.door)
             # todo: dependent portals
+        # a hole's Drop Portal is entered from the overworld, which resets the crystals, as a portal is
+        for region in sector_drop_portals(self.sector):
+            fall = next(ext.door for ext in region.exits if ext.door is not None)
+            if fall in self.sector.outstanding_doors:
+                self.reachability[fall].append((fall, CrystalBarrier.Orange, CrystalBarrier.Null))
+                skip_doors.add(fall)
         # which outstanding doors are reachable from which outstanding doors
         for door in self.sector.outstanding_doors:
             # these types you cannot enter from
@@ -102,6 +110,7 @@ class SectorDescriptor:
                 # crystal = self.resolve_crystal_prop(explorable.crystal, state.visited_map[explorable.door.entrance.parent_region])
                 self.add_reachable(door, explorable)
             self.state_cache[door] = state
+        self.find_locked_drop_landings(v_trap_flag)
 
         for door, reach_list in self.reachability.items():
             ctr = Counter([(hook_from_door(d), number, flag) for d, number, flag in reach_list if hook_from_door(d) is not None])
@@ -116,6 +125,20 @@ class SectorDescriptor:
                 self.shape_construct[door] = (False, 'no')
 
         self.classify()
+
+    def find_locked_drop_landings(self, v_trap_flag):
+        """For each fall kept inside the sector, the rooms reached through it and from no outstanding door or portal."""
+        self.locked_drop_landings.clear()
+        reached = {r for state in self.state_cache.values() for r in state.visited_map}
+        for region in sector_drop_portals(self.sector):
+            fall = next(ext.door for ext in region.exits if ext.door is not None)
+            if fall in self.sector.outstanding_doors:
+                continue
+            state = SimpleExplorationState(v_trap_flag)
+            state.extend_reachable_state(fall)
+            landing = {r for r in state.visited_map if r not in reached and not is_drop_portal(r)}
+            if landing:
+                self.locked_drop_landings[fall] = landing
 
     def add_reachable(self, start, explorable):
         """Records an outstanding door reached from start. Reaching any source of a pit group reaches the group's
@@ -143,7 +166,7 @@ class SectorDescriptor:
             if door.type == DoorType.Terminal:
                 self.must_enter_reqs.append(door)
                 unreached.difference_update({d for d, c, f in self.reachability.get(door, [])})
-        if total_needed == 1 and not self.sector.portals:
+        if total_needed == 1 and not self.sector.portals and not sector_drop_portals(self.sector):
             self.dead_end = True
         else: #elif not self.sector.portals or all(p.destination for p in self.sector.portals):
             if 'Ice Cross Left' in self.sector.r_name_set and any('Ice Cross ' in d.name for d in self.reachability):

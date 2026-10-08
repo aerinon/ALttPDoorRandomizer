@@ -5,10 +5,11 @@ import unittest
 import yaml
 
 import Main
-from BaseClasses import RegionType
+from BaseClasses import CollectionState, RegionType
 from CLI import parse_cli
+from Items import ItemFactory
 from source.classes.BabelFish import BabelFish
-from source.dungeon.DropPortals import drop_portals, is_drop_portal, drop_parent_region
+from source.dungeon.DropPortals import drop_portals, is_drop_portal, drop_parent_region, sector_drop_portals
 
 TERMINALS = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'terminals.yaml')
 VANILLA_ROM = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'orig', 'z3.sfc')
@@ -31,6 +32,22 @@ def generate(extra=()):
     finally:
         logging.disable(logging.NOTSET)
     raise RuntimeError('no seed generated')
+
+
+def generate_i4(extra=()):
+    """The first crossed intensity-4 seed of 1-8 that generates."""
+    argv = ['--door_shuffle', 'crossed', '--intensity', '4', '--dungeon_shuffle_algorithm', 'experimental',
+            '--key_logic_algorithm', 'experimental', '--suppress_rom', '--spoiler', 'none', *extra]
+    logging.disable(logging.WARNING)
+    try:
+        for seed in range(1, 9):
+            try:
+                return Main.main(parse_cli(argv + ['--seed', str(seed)]), seed=seed, fish=BabelFish(lang='en'))
+            except Exception:
+                continue
+    finally:
+        logging.disable(logging.NOTSET)
+    raise RuntimeError('no intensity 4 seed generated')
 
 
 class TestDropPortals(unittest.TestCase):
@@ -86,6 +103,78 @@ class TestDropPortals(unittest.TestCase):
             with self.subTest(drop=p.region):
                 for address, data in entrance_row_fields(p.entrance_id, entries[p.terminal]['rom']['landing']):
                     self.assertEqual(list(rom[address:address + len(data)]), data, hex(address))
+
+
+class TestDropPortalSectors(unittest.TestCase):
+    """With drop lobbies unlocked, a Drop Portal stays with its owning dungeon while its fall may land elsewhere."""
+
+    def test_unlocked_drop_portals_stay_with_their_owner(self):
+        world = generate_i4()
+        for p in drop_portals:
+            with self.subTest(drop=p.region):
+                self.assertEqual(p.owner, world.get_region(p.region, 1).dungeon.name)
+
+    def test_stages_credit_drops_to_their_dungeon(self):
+        from DoorShuffle import find_possible_entrances
+        world = generate_i4()
+        for name, builder in world.dungeon_layouts[1].items():
+            drops = [r.name for s in builder.sectors for r in sector_drop_portals(s)]
+            with self.subTest(builder=name):
+                self.assertTrue(set(drops) <= set(find_possible_entrances(world, 1, builder)))
+
+    def test_unlocked_falls_are_shuffled(self):
+        world = generate_i4()
+        for p in drop_portals:
+            with self.subTest(drop=p.region):
+                self.assertIsNotNone(world.get_door(p.fall, 1).pit_terminal)
+
+
+def generate_doors(seed, *door_args):
+    argv = [*door_args, '--dungeon_shuffle_algorithm', 'experimental', '--key_logic_algorithm', 'experimental',
+            '--suppress_rom', '--spoiler', 'none', '--seed', str(seed)]
+    logging.disable(logging.WARNING)
+    try:
+        return Main.main(parse_cli(argv), seed=seed, fish=BabelFish(lang='en'))
+    finally:
+        logging.disable(logging.NOTSET)
+
+
+class TestDropPortalKeyLogic(unittest.TestCase):
+    """Key logic walks a dungeon from its Drop Portals, where a hole enters it, so it never locks a hole behind a key."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.vanilla = generate_doors(1, '--door_shuffle', 'vanilla')
+        cls.basic = generate_doors(2, '--door_shuffle', 'basic', '--intensity', '1')
+
+    def test_walks_start_at_drop_portals(self):
+        for label, world in [('vanilla', self.vanilla), ('basic', self.basic)]:
+            starts = {r.name for r in world.key_layout[1]['Hyrule Castle'].start_regions}
+            with self.subTest(doors=label):
+                self.assertIn('Sewers Drop Portal', starts)
+                self.assertNotIn('Sewers Rat Path', starts)
+
+    def test_starts_are_listed_once(self):
+        for label, world in [('vanilla', self.vanilla), ('basic', self.basic)]:
+            for name, layout in world.key_layout[1].items():
+                with self.subTest(doors=label, dungeon=name):
+                    names = [r.name for r in layout.start_regions]
+                    self.assertEqual(len(names), len(set(names)))
+
+    def test_no_drop_portal_is_locked(self):
+        for label, world in [('vanilla', self.vanilla), ('basic', self.basic)]:
+            for name, logic in world.key_logic[1].items():
+                if logic.new_logic is None:
+                    continue
+                locked = set(logic.new_logic.bk_regions) | set(logic.new_logic.region_key_reqs)
+                with self.subTest(doors=label, dungeon=name):
+                    self.assertEqual([], sorted(r.name for r in locked if is_drop_portal(r)))
+
+    def test_sanctuary_grave_needs_only_the_glove(self):
+        world = self.vanilla
+        state = CollectionState(world)
+        state.collect(ItemFactory('Power Glove', 1), True)
+        self.assertTrue(world.get_entrance('Sanctuary Grave', 1).access_rule(state))
 
 
 if __name__ == '__main__':

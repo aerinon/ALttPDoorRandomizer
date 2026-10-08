@@ -6,7 +6,8 @@ import time
 from BaseClasses import CrystalBarrier, DoorType, Hook, RegionType, Sector, Portal
 from BaseClasses import hook_from_door, flooded_keys
 from Regions import dungeon_events, flooded_keys_reverse
-from source.dungeon.DropPortals import drop_parent_region, is_drop_portal, sector_drop_portals
+from source.dungeon.DropPortals import drop_parent_region, is_drop_portal, is_escape_builder, is_lobby_portal
+from source.dungeon.DropPortals import region_overworld_side, sector_drop_portals
 from source.dungeon.DungeonGenTransitivity import do_transitivity_check
 from source.dungeon.DungeonGenSectorDesc import SectorDescriptor
 
@@ -51,10 +52,8 @@ def determine_entrance_regions(builder, flags, world, player):
     rupee_bow_flag = hc_flag and world.bow_mode[player].startswith('retro')  # rupee bow
     bk_shuffle = bk_shuffle_lobbies_allowed(builder, world, player)
 
-    single_entrance_flag = False
     if len(builder_portals) == 1:  # only one access
         destination_portals, non_destination_portals = [], builder_portals
-        single_entrance_flag = True
     else:
         destination_portals = [p for p in builder_portals if p.destination]
         non_destination_portals = [p for p in builder_portals if not p.destination]
@@ -107,14 +106,12 @@ def determine_entrance_regions(builder, flags, world, player):
         else:
             record_entrance_regions(entrance_regions, portal)
 
-    # drop entrances: a hole's Drop Portal
-    for region in (r for s in builder.sectors for r in sector_drop_portals(s)):
-        if std_flag and region.name == 'Sewers Drop Portal':
-            continue
-        parent_region = drop_parent_region(region)
-        # access to the parent_region may be gated by this dungeon, don't depend on it
-        if parent_region.name not in world.inaccessible_regions[player] or single_entrance_flag:
-            entrance_regions.append(region)
+    # drop entrances: a hole's Drop Portal whose overworld side is reachable (gated ones open during exploration)
+    if not is_escape_builder(builder.name, std_flag):
+        for region in (r for s in builder.sectors for r in sector_drop_portals(s)):
+            parent_region = drop_parent_region(region)
+            if parent_region is not None and parent_region.name not in world.inaccessible_regions[player]:
+                entrance_regions.append(region)
 
     return entrance_regions
 
@@ -377,9 +374,35 @@ def explore_proposal(builder, entrance_regions, all_regions, proposed_map, valid
     start = ExplorationState(dungeon=builder.name)
     bk_relevant = (world.door_type_mode[player] == 'original' and not world.bigkeyshuffle[player] and not builder.split_flag) or bk_special
     start.big_key_special = bk_special
-    original_state = extend_reachable_state_lenient(entrance_regions, start, proposed_map,
-                                                    all_regions, valid_doors, bk_relevant, world, player)
-    return original_state
+    gated = gated_drop_portals(builder, world, player)
+    regions = list(entrance_regions)
+    while True:
+        original_state = extend_reachable_state_lenient(regions, start, proposed_map,
+                                                        all_regions, valid_doors, bk_relevant, world, player)
+        visited = set(original_state.visited_blue) | set(original_state.visited_orange)
+        opened = [r for r in opened_drop_portals(gated, visited) if r not in regions]
+        if not opened:
+            return original_state
+        regions.extend(opened)  # leaving onto a hole's overworld region makes the hole a way back in
+
+
+def gated_drop_portals(builder, world, player):
+    """(Drop Portal, overworld parent) for each of the builder's holes whose overworld side is reached only by leaving
+    through a portal; as in Transitivity, none in standard's escape builders."""
+    if is_escape_builder(builder.name, world.mode[player] == 'standard'):
+        return []
+    gated = []
+    for region in (r for s in builder.sectors for r in sector_drop_portals(s)):
+        parent = drop_parent_region(region)
+        if parent is not None and parent.name in world.inaccessible_regions[player]:
+            gated.append((region, parent))
+    return gated
+
+
+def opened_drop_portals(gated, visited):
+    """The gated Drop Portals whose overworld side a visited lobby portal leads out onto."""
+    outside = {region_overworld_side(r) for r in visited if is_lobby_portal(r)}
+    return [region for region, parent in gated if parent in outside]
 
 
 def check_valid(builder, exploration_state, proposed_map, doors_to_connect, all_regions,

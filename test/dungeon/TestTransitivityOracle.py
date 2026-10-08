@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from source.dungeon.DungeonGenLocalSearch import default_lobby_drops
+from source.dungeon.DropPortals import sector_drop_portals
 from source.dungeon.DungeonGenTransitivity import ConstraintInfo, find_transitivity_solution
 from test.dungeon.transitivity_harness import DUNGEONS, capture_sectors, hard_timeout, make_builder, sectors_by_dungeon
 from test.dungeon.transitivity_oracle import crystal_free, oracle_solvable, pairable
@@ -18,7 +18,7 @@ def differential(intensity, seed=20260923, cases=CASES):
     portals = {n: [s for s in grouped[n] if s.portals and any(not p.destination for p in s.portals)] for n in DUNGEONS}
     pool = [s for s in sectors if not s.portals and s.outstanding_doors and crystal_free(s)
             and not s.descriptor.is_neutral
-            and not any(r.name in default_lobby_drops for r in s.regions)]  # drop lobbies stay in their dungeon
+            and not sector_drop_portals(s)]  # a hole's Drop Portal stays with its owning dungeon
     rng = random.Random(seed)
     disagreements, bad_witness, skipped, verdicts = [], [], 0, {True: 0, False: 0}
     sampled = 0

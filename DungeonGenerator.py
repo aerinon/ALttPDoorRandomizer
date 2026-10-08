@@ -3108,7 +3108,8 @@ split_check_entrance_invalid = [
 ]
 
 dungeon_drops = {
-    'Hyrule Castle': ['Sewers Rat Path'],
-    'Skull Woods': ['Skull Pot Circle', 'Skull Pinball', 'Skull Left Drop', 'Skull Back Drop'],
+    'Hyrule Castle': ['Sewers Drop Portal'],
+    'Skull Woods': ['Skull Pot Circle Drop Portal', 'Skull Pinball Drop Portal', 'Skull Left Drop Drop Portal',
+                    'Skull Back Drop Drop Portal'],
 }
 

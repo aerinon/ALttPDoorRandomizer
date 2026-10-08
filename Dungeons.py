@@ -233,15 +233,17 @@ dungeon_regions = {
 }
 
 region_starts = {
-    'Hyrule Castle': ['Hyrule Castle Lobby', 'Hyrule Castle West Lobby', 'Hyrule Castle East Lobby', 'Sewers Rat Path', 'Sanctuary'],
+    'Hyrule Castle': ['Hyrule Castle Lobby', 'Hyrule Castle West Lobby', 'Hyrule Castle East Lobby', 'Sewers Drop Portal',
+                      'Sanctuary'],
     'Eastern Palace': ['Eastern Lobby'],
     'Desert Palace': ['Desert Back Lobby', 'Desert Main Lobby', 'Desert West Lobby', 'Desert East Lobby'],
     'Tower of Hera': ['Hera Lobby'],
     'Agahnims Tower': ['Tower Lobby'],
     'Palace of Darkness': ['PoD Lobby'],
     'Swamp Palace': ['Swamp Lobby'],
-    'Skull Woods': ['Skull 1 Lobby', 'Skull 2 East Lobby', 'Skull 2 West Lobby', 'Skull 3 Lobby', 'Skull Pot Circle',
-                    'Skull Pinball', 'Skull Left Drop', 'Skull Back Drop'],
+    'Skull Woods': ['Skull 1 Lobby', 'Skull 2 East Lobby', 'Skull 2 West Lobby', 'Skull 3 Lobby',
+                    'Skull Pot Circle Drop Portal', 'Skull Pinball Drop Portal', 'Skull Left Drop Drop Portal',
+                    'Skull Back Drop Drop Portal'],
     'Thieves Town': ['Thieves Lobby'],
     'Ice Palace': ['Ice Lobby'],
     'Misery Mire': ['Mire Lobby'],
@@ -259,8 +261,8 @@ split_region_starts = {
         'Main': ['Desert Main Lobby', 'Desert West Lobby', 'Desert East Lobby']
     },
     'Skull Woods': {
-        '1': ['Skull 1 Lobby', 'Skull Pot Circle'],
-        '2': ['Skull 2 West Lobby', 'Skull 2 East Lobby', 'Skull Back Drop'],
+        '1': ['Skull 1 Lobby', 'Skull Pot Circle Drop Portal'],
+        '2': ['Skull 2 West Lobby', 'Skull 2 East Lobby', 'Skull Back Drop Drop Portal'],
         '3': ['Skull 3 Lobby']
     }
 }
