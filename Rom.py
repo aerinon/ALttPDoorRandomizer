@@ -19,6 +19,7 @@ except ImportError:
 from BaseClasses import ShopType, Region, Location, Door, DoorType, RegionType, LocationType
 from DoorShuffle import compass_data, DROptions, boss_indicator, pit_boss_regions, dungeon_portals
 from Doors import pits_shuffled
+from source.dungeon.DropPortals import drop_portals
 from Dungeons import dungeon_music_addresses, dungeon_table
 from Regions import location_table, shop_to_location_table, retro_shops
 from RoomData import DoorKind
@@ -662,6 +663,7 @@ def patch_rom(world, rom, player, team, is_mystery=False):
                                                      DoorType.Open, DoorType.StraightStairs, DoorType.Ladder]:
             rom.write_bytes(door.getAddress(), door.dest.getTarget(door))
     write_pitwarps(world, rom, player)
+    write_drop_entrances(world, rom, player)
     for paired_door in world.paired_doors[player]:
         rom.write_bytes(paired_door.address_a(world, player), paired_door.rom_data_a(world, player))
         rom.write_bytes(paired_door.address_b(world, player), paired_door.rom_data_b(world, player))
@@ -1605,6 +1607,36 @@ def pit_boss_sources(world, player):
             raise ValueError(f'{len(reps)} shuffled pit groups land in {region}, expected 1')
         sources[name] = reps[0]
     return sources
+
+
+ENTRANCE_WORDS = {'room_id_a0': 0x14577, 'scroll_x_e2': 0x14AA9, 'scroll_y_e8': 0x14BB3, 'link_y_20': 0x14CBD,
+                  'link_x_22': 0x14DC7, 'camera_y_618': 0x14ED1, 'camera_x_61c': 0x14FDB}
+ENTRANCE_BOUNDS = 0x14681
+ENTRANCE_BYTES = {'blockset_aa1': 0x150E5, 'floor_a4': 0x1516A}
+ENTRANCE_LAYER, ENTRANCE_SCROLL_CONTROL, ENTRANCE_QUADRANT = 0x152F9, 0x1537E, 0x15403
+
+
+def entrance_row_fields(entrance_id, landing):
+    """(pc address, bytes) of an entrance's EntranceData row from a landing block; the dungeon id, in-door, overworld
+    door tilemap and song stay the owning dungeon's."""
+    fields = [(base + entrance_id * 2, int16_as_bytes(landing[key])) for key, base in ENTRANCE_WORDS.items()]
+    fields.append((ENTRANCE_BOUNDS + entrance_id * 8, list(landing['scroll_bounds'])))
+    fields += [(base + entrance_id, [landing[key]]) for key, base in ENTRANCE_BYTES.items()]
+    fields.append((ENTRANCE_LAYER + entrance_id, [landing['bg_setting_ee'] << 4 | landing['layer_0476']]))
+    fields.append((ENTRANCE_SCROLL_CONTROL + entrance_id, [landing['hv_scroll_a6'] << 4 | landing['hv_scroll_a7']]))
+    fields.append((ENTRANCE_QUADRANT + entrance_id, [landing['scroll_quad_a9'] << 4 | landing['scroll_quad_aa']]))
+    return fields
+
+
+def write_drop_entrances(world, rom, player):
+    """Writes the entrance row of every shuffled hole, even one landing on its own vanilla landing (as write_pitwarps).
+    Unshuffled, a hole keeps its vanilla row."""
+    for drop in drop_portals:
+        fall = world.get_door(drop.fall, player)
+        if fall.pit_terminal is None:
+            continue
+        for address, data in entrance_row_fields(drop.entrance_id, fall.pit_terminal.pitwarp_rom['landing']):
+            rom.write_bytes(address, data)
 
 
 def write_pitwarps(world, rom, player):

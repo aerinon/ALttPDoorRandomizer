@@ -91,7 +91,6 @@ class TestDropPortals(unittest.TestCase):
                 for key in ['floor_a4', 'blockset_aa1', 'room_id_a0', 'scroll_bounds']:
                     self.assertIn(key, entry['rom']['landing'])
 
-    @unittest.skip('entrance_row_fields arrives in Task 6')
     @unittest.skipUnless(os.path.exists(VANILLA_ROM), 'vanilla ROM not present')
     def test_drop_landings_match_the_vanilla_entrance_rows(self):
         from Rom import entrance_row_fields
@@ -121,6 +120,16 @@ class TestDropPortalSectors(unittest.TestCase):
             drops = [r.name for s in builder.sectors for r in sector_drop_portals(s)]
             with self.subTest(builder=name):
                 self.assertTrue(set(drops) <= set(find_possible_entrances(world, 1, builder)))
+
+    def test_spoiler_lists_drops_with_the_lobbies_not_the_pits(self):
+        world = generate_i4()
+        world.spoiler.parse_data()
+        lobbies = {entry['lobby_name']: entry['door_name'] for entry in world.spoiler.lobbies.values()}
+        pit_lines = {entry['entrance'] for entry in world.spoiler.doors.values()}
+        for p in drop_portals:
+            with self.subTest(drop=p.region):
+                self.assertEqual(world.get_door(p.fall, 1).pit_terminal.name, lobbies[p.region])
+                self.assertNotIn(p.fall, pit_lines)
 
     def test_unlocked_falls_are_shuffled(self):
         world = generate_i4()

@@ -2853,6 +2853,11 @@ class Spoiler(object):
             if self.world.intensity[player] >= 3 and self.world.doorShuffle[player] != 'vanilla':
                 for portal in self.world.dungeon_portals[player]:
                     self.set_lobby(portal.name, portal.door.name, player)
+                from source.dungeon.DropPortals import drop_portals  # DropPortals imports BaseClasses
+                for drop in drop_portals:  # a shuffled hole is listed with the Terminal its Drop Portal falls on
+                    fall = self.world.get_door(drop.fall, player)
+                    if fall.pit_terminal is not None:
+                        self.set_lobby(drop.region, fall.pit_terminal.name, player)
 
     def to_json(self):
         self.parse_meta()

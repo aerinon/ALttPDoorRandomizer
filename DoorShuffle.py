@@ -227,8 +227,8 @@ def create_door_spoiler(world, player):
                     elif not isinstance(door_b, Region):
                         logger.warning('Door not connected: %s', door_a.name)
                 elif door_a and door_a.type in [DoorType.Hole, DoorType.Warp] and door_a.group_rep is not None and door_a not in done:
-                    done.add(door_a)  # shuffled pit: one-way to the landing region
-                    if isinstance(door_a.dest, Region):
+                    done.add(door_a)  # shuffled pit: one-way to the landing region (a hole's fall is listed with the lobbies)
+                    if isinstance(door_a.dest, Region) and not is_drop_portal(door_a.entrance.parent_region):
                         world.spoiler.set_door(door_a.name, door_a.dest.name, 'entrance', player, builder.name)
                 if valid_connection(connect, std_flag, world, player) and connect not in visited:
                     visited.add(connect)

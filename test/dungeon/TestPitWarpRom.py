@@ -5,7 +5,9 @@ from types import SimpleNamespace
 
 import yaml
 
-from Rom import LANDING_ZONE_DATA, LANDING_ZONE_ROW_SIZE, pitwarp_row_bytes, write_pitwarps
+from Rom import LANDING_ZONE_DATA, LANDING_ZONE_ROW_SIZE, entrance_row_fields, pitwarp_row_bytes, write_pitwarps
+from Rom import write_drop_entrances
+from source.dungeon.DropPortals import drop_portals
 from Utils import snes_to_pc
 
 TERMINALS = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'terminals.yaml')
@@ -114,6 +116,37 @@ class TestWritePitWarps(unittest.TestCase):
         write_pitwarps(world, rom, 1)
         address = snes_to_pc(LANDING_ZONE_DATA + 0x1A * LANDING_ZONE_ROW_SIZE)
         self.assertEqual({address: pitwarp_row_bytes(entries['Ice Boss Terminal']['rom']['landing'])}, rom.writes)
+
+
+def stub_drop_world(assignments):
+    """assignments: Drop Portal region name -> assigned terminal name; other falls stay unshuffled."""
+    entries = {e['name']: e for e in terminal_entries()}
+    terminals = {n: SimpleNamespace(name=n, pitwarp_rom=entries[n]['rom']) for n in entries}
+    falls = {p.fall: SimpleNamespace(name=p.fall, pit_terminal=terminals.get(assignments.get(p.region)))
+             for p in drop_portals}
+    return SimpleNamespace(get_door=lambda name, player: falls[name]), entries
+
+
+class TestWriteDropEntrances(unittest.TestCase):
+
+    def test_shuffled_drop_writes_its_landing_and_nothing_else(self):
+        world, entries = stub_drop_world({'Skull Pinball Drop Portal': 'Ice Boss Terminal'})
+        rom = RecordingRom()
+        write_drop_entrances(world, rom, 1)
+        self.assertEqual(dict(entrance_row_fields(0x78, entries['Ice Boss Terminal']['rom']['landing'])), rom.writes)
+
+    def test_entrance_row_leaves_the_owners_fields_alone(self):
+        # dungeon id, in-door, overworld door tilemap and song stay the owning dungeon's
+        written = {address for address, data in entrance_row_fields(0x78, next(iter(terminal_entries()))['rom']['landing'])}
+        for base in [0x151EF, 0x15274, 0x15488, 0x1550D]:
+            with self.subTest(table=hex(base)):
+                self.assertNotIn(base + 0x78, written)
+
+    def test_unshuffled_drops_write_nothing(self):
+        world, entries = stub_drop_world({})
+        rom = RecordingRom()
+        write_drop_entrances(world, rom, 1)
+        self.assertEqual({}, rom.writes)
 
 
 if __name__ == '__main__':

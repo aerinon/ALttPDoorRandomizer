@@ -468,11 +468,11 @@ pits:
       capture: 'Ice Big Chest Landing'  # label in pit_warp_data_manual.json
       landing:
         room_id_a0: 0x009E
-        link_y_20: 0x1378
-        link_x_22: 0x1CB8
+        link_y_20: 0x1368
+        link_x_22: 0x1C40
         scroll_x_e2: 0x1C00
-        scroll_y_e8: 0x130B
-        camera_y_618: 0x0183
+        scroll_y_e8: 0x1300
+        camera_y_618: 0x0178
         camera_x_61c: 0x007F
         layer_0476: 0x00
         bg_setting_ee: 0x00
