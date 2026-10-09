@@ -1,3 +1,4 @@
+import itertools
 import types
 from collections import deque, defaultdict
 from typing import Optional, Deque, Tuple
@@ -13,9 +14,11 @@ from source.dungeon.DungeonStitcherV2 import special_big_key_doors
 
 
 def _make_subset_key_layout(key_layout, filtered_start_regions):
-    """Proxy for key_layout with filtered start_regions; mutable fields are fresh scratch objects."""
+    """Proxy for key_layout with filtered start_regions; mutable fields are fresh scratch objects. A prize lobby in it
+    counts as open: these layouts answer for futures in which the player can enter every lobby listed."""
     proxy = types.SimpleNamespace()
     proxy.start_regions = filtered_start_regions
+    proxy.open_prize_lobbies = True
     proxy.found_doors = set()       # scratch
     proxy.prize_relevant = None     # scratch
     proxy.event_starts = key_layout.event_starts
@@ -63,7 +66,9 @@ class NewKeyLogic(object):
 
         # Portal accessibility data
         self.start_regions = []       # [(start_region, gateway_region), ...] — lobby + first OW-connected dungeon region
-        self.portal_subset_cache = {} # {frozenset(start_regions): NewKeyLogic} — lazily built subset logics
+        self.prize_lobbies = frozenset()  # start regions entered only once this dungeon's prize is obtained
+        self.portal_subset_cache = {} # {frozenset(start_regions): NewKeyLogic} — lazily built logics per lobby set
+        self.futures_cache = {}
         self._key_layout = None       # stored for lazy subset rebuild
         self._world = None
         self._player = None
@@ -97,15 +102,18 @@ class NewKeyLogic(object):
         accessible = frozenset(sr for sr, gw in self.start_regions if gw in rrp)
         return accessible
 
-    def _get_or_build_subset_logic(self, accessible_portals):
-        if accessible_portals in self.portal_subset_cache:
-            return self.portal_subset_cache[accessible_portals]
+    def _lobby_logic(self, lobbies):
+        """The logic for a future in which exactly these lobbies can be entered; a prize lobby among them is open."""
+        if lobbies is None or (lobbies == frozenset(sr for sr, _ in self.start_regions) and not self.prize_lobbies):
+            return self
+        if lobbies in self.portal_subset_cache:
+            return self.portal_subset_cache[lobbies]
 
         key_layout = self._key_layout
         world = self._world
         player = self._player
 
-        filtered_starts = [sr for sr in key_layout.start_regions if sr in accessible_portals]
+        filtered_starts = [sr for sr in key_layout.start_regions if sr in lobbies]
         subset_layout = _make_subset_key_layout(key_layout, filtered_starts)
         counters = create_key_counters(subset_layout, world, player)
 
@@ -121,8 +129,48 @@ class NewKeyLogic(object):
 
         _build_spheres_for_counters(subset_logic, counters, subset_layout, world, player)
 
-        self.portal_subset_cache[accessible_portals] = subset_logic
+        self.portal_subset_cache[lobbies] = subset_logic
         return subset_logic
+
+    def _lobby_futures(self, accessible):
+        """Every lobby set the player can still grow into: supersets of the accessible lobbies. Some lobby is always
+        entered, so with none accessible yet the futures are all non-empty lobby sets."""
+        if accessible is None:
+            return [None]  # a single lobby: nothing to choose
+        rest = sorted(frozenset(sr for sr, _ in self.start_regions) - accessible, key=lambda r: r.name)
+        futures = [accessible | frozenset(extra) for k in range(len(rest) + 1)
+                   for extra in itertools.combinations(rest, k)]
+        return [lobbies for lobbies in futures if lobbies]
+
+    @staticmethod
+    def _key_futures(cache_key, small_locations, big_location, state, dungeon_logic, player):
+        """The key inputs the player can grow into: a big key that exists but is neither held nor at a dungeon
+        location (placed elsewhere, or not placed yet) may be obtained before any later visit. It counts toward waste
+        through the held future, never toward progress, which the not-held future keeps."""
+        smalls_in_hand, big_in_hand, small_loc_name_set, big_loc_name, placing_spot = cache_key
+        futures = [(cache_key, small_locations, big_location)]
+        if not big_in_hand and big_location is None:
+            if state.world.get_dungeon(dungeon_logic.dungeon, player).big_key is not None:
+                futures.append(((smalls_in_hand, True, small_loc_name_set, None, placing_spot), small_locations, None))
+        return futures
+
+    def _futures(self, state, dungeon_logic, player, accessible):
+        """(logic, reachable regions, reachable locations) for every future; what is guaranteed now is what every
+        future guarantees, so the answer only grows as the player gains keys, the big key, the prize or lobbies."""
+        cache_key, small_locations, big_location = self.build_cache_key(state, dungeon_logic, player)
+        key_futures = self._key_futures(cache_key, small_locations, big_location, state, dungeon_logic, player)
+        memo = (cache_key, accessible, len(key_futures))
+        if memo not in self.futures_cache:
+            results = []
+            for lobbies in self._lobby_futures(accessible):
+                logic = self._lobby_logic(lobbies)
+                for future_key, future_smalls, future_big in key_futures:
+                    if future_key not in logic.can_reach_cache:
+                        logic.calculate_reachability(future_key, future_smalls, future_big, dungeon_logic, player)
+                    regions, locations = logic.can_reach_cache[future_key]
+                    results.append((logic, regions, locations))
+            self.futures_cache[memo] = results
+        return self.futures_cache[memo], cache_key
 
     def build_cache_key(self, state, dungeon_logic, player):
         sk_name = dungeon_logic.small_key_name
@@ -144,10 +192,6 @@ class NewKeyLogic(object):
                     big_location = loc
                     big_loc_name = loc.name
         small_loc_name_set = frozenset(small_loc_name_set)
-        # fill treats unplaced keys as held, so the worst case lets the player hold an unplaced big key
-        if not big_in_hand and big_location is None:
-            big_key = state.world.get_dungeon(dungeon_logic.dungeon, player).big_key
-            big_in_hand = big_key is not None and big_key.location is None
 
         # the location this dungeon's small key is being placed at, if known - only it can be a self-locking spot
         placing_spot = None
@@ -159,31 +203,24 @@ class NewKeyLogic(object):
         return cache_key, small_locations, big_location
 
     def can_reach(self, entrance, state, dungeon_logic, player):
-        cache_key, small_locations, big_location = self.build_cache_key(state, dungeon_logic, player)
-        accessible_portals = self._get_accessible_portals(state, player)
-        logic = self
-        # OW→Dungeon entry must use full logic so portal gateway regions enter rrp correctly.
-        if (accessible_portals is not None and accessible_portals
-                and accessible_portals != frozenset(sr for sr, _ in self.start_regions)
-                and entrance.parent_region.type == RegionType.Dungeon):
-            logic = self._get_or_build_subset_logic(accessible_portals)
-        if cache_key not in logic.can_reach_cache:
-            logic.calculate_reachability(cache_key, small_locations, big_location, dungeon_logic, player)
-        reachable_regions, reachable_locations = logic.can_reach_cache[cache_key]
-        # the entrances connected region must be in the reachable regions
-        # and it must not be a locked door or they must have at least one key to waste
-        # this may not be sufficient consider vanilla GT
-        return entrance.connected_region in reachable_regions and (entrance.name not in logic.door_minimums or cache_key[0] > 0)
+        accessible = self._get_accessible_portals(state, player)
+        if accessible is not None:
+            # the lobby this entrance leads into is accessible while the entrance is being evaluated
+            accessible = accessible | frozenset(sr for sr, gw in self.start_regions
+                                                if entrance.connected_region in (sr, gw))
+        results, cache_key = self._futures(state, dungeon_logic, player, accessible)
+        # in every future the connected region must be reachable, and a locked door needs a key to waste unless it
+        # is self-locking in that future's logic
+        return all(entrance.connected_region in regions and (entrance.name not in logic.door_minimums or cache_key[0] > 0)
+                   for logic, regions, _ in results)
 
     def query_reachability(self, state, dungeon_logic, player):
-        cache_key, small_locations, big_location = self.build_cache_key(state, dungeon_logic, player)
-        accessible_portals = self._get_accessible_portals(state, player)
-        logic = self
-        if accessible_portals is not None and accessible_portals and accessible_portals != frozenset(sr for sr, _ in self.start_regions):
-            logic = self._get_or_build_subset_logic(accessible_portals)
-        if cache_key not in logic.can_reach_cache:
-            logic.calculate_reachability(cache_key, small_locations, big_location, dungeon_logic, player)
-        return logic.can_reach_cache[cache_key]
+        results, _ = self._futures(state, dungeon_logic, player, self._get_accessible_portals(state, player))
+        regions, locations = set(results[0][1]), set(results[0][2])
+        for _, more_regions, more_locations in results[1:]:
+            regions &= more_regions
+            locations &= more_locations
+        return regions, locations
 
     # notes, smalls_in_hand can include some of the small_locations, small_locations may have been checked already - this affects cache_key
     # perhaps we should always start at the root sphere, skipping ahead can be problematic if you have enough keys, but not the big key to reach those later spheres
@@ -642,6 +679,9 @@ def determine_small_key_logic_exhaustive(key_layout, world, player):
 
     # Store data needed for lazy portal-subset rebuilds
     new_logic.start_regions = [(sr, _find_gateway_region(sr)) for sr in key_layout.start_regions]
+    atgt_swapped = world.is_atgt_swapped(player)
+    new_logic.prize_lobbies = frozenset(sr for sr in key_layout.start_regions
+                                        if prize_relevance(key_layout, find_outside_connection(sr)[0], atgt_swapped))
     new_logic._key_layout = key_layout
     new_logic._world = world
     new_logic._player = player

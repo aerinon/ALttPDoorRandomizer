@@ -623,7 +623,15 @@ class CollectionState(object):
 
         queue = deque(self.blocked_connections[player].items())
 
+        lobbies = self.accessible_lobbies(player)
         self.traverse_world(queue, rrp, bc, player)
+        # an entrance key logic refused may pass once another lobby of its dungeon is reached: go round again until
+        # no new lobby turns up (lobbies only open, so this stops)
+        reached = self.accessible_lobbies(player)
+        while reached != lobbies:
+            lobbies = reached
+            self.traverse_world(deque(bc.items()), rrp, bc, player)
+            reached = self.accessible_lobbies(player)
         if self.world.key_logic_algorithm[player] == 'dangerous':
             unresolved_events = [x for y in self.reachable_regions[player] for x in y.locations
                                  if x.event and x.item and (x.item.smallkey or x.item.bigkey or x.item.advancement)
@@ -631,6 +639,13 @@ class CollectionState(object):
             unresolved_events = self._do_not_flood_the_keys(unresolved_events)
             if len(unresolved_events) == 0:
                 self.check_key_doors_in_dungeons(rrp, player)
+
+    def accessible_lobbies(self, player):
+        """Lobbies of experimental key logic dungeons whose gateway region is reached."""
+        rrp = self.reachable_regions[player]
+        return frozenset(lobby for logic in self.world.key_logic.get(player, {}).values()
+                         if logic.new_logic is not None
+                         for lobby, gateway in logic.new_logic.start_regions if gateway in rrp)
 
     def traverse_world(self, queue, rrp, bc, player):
         # run BFS on all connections, and keep track of those blocked by missing items

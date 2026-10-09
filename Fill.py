@@ -233,8 +233,40 @@ def verify_spot_to_fill_v2(location, item_to_place, max_exp_state, single_player
             if valid_key_placement(item_to_place, location, key_pool, state, world):
                 if valid_bk_placement(location, item_to_place, world):
                     if item_to_place.crystal or valid_dungeon_placement(item_to_place, location, world):
-                        return location
+                        if not perform_access_check or keeps_dungeon_guaranteed(location, item_to_place, max_exp_state, world):
+                            return location
     return None
+
+
+def keeps_dungeon_guaranteed(location, item, max_exp_state, world):
+    """A small key placed at a location instead of held must not cut off anything already placed in its dungeon: the
+    worst case can spend a held key before the player reaches a placed one, so placing a key can shrink what the
+    experimental key logic guarantees for items placed earlier."""
+    player = item.player
+    if not item.smallkey or world.key_logic_algorithm[player] != 'experimental' or world.keyshuffle[player] == 'universal':
+        return True
+    logic = world.key_logic[player].get(item.dungeon)
+    if logic is None or logic.new_logic is None or logic.new_logic.fast_logic:
+        return True
+    held = max_exp_state.copy()
+    held.collect(item, True)
+    held.sweep_for_events()
+    _, before = logic.new_logic.query_reachability(held, logic, player)
+    filled = [loc for loc in before if loc.item is not None and loc is not location]
+    if not filled:
+        return True
+    previous = location.item, location.event
+    location.item, location.event = item, True  # as fill leaves it once placed, so sweeps collect it
+    try:
+        placed = max_exp_state.copy()
+        placed.placing_items = [item]
+        placed.placing_locations = [(item, location)]
+        placed.stale[player] = True
+        placed.sweep_for_events()
+        _, after = logic.new_logic.query_reachability(placed, logic, player)
+    finally:
+        location.item, location.event = previous
+    return all(loc in after for loc in filled)
 
 
 def valid_key_placement(item, location, key_pool, collection_state, world):

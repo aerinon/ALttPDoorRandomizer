@@ -1,6 +1,6 @@
 from collections import deque
 
-from BaseClasses import DoorType
+from BaseClasses import CollectionState, DoorType
 from KeyDoorShuffle import cid, create_key_counters, dungeon_bigs, dungeon_keys, find_counter_hint
 from Regions import dungeon_events
 
@@ -25,12 +25,34 @@ def find_keylock(key_layout, world, player):
         return location.item is not None and location.item.name == name and location.item.player == player
 
     inside = set().union(*(locations_of(c) for c in counters.values()))
-    outside_keys = sum(1 for l in world.get_locations() if holds(l, small_key) and l not in inside)
-    outside_keys += sum(1 for i in world.precollected_items if i.player == player and i.name == small_key)
-    big_outside = (any(holds(l, big_key) and l not in inside for l in world.get_locations())
-                   or any(i.player == player and i.name == big_key for i in world.precollected_items))
+    outside = [l for l in world.get_locations() if (holds(l, small_key) or holds(l, big_key)) and l not in inside]
+    start_keys = sum(1 for i in world.precollected_items if i.player == player and i.name == small_key)
+    start_big = any(i.player == player and i.name == big_key for i in world.precollected_items)
+    supplies = {}
 
-    def keys_held(counter):
+    def supply(found):
+        """Keys from outside this dungeon (and whether its big key) the world yields while the dungeon's locations
+        beyond `found` stay unreached: a key behind something only those locations hold doesn't count."""
+        if not outside:
+            return start_keys, start_big
+        found = frozenset(found)
+        if found not in supplies:
+            state = CollectionState(world)
+            pending = [l for l in world.get_locations() if l.item is not None and (l not in inside or l in found)]
+            def sphere():  # as the generator's sweeps: no switch that would flood a key still to collect
+                return [l for l in pending if l.can_reach(state) and state.not_flooding_a_key(world, l)]
+            reached = sphere()
+            while reached:
+                for l in reached:
+                    pending.remove(l)
+                    state.collect(l.item, True, l)
+                reached = sphere()
+            obtained = [l for l in outside if l not in pending]
+            supplies[found] = (start_keys + sum(1 for l in obtained if holds(l, small_key)),
+                               start_big or any(holds(l, big_key) for l in obtained))
+        return supplies[found]
+
+    def keys_held(counter, outside_keys, big_outside):
         found = locations_of(counter)
         big = big_outside or any(holds(l, big_key) for l in found)  # a big chest may hold its own big key
         smalls = outside_keys + sum(1 for l in found if holds(l, small_key) and (big or '- Big Chest' not in l.name))
@@ -49,7 +71,13 @@ def find_keylock(key_layout, world, player):
         if code in seen:
             continue
         seen.add(code)
-        smalls, big = keys_held(counter)
+        # assume every outside key comes first; ask the world only when that changes which doors open
+        smalls, big = keys_held(counter, start_keys + sum(1 for l in outside if holds(l, small_key)),
+                                start_big or any(holds(l, big_key) for l in outside))
+        if outside:
+            needed = keys_held(counter, start_keys, start_big)
+            if needed != (smalls, big) and not (needed[0] > counter.used_keys and needed[1] == big):
+                smalls, big = keys_held(counter, *supply(locations_of(counter)))
         moves = []
         for door in counter.child_doors:
             opened = dict(counter.open_doors)

@@ -1784,7 +1784,7 @@ def create_key_counters(key_layout, world, player):
     for region in key_layout.start_regions:
         dungeon_entrance, portal_door = find_outside_connection(region)
         prize_relevant_flag = prize_relevance(key_layout, dungeon_entrance, world.is_atgt_swapped(player))
-        if prize_relevant_flag:
+        if prize_relevant_flag and not getattr(key_layout, 'open_prize_lobbies', False):
             state.append_door_to_list(portal_door, state.prize_doors)
             state.prize_door_set[portal_door] = dungeon_entrance
             key_layout.prize_relevant = prize_relevant_flag
