@@ -66,26 +66,48 @@ def oracle_plan(sector_list, c_info, max_nodes=200_000):
     def enter(reached, door):
         return reached | {d for d, c, f in door_sector[door].descriptor.reachability.get(door, [])} | {door}
 
-    def search(reached, used):
-        if (reached, used) in visited:
+    big_key = c_info.big_key  # where big keys matter, a location must be reachable before any big key door
+
+    def leftover_pairings(left, cmap):
+        """Every complete pairing of the doors left over once all doors are reached."""
+        if not left:
+            yield dict(cmap)
+            return
+        a = left[0]
+        for b in left[1:]:
+            if allowed(a, b) or allowed(b, a):
+                cmap[a], cmap[b] = b, a
+                yield from leftover_pairings([x for x in left if x is not a and x is not b], cmap)
+                del cmap[a], cmap[b]
+
+    def complete(conns, used):
+        left = sorted(all_doors - used, key=lambda d: d.name)
+        if big_key is None:
+            return pairable(left)
+        cmap = {d: p for hanger, hook in conns for d, p in ((hanger, hook), (hook, hanger))}
+        return any(big_key.satisfied(full) for full in leftover_pairings(left, cmap))
+
+    def search(reached, used, conns):
+        key = (reached, used, frozenset(conns) if big_key is not None else None)
+        if key in visited:
             return None
-        visited.add((reached, used))
+        visited.add(key)
         counter[0] += 1
         if counter[0] > max_nodes:
             raise _Budget()
         if reached >= all_doors:
-            return [] if pairable(all_doors - used) else None
+            return [] if complete(conns, used) else None
         for hook in sorted(reached - used, key=lambda d: d.name):
             # connecting to an already-reached door adds nothing: reachability only grows
             for hanger in sorted(all_doors - reached, key=lambda d: d.name):
                 if allowed(hanger, hook):
-                    rest = search(enter(reached, hanger), used | {hook, hanger})
+                    rest = search(enter(reached, hanger), used | {hook, hanger}, conns + ((hanger, hook),))
                     if rest is not None:
                         return [(hanger, hook)] + rest
         return None
 
     try:
-        plan = search(frozenset(start_doors(sector_list)), frozenset())
+        plan = search(frozenset(start_doors(sector_list)), frozenset(), ())
         return False if plan is None else plan
     except _Budget:
         return None

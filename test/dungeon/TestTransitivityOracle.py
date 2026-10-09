@@ -60,6 +60,16 @@ class TestTransitivityOracle(unittest.TestCase):
         self.assertEqual([], false_positives)
         self.assertLessEqual(len(false_negatives), FALSE_NEGATIVE_BUDGET * verdicts[True], false_negatives)
 
+    def test_oracle_requires_a_location_before_big_key_doors(self):
+        # 72 complete layouts reach every door, but none has a location for the big key before its big key door
+        sectors, flags = capture_sectors(3)
+        by_key = {s.sector_key(): s for s in sectors}
+        chosen = [by_key[k] for k in ['Hyrule Castle South Portal', 'Mire Cross', 'Thieves BK Corner',
+                                      'Thieves Big Chest Room']]
+        info = ConstraintInfo(make_builder('Hyrule Castle'), chosen, [], flags)
+        self.assertIsNotNone(info.big_key)
+        self.assertFalse(oracle_solvable(chosen, info))
+
     def test_small_sets_intensity_3(self):
         self.run_differential(3)
 
