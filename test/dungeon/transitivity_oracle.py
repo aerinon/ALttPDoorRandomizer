@@ -67,6 +67,13 @@ def oracle_plan(sector_list, c_info, max_nodes=200_000):
         return reached | {d for d, c, f in door_sector[door].descriptor.reachability.get(door, [])} | {door}
 
     big_key = c_info.big_key  # where big keys matter, a location must be reachable before any big key door
+    primary_doors = c_info.primary_portal_doors  # the stitcher's primary portal, one of these, takes no dead end
+    layout_rules = big_key is not None or c_info.primary_portal_required
+
+    def layout_ok(full):
+        if c_info.primary_portal_required and not any(p in full and not full[p].deadEnd for p in primary_doors):
+            return False
+        return big_key is None or big_key.satisfied(full)
 
     def leftover_pairings(left, cmap):
         """Every complete pairing of the doors left over once all doors are reached."""
@@ -82,13 +89,13 @@ def oracle_plan(sector_list, c_info, max_nodes=200_000):
 
     def complete(conns, used):
         left = sorted(all_doors - used, key=lambda d: d.name)
-        if big_key is None:
+        if not layout_rules:
             return pairable(left)
         cmap = {d: p for hanger, hook in conns for d, p in ((hanger, hook), (hook, hanger))}
-        return any(big_key.satisfied(full) for full in leftover_pairings(left, cmap))
+        return any(layout_ok(full) for full in leftover_pairings(left, cmap))
 
     def search(reached, used, conns):
-        key = (reached, used, frozenset(conns) if big_key is not None else None)
+        key = (reached, used, frozenset(conns) if layout_rules else None)
         if key in visited:
             return None
         visited.add(key)

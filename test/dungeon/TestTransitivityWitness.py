@@ -50,6 +50,13 @@ class TestWitnessChecker(unittest.TestCase):
         solution.state.connection_map.clear()
         self.assertTrue(any('unreached region' in p for p in check_witness(solution)))
 
+    def test_primary_portal_on_a_dead_end_is_reported(self):
+        solution = self.eastern()
+        cmap = solution.state.connection_map
+        portal = next(d for d in cmap if d.traversal_only)  # Eastern's only portal: the stitcher's primary
+        cmap[portal] = self.sectors[0].regions[0].world.get_door('GT DMs Room SW', 1)  # a dead end
+        self.assertIn('no portal that may be primary has a door that is not a dead end', check_witness(solution))
+
     def test_shared_terminal_and_leftover_are_reported(self):
         # two different groups landing on one terminal leaves another terminal without a group
         doors = {d.name: d for s in self.grouped['Tower of Hera'] for d in s.outstanding_doors}

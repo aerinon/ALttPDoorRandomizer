@@ -206,6 +206,11 @@ class ConstraintInfo:
             sector, enabling_portal = dep_info
             self.dependent_lookup.setdefault(enabling_portal.door, []).append(d)
         self.classify_drops(builder, sector_list, flags)
+        primary_portals = {id(p): p for s in sector_list for p in s.portals if portal_may_be_primary(p, sector_list)}
+        # a portal the stitcher already linked has its lobby door, no longer outstanding
+        primary_linked = any(p.door not in self.door_sector_map and not p.door.deadEnd for p in primary_portals.values())
+        self.primary_portal_required = bool(primary_portals) and not primary_linked
+        self.primary_portal_doors = [p.door for p in primary_portals.values() if p.door in self.door_sector_map]
 
         self.door_constraint_map = defaultdict(list)
         for constraint in self.constraints:
@@ -501,7 +506,6 @@ def valid_portal(door, match_door, c_info, init=True):
     dest_portal = destination or not init
     return (door.portalAble
             and (not c_info.flags.vanilla_traps or not door.blocked or is_boss_trap(door))
-            and not (door.deadEnd and init and may_be_primary_portal(match_door, c_info))
             # a destination portal is left through to reach its overworld side (the stitcher's destination filter)
             and (not destination or (door.passage and (not c_info.flags.std_flag or not door.standard_restricted)
                                      and (not rupee_bow_flag or not door.rupee_bow_restricted)))
@@ -515,15 +519,23 @@ def violates_restriction(a, b, c_info):
     return c_info.restricted_doors.get(a, b) is not b or c_info.restricted_doors.get(b, a) is not a
 
 
-def may_be_primary_portal(match_door, c_info):
+def primary_portal_possible(connection_map, c_info, complete=False):
+    """The stitcher picks its primary portal from the portals that may be primary and gives it a door that is not a
+    dead end; the others may take dead ends. Until complete, an unconnected portal can still take such a door."""
+    if not c_info.primary_portal_required:
+        return True
+    return any((p not in connection_map and not complete) or (p in connection_map and not connection_map[p].deadEnd)
+               for p in c_info.primary_portal_doors)
+
+
+def portal_may_be_primary(portal, sector_list):
     """The stitcher picks the primary portal at random from these and never gives it a dead-end door."""
-    portal = next((p for p in c_info.door_sector_map[match_door].portals if p.door == match_door), None)
-    if portal is None or portal.destination:
+    if portal.destination:
         return False
     if portal.dependent is None:
         return True
     # a dependent portal is chosen only when it is the builder's sole non-destination portal
-    return not any(not p.destination and p is not portal for s in c_info.sector_list for p in s.portals)
+    return not any(not p.destination and p is not portal for s in sector_list for p in s.portals)
 
 
 class ConstraintType(Enum):
@@ -740,6 +752,8 @@ class Transitivity:
 
     def is_complete(self, c_info):
         if self.unsatisfied_constraints or self.remaining_doors:
+            return False
+        if not primary_portal_possible(self.connection_map, c_info, complete=True):
             return False
         if c_info.escape is not None and not c_info.escape.satisfied(self.connection_map):
             return False
@@ -976,6 +990,8 @@ class Transitivity:
             return True
 
         if self.quick_door_matches_check(c_info):
+            return True
+        if not primary_portal_possible(self.connection_map, c_info):
             return True
         if c_info.escape and not c_info.escape.satisfied(self.connection_map, c_info.door_matches):
             return True

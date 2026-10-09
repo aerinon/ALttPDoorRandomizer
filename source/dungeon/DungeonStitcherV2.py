@@ -81,16 +81,20 @@ def determine_entrance_regions(builder, flags, world, player):
     primary_candidates = [p for p in non_destination_portals if p.dependent is None]
     if len(primary_candidates) == 0 and len(non_destination_portals) == 1:
         primary_candidates = non_destination_portals
-    if len(primary_candidates) > 1:
-        primary_portal = random.choice(primary_candidates)
-    else:
-        primary_portal = primary_candidates[0]
-    non_destination_portals.remove(primary_portal)
-    if not primary_portal.assigned:
+
+    def try_primary(portal):
+        if portal.assigned:
+            record_entrance_regions(entrance_regions, portal)
+            return True
         candidates = find_portal_candidates(master_door_list, v_traps, standard=hc_flag, rupee_bow=rupee_bow_flag, bk_shuffle=bk_shuffle)
-        assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, primary_portal, flags)
-    else:
-        record_entrance_regions(entrance_regions, primary_portal)
+        candidate = find_passing_candidate(builder, candidates, portal, flags)
+        if candidate is None:
+            return False
+        link_portal_candidate(builder, candidate, entrance_regions, master_door_list, portal, flags)
+        return True
+
+    primary_portal = choose_primary_portal(primary_candidates, try_primary, builder.name)
+    non_destination_portals.remove(primary_portal)
 
     # dead-end-able portals
     for portal in non_destination_portals:
@@ -124,16 +128,42 @@ def bk_shuffle_lobbies_allowed(builder, world, player):
             or builder.split_flag)  # as in Transitivity's valid_portal
 
 
-def assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, flags, record_portal=True):
+def choose_primary_portal(primary_candidates, try_portal, builder_name):
+    """The primary portal: the first of the portals that may be primary, in random order, that try_portal assigns (a
+    door that is not a dead end and passes Transitivity). Transitivity promises only that one of them can be."""
+    first = random.choice(primary_candidates) if len(primary_candidates) > 1 else primary_candidates[0]
+    if try_portal(first):
+        return first
+    rest = [p for p in primary_candidates if p is not first]
+    random.shuffle(rest)
+    for portal in rest:
+        if try_portal(portal):
+            return portal
+    raise GenerationException(f'No valid portal candidates for {builder_name}')
+
+
+def find_passing_candidate(builder, candidates, portal, flags):
+    """A random candidate whose connection to the portal passes Transitivity, or None."""
     if len(candidates) == 0:
-        raise GenerationException(f'No valid portal candidates for {builder.name}')
-    logger = logging.getLogger('')
+        return None
     candidate = random.choice(candidates)
     while not do_transitivity_check(builder, builder.sectors, flags, [(candidate, portal.door)]):
         candidates.remove(candidate)
         if len(candidates) == 0:
-            raise GenerationException(f'No valid portal candidates for {builder.name}')
+            return None
         candidate = random.choice(candidates)
+    return candidate
+
+
+def assign_portal_candidate(builder, candidates, entrance_regions, master_door_list, portal, flags, record_portal=True):
+    candidate = find_passing_candidate(builder, candidates, portal, flags)
+    if candidate is None:
+        raise GenerationException(f'No valid portal candidates for {builder.name}')
+    return link_portal_candidate(builder, candidate, entrance_regions, master_door_list, portal, flags, record_portal)
+
+
+def link_portal_candidate(builder, candidate, entrance_regions, master_door_list, portal, flags, record_portal=True):
+    logger = logging.getLogger('')
     master_door_list.remove(candidate)
     master_door_list[:] = [x for x in master_door_list if x.roomIndex != candidate.roomIndex]
     logger.debug(f' Portal Link {portal.name} <-> {candidate.name}')

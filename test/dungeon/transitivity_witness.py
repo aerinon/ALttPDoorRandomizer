@@ -7,6 +7,7 @@ from collections import deque
 
 from BaseClasses import CollectionState, CrystalBarrier, DoorType, RegionType
 from source.dungeon.DungeonGenerationCommon import hanger_from_door, hook_from_door
+from source.dungeon.DungeonGenTransitivity import portal_may_be_primary
 from source.dungeon.DropPortals import drop_parent_region, is_drop_portal, is_escape_builder, is_lobby_portal, sector_drop_portals
 
 ONE_WAY = (DoorType.Hole, DoorType.Warp)
@@ -157,6 +158,12 @@ def check_witness(solution):
             problems.append(f'initial connection not kept: {a.name} <-> {b.name}')
     if solution.c_info is None:
         return problems
+    sector_list = solution.c_info.sector_list
+    primary = [p for s in sector_list for p in s.portals if portal_may_be_primary(p, sector_list)]
+    considered_doors = set(considered)
+    linked = any(p.door not in considered_doors and not p.door.deadEnd for p in primary)  # already given a lobby door
+    if primary and not linked and not any(p.door in cmap and not cmap[p.door].deadEnd for p in primary):
+        problems.append('no portal that may be primary has a door that is not a dead end')
 
     considered_set = set(considered)
     must_reach = {r for s in solution.c_info.sector_list

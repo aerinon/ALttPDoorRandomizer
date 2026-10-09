@@ -2,7 +2,7 @@ import itertools
 import unittest
 from types import SimpleNamespace
 
-from source.dungeon.DungeonGenTransitivity import valid_portal
+from source.dungeon.DungeonGenTransitivity import primary_portal_possible, valid_portal
 from source.dungeon.DungeonStitcherV2 import find_portal_candidates
 from test.dungeon.transitivity_harness import capture_sectors
 
@@ -32,7 +32,8 @@ def stitcher_accepts(door, role, split, bk, std, hc, vanilla_traps):
 
 
 def transitivity_accepts(door, role, split, bk, std, hc, vanilla_traps):
-    """Whether valid_portal lets door serve a portal of this role at the start of the search."""
+    """Whether Transitivity lets door serve a portal of this role: valid_portal, plus, for the primary portal, the
+    rule that it takes no dead end (primary_portal_possible)."""
     placeholder = Placeholder()
     portal = SimpleNamespace(door=placeholder, destination=role == 'destination',
                              dependent=SimpleNamespace() if role == 'dead_end_able' else None)
@@ -42,7 +43,9 @@ def transitivity_accepts(door, role, split, bk, std, hc, vanilla_traps):
                              flags=SimpleNamespace(vanilla_traps=vanilla_traps, bk_shuffle_flag=bk, std_flag=std,
                                                    rupee_bow_flag=std and hc),
                              door_sector_map={placeholder: sector}, sector_list=[sector, other])
-    return valid_portal(door, placeholder, c_info, True)
+    c_info.primary_portal_doors = [placeholder] if role == 'primary' else []
+    c_info.primary_portal_required = role == 'primary'
+    return valid_portal(door, placeholder, c_info, True) and primary_portal_possible({placeholder: door}, c_info, True)
 
 
 class TestPortalConsistency(unittest.TestCase):
