@@ -132,6 +132,19 @@ class TestStaticKeyLogic(unittest.TestCase):
         finally:
             self.world.dropshuffle[1] = 'none'
 
+    def test_requires_forbidden_special_enemies(self):
+        # key drops count as free, so their enemies must not need special weapons
+        from source.dungeon.StaticKeyLogic import static_logic_supported
+        self.world.enemy_shuffle[1] = 'shuffled'
+        try:
+            for enemy_logic, supported in [('none', True), ('allow_drops', False), ('allow_all', False)]:
+                self.world.any_enemy_logic[1] = enemy_logic
+                self.assertEqual(static_logic_supported(self.world, 1), supported, enemy_logic)
+        finally:
+            self.world.enemy_shuffle[1] = 'none'
+            self.world.any_enemy_logic[1] = 'allow_all'
+        self.assertTrue(static_logic_supported(self.world, 1))
+
 
 if __name__ == '__main__':
     unittest.main()

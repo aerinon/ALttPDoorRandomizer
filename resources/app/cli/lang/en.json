@@ -264,7 +264,7 @@
       "dangerous: Key usage must follow logic for safety",
       "partial: Partial protection when using certain minor glitches",
       "strict:  Ensure small keys are available",
-      "static:  Entrance randomizer key rules; vanilla doors and key drops only"
+      "static:  Entrance randomizer key rules; vanilla doors and key drops only, any_enemy_logic none if enemies shuffle"
     ],
     "decoupledoors" : [ "Door entrances and exits are decoupled" ],
     "door_self_loops" : [ "Spiral stairs are allowed to self-loop" ],

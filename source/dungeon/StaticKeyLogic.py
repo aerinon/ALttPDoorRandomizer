@@ -79,12 +79,15 @@ DOOR_RULES = {
 
 def static_logic_supported(world, player):
     return (world.doorShuffle[player] == 'vanilla' and world.dropshuffle[player] == 'none'
-            and world.pottery[player] in ('none', 'cave'))
+            and world.pottery[player] in ('none', 'cave')
+            # key drops count as free, so no drop enemy may need a special weapon
+            and (world.enemy_shuffle[player] == 'none' or world.any_enemy_logic[player] == 'none'))
 
 
 def static_door_rules(world, player):
     if not static_logic_supported(world, player):
-        raise Exception('static key logic needs vanilla doors, unshuffled key drops and unshuffled key pots')
+        raise Exception('static key logic needs vanilla doors, unshuffled key drops, unshuffled key pots, '
+                        'and any_enemy_logic: none when enemies are shuffled')
     specs = {}
     for doors in DOOR_RULES.values():
         for door, spec in doors.items():
