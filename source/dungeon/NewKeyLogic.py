@@ -793,7 +793,8 @@ def _build_spheres_for_counters(new_logic, counters, key_layout, world, player):
                     child_open_set = open_door_set.union({child_door, child_door.dest})
                 else:
                     child_open_set = open_door_set.union({child_door})
-                small_code = sphere_id(key_counter.big_key_opened, child_open_set, key_layout.flat_prop)
+                small_code = sphere_id(key_counter.big_key_opened, child_open_set, key_layout.flat_prop,
+                                       key_layout.prize_relevant, key_counter.prize_doors_opened)
                 if small_code in counters:
                     queue.append((small_code, counters[small_code], sphere))
             # prize doors? - ignore for now I guess
