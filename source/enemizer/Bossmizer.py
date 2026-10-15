@@ -4,7 +4,7 @@ from Utils import snes_to_pc
 from source.dungeon.EnemyList import EnemySprite, SpriteType, Sprite
 from source.dungeon.RoomList import boss_rooms, gt_boss_room, Room0006
 from source.dungeon.RoomObject import RoomObject
-from source.enemizer.SpriteSheets import required_boss_sheets
+from source.enemizer.SpriteSheets import did, required_boss_sheets
 
 
 def get_dungeon_boss_room(dungeon_name, level):
@@ -140,6 +140,8 @@ def boss_adjust(world, player):
                 if len(sprite_list) > 15:
                     del sprite_list[15:]
                 data_tables.room_headers[room_id].sprite_sheet = required_boss_sheets[sprite_type]
+                # pin the room so the enemizer can't re-pick a sheet without the boss's groups
+                data_tables.sprite_sheets[did(required_boss_sheets[sprite_type])].room_set.add(room_id)
 
 
 def boss_writes(world, player, rom):
