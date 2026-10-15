@@ -113,8 +113,8 @@ def defeat_rule_multiple(world, player, enemy_sprite_region_pairs):
 
         optional_clears = find_possible_rules(vln_list, used_resources, world, player)
         if len(optional_clears) == 0:
-            raise Exception('Kill rules seems to be insufficient for this enemy set, please report:'
-                            + ', '.join([str(x) for x, y in enemy_sprite_region_pairs]))
+            raise Exception('Kill rules seems to be insufficient for this enemy set, please report: '
+                            + describe_enemies(world, player, enemy_sprite_region_pairs))
 
         # find rules which kill the most
         # idea: this could be multiple criteria: most-constrained then which method kills the most
@@ -132,8 +132,8 @@ def defeat_rule_multiple(world, player, enemy_sprite_region_pairs):
         else:
             vln_option, rule_pair_list = random.choice(list(best_rules.items()))
         if best_size == 0:
-            raise Exception('Invulnerable enemy? rules seems to be insufficient for this enemy set, please report:'
-                            + ', '.join([str(x) for x, y in enemy_sprite_region_pairs]))
+            raise Exception('Invulnerable enemy? rules seems to be insufficient for this enemy set, please report: '
+                            + describe_enemies(world, player, enemy_sprite_region_pairs))
 
         new_vln_list = {vln_kv[0]: vln_kv[1] for idx, vln_kv in enumerate(vln_list.items()) if idx not in vln_option}
         rules_to_add = [rule for rule, resources in rule_pair_list]
@@ -145,6 +145,16 @@ def defeat_rule_multiple(world, player, enemy_sprite_region_pairs):
         vln_list = new_vln_list
 
     return and_rule(*required_rules)
+
+
+def describe_enemies(world, player, enemy_sprite_region_pairs):
+    room_map = world.data_tables[player].uw_enemy_table.room_map
+    descriptions = []
+    for sprite, region in enemy_sprite_region_pairs:
+        sprites = room_map.get(sprite.super_tile, [])
+        slot = next((i for i, s in enumerate(sprites) if s is sprite), '?')  # spawned extras have no slot
+        descriptions.append(f'{sprite} (room {sprite.super_tile:#x} slot {slot}, {region.name})')
+    return ', '.join(descriptions)
 
 
 def find_possible_rules(vln_list, used_resources, world, player):

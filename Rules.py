@@ -1480,6 +1480,7 @@ std_kill_rooms = {
 
 kill_chests = {
     'Tower Room 03': (['Castle Tower - Room 03'], 0xe0, [2, 3]),
+    'Eastern Big Key': (['Eastern Palace - Big Key Chest'], 0xb8, [0, 1, 2, 3, 4, 5]),
     'Ice Compass Room': (['Ice Palace - Compass Chest'], 0x2e, [0, 1, 2, 3, 4, 5]),
     'Swamp Entrance': (['Swamp Palace - Entrance'], 0x28, [0, 1, 2, 3, 4]),
     'GT Tile Room': (['Ganons Tower - Tile Room'], 0x8d, [1, 2, 3, 4]),

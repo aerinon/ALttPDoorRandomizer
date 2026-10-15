@@ -16,7 +16,7 @@ shutter_sprites = {
     0x85: {2, 3, 4, 5}, 0x5d: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, 0x6b: {5, 6, 7, 8, 9, 10, 11, 12, 13},
     0x6d: {0, 1, 2, 3, 4, 5, 6, 7, 8}, 0x7b: {2, 3, 4, 5, 8, 9, 10}, 0x7d: {4, 5, 6, 7, 8, 10}, 0x8d: {0, 1, 2, 3, 4},
     0xa5: {0, 1, 2, 3, 4, 5, 6, 7}, 0x71: {0, 1}, 0xd8: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-    0xb0: {0, 1, 2, 3, 4, 5, 7, 8, 9, 10}, 0xc0: {0, 1, 2}, 0xe0: {0, 1, 2, 3}, 0xb2: {5, 6, 7, 10, 11},
+    0xb0: {0, 1, 2, 3, 4, 5, 7, 8, 9, 10}, 0xc0: {0, 1, 3}, 0xe0: {0, 1, 2, 3}, 0xb2: {5, 6, 7, 10, 11},
     0xd2: {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, 0xef: {0, 1, 2}, 0x10c: {4, 5, 6, 7}, 0x123: {0, 1, 2, 3},
     0xee: {0, 1, 2, 3, 4}  # low health traversal
 }
@@ -371,6 +371,17 @@ def determine_forbidden(forbid, room_id, drop_flag=False):
     return forbidden_set
 
 
+def force_allowed(req, sprite, room_id, idx, any_enemy_logic):
+    # drops and kill rooms keep their normal restrictions; those slots fall back to random placement
+    if req is None or isinstance(req, dict):
+        return True
+    if sprite.drops_item:
+        return req.good_for_key_drop(determine_forbidden(any_enemy_logic == 'none', room_id, True))
+    if room_id in shutter_sprites and idx in shutter_sprites[room_id]:
+        return req.good_for_shutter(determine_forbidden(any_enemy_logic != 'allow_all', room_id))
+    return True
+
+
 def filter_choices(options, room_id, sprite_idx, denials):
     key = room_id, sprite_idx
     return [x for x in options if key not in denials or x.sprite not in denials[key]]
@@ -431,7 +442,10 @@ def randomize_enemies(world, player):
         custom_uw, custom_ow = {}, {}
         if world.force_enemy[player]:
             custom_ow = {area_id: {i: world.force_enemy[player] for i, s in enumerate(sprite_list)} for area_id, sprite_list in world.data_tables[player].ow_enemy_table.items()}
-            custom_uw = {room_id: {i: world.force_enemy[player] for i, s in enumerate(sprite_list)} for room_id, sprite_list in world.data_tables[player].uw_enemy_table.room_map.items()}
+            forced_req = data_tables.sprite_requirements.get((sprite_translation[world.force_enemy[player]], 0))
+            custom_uw = {room_id: {i: world.force_enemy[player] for i, s in enumerate(sprite_list)
+                                   if force_allowed(forced_req, s, room_id, i, world.any_enemy_logic[player])}
+                         for room_id, sprite_list in world.data_tables[player].uw_enemy_table.room_map.items()}
         else:
             enemy_map = world.customizer.get_enemies() if world.customizer else None
             if enemy_map and player in enemy_map:
