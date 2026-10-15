@@ -62,6 +62,7 @@ class NewKeyLogic(object):
         self.relevant_regions = []
         self.relevant_locations = []
         self.can_reach_cache = {}
+        self.crystal_cache = {}  # cache key -> {region: crystal bits every terminal sphere reached it in}
         self.crystal_switch_reachable = {}
 
         # Portal accessibility data
@@ -168,7 +169,7 @@ class NewKeyLogic(object):
                     if future_key not in logic.can_reach_cache:
                         logic.calculate_reachability(future_key, future_smalls, future_big, dungeon_logic, player)
                     regions, locations = logic.can_reach_cache[future_key]
-                    results.append((logic, regions, locations))
+                    results.append((logic, regions, locations, logic.crystal_cache[future_key]))
             self.futures_cache[memo] = results
         return self.futures_cache[memo], cache_key
 
@@ -212,15 +213,23 @@ class NewKeyLogic(object):
         # in every future the connected region must be reachable, and a locked door needs a key to waste unless it
         # is self-locking in that future's logic
         return all(entrance.connected_region in regions and (entrance.name not in logic.door_minimums or cache_key[0] > 0)
-                   for logic, regions, _ in results)
+                   for logic, regions, _, _ in results)
 
     def query_reachability(self, state, dungeon_logic, player):
         results, _ = self._futures(state, dungeon_logic, player, self._get_accessible_portals(state, player))
         regions, locations = set(results[0][1]), set(results[0][2])
-        for _, more_regions, more_locations in results[1:]:
+        for _, more_regions, more_locations, _ in results[1:]:
             regions &= more_regions
             locations &= more_locations
         return regions, locations
+
+    def query_guarantee(self, state, dungeon_logic, player):
+        """Guaranteed regions, each with the crystal bits every future guarantees there (Null where they disagree)."""
+        results, _ = self._futures(state, dungeon_logic, player, self._get_accessible_portals(state, player))
+        crystals = dict(results[0][3])
+        for _, _, _, more in results[1:]:
+            crystals = {region: bits & more[region] for region, bits in crystals.items() if region in more}
+        return crystals
 
     # notes, smalls_in_hand can include some of the small_locations, small_locations may have been checked already - this affects cache_key
     # perhaps we should always start at the root sphere, skipping ahead can be problematic if you have enough keys, but not the big key to reach those later spheres
@@ -317,6 +326,13 @@ class NewKeyLogic(object):
 
         # cache the result
         self.can_reach_cache[cache_key] = (reachable_regions, reachable_locations)
+        crystals = {}
+        for region in reachable_regions:
+            bits = CrystalBarrier.Either
+            for sphere in terminal_spheres:
+                bits &= sphere.crystal_bits(region)
+            crystals[region] = bits
+        self.crystal_cache[cache_key] = crystals
 
 
     def restrict_blind(self, reachable_regions, reachable_locations):
@@ -496,6 +512,18 @@ class KeySphere(object):
         self.self_locking_child_spheres = []
 
         self.accessible_locations = None
+        self.crystal_map = None
+
+    def crystal_bits(self, region):
+        """The crystal states this sphere's exploration reached the region in: Blue, Orange, Either or Null."""
+        if self.crystal_map is None:
+            explored = self.key_counter.state_ref
+            self.crystal_map = defaultdict(int)
+            for visited in explored.visited_blue:
+                self.crystal_map[visited] |= CrystalBarrier.Blue
+            for visited in explored.visited_orange:
+                self.crystal_map[visited] |= CrystalBarrier.Orange
+        return self.crystal_map.get(region, CrystalBarrier.Null)
 
     def get_accessible_locations(self):
         if self.accessible_locations is None:

@@ -625,13 +625,15 @@ class CollectionState(object):
 
         lobbies = self.accessible_lobbies(player)
         self.traverse_world(queue, rrp, bc, player)
-        # an entrance key logic refused may pass once another lobby of its dungeon is reached: go round again until
-        # no new lobby turns up (lobbies only open, so this stops)
-        reached = self.accessible_lobbies(player)
-        while reached != lobbies:
+        # an entrance key logic refused may pass once another lobby of its dungeon is reached, and a region key logic
+        # guarantees by one route or another has no path of its own: go round again until neither turns up anything
+        # (both only grow, so this stops)
+        while True:
+            reached = self.accessible_lobbies(player)
+            if reached == lobbies and not self.inject_guaranteed_regions(player):
+                break
             lobbies = reached
             self.traverse_world(deque(bc.items()), rrp, bc, player)
-            reached = self.accessible_lobbies(player)
         if self.world.key_logic_algorithm[player] == 'dangerous':
             unresolved_events = [x for y in self.reachable_regions[player] for x in y.locations
                                  if x.event and x.item and (x.item.smallkey or x.item.bigkey or x.item.advancement)
@@ -646,6 +648,54 @@ class CollectionState(object):
         return frozenset(lobby for logic in self.world.key_logic.get(player, {}).values()
                          if logic.new_logic is not None
                          for lobby, gateway in logic.new_logic.start_regions if gateway in rrp)
+
+    def inject_guaranteed_regions(self, player):
+        """Experimental key logic guarantees sets: a region reached by one route or another, where no single route's
+        rooms are guaranteed, has no path for the traversal. Each such region the traversal reaches holding every key
+        of its dungeon (so item rules hold) becomes a traversal root, in the crystal state both allow."""
+        if self.world.key_logic_algorithm[player] != 'experimental':
+            return False
+        rrp, bc = self.reachable_regions[player], self.blocked_connections[player]
+        entered = {}
+        for region in rrp:
+            if region.dungeon is not None:
+                entered.setdefault(region.dungeon.name, region)
+        injected = False
+        for name, logic in self.world.key_logic[player].items():
+            new_logic = logic.new_logic
+            if (name not in entered or new_logic is None or new_logic.fast_logic or not new_logic.key_spheres.get(0)
+                    or (self.dungeon_limits and name not in self.dungeon_limits)):
+                continue
+            pending = {r: bits for r, bits in new_logic.query_guarantee(self, logic, player).items() if r not in rrp}
+            if not pending:
+                continue
+            walked = self.reach_with_keys(logic, player)
+            root = next((lobby for lobby, _ in new_logic.start_regions if lobby in rrp), entered[name])
+            for region, bits in pending.items():
+                if region not in walked:
+                    continue
+                walked_bits = CrystalBarrier.Either if walked[region] == CrystalBarrier.Both else walked[region]
+                crystal = bits & walked_bits
+                rrp[region] = crystal
+                self.path[region] = (region.name, self.path.get(root, (root.name, None)))
+                for conn in region.exits:
+                    door = conn.door
+                    if door is None:
+                        bc[conn] = crystal
+                    elif (not (door.controller.blocked if door.controller is not None else door.blocked)
+                          and self.valid_crystal(door, crystal)):
+                        bc[conn] = door.crystal if door.crystal else crystal
+                injected = True
+        return injected
+
+    def reach_with_keys(self, key_logic, player):
+        """The regions (with crystal state) the traversal reaches from here holding every key of this dungeon."""
+        walk = self.copy()
+        walk.prog_items[key_logic.small_key_name, player] += 99
+        walk.prog_items[key_logic.bk_name, player] += 1
+        wrrp, wbc = walk.reachable_regions[player], walk.blocked_connections[player]
+        walk.traverse_world(deque(wbc.items()), wrrp, wbc, player)
+        return wrrp
 
     def traverse_world(self, queue, rrp, bc, player):
         # run BFS on all connections, and keep track of those blocked by missing items
@@ -1091,27 +1141,6 @@ class CollectionState(object):
                     self.events.append((event.name, event.player))
                     self.collect(event.item, True, event)
                     new_locations = True
-            # only doing this if placing a small key
-            if not new_locations and self.placing_items and any(i.smallkey for i in self.placing_items) and self.check_for_isolated_regions():
-                new_locations = True
-
-    def check_for_isolated_regions(self):
-        isolated_reachable_regions = False
-        for player, logic_map in self.world.key_logic.items():
-            # small keys for this player aren't shuffled and we have experimental key logic on
-            if self.world.key_logic_algorithm[player] == 'experimental' and self.world.keyshuffle[player] == 'none':
-                for dungeon, logic in logic_map.items():
-                    # one of the placing items is a small key for this dungeon and player
-                    if all(i.dungeon != dungeon or i.player != player for i in self.placing_items):
-                        continue
-                    if logic.new_logic and not logic.new_logic.fast_logic and any(region.dungeon and region.dungeon.name == dungeon for region in self.reachable_regions[player]):
-                        detected_regions, detected_locations = logic.new_logic.query_reachability(self, logic, player)
-                        unvisited_regions = {r for r in detected_regions if r not in self.reachable_regions[player]}
-                        if unvisited_regions:
-                            isolated_reachable_regions = True
-                            self.reachable_regions[player].update({r: CrystalBarrier.Null for r in unvisited_regions})
-                            logging.getLogger('').debug(f'Detected isolated reachable regions in {dungeon}: {", ".join([r.name for r in unvisited_regions])}')
-        return isolated_reachable_regions
 
     def can_reach_blue(self, region, player):
         return region in self.reachable_regions[player] and self.reachable_regions[player][region] in [CrystalBarrier.Blue, CrystalBarrier.Either]
