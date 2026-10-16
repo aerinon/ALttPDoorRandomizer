@@ -358,4 +358,4 @@ Misery Mire (otherwise, 7 items): in Misery Mire
 Turtle Rock - Boss: with Trinexx
 Turtle Rock (otherwise, 11 items): in Turtle Rock
 Ganons Tower (after climb, 4 items): atop Ganon's Tower
-Ganon's Tower (otherwise, 23 items): in Ganon's Tower 
+Ganon's Tower (otherwise, 23 items): in Ganon's Tower
