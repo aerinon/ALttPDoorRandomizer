@@ -61,6 +61,8 @@ class NewKeyLogic(object):
         # Calculated or cached data
         self.relevant_regions = []
         self.relevant_locations = []
+        self.layout_regions = []  # every region in any key-door state, prize lobby open or not
+        self.layout_locations = []  # every location in any key-door state, prize lobby open or not
         self.can_reach_cache = {}
         self.crystal_cache = {}  # cache key -> {region: crystal bits every terminal sphere reached it in}
         self.crystal_switch_reachable = {}
@@ -180,18 +182,21 @@ class NewKeyLogic(object):
         smalls_in_hand = state.prog_items[sk_name, player]
         big_in_hand = True if state.prog_items[bk_name, player] > 0 else False
 
-        # for relevant locations, where are small/big keys
+        # a key inside the dungeon is credited where it lies, collected or not: a careless player may waste the keys
+        # they hold before reaching it, so only keys from outside count as held from the start
         regions, locations = self.get_relevant_regions_and_locations()
         small_locations, big_location = [], None
         small_loc_name_set, big_loc_name = set(), None
-        for loc in locations:
-            if loc not in state.locations_checked and loc.item is not None:
-                if loc.item.name == sk_name and loc.item.player == player:
-                    small_locations.append(loc)
-                    small_loc_name_set.add(loc.name)
-                if loc.item.name == bk_name and loc.item.player == player:
-                    big_location = loc
-                    big_loc_name = loc.name
+        for loc in self.layout_locations or locations:
+            if loc.item is None or loc.item.player != player:
+                continue
+            if loc.item.name == sk_name:
+                small_locations.append(loc)
+                small_loc_name_set.add(loc.name)
+                if loc in state.locations_checked:
+                    smalls_in_hand -= 1
+            elif loc.item.name == bk_name:
+                big_location, big_loc_name, big_in_hand = loc, loc.name, False
         small_loc_name_set = frozenset(small_loc_name_set)
 
         # the location this dungeon's small key is being placed at, if known - only it can be a self-locking spot
@@ -209,10 +214,11 @@ class NewKeyLogic(object):
             # the lobby this entrance leads into is accessible while the entrance is being evaluated
             accessible = accessible | frozenset(sr for sr, gw in self.start_regions
                                                 if entrance.connected_region in (sr, gw))
-        results, cache_key = self._futures(state, dungeon_logic, player, accessible)
-        # in every future the connected region must be reachable, and a locked door needs a key to waste unless it
-        # is self-locking in that future's logic
-        return all(entrance.connected_region in regions and (entrance.name not in logic.door_minimums or cache_key[0] > 0)
+        results, _ = self._futures(state, dungeon_logic, player, accessible)
+        # in every future the connected region must be reachable, and a locked door needs a key in hand to waste unless
+        # it is self-locking in that future's logic
+        held = state.prog_items[dungeon_logic.small_key_name, player] > 0
+        return all(entrance.connected_region in regions and (entrance.name not in logic.door_minimums or held)
                    for logic, regions, _, _ in results)
 
     def query_reachability(self, state, dungeon_logic, player):
@@ -748,26 +754,6 @@ def _build_spheres_for_counters(new_logic, counters, key_layout, world, player):
             if world.accessibility[player] != 'locations':
                 self_locking_doors.update(detect_self_locks(sphere, parent_sphere, key_layout))
 
-            # bk_restricted zones, obviously only important if both big and small keys aren't shuffled
-            if not key_counter.big_key_opened:
-                possible_key_locs = set(sphere.locations)
-                potential_doors = 0
-                for door_pair in key_layout.proposal:
-                    if isinstance(door_pair, tuple):
-                        if (door_pair[0] in key_counter.child_doors or door_pair[1] in key_counter.child_doors
-                                or door_pair[0] in key_counter.open_doors or door_pair[1] in key_counter.open_doors):
-                            potential_doors += 1
-                    elif door_pair in key_counter.child_doors or door_pair in key_counter.open_doors:
-                        potential_doors += 1
-                extras = calc_extras(potential_doors, key_layout.key_logic.dungeon, world, player)
-                key_locs_sans_bk = possible_key_locs.difference(new_logic.bk_locations)
-                big_chests_in_range = len(possible_key_locs.intersection(new_logic.bk_locations))
-                big_doors_accessible = any(d for d in key_counter.child_doors if d.bigKey or d.name in special_big_key_doors)
-                if (not big_doors_accessible
-                        and (len(key_locs_sans_bk) + big_chests_in_range < potential_doors + extras  # strictly less
-                             or (len(key_locs_sans_bk) + big_chests_in_range == potential_doors + extras and big_chests_in_range == 0))):  # exactly enough but no big chests
-                    new_logic.bk_restricted.update(sphere.locations)
-
         skip = False
         if parent_sphere:
             if not parent_sphere.key_counter.big_key_opened and key_counter.big_key_opened:
@@ -801,6 +787,12 @@ def _build_spheres_for_counters(new_logic, counters, key_layout, world, player):
 
     new_logic.relevant_regions = list(complete_region_set)
     new_logic.relevant_locations = list(complete_location_set)
+    new_logic.layout_regions = list({region for counter in counters.values()
+                                     for region in itertools.chain(counter.state_ref.visited_orange,
+                                                                   counter.state_ref.visited_blue)})
+    new_logic.layout_locations = list({loc for counter in counters.values()
+                                       for loc in itertools.chain(counter.free_locations, counter.key_only_locations,
+                                                                  counter.other_locations)})
     new_logic.door_minimums = [d for d in new_logic.door_minimums if all(d != self_locking.name for self_locking in self_locking_doors)]
 
     if key_layout.sector.name == "Thieves Town":

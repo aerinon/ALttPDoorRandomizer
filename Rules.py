@@ -2432,8 +2432,8 @@ def new_key_logic(key_logic, world, player):
             # do I need to clear and re-populate the entrance/door caches?
             # thinking not for now
 
-            # Small Key Logic
-            for region in regions:
+            # Small Key Logic: every region of any key-door state, including those only a prize lobby reaches
+            for region in logic.layout_regions or regions:
                 for ent in region.entrances:
                     add_rule(ent, create_rule_for_key_access(ent, d_logic, logic, player))
 
