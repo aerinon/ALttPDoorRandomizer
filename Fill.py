@@ -58,7 +58,7 @@ def fill_dungeons_restrictive(world, shuffled_locations):
 
     all_state_base = world.get_all_state()
     for player in range(1, world.players + 1):
-        if world.logic[player] == 'hybridglitches' and world.keyshuffle[i.player] in ['none', 'nearby'] \
+        if world.logic[player] == 'hybridglitches' and world.keyshuffle[player] == 'none' \
                 and world.pottery[player] not in ['none', 'cave']:
             # remove 2 keys from main pool
             count_to_remove = 2
@@ -85,8 +85,8 @@ def fill_dungeons_restrictive(world, shuffled_locations):
             hybrid_state_base = all_state_base.copy()
             for x in bigs + smalls + others:
                 hybrid_state_base.collect(x, True)
-            hybrid_smalls = [ItemFactory('Small Key (Swamp Palace)', player)] * 2
-            fill(hybrid_state_base, hybrid_smalls, hybrid_locations, unplaced_smalls)
+            hybrid_smalls = [ItemFactory('Small Key (Swamp Palace)', player) for _ in range(2)]
+            fill_restrictive(world, hybrid_state_base, hybrid_locations, hybrid_smalls, unplaced_smalls, True)
 
     big_state_base = all_state_base.copy()
     for x in smalls + others:
