@@ -1182,7 +1182,7 @@ def patch_rom(world, rom, player, team, is_mystery=False):
     rom.write_byte(0xF5F10, 0xF0) # bees are catchable
     rom.write_byte(0x180086, 0x00 if world.aga_randomness[player] else 0x01)  # set blue ball and ganon warp randomness
     rom.write_byte(0x1800A0, 0x01)  # return to light world on s+q without mirror
-    rom.write_byte(0x1800A1, 0x01)  # enable overworld screen transition draining for water level inside swamp
+    rom.write_byte(0x1800A1, 0x00 if world.logic[player] in ['hybridglitches', 'nologic'] else 0x01)  # enable overworld screen transition draining for water level inside swamp
     rom.write_byte(0x180174, 0x01 if world.fix_fake_world[player] else 0x00)
     rom.write_byte(0x18017E, 0x01) # Fairy fountains only trade in bottles
 
@@ -1327,7 +1327,7 @@ def patch_rom(world, rom, player, team, is_mystery=False):
                               | (0x02 if world.bigkeyshuffle[player] else 0x00)
                               | (0x04 if world.mapshuffle[player] or enable_menu_map_check else 0x00)
                               | (0x08 if world.compassshuffle[player] else 0x00)  # free roaming items in menu
-                              | (0x10 if world.logic[player] == 'nologic' else 0)))  # boss icon
+                              | (0x10 if world.logic[player] in ['hybridglitches', 'nologic'] else 0)))  # boss icon
 
     # Map reveals
     reveal_bytes = {
@@ -1375,7 +1375,8 @@ def patch_rom(world, rom, player, team, is_mystery=False):
     player_name = '' if world.players == 1 else str(' (' + world.get_player_names(player) + ')')
     world.spoiler.dig_game_digs[player_name] = digging_game_rng
 
-    rom.write_byte(0x1800A3, 0x01)  # enable correct world setting behaviour after agahnim kills
+    rom.write_byte(0x1800A3, 0x00 if glitches_enabled else 0x01)  # enable correct world setting behaviour after agahnim kills
+    rom.write_byte(0x159A8, 0x02 if world.logic[player] in ['hybridglitches', 'nologic'] else 0x04)  # zelda S&Q mirror fix
     rom.write_byte(0x1800A4, 0x01 if not glitches_enabled else 0x00)  # enable POD EG fix
     rom.write_byte(0x180042, 0x01 if world.save_and_quit_from_boss else 0x00)  # Allow Save and Quit after boss kill
     rom.write_byte(0x180358, 0x01 if glitches_enabled else 0x00)
