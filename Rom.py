@@ -1256,7 +1256,7 @@ def patch_rom(world, rom, player, team, is_mystery=False):
         map_hud_mode = 0x02  # always on
     elif world.dungeon_counters[player] == 'off':
         pass
-    elif world.keyshuffle[player] != 'universal' and (world.mapshuffle[player] != 'none' or world.doorShuffle[player] != 'vanilla'
+    elif world.keyshuffle[player] != 'universal' and (world.mapshuffle[player] or world.doorShuffle[player] != 'vanilla'
                                                       or world.dropshuffle[player] != 'none' or world.pottery[player] not in ['none', 'cave'] or world.dungeon_counters[player] == 'pickup'):
         map_hud_mode = 0x01  # show on pickup
     rom.write_byte(0x18003A, map_hud_mode)
