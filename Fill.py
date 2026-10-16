@@ -229,44 +229,83 @@ def verify_spot_to_fill_v2(location, item_to_place, max_exp_state, single_player
             state.placing_locations = [(item_to_place, location)]
             state.stale[item_to_place.player] = True
             state.sweep_for_events()
-        if location.can_fill(state, item_to_place, perform_access_check):
+        if (location.can_fill(state, item_to_place, perform_access_check)
+                or (perform_access_check and self_locking_spot(location, item_to_place, state, world)
+                    and location.can_fill(state, item_to_place, False))):
             if valid_key_placement(item_to_place, location, key_pool, state, world):
                 if valid_bk_placement(location, item_to_place, world):
                     if item_to_place.crystal or valid_dungeon_placement(item_to_place, location, world):
-                        if not perform_access_check or keeps_dungeon_guaranteed(location, item_to_place, max_exp_state, world):
+                        if not perform_access_check or keeps_placed_items_reachable(location, item_to_place, max_exp_state, world):
                             return location
     return None
 
 
-def keeps_dungeon_guaranteed(location, item, max_exp_state, world):
-    """A small key placed at a location instead of held must not cut off anything already placed in its dungeon: the
-    worst case can spend a held key before the player reaches a placed one, so placing a key can shrink what the
-    experimental key logic guarantees for items placed earlier."""
+def self_locking_spot(location, item, state, world):
+    """A dungeon's small key may lie behind the door it opens: its key logic grants that spot (and nothing beyond the
+    door) while the key is named as placed there. The spot must still be reachable by items, with the dungeon's keys
+    in hand."""
+    dungeon = location.parent_region.dungeon
+    if not item.smallkey or dungeon is None or dungeon.name != item.dungeon or not state.placing_locations:
+        return False
+    logic = world.key_logic[item.player].get(item.dungeon)
+    if logic is None or logic.new_logic is None or logic.new_logic.fast_logic:
+        return False
+    _, locations = logic.new_logic.query_reachability(state, logic, item.player)
+    if location not in locations:
+        return False
+    walked = state.reach_with_keys(logic, item.player)
+    if location.parent_region not in walked:
+        return False
+    # the location's own rule (a big chest, a crystal state) is judged with the items held and its room reached as
+    # the walk reaches it
+    at_spot = state.copy()
+    at_spot.reachable_regions[item.player][location.parent_region] = walked[location.parent_region]
+    return location.access_rule(at_spot)
+
+
+def keeps_placed_items_reachable(location, item, max_exp_state, world):
+    """A small key placed at a location instead of held can shrink what the experimental key logic guarantees (the
+    worst case may spend a held key before the player reaches a placed one), and with it whatever is reached through
+    that dungeon, its exits included: everything placed and reachable with the key held must stay reachable once the
+    key is placed. Both sides are rebuilt from scratch, since a copied state never loses a region."""
     player = item.player
     if not item.smallkey or world.key_logic_algorithm[player] != 'experimental' or world.keyshuffle[player] == 'universal':
         return True
     logic = world.key_logic[player].get(item.dungeon)
     if logic is None or logic.new_logic is None or logic.new_logic.fast_logic:
         return True
+
+    def rebuilt(placing):
+        state = max_exp_state.copy()
+        state.reachable_regions[player], state.blocked_connections[player] = {}, {}
+        if placing:
+            state.placing_items, state.placing_locations = [item], [(item, location)]
+        else:
+            state.collect(item, True)
+        state.stale[player] = True
+        state.sweep_for_events()
+        return state
+
     held = max_exp_state.copy()
     held.collect(item, True)
-    held.sweep_for_events()
-    _, before = logic.new_logic.query_reachability(held, logic, player)
-    filled = [loc for loc in before if loc.item is not None and loc is not location]
-    if not filled:
-        return True
     previous = location.item, location.event
     location.item, location.event = item, True  # as fill leaves it once placed, so sweeps collect it
     try:
-        placed = max_exp_state.copy()
-        placed.placing_items = [item]
-        placed.placing_locations = [(item, location)]
-        placed.stale[player] = True
-        placed.sweep_for_events()
-        _, after = logic.new_logic.query_reachability(placed, logic, player)
+        # only this dungeon's key logic changes: if it guarantees no fewer regions, nothing anywhere is lost
+        named = max_exp_state.copy()
+        named.placing_items, named.placing_locations = [item], [(item, location)]
+        if logic.new_logic.query_reachability(named, logic, player)[0] >= logic.new_logic.query_reachability(held, logic, player)[0]:
+            return True
+        placed = rebuilt(True)
     finally:
         location.item, location.event = previous
-    return all(loc in after for loc in filled)
+    before = rebuilt(False)
+    filled = [loc for loc in world.get_filled_locations() if loc is not location and loc.can_reach(before)]
+    location.item, location.event = item, True
+    try:
+        return all(loc.can_reach(placed) for loc in filled)
+    finally:
+        location.item, location.event = previous
 
 
 def valid_key_placement(item, location, key_pool, collection_state, world):

@@ -282,51 +282,24 @@ class NewKeyLogic(object):
                         queue.append((next_sphere, next_unspent_keys, current_big, next_small_locs))
                 continue  # even if no spheres are added, we don't continue processing it
 
-            # if we can't spend a key, possible to place in a self-locking sphere?
-            total_unspent_keys = unspent_keys + len(smalls_to_grab)
-            if placing_spot is not None and total_unspent_keys == 0:  # we can't do this twice so only we have exactly zero keys
-                next_unspent_keys = total_unspent_keys - 1  # we are "spending" a key we don't have here (can't open up more doors with it)
-                valid_spheres, non_terminal = [], False
+            # can't advance - terminal. If no key is left, the key being placed may lie behind the door it opens (the
+            # only new location there): that spot alone is granted, nothing else beyond the door
+            granted = None
+            if placing_spot is not None and unspent_keys + len(smalls_to_grab) == 0:
                 for next_sphere in sphere.self_locking_child_spheres:
-                    # Get the unique self-locking location
-                    self_locking_locations = next_sphere.locations.difference(sphere.locations)
-                    if len(self_locking_locations) != 1:
-                        continue
-
-                    self_locking_location = next(iter(self_locking_locations))
-                    if self_locking_location != placing_spot:
-                        continue  # the key being placed goes somewhere else
-                    # Skip if non-small key item has been placed
-                    if self_locking_location.item is not None and (not self_locking_location.item.smallkey
-                                                                   or self_locking_location.item.name != dungeon_logic.small_key_name
-                                                                   or self_locking_location.item.player != player):
-                        continue
-
-                    # Valid but not visited, mean this sphere is non-terminal
-                    if (next_sphere, current_big) in visited_spheres:
-                        non_terminal = True
-                        continue
-
-                    valid_spheres.append(next_sphere)
-                if valid_spheres:
-                    for next_sphere in valid_spheres:
-                        visited_spheres.add((next_sphere, current_big))
-                        queue.append((next_sphere, next_unspent_keys, current_big, small_locations_left))
-                    continue
-                if non_terminal:
-                    continue
-
-            # can't advance - terminal
-            terminal_spheres.append(sphere)
+                    if (next_sphere.locations.difference(sphere.locations) == {placing_spot}
+                            and (placing_spot.item is None or (placing_spot.item.name == dungeon_logic.small_key_name
+                                                               and placing_spot.item.player == player))):
+                        granted = placing_spot
+                        break
+            terminal_spheres.append((sphere, granted))
         if not terminal_spheres:
             raise Exception('No terminal spheres found - logic failure in NewKeyLogic')
 
         # collect all reachable regions and locations
-        reachable_regions = set(terminal_spheres[0].regions)
-        reachable_locations = set(terminal_spheres[0].locations)
-        for sphere in terminal_spheres[1:]:
-            reachable_regions.intersection_update(sphere.regions)
-            reachable_locations.intersection_update(sphere.locations)
+        reachable_regions = set.intersection(*(set(sphere.regions) for sphere, _ in terminal_spheres))
+        reachable_locations = set.intersection(*(set(sphere.locations) | ({granted} if granted else set())
+                                                 for sphere, granted in terminal_spheres))
 
         self.restrict_blind(reachable_regions, reachable_locations)
 
@@ -335,7 +308,7 @@ class NewKeyLogic(object):
         crystals = {}
         for region in reachable_regions:
             bits = CrystalBarrier.Either
-            for sphere in terminal_spheres:
+            for sphere, _ in terminal_spheres:
                 bits &= sphere.crystal_bits(region)
             crystals[region] = bits
         self.crystal_cache[cache_key] = crystals
