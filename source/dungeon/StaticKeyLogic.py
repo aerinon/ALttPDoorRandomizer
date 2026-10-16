@@ -237,6 +237,7 @@ def set_turtle_rock_rules(world, player, keys, big_key_in, small_key_at, or_rule
         allow_small(tr, chest)
     elif front and middle:
         set_rule(loc(chest), lambda state: state.has_sm_key_strict(dungeon_keys[tr], player, chest_keys_needed(state)))
+        allow_door_with_small_key_at(world, player, 'TR Pokey 2 ES', loc(chest))
         allow_small(tr, chest)
         no_big_key += ['Turtle Rock - Crystaroller Room'] + TR_EYE_BRIDGE
     elif front:
