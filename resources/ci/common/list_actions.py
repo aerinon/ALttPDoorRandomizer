@@ -5,9 +5,13 @@ List GitHub Actions versions used and latest versions
 import json
 import os
 import ssl
+import sys
 import urllib.request
 import yaml
 from json.decoder import JSONDecodeError
+
+# Windows runners default to cp1252, which can't print the status emoji
+sys.stdout.reconfigure(encoding='utf-8')
 
 allACTIONS = {}
 listACTIONS = []
