@@ -52,6 +52,13 @@ def find_keylock(key_layout, world, player):
                                start_big or any(holds(l, big_key) for l in obtained))
         return supplies[found]
 
+    # supply only grows as fewer of the dungeon's locations are withheld: if the world yields every outside key with all
+    # locations withheld but those every key-door state reaches, it does so for every state, and no state needs a sweep
+    every_outside = (start_keys + sum(1 for l in outside if holds(l, small_key)),
+                     start_big or any(holds(l, big_key) for l in outside))
+    always_reached = set.intersection(*(locations_of(c) for c in counters.values()))
+    sweep_needed = bool(outside) and supply(always_reached) != every_outside
+
     def keys_held(counter, outside_keys, big_outside):
         found = locations_of(counter)
         big = big_outside or any(holds(l, big_key) for l in found)  # a big chest may hold its own big key
@@ -72,9 +79,8 @@ def find_keylock(key_layout, world, player):
             continue
         seen.add(code)
         # assume every outside key comes first; ask the world only when that changes which doors open
-        smalls, big = keys_held(counter, start_keys + sum(1 for l in outside if holds(l, small_key)),
-                                start_big or any(holds(l, big_key) for l in outside))
-        if outside:
+        smalls, big = keys_held(counter, *every_outside)
+        if sweep_needed:
             needed = keys_held(counter, start_keys, start_big)
             if needed != (smalls, big) and not (needed[0] > counter.used_keys and needed[1] == big):
                 smalls, big = keys_held(counter, *supply(locations_of(counter)))

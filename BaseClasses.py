@@ -552,6 +552,7 @@ class CollectionState(object):
 
     def __init__(self, parent, skip_init=False):
         self.world = parent
+        self.key_cache_memo = {}  # NewKeyLogic.build_cache_key per dungeon; never carried into a copy
         if not skip_init:
             self.prog_items = Counter()
             self.forced_keys = Counter()

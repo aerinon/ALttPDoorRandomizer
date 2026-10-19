@@ -180,6 +180,17 @@ class NewKeyLogic(object):
         return self.futures_cache[memo], cache_key
 
     def build_cache_key(self, state, dungeon_logic, player):
+        # within one state the answer changes only with these: its keys held, its checked locations (which only
+        # grow) and the placement it names
+        memo_key = (id(self), player, state.prog_items[dungeon_logic.small_key_name, player],
+                    state.prog_items[dungeon_logic.bk_name, player], len(state.locations_checked),
+                    tuple(map(id, state.placing_locations)) if state.placing_items and state.placing_locations else None)
+        memo = state.key_cache_memo
+        if memo_key not in memo:
+            memo[memo_key] = self._build_cache_key(state, dungeon_logic, player)
+        return memo[memo_key]
+
+    def _build_cache_key(self, state, dungeon_logic, player):
         sk_name = dungeon_logic.small_key_name
         bk_name = dungeon_logic.bk_name
         # parameters from state
