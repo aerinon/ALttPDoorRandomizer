@@ -82,5 +82,28 @@ class TestSelfLockingAllowance(unittest.TestCase):
             logging.disable(logging.NOTSET)
 
 
+    def test_event_with_another_way_does_not_stop_a_self_lock(self):
+        # basic i2, OWG, standard: Ice's last key fits only at Iced T Room, behind its own door; that door can also
+        # reach Ice Block Drop, whose block has another way past (Cane of Somaria), so the spot still self-locks
+        original = Main.find_keylock
+
+        def stop(key_layout, world, player):
+            raise Stop(world)
+
+        Main.find_keylock = stop
+        argv = ['--door_shuffle', 'basic', '--intensity', '2', '--logic', 'owglitches', '--mode', 'standard',
+                '--dungeon_shuffle_algorithm', 'experimental', '--key_logic_algorithm', 'experimental',
+                '--suppress_rom', '--spoiler', 'none', '--seed', '684160854']
+        logging.disable(logging.WARNING)
+        try:
+            Main.main(parse_cli(argv), seed=684160854, fish=BabelFish(lang='en'))
+            self.fail('generation finished without reaching the keylock check')
+        except Stop:
+            pass
+        finally:
+            Main.find_keylock = original
+            logging.disable(logging.NOTSET)
+
+
 if __name__ == '__main__':
     unittest.main()

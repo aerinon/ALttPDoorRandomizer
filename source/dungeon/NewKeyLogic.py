@@ -12,6 +12,10 @@ from source.dungeon.KeyPlacement import create_exhaustive_placement_rules
 from Regions import dungeon_events
 from source.dungeon.DungeonStitcherV2 import special_big_key_doors
 
+# events a self-locked key may cut off: what they open is also open another way (Ice Block Drop: Cane of Somaria).
+# Every other event, and every prize and boss, keeps a door from counting as self-locking.
+self_lock_ignored_events = {'Ice Block Drop'}
+
 
 def _make_subset_key_layout(key_layout, filtered_start_regions):
     """Proxy for key_layout with filtered start_regions; mutable fields are fresh scratch objects. A prize lobby in it
@@ -287,7 +291,8 @@ class NewKeyLogic(object):
             granted = None
             if placing_spot is not None and unspent_keys + len(smalls_to_grab) == 0:
                 for next_sphere in sphere.self_locking_child_spheres:
-                    if (next_sphere.locations.difference(sphere.locations) == {placing_spot}
+                    if ({loc for loc in next_sphere.locations.difference(sphere.locations)
+                         if loc.name not in self_lock_ignored_events} == {placing_spot}
                             and (placing_spot.item is None or (placing_spot.item.name == dungeon_logic.small_key_name
                                                                and placing_spot.item.player == player))):
                         granted = placing_spot
@@ -786,11 +791,14 @@ def detect_self_locks(sphere, parent_sphere, key_layout):
     child_door_diff = [d for d in sphere.key_counter.child_doors if d not in parent_sphere.key_counter.child_doors]
     if len(child_door_diff) == 0:
         child_only_locs = sphere.locations.difference(parent_sphere.locations)
-        other_locations = set(sphere.key_counter.other_locations.keys()).difference(parent_sphere.key_counter.other_locations.keys())
+        other_locations = {loc for loc in sphere.key_counter.other_locations
+                           if loc not in parent_sphere.key_counter.other_locations
+                           and loc.name not in self_lock_ignored_events}
         if len(other_locations) > 0:
             # if the child sphere has other locations, it can't be self-locking
             return self_locking_doors
-        child_only_locs = {loc for loc in child_only_locs if loc.forced_item is None}
+        child_only_locs = {loc for loc in child_only_locs
+                           if loc.forced_item is None and loc.name not in self_lock_ignored_events}
         if len(child_only_locs) == 1:
             # must only be one door small key door difference
             door_diff = [s for s in sphere.key_counter.open_doors if s not in parent_sphere.key_counter.open_doors]

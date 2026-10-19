@@ -12,6 +12,7 @@ from Regions import shop_to_location_table, retro_shops
 from dungeon.SmallKeyDoorShuffle import is_key_door_layout_satisfiable
 from source.item.FillUtil import filter_locations, classify_major_items, replace_trash_item, vanilla_fallback
 from source.item.FillUtil import filter_special_locations, valid_pot_items
+from source.dungeon.NewKeyLogic import self_lock_ignored_events
 
 
 def get_dungeon_item_pool(world):
@@ -300,7 +301,8 @@ def keeps_placed_items_reachable(location, item, max_exp_state, world):
     finally:
         location.item, location.event = previous
     before = rebuilt(False)
-    filled = [loc for loc in world.get_filled_locations() if loc is not location and loc.can_reach(before)]
+    filled = [loc for loc in world.get_filled_locations() if loc is not location and loc.can_reach(before)
+              and loc.name not in self_lock_ignored_events]  # those a self-locked key may cut off
     location.item, location.event = item, True
     try:
         return all(loc.can_reach(placed) for loc in filled)
