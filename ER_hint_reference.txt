@@ -278,10 +278,10 @@ Bumper Cave Ledge: on a ledge
 Spectacle Rock: atop a rock
 Maze Race: at the race
 Desert Ledge: in the desert
-Pyramid: on the pyramid
+Pyramid: on the Pyramid
 Catfish: with a catfish
-Ether Tablet: at a monument
-Bombos Tablet: at a monument
+Ether Tablet: at a monolith
+Bombos Tablet: at a monolith
 Hobo: with the hobo
 Zora's Ledge: near Zora
 King Zora: at a high price
@@ -308,7 +308,7 @@ Waterfall Fairy (2 items): near a fairy
 Pyramid Fairy (2 items): near a fairy
 Mire Shed (2 items): near sparks
 Superbunny Cave (2 items): in a connection
-Spiral Cave: in spiral cave
+Spiral Cave: in Spiral Cave
 Kakariko Tavern: in the bar
 Link's House: in your home
 Sick Kid: with the sick
@@ -350,7 +350,7 @@ Skull Woods - Bridge Room: near Mothula
 Skull Woods - Boss: with Mothula
 Skull Woods (otherwise, 6 items): in Skull Woods
 Thieves' Town - Boss: with Blind
-Thieves' Town (otherwise, 7 items): in Thieves' Town
+Thieves' Town (otherwise, 7 items): in Thieves Town
 Ice Palace - Boss: with Kholdstare
 Ice Palace (otherwise, 7 items): in Ice Palace
 Misery Mire - Boss: with Vitreous
