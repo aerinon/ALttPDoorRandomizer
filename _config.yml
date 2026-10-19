@@ -82,8 +82,15 @@ plugins:
   - jekyll-seo-tag
   - jekyll-sitemap
 
-# Exclude from processing
+# Exclude from processing (a custom list replaces Jekyll's defaults, so those are repeated here)
 exclude:
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/
   - .git/
   - .github/
   - .gitignore

@@ -1,9 +1,6 @@
 import platform, sys, os, subprocess
-try:
-    import pkg_resources
-except ModuleNotFoundError as e:
-    pass
 import datetime
+from importlib import metadata
 
 from Main import __version__
 DR_VERSION = __version__
@@ -43,12 +40,10 @@ def output():
    pkg = pkg.split("==")
    lines.append(diagpad(pkg[0]) + pkg[1])
   '''
-  installed_packages = []
-  installed_packages = [str(d) for d in pkg_resources.working_set]   #this doesn't work from the .exe either, but it doesn't crash the program
-  installed_packages.sort()
-  for pkg in installed_packages:
-    pkg = pkg.split(' ')
-    lines.append(diagpad(pkg[0]) + pkg[1])
+  # empty when run from the .exe, but it doesn't crash the program
+  installed_packages = sorted((d.metadata['Name'], d.version) for d in metadata.distributions() if d.metadata['Name'])
+  for name, version in installed_packages:
+    lines.append(diagpad(name) + version)
 
   return lines
 
