@@ -16,10 +16,10 @@ class TestFastKeyLogic(unittest.TestCase):
         argv = ['--door_shuffle', 'crossed', '--intensity', '3', '--door_type_mode', 'all',
                 '--door_type_distribution', 'chaos', '--keydropshuffle', '--pottery', 'keys',
                 '--dungeon_shuffle_algorithm', 'experimental', '--key_logic_algorithm', 'experimental',
-                '--suppress_rom', '--spoiler', 'none', '--seed', '6']
+                '--suppress_rom', '--spoiler', 'none', '--seed', '16']
         logging.disable(logging.WARNING)
         try:
-            cls.world = Main.main(parse_cli(argv), seed=6, fish=BabelFish(lang='en'))
+            cls.world = Main.main(parse_cli(argv), seed=16, fish=BabelFish(lang='en'))
         finally:
             logging.disable(logging.NOTSET)
 

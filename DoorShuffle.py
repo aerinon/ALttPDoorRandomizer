@@ -2412,6 +2412,10 @@ def validate_trap_layout(proposal, builder, start_regions, paths, world, player)
         all_locations = [l for r in builder.master_sector.region_set() for l in world.get_region(r, player).locations]
         if any(l not in state.found_locations for l in all_locations):
             return False
+    if not world.smaller_dungeon_gen[player]:
+        # traps may not cut off rooms, even ones without locations (smaller_dungeon_gen allows excluding them)
+        if any(not state.visited_at_all(r) for r in builder.master_sector.regions):
+            return False
     return True
 
 

@@ -54,9 +54,9 @@ class TestKeyPlacementRecheck(unittest.TestCase):
                                                   '--shopsanity', '--mode', 'inverted'])
 
     def test_swapped_out_item_is_placed_without_itself(self):
-        # crossed i3, chaos door types, key drops and pot keys: fill's swap fallback moved Desert Palace's big key with
+        # crossed i3, chaos door types, key drops and pot keys: fill's swap fallback moved Thieves Town's big key with
         # it still held, behind its own big key door
-        self.generates_without_keylock(237, ['--door_shuffle', 'crossed', '--intensity', '3', '--door_type_mode', 'all',
+        self.generates_without_keylock(123, ['--door_shuffle', 'crossed', '--intensity', '3', '--door_type_mode', 'all',
                                              '--door_type_distribution', 'chaos', '--keydropshuffle', '--pottery', 'keys'])
 
 
