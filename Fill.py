@@ -236,7 +236,8 @@ def verify_spot_to_fill_v2(location, item_to_place, max_exp_state, single_player
             if valid_key_placement(item_to_place, location, key_pool, state, world):
                 if valid_bk_placement(location, item_to_place, world):
                     if item_to_place.crystal or valid_dungeon_placement(item_to_place, location, world):
-                        if not perform_access_check or keeps_placed_items_reachable(location, item_to_place, max_exp_state, world):
+                        if not perform_access_check or (keeps_placed_items_reachable(location, item_to_place, max_exp_state, world)
+                                                        and seals_only_its_chest(location, item_to_place, max_exp_state, world)):
                             return location
     return None
 
@@ -262,6 +263,30 @@ def self_locking_spot(location, item, state, world):
     at_spot = state.copy()
     at_spot.reachable_regions[item.player][location.parent_region] = walked[location.parent_region]
     return location.access_rule(at_spot)
+
+
+def seals_only_its_chest(location, item, max_exp_state, world):
+    """A dungeon's big key may sit in its own big chest, where it can never be had: the dungeon must then guarantee
+    everything it would with the big key obtainable, the chest aside. Losing the big key can also lose key drops and
+    small key routes, and with them rooms no big key door guards."""
+    player = item.player
+    dungeon = location.parent_region.dungeon
+    if (not item.bigkey or world.key_logic_algorithm[player] != 'experimental' or dungeon is None
+            or dungeon.name != item.dungeon or '- Big Chest' not in location.name):
+        return True
+    logic = world.key_logic[player].get(item.dungeon)
+    if logic is None or logic.new_logic is None or logic.new_logic.fast_logic:
+        return True
+    held = max_exp_state.copy()
+    held.collect(item, True)
+    _, obtainable = logic.new_logic.query_reachability(held, logic, player)
+    previous = location.item
+    location.item = item
+    try:
+        _, sealed = logic.new_logic.query_reachability(max_exp_state.copy(), logic, player)
+    finally:
+        location.item = previous
+    return sealed >= obtainable - {location}
 
 
 def keeps_placed_items_reachable(location, item, max_exp_state, world):
@@ -292,9 +317,9 @@ def keeps_placed_items_reachable(location, item, max_exp_state, world):
     previous = location.item, location.event
     location.item, location.event = item, True  # as fill leaves it once placed, so sweeps collect it
     try:
-        # only this dungeon's key logic changes: if it guarantees no fewer regions, nothing anywhere is lost
         named = max_exp_state.copy()
         named.placing_items, named.placing_locations = [item], [(item, location)]
+        # only this dungeon's key logic changes: if it guarantees no fewer regions, nothing anywhere is lost
         if logic.new_logic.query_reachability(named, logic, player)[0] >= logic.new_logic.query_reachability(held, logic, player)[0]:
             return True
         placed = rebuilt(True)
@@ -498,8 +523,8 @@ def try_possible_swaps(swap_locations, item_to_place, locations, world, base_sta
         if new_spot:
             restore_item = new_spot.item
             new_spot.item = item_to_place
-            swap_spot = find_spot_for_item(old_item, locations, world, base_state, itempool,
-                                           key_pool, single_player_placement)
+            swap_spot = find_spot_for_item(old_item, locations, world, without_item(base_state, old_item, location),
+                                           itempool, key_pool, single_player_placement)
             if swap_spot:
                 logging.getLogger('').debug(f'Swapping {old_item} for {item_to_place}')
                 world.push_item(swap_spot, old_item, False)
@@ -514,6 +539,23 @@ def try_possible_swaps(swap_locations, item_to_place, locations, world, base_sta
     return None, None
 
 
+def without_item(state, item, location):
+    """A copy of state that never collected item from location: a displaced item is re-placed by what reaches its new
+    spot without it."""
+    ret = state.copy()
+    if item.advancement:
+        ret.remove(item)
+    elif ret.prog_items[item.name, item.player] > 0:
+        ret.prog_items[item.name, item.player] -= 1
+        if ret.prog_items[item.name, item.player] < 1:
+            del ret.prog_items[item.name, item.player]  # has() asks whether the name is present, not its count
+    ret.locations_checked.discard(location)
+    ret.events = [e for e in ret.events if e != (location.name, location.player)]
+    ret.reachable_regions[item.player], ret.blocked_connections[item.player] = {}, {}
+    ret.stale[item.player] = True
+    return ret
+
+
 def find_spot_for_item(item_to_place, locations, world, base_state, pool,
                        keys_in_itempool=None, single_player_placement=False):
     def sweep_from_pool():
@@ -523,6 +565,23 @@ def find_spot_for_item(item_to_place, locations, world, base_state, pool,
         new_state.sweep_for_events()
         return new_state
     for location in locations:
+        if world.key_logic_algorithm[item_to_place.player] == 'experimental':
+            # judged as the main fill judges a spot; the item the spot holds now, about to be displaced, doesn't count
+            current = location.item
+            location.item = None
+            try:
+                maximum_exploration_state = sweep_from_pool()
+                perform_access_check = True
+                if world.accessibility[item_to_place.player] == 'none':
+                    perform_access_check = not (world.has_beaten_game(maximum_exploration_state, item_to_place.player)
+                                                if single_player_placement else world.has_beaten_game(maximum_exploration_state))
+                key_pool = pool if (keys_in_itempool and keys_in_itempool[item_to_place.player]) else world.itempool
+                if verify_spot_to_fill(location, item_to_place, maximum_exploration_state, single_player_placement,
+                                       perform_access_check, key_pool, world):
+                    return location
+            finally:
+                location.item = current
+            continue
         maximum_exploration_state = sweep_from_pool()
         perform_access_check = True
         old_item = None

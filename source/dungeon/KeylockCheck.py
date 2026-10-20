@@ -17,6 +17,7 @@ def find_keylock(key_layout, world, player):
         key_layout.key_counters = create_key_counters(key_layout, world, player)
     counters = key_layout.key_counters
     small_key, big_key = dungeon_keys[key_layout.sector.name], dungeon_bigs[key_layout.sector.name]
+    every_location = world.accessibility[player] == 'locations'
 
     def locations_of(counter):
         return set(counter.free_locations) | set(counter.key_only_locations) | set(counter.other_locations)
@@ -105,10 +106,11 @@ def find_keylock(key_layout, world, player):
             if child is not None and child is not counter:
                 moves.append(child)
         if not moves:
+            # every location counts under "locations" accessibility; otherwise a key may be lost (self-locking)
             lost = [l for l in inside - locations_of(counter)
-                    if l.item is not None and not holds(l, small_key) and not holds(l, big_key)
-                    and not l.item.name.startswith('Small Key')
-                    and (l.name not in dungeon_events or l.name in blind_events)]
+                    if l.item is not None and (l.name not in dungeon_events or l.name in blind_events)
+                    and (every_location or (not holds(l, small_key) and not holds(l, big_key)
+                                            and not l.item.name.startswith('Small Key')))]
             if lost:
                 return (f'{len(counter.open_doors)} key doors open, {smalls} keys found, '
                         f'cut off: {", ".join(sorted(l.name for l in lost))}')

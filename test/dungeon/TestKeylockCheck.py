@@ -55,6 +55,26 @@ class TestKeylockCheck(unittest.TestCase):
                     key_spot.item, spot.item = spot.item, key_spot.item
         self.assertGreater(moved, 0)
 
+    def test_self_locked_key_counts_only_under_locations_accessibility(self):
+        # crossed i2: Swamp Palace's key at Tower of Hera - Basement Cage sits behind the door it opens; "items"
+        # accessibility may lose it, "locations" may not
+        argv = ['--door_shuffle', 'crossed', '--intensity', '2', '--dungeon_shuffle_algorithm', 'experimental',
+                '--key_logic_algorithm', 'experimental', '--suppress_rom', '--spoiler', 'none', '--seed', '100']
+        logging.disable(logging.WARNING)
+        try:
+            world = Main.main(parse_cli(argv), seed=100, fish=BabelFish(lang='en'))
+        finally:
+            logging.disable(logging.NOTSET)
+        layout = world.key_layout[1]['Swamp Palace']
+        self.assertIsNone(find_keylock(layout, world, 1))
+        world.accessibility[1] = 'locations'
+        try:
+            lock = find_keylock(layout, world, 1)
+        finally:
+            world.accessibility[1] = 'items'
+        self.assertIsNotNone(lock)
+        self.assertIn('Tower of Hera - Basement Cage', lock)
+
 
 if __name__ == '__main__':
     unittest.main()

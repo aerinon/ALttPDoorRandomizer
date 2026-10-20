@@ -373,7 +373,7 @@ def monte_carlo_algorithm(builder, key_door_pool, key_doors_needed, start_region
         cand_list = flatten_to_list(candidate)
         current_state = init_state.copy()
         initialize_state(current_state, start_regions, builder, cand_list, world, player)
-        expand_state_improved(current_state, cand_list, world, player)
+        expand_state_for_picker(current_state, cand_list, key_doors_needed, world, player)
         found_smalls = count_small_key_only_locations(current_state)
         ttl_locations = count_free_locations(current_state, world, player)
         if current_state.big_key_opened:
@@ -409,7 +409,7 @@ def validate_key_proposal_large(proposal, init_state, all_smalls, builder, start
     flat_prop = flatten_pair_list(proposal)
     state = init_state.copy()
     initialize_state(state, start_regions, builder, flat_prop, world, player)
-    expand_state_improved(state, flat_prop, world, player)
+    expand_state_for_picker(state, flat_prop, len(proposal), world, player)
     found_smalls = count_small_key_only_locations(state)
     ttl_locations = count_free_locations(state, world, player)
     if state.big_key_opened:
@@ -433,15 +433,21 @@ def build_sample_list(combinations, max_combinations=10000):
     return sample_list
 
 
-def expand_state_improved(state, cand_list, world, player):
+def expand_state_for_picker(state, cand_list, key_doors, world, player):
+    """With more than 8 key doors the key logic is the fast one, which needs every small key reachable before any key
+    door: big key doors open only for a big key already found (forced), never on the hope that it will be placed
+    here. With fewer, the exhaustive key logic follows each door order, and a big key that could be placed here counts.
+    """
     changed = True
     while changed:
         changed = False
         expand_key_state(state, cand_list, world, player)
         if state.big_doors and not state.big_key_opened:
-            ttl_locations = count_locations_exclude_big_chest(state.found_locations, world, player)
-            available_big_locations = cnt_avail_big_locations(ttl_locations, state, world, player)
-            if available_big_locations > 0 or state.found_forced_bk():
+            big_key_here = state.found_forced_bk()
+            if not big_key_here and key_doors <= 8:
+                ttl_locations = count_locations_exclude_big_chest(state.found_locations, world, player)
+                big_key_here = cnt_avail_big_locations(ttl_locations, state, world, player) > 0
+            if big_key_here:
                 state.big_key_opened = True
                 state.avail_doors.extend(state.big_doors)
                 state.opened_doors.extend(set([d.door for d in state.big_doors]))
