@@ -200,12 +200,12 @@ class ConstraintInfo:
                 self.constraints.append(Constraint(ConstraintType.Neutral, s.outstanding_doors, None))
 
         self.escape = EscapeCheck(sector_list, flags) if flags.std_flag and builder.name == 'Hyrule Castle Dungeon' else None
-        self.big_key = BigKeyCheck.create(builder, sector_list, flags)
 
         for d, dep_info in self.dependent_portals.items():
             sector, enabling_portal = dep_info
             self.dependent_lookup.setdefault(enabling_portal.door, []).append(d)
         self.classify_drops(builder, sector_list, flags)
+        self.big_key = BigKeyCheck.create(builder, sector_list, flags, self)
         primary_portals = {id(p): p for s in sector_list for p in s.portals if portal_may_be_primary(p, sector_list)}
         # a portal the stitcher already linked has its lobby door, no longer outstanding
         primary_linked = any(p.door not in self.door_sector_map and not p.door.deadEnd for p in primary_portals.values())
@@ -308,8 +308,10 @@ class ConstraintInfo:
         return [d for t in sector_list if portal in t.portals for d in t.outstanding_doors]
 
     def free_hook_may_land(self, terminal):
-        """A free hook adds nothing to what is reached, so its Terminal's sector must be reachable another way."""
-        return terminal.type == DoorType.Terminal and len(self.door_sector_map[terminal].outstanding_doors) > 1
+        """A free hook adds nothing to what is reached, so its Terminal's sector must be reachable another way: through
+        a two-way door, since its other Terminals may be taken by free hooks too."""
+        return (terminal.type == DoorType.Terminal
+                and any(not is_one_way(d) for d in self.door_sector_map[terminal].outstanding_doors))
 
 
 # a mirror scroll respawn resets the crystal state to Orange
@@ -334,7 +336,7 @@ class BigKeyCheck:
     big key: the regions reached from the dungeon's entrances without crossing one must contain such a location."""
 
     @staticmethod
-    def create(builder, sector_list, flags):
+    def create(builder, sector_list, flags, c_info):
         from source.dungeon.DungeonStitcherV2 import check_for_special, get_special_big_key_doors
         world, player = flags.world, flags.player
         if world is None:  # flags not built from a world
@@ -346,17 +348,25 @@ class BigKeyCheck:
         bk_names = set(get_special_big_key_doors(world, player))
         if not any(ext.door and (ext.door.bigKey or ext.door.name in bk_names) for r in regions for ext in r.exits):
             return None
-        return BigKeyCheck(sector_list, flags, special, bk_names)
+        return BigKeyCheck(builder, sector_list, flags, special, bk_names, c_info)
 
-    def __init__(self, sector_list, flags, special, bk_names):
-        from source.dungeon.DungeonGenLocalSearch import default_lobby_drops
+    def __init__(self, builder, sector_list, flags, special, bk_names, c_info):
         self.world, self.player = flags.world, flags.player
         self.special, self.bk_names = special, bk_names
         self.v_trap_flag = flags.vanilla_traps
         self.sector_of = {r: s for s in sector_list for r in s.regions}
         self.portals = [p for s in sector_list for p in s.portals if not p.destination and p.dependent is None]
-        self.drop_regions = [r for s in sector_list for r in s.regions if r.name in default_lobby_drops
-                             and not (flags.std_flag and r.name == 'Sewers Rat Path')]
+        # every hole's fall, locked or not, as Transitivity classifies it: a start, or opened by its enabling portals
+        self.drop_starts, self.gated_drops = [], []
+        init_doors = {p.door for s in c_info.init_portals for p in s.portals}
+        for s in sector_list:
+            for region in sector_drop_portals(s):
+                fall = next(ext.door for ext in region.exits if ext.door is not None)
+                way_in, enablers = c_info.drop_way_in(builder, region, sector_list, flags, init_doors)
+                if way_in == 'start':
+                    self.drop_starts.append(fall)
+                elif way_in == 'dependent':
+                    self.gated_drops.append((fall, enablers))
         self.cache = {}
 
     def explore(self, start_door):
@@ -378,13 +388,12 @@ class BigKeyCheck:
             if matches is not None:
                 return [m for m in matches.get(door, []) if m not in connection_map]
             return []
-        starts = []
-        for p in self.portals:
-            lobbies = partners(p.door) if p.door.traversal_only else [p.door]
-            starts.extend(lb for lb in lobbies if not lb.traversal_only and lb.entrance.parent_region in self.sector_of)
-        for r in self.drop_regions:
-            starts.extend(ext.door for ext in r.exits if ext.door is not None)
+        def lobbies(portal):
+            doors = partners(portal.door) if portal.door.traversal_only else [portal.door]
+            return [lb for lb in doors if not lb.traversal_only and lb.entrance.parent_region in self.sector_of]
+        starts = [lb for p in self.portals for lb in lobbies(p)] + self.drop_starts
         regions, seen, queue = set(), set(starts), deque(starts)
+        gated = list(self.gated_drops)
         while queue:
             visited, reach = self.explore(queue.popleft())
             regions |= visited
@@ -393,6 +402,15 @@ class BigKeyCheck:
                     if not partner.traversal_only and partner not in seen and partner.entrance.parent_region in self.sector_of:
                         seen.add(partner)
                         queue.append(partner)
+            if not queue:
+                # a gated hole opens once a lobby leading out onto its overworld side is reached
+                opened = [fall for fall, enablers in gated
+                          if any(lb.entrance.parent_region in regions for p in enablers for lb in lobbies(p))]
+                gated = [g for g in gated if g[0] not in opened]
+                for fall in opened:
+                    if fall not in seen:
+                        seen.add(fall)
+                        queue.append(fall)
         locations = [loc for r in regions for loc in r.locations]
         if self.special:
             return any(loc.forced_big_key() for loc in locations)

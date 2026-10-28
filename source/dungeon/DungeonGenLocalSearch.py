@@ -1371,24 +1371,6 @@ dungeon_aliases = {
 }
 
 
-default_dungeon_entrances = {
-    'Hyrule Castle': ['Hyrule Castle Lobby', 'Hyrule Castle West Lobby', 'Hyrule Castle East Lobby', 'Sewers Rat Path',
-                      'Sanctuary'],
-    'Eastern Palace': ['Eastern Lobby'],
-    'Desert Palace': ['Desert Back Lobby', 'Desert Main Lobby', 'Desert West Lobby', 'Desert East Lobby'],
-    'Tower of Hera': ['Hera Lobby'],
-    'Agahnims Tower': ['Tower Lobby'],
-    'Palace of Darkness': ['PoD Lobby'],
-    'Swamp Palace': ['Swamp Lobby'],
-    'Skull Woods': ['Skull 1 Lobby', 'Skull Pinball', 'Skull Left Drop', 'Skull Pot Circle', 'Skull 2 East Lobby',
-                    'Skull 2 West Lobby', 'Skull Back Drop', 'Skull 3 Lobby'],
-    'Thieves Town': ['Thieves Lobby'],
-    'Ice Palace': ['Ice Lobby'],
-    'Misery Mire': ['Mire Lobby'],
-    'Turtle Rock': ['TR Main Lobby', 'TR Eye Bridge', 'TR Big Chest Entrance', 'TR Lazy Eyes'],
-    'Ganons Tower': ['GT Lobby']
-}
-
 default_lobby_drops = {
     'Sewers Rat Path': ['Hyrule Castle Sewers', 'Hyrule Castle'],
     'Skull Pinball': ['Skull Woods', 'Skull Woods Back', 'Skull Woods Front'],

@@ -2850,10 +2850,16 @@ class Spoiler(object):
             self.bosses = self.bosses["1"]
 
         for player in range(1, self.world.players + 1):
-            if self.world.intensity[player] >= 3 and self.world.doorShuffle[player] != 'vanilla':
+            if self.world.doorShuffle[player] == 'vanilla':
+                continue
+            # DropPortals and DungeonGenLocalSearch import BaseClasses
+            from source.dungeon.DungeonGenLocalSearch import DoorFlags, drop_lobbies_locked
+            from source.dungeon.DropPortals import drop_portals
+            flags = DoorFlags.for_player(self.world, player)
+            if flags.lobbies or self.world.intensity[player] >= 3:  # the classic algorithm ignores custom intensity
                 for portal in self.world.dungeon_portals[player]:
                     self.set_lobby(portal.name, portal.door.name, player)
-                from source.dungeon.DropPortals import drop_portals  # DropPortals imports BaseClasses
+            if not drop_lobbies_locked(flags):
                 for drop in drop_portals:  # a shuffled hole is listed with the Terminal its Drop Portal falls on
                     fall = self.world.get_door(drop.fall, player)
                     if fall.pit_terminal is not None:

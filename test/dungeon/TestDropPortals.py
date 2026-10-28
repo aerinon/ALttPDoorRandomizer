@@ -1,5 +1,6 @@
 import logging
 import os
+import tempfile
 import unittest
 
 import yaml
@@ -130,6 +131,62 @@ class TestDropPortalSectors(unittest.TestCase):
             with self.subTest(drop=p.region):
                 self.assertEqual(world.get_door(p.fall, 1).pit_terminal.name, lobbies[p.region])
                 self.assertNotIn(p.fall, pit_lines)
+
+    def test_spoiler_lists_drops_when_custom_intensity_unlocks_them(self):
+        # world intensity 2, with lobbies and pits switched on by the customizer
+        with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False) as f:
+            yaml.safe_dump({'doors': {1: {'intensity': {'lobbies': True, 'pit_warps': 'pits'}}}}, f)
+        try:
+            world = generate_i4(['--intensity', '2', '--customizer', f.name])
+        finally:
+            os.unlink(f.name)
+        world.spoiler.parse_data()
+        lobbies = {entry['lobby_name']: entry['door_name'] for entry in world.spoiler.lobbies.values()}
+        for p in drop_portals:
+            with self.subTest(drop=p.region):
+                self.assertEqual(world.get_door(p.fall, 1).pit_terminal.name, lobbies.get(p.region))
+
+    def test_sewer_palette_spreads_from_the_sanctuary_grave_landing_in_hyrule_castle(self):
+        for extra in ([], ['--mode', 'inverted']):
+            world = generate_i4(extra)
+            dungeons_of_room = {}
+            for r in world.regions:
+                for ext in r.exits:
+                    if r.player == 1 and r.dungeon and ext.door and ext.door.roomIndex >= 0:
+                        dungeons_of_room.setdefault(ext.door.roomIndex, set()).add(r.dungeon.name)
+            landing = world.get_door('Sewers Drop Portal Fall', 1).entrance.connected_region
+            landing_room = next(ext.door.roomIndex for ext in landing.exits if ext.door and ext.door.roomIndex >= 0)
+            with self.subTest(mode=extra):
+                if landing.dungeon.name == 'Hyrule Castle':
+                    self.assertEqual(0x1, world.get_room(landing_room, 1).palette)
+                for idx, dungeons in dungeons_of_room.items():
+                    if world.get_room(idx, 1).palette == 0x1:
+                        self.assertIn('Hyrule Castle', dungeons, hex(idx))
+
+    def test_any_hole_into_a_drop_portal_revives_at_its_landing(self):
+        from Rules import revival_lobby
+        world = generate_i4()
+        hole, drop = world.get_entrance('Kakariko Well Drop', 1), world.get_region('Skull Pinball Drop Portal', 1)
+        landing = world.get_door('Skull Pinball Drop Portal Fall', 1).entrance.connected_region
+        original = hole.connected_region
+        hole.connected_region = drop
+        try:
+            self.assertEqual(landing, revival_lobby(hole, drop, world, 1))
+        finally:
+            hole.connected_region = original
+
+    def test_no_mirrorless_courtyard_path_through_any_drop_portal(self):
+        from Rules import mirrorless_path_to_castle_courtyard
+        world = generate_i4()
+        hole = world.get_entrance('Hyrule Castle Secret Entrance Drop', 1)
+        original = hole.connected_region
+        hole.connected_region = world.get_region('Skull Pinball Drop Portal', 1)
+        try:
+            rules = mirrorless_path_to_castle_courtyard(world, 1)
+        finally:
+            hole.connected_region = original
+        self.assertEqual(1, len(rules))
+        self.assertFalse(rules[0](CollectionState(world)))
 
     def test_unlocked_falls_are_shuffled(self):
         world = generate_i4()

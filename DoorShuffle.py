@@ -1658,10 +1658,13 @@ def palette_assignment(world, player):
                     room = world.get_room(door.roomIndex, player)
                     room.palette = tuple[1]
 
-    rat_path = world.get_region('Sewers Rat Path', player)
+    # the sewers are the Hyrule Castle rooms near where the Sanctuary grave lands
+    def in_castle(region):
+        return region is not None and region.dungeon is not None and region.dungeon.name == 'Hyrule Castle'
+    sewers = world.get_door('Sewers Drop Portal Fall', player).entrance.connected_region
     visited_rooms = set()
-    visited_regions = {rat_path}
-    queue = deque([(rat_path, 0)])
+    visited_regions = {sewers}
+    queue = deque([(sewers, 0)] if in_castle(sewers) else [])
     while len(queue) > 0:
         region, dist = queue.popleft()
         if dist > 5:
@@ -1678,7 +1681,8 @@ def palette_assignment(world, player):
                     visited_rooms.add(ext.door.dest.roomIndex)
                     if ext.connected_region:
                         visited_regions.add(ext.connected_region)
-            elif ext.connected_region and ext.connected_region.type == RegionType.Dungeon and ext.connected_region not in visited_regions:
+            elif (ext.connected_region and ext.connected_region.type == RegionType.Dungeon
+                  and in_castle(ext.connected_region) and ext.connected_region not in visited_regions):
                 queue.append((ext.connected_region, dist+1))
                 visited_regions.add(ext.connected_region)
 

@@ -78,6 +78,20 @@ class TestDropPortalTransitivity(unittest.TestCase):
             with self.subTest(terminal=hanger.name):
                 self.assertGreater(len(info.door_sector_map[hanger].outstanding_doors), 1)
 
+    def test_free_hook_never_lands_where_only_one_way_doors_lead_in(self):
+        # two free hooks could otherwise fill both Terminals of a sector reached by nothing else
+        sectors, flags = skull_sectors()
+        world = sectors[0].regions[0].world
+        info = ConstraintInfo(make_builder('Skull Woods'), sectors, [], flags)
+        left, pinball = world.get_door('Skull Left Drop Terminal', 1), world.get_door('Skull Pinball Terminal', 1)
+        hole = world.get_door('Skull Final Drop Hole', 1)
+        for others in ([pinball], [hole]):
+            with self.subTest(others=[d.name for d in others]):
+                info.door_sector_map[left] = mock.Mock(outstanding_doors=[left] + others)
+                self.assertFalse(info.free_hook_may_land(left))
+        info.door_sector_map[left] = mock.Mock(outstanding_doors=[left, world.get_door('Skull Compass Room ES', 1)])
+        self.assertTrue(info.free_hook_may_land(left))
+
 
 class TestLockedDrops(unittest.TestCase):
     """At intensity 3 a hole's fall stays inside its sector. Rooms reached only from the hole need the hole to be a way

@@ -3087,22 +3087,6 @@ def ncr(n, r):
     return int(numerator / denominator)
 
 
-drop_entrances = {
-    'Hyrule Castle': ['Sewers Rat Path'],
-    'Eastern Palace': [],
-    'Desert Palace': [],
-    'Tower of Hera': [],
-    'Agahnims Tower': [],
-    'Palace of Darkness': [],
-    'Swamp Palace': [],
-    'Skull Woods': ['Skull Pinball', 'Skull Left Drop', 'Skull Pot Circle', 'Skull Back Drop'],
-    'Thieves Town': [],
-    'Ice Palace': [],
-    'Misery Mire': [],
-    'Turtle Rock': [],
-    'Ganons Tower': []
-}
-
 split_check_entrance_invalid = [
     'Desert East Lobby', 'Skull 2 West Lobby'
 ]
