@@ -26,7 +26,7 @@ from DungeonGenerator import create_dungeon_builders, split_dungeon_builder, sim
 from DungeonGenerator import dungeon_portals, dungeon_drops, connect_doors, count_reserved_locations
 from DungeonGenerator import valid_region_to_explore
 from KeyDoorShuffle import analyze_dungeon, build_key_layout, validate_key_layout, determine_prize_lock
-from KeyDoorShuffle import validate_bk_layout, DoorRules, apply_custom_key_rules
+from KeyDoorShuffle import validate_bk_layout, DoorRules, apply_custom_key_rules, save_quit_start
 from source.dungeon.StaticKeyLogic import static_door_rules
 from Utils import ncr, kth_combination
 
@@ -3499,8 +3499,7 @@ def find_accessible_entrances(world, player, builder):
     visited_regions = set()
     visited_entrances = []
 
-    # Add Sanctuary as an additional entrance in open mode, since you can save and quit to there
-    if world.mode[player] == 'open' and world.get_region('Sanctuary', player).dungeon.name == builder.name and 'Sanctuary' not in entrances:
+    if save_quit_start(world, player, builder) and 'Sanctuary' not in entrances:
         entrances.append('Sanctuary')
         visited_entrances.append('Sanctuary')
         regs.remove(world.get_region('Sanctuary', player))
@@ -3536,6 +3535,8 @@ def find_possible_entrances(world, player, builder):
                  (portal.door.entrance.parent_region for portal in world.dungeon_portals[player])
                  if region.dungeon.name == builder.name]
     entrances.extend(drop_entrances[builder.name])
+    if save_quit_start(world, player, builder) and 'Sanctuary' not in entrances:
+        entrances.append('Sanctuary')
     return entrances
 
 
@@ -4990,8 +4991,8 @@ def handle_intensity_settings(flags, world, player):
 def customize_lobbies(world, player):
     if world.customizer and world.customizer.get_custom_lobbies(player):
         custom_lobbies = world.customizer.get_custom_lobbies(player)
-        for portal, assigned_door in custom_lobbies.items():
-            portal = world.get_portal('portal', player)
+        for portal_name, assigned_door in custom_lobbies.items():
+            portal = world.get_portal(portal_name, player)
             door = world.get_door(assigned_door, player)
             connect_door_to_portal(door, portal, world, player)
 
@@ -5001,6 +5002,7 @@ def connect_door_to_portal(door, portal, world, player):
     region = world.get_region(region_name, player)
     entrance_door = next(e.name for e in region.exits if e.name.startswith('Enter '))
     connect_two_way(world, entrance_door, door.name, player)
+    portal.change_door(door)
     portal.assigned = True
     door.dest = region
     door.entranceFlag = True

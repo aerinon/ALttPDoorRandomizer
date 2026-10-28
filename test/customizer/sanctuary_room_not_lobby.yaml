@@ -1,0 +1,17 @@
+meta:
+  players: 1
+settings:
+  1:
+    door_shuffle: basic
+    intensity: 3
+    dungeon_shuffle_algorithm: experimental
+    key_logic_algorithm: experimental
+    mode: open
+doors:
+  1:
+    lobbies:
+      # the Sanctuary portal enters elsewhere, so the Sanctuary room is reached by save and quit, not by a portal
+      Sanctuary: Hyrule Castle East Hall S
+      Hyrule Castle South: Hyrule Castle Lobby S
+      Hyrule Castle East: Hyrule Castle East Lobby S
+      Hyrule Castle West: Hyrule Castle West Lobby S

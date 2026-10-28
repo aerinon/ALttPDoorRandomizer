@@ -1509,22 +1509,73 @@ def forced_big_key_avail(locations):
     return None
 
 
+def save_quit_start(world, player, builder):
+    """In open mode, save and quit puts the player in the Sanctuary room, in whichever dungeon holds it."""
+    if world.mode[player] != 'open':
+        return False
+    sanctuary = world.get_region('Sanctuary', player)
+    return sanctuary.dungeon is not None and sanctuary.dungeon.name == builder.name
+
+
 def prize_relevance(key_layout, dungeon_entrance, is_atgt_swapped):
     if len(key_layout.start_regions) > 1 and dungeon_entrance and dungeon_table[key_layout.key_logic.dungeon].prize:
-        if dungeon_entrance.name == ('Agahnims Tower' if is_atgt_swapped else 'Ganons Tower'):
-            return 'GT'
-        elif dungeon_entrance.name == 'Pyramid Fairy':
-            return 'BigBomb'
+        return prize_gate(dungeon_entrance, key_layout.key_logic.dungeon, is_atgt_swapped)
     return None
 
 
 def prize_relevance_sig2(start_regions, d_name, dungeon_entrance, is_atgt_swapped):
     if len(start_regions) > 1 and dungeon_entrance and dungeon_table[d_name].prize:
-        if dungeon_entrance.name == ('Agahnims Tower' if is_atgt_swapped else 'Ganons Tower'):
-            return 'GT'
-        elif dungeon_entrance.name == 'Pyramid Fairy':
-            return 'BigBomb'
+        return prize_gate(dungeon_entrance, d_name, is_atgt_swapped)
     return None
+
+
+def prize_gate(dungeon_entrance, dungeon_name, is_atgt_swapped):
+    """Which prize-gated entrance the player must pass to use dungeon_entrance: the entrance itself, or every route to
+    it that doesn't go through the dungeon itself (an entrance shuffle may put the way there behind the tower entrance
+    or the fairy)."""
+    gates = {('Agahnims Tower' if is_atgt_swapped else 'Ganons Tower'): 'GT', 'Pyramid Fairy': 'BigBomb'}
+    if dungeon_entrance.name in gates:
+        return gates[dungeon_entrance.name]
+    region = dungeon_entrance.parent_region
+    world, player = region.world, region.player
+    if world is None:
+        return None
+    cache = world.__dict__.setdefault('prize_gate_reach', {})
+
+    def reach(blocked):
+        key = (player, dungeon_name, blocked)
+        if key not in cache:
+            cache[key] = reach_without(world, player, set(blocked), dungeon_name)
+        return cache[key]
+    if region in reach(tuple(sorted(gates))):
+        return None
+    # the gate whose opening alone reaches it; GT if it takes both
+    for gate, kind in gates.items():
+        if region in reach(tuple(g for g in gates if g != gate)):
+            return kind
+    return 'GT' if region in reach(()) else None
+
+
+def reach_without(world, player, blocked, dungeon_name):
+    """Regions reachable from the spawns without the entrances named in blocked or the regions of dungeon_name. Like
+    find_inaccessible_regions and vanilla_key_logic's enabled entrances, item rules and key doors are ignored."""
+    inverted = world.mode[player] == 'inverted'
+    starts = ['Links House', 'Dark Sanctuary Hint' if inverted else 'Sanctuary']
+    queue = deque(world.get_region(r, player) for r in starts)
+    visited = set()
+    while queue:
+        region = queue.popleft()
+        if region in visited:
+            continue
+        visited.add(region)
+        if inverted and region.name == 'Dark Sanctuary Hint':  # special spawn point in cave
+            queue.extend(e.parent_region for e in region.entrances if e.parent_region)
+        for ext in region.exits:
+            connect = ext.connected_region
+            if (connect and ext.name not in blocked and connect not in visited
+                    and not (connect.dungeon and connect.dungeon.name == dungeon_name)):
+                queue.append(connect)
+    return visited
 
 
 def validate_bk_layout(proposal, builder, start_regions, world, player):

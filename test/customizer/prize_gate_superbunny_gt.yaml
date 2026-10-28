@@ -1,0 +1,13 @@
+meta:
+  players: 1
+settings:
+  1:
+    door_shuffle: vanilla
+    shuffle: lite
+entrances:
+  1:
+    two-way:
+      # Dark Death Mountain Ledge is reached only through the Ganons Tower entrance (via Superbunny Cave) or Turtle Rock
+      Ganons Tower: Superbunny Cave Exit (Bottom)
+      Dark Death Mountain Ledge (West): Superbunny Cave Exit (Top)
+      Dark Death Mountain Ledge (East): Turtle Rock Isolated Ledge Exit
