@@ -271,8 +271,8 @@ def seals_only_its_chest(location, item, max_exp_state, world):
     small key routes, and with them rooms no big key door guards."""
     player = item.player
     dungeon = location.parent_region.dungeon
-    if (not item.bigkey or world.key_logic_algorithm[player] != 'experimental' or dungeon is None
-            or dungeon.name != item.dungeon or '- Big Chest' not in location.name):
+    if (not item.bigkey or world.key_logic_algorithm[player] != 'experimental' or world.keyshuffle[player] == 'universal'
+            or dungeon is None or dungeon.name != item.dungeon or '- Big Chest' not in location.name):
         return True
     logic = world.key_logic[player].get(item.dungeon)
     if logic is None or logic.new_logic is None or logic.new_logic.fast_logic:

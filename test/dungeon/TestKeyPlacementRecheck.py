@@ -1,7 +1,9 @@
 import logging
 import unittest
 
+import Fill
 import Main
+from BaseClasses import CollectionState
 from CLI import parse_cli
 from source.classes.BabelFish import BabelFish
 
@@ -58,6 +60,30 @@ class TestKeyPlacementRecheck(unittest.TestCase):
         # it still held, behind its own big key door
         self.generates_without_keylock(123, ['--door_shuffle', 'crossed', '--intensity', '3', '--door_type_mode', 'all',
                                              '--door_type_distribution', 'chaos', '--keydropshuffle', '--pottery', 'keys'])
+
+    def test_big_chest_check_skips_universal_keys(self):
+        # retro: universal small keys leave the key logic without spheres, so there is nothing to ask about a big key
+        # sealed in its big chest
+        argv = ['--door_shuffle', 'vanilla', '--retro', '--shuffle', 'vanilla', '--key_logic_algorithm', 'experimental',
+                '--suppress_rom', '--spoiler', 'none', '--seed', '1']
+        original = Main.fill_dungeons_restrictive
+
+        def stop(world, *rest, **kwargs):
+            raise Stop(world)
+
+        Main.fill_dungeons_restrictive = stop
+        logging.disable(logging.WARNING)
+        try:
+            Main.main(parse_cli(argv), seed=1, fish=BabelFish(lang='en'))
+            self.fail('generation finished without reaching the dungeon fill')
+        except Stop as s:
+            world = s.args[0]
+        finally:
+            Main.fill_dungeons_restrictive = original
+            logging.disable(logging.NOTSET)
+        big_key = next(d.big_key for d in world.dungeons if d.name == 'Skull Woods')
+        chest = world.get_location('Skull Woods - Big Chest', 1)
+        self.assertTrue(Fill.seals_only_its_chest(chest, big_key, CollectionState(world), world))
 
 
 if __name__ == '__main__':

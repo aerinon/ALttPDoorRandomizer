@@ -183,7 +183,8 @@ class NewKeyLogic(object):
         # within one state the answer changes only with these: its keys held, its checked locations (which only
         # grow) and the placement it names
         memo_key = (id(self), player, state.prog_items[dungeon_logic.small_key_name, player],
-                    state.prog_items[dungeon_logic.bk_name, player], len(state.locations_checked),
+                    state.prog_items[dungeon_logic.bk_name, player], state.prog_items['Small Key (Universal)', player],
+                    len(state.locations_checked),
                     tuple(map(id, state.placing_locations)) if state.placing_items and state.placing_locations else None)
         memo = state.key_cache_memo
         if memo_key not in memo:
@@ -202,10 +203,17 @@ class NewKeyLogic(object):
         regions, locations = self.get_relevant_regions_and_locations()
         small_locations, big_location = [], None
         small_loc_name_set, big_loc_name = set(), None
+        # the standard escape's universal key (make_custom_item_pool puts it in an escape chest or the Secret Passage)
+        # opens escape doors like the drops do; no other universal key is reachable before the escape ends
+        world = state.world
+        escape_universal = (world.keyshuffle[player] == 'universal' and world.mode[player] == 'standard'
+                            and dungeon_logic.dungeon == 'Hyrule Castle')
+        if escape_universal:
+            smalls_in_hand += state.prog_items['Small Key (Universal)', player]
         for loc in self.layout_locations or locations:
             if loc.item is None or loc.item.player != player:
                 continue
-            if loc.item.name == sk_name:
+            if loc.item.name == sk_name or (escape_universal and loc.item.name == 'Small Key (Universal)'):
                 small_locations.append(loc)
                 small_loc_name_set.add(loc.name)
                 if loc in state.locations_checked:
