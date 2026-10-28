@@ -118,9 +118,10 @@ if __name__ == "__main__":
     cpu_threads = args.cpu_threads
 
     count = args.count
-    # [door shuffle, dungeon algorithm (None: no generation), seed count, max intensity]
+    # [door shuffle, dungeon algorithm (None: default key logic, no generation), seed count, max intensity]
     # the new algorithm is the main target; classic (no intensity 4) is a lighter regression check
     for dr in [['vanilla', None, count if count else 2, 1],
+               ['vanilla', 'experimental', count if count else 5, 1],  # experimental key logic on vanilla doors
                ['basic', 'experimental', count if count else 5, 3],
                ['crossed', 'experimental', count if count else 10, 3],
                ['basic', 'classic', count if count else 2, 3],
