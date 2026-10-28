@@ -3,8 +3,11 @@ import unittest
 
 import Main
 from CLI import parse_cli
+from DungeonGenerator import ExplorationState
+from Items import ItemFactory
 from KeyDoorShuffle import dungeon_bigs, dungeon_keys
 from source.classes.BabelFish import BabelFish
+from source.dungeon.SmallKeyDoorShuffle import expand_state_for_picker
 
 
 class TestFastKeyLogic(unittest.TestCase):
@@ -45,21 +48,63 @@ class TestFastKeyLogic(unittest.TestCase):
     def test_small_keys_before_key_doors(self):
         self.assert_small_keys_before_key_doors(self.world)
 
-    def test_key_drops_behind_a_big_key_door_are_not_before_key_doors(self):
-        # crossed, Skull Woods with 9 and 11 key doors: key drops sat behind a big key door while the big key went behind
-        # small key doors; the layout picker counted them before any key door as if the big key were already in hand
-        for seed, args in [(129025593, ['--door_shuffle', 'crossed', '--intensity', '1', '--shuffle', 'lean']),
-                           (958163247, ['--door_shuffle', 'crossed', '--intensity', '3', '--shuffle', 'crossed',
-                                        '--mode', 'inverted'])]:
-            argv = args + ['--dungeon_shuffle_algorithm', 'experimental', '--key_logic_algorithm', 'experimental',
-                           '--suppress_rom', '--spoiler', 'none', '--seed', str(seed)]
-            logging.disable(logging.WARNING)
-            try:
-                world = Main.main(parse_cli(argv), seed=seed, fish=BabelFish(lang='en'))
-            finally:
-                logging.disable(logging.NOTSET)
-            with self.subTest(seed=seed):
-                self.assert_small_keys_before_key_doors(world)
+
+class Stop(Exception):
+    pass
+
+
+class TestPickerBigKeyDoors(unittest.TestCase):
+    """The key door picker walks a dungeon to count what lies before any key door. With more than 8 key doors (the fast
+    key logic) it opens big key doors only for a big key forced into what it already reached; with fewer, a spot that
+    could hold the big key is enough. Vanilla Eastern Palace has the Eyegore key drop behind its big key doors."""
+
+    @classmethod
+    def setUpClass(cls):
+        original = Main.fill_dungeons_restrictive
+
+        def stop(world, *rest, **kwargs):
+            raise Stop(world)
+
+        Main.fill_dungeons_restrictive = stop
+        logging.disable(logging.WARNING)
+        try:
+            Main.main(parse_cli(['--suppress_rom', '--spoiler', 'none', '--seed', '1']), seed=1,
+                      fish=BabelFish(lang='en'))
+            raise AssertionError('generation finished without reaching the dungeon fill')
+        except Stop as s:
+            cls.world = s.args[0]
+        finally:
+            Main.fill_dungeons_restrictive = original
+            logging.disable(logging.NOTSET)
+
+    def walk_eastern(self, key_doors):
+        state = ExplorationState(dungeon='Eastern Palace')
+        lobby = self.world.get_region('Eastern Lobby', 1)
+        state.visit_region(lobby, key_checks=True)
+        state.add_all_doors_check_keys(lobby, [], self.world, 1)
+        expand_state_for_picker(state, [], key_doors, self.world, 1)
+        return state, {loc.name for loc in state.found_locations}
+
+    def test_fast_key_logic_keeps_big_key_doors_shut(self):
+        state, found = self.walk_eastern(9)
+        self.assertFalse(state.big_key_opened)
+        self.assertNotIn('Eastern Palace - Dark Eyegore Key Drop', found)
+
+    def test_fewer_key_doors_open_big_key_doors_where_the_big_key_could_be(self):
+        state, found = self.walk_eastern(8)
+        self.assertTrue(state.big_key_opened)
+        self.assertIn('Eastern Palace - Dark Eyegore Key Drop', found)
+
+    def test_fast_key_logic_opens_big_key_doors_for_a_big_key_forced_in_front(self):
+        spot = self.world.get_location('Eastern Palace - Compass Chest', 1)
+        spot.item = spot.forced_item = ItemFactory('Big Key (Eastern Palace)', 1)
+        try:
+            state, found = self.walk_eastern(9)
+        finally:
+            spot.item = spot.forced_item = None
+        self.assertTrue(state.big_key_opened)
+        self.assertIn('Eastern Palace - Dark Eyegore Key Drop', found)
+
 
 if __name__ == '__main__':
     unittest.main()
