@@ -12,11 +12,10 @@ randomizable, adds a new intensity level, and integrates with lobby shuffle and 
 
 ## Current State
 
-- Phases 1, 2, 3 and 5 are implemented: intensity 4 shuffles pits, warps and where overworld holes land, in logic, in
-  dungeon generation and in the ROM. The generator writes `LandingZoneData` for pits and warps and the entrance rows for
-  holes; the base patch with the PitWarps code (from dr_baserom's `PitWarps` branch) is not committed yet.
-- Phase 3 is not done until a playtest seed exercises drops landing away from their vanilla rooms; the next playtest
-  seed covers it.
+- Phases 1, 2, 3 and 5 are done: intensity 4 shuffles pits, warps and where overworld holes land, in logic, in dungeon
+  generation and in the ROM. The generator writes `LandingZoneData` for pits and warps and the entrance rows for holes;
+  the base patch comes from dr_baserom's `PitWarps` branch.
+- A playtest seed with all five drops moved (crossed, intensity 4, seed 1) confirmed drop lobbies in game.
 - `data/terminals.yaml` defines 27 pit Terminals (33 sources) and 26 warp Terminals (26 sources).
 - Verification and the Transitivity design history are in `docs/plans/transitivity_pitwarp_verification.md`.
 
@@ -140,7 +139,7 @@ choice decides which regions are reachable, and in which crystal color):
 
 ---
 
-## Phase 3 — Drop Lobbies (implemented; done once a playtest seed exercises moved drops)
+## Phase 3 — Drop Lobbies ✓ COMPLETE
 
 An overworld hole leads to its Drop Portal (`source/dungeon/DropPortals.py`), owned by its vanilla dungeon: Skull Woods
 owns Pot Circle, Left Drop, Pinball and Back Drop; Hyrule Castle owns the Sewers drop. The Drop Portal's fall is a `Hole`
@@ -186,7 +185,7 @@ When `dungeon_entrances: free` (or any redistributed mode) is active:
 
 ---
 
-## Phase 5 — ROM Write
+## Phase 5 — ROM Write ✓ COMPLETE
 
 ### 5a. ROM interface
 
@@ -271,12 +270,15 @@ dungeon's slot. `TestBossIndicator` covers intensity 4, custom `pits`, and inten
 
 ### 7c. Regression
 
-- Ensure intensity 1–3 seeds are unaffected by the new intensity 4 infrastructure. Today they are not: the same seed
-  generates differently from NewGeneration, because the trap rule, Drop Portal regions and the Ice Freezors Shared Pit
-  region change sectors and random draws. What still needs checking is that only the draws change: logic stays
-  equivalent and no rule moves (e.g. no key rule lands on a hole).
-- Ensure custom intensity `pit_warps: none` produces identical output to pre-feature
-  behavior at any intensity level
+- ✓ Item logic matches NewGeneration on identical worlds. Shuffled doors draw differently (the trap rule, Drop Portal
+  regions and the Ice Freezors Shared Pit region change sectors and random draws), so the comparison uses vanilla doors,
+  where both branches build the same world. `doors-work/tools/logic_equiv.py` generates a seed on each branch and
+  compares which locations and entrances 40 sampled item sets reach. All seeds 1–10 match in open, standard and
+  inverted on both key logic algorithms, key drops with pottery keys, wild keys and big keys, and crossed entrance
+  shuffle (open, standard, inverted) and insanity. Seeds that fail generation fail identically on both branches.
+- Key logic treats a Drop Portal start like the landing it stood for: a door into the landing reaches that start, and
+  no key rule goes on a hole (`TestDropPortalKeyLogic`).
+- Not yet checked: custom intensity `pit_warps: none` against NewGeneration at shuffled intensities.
 
 ---
 
@@ -314,9 +316,9 @@ Phase 1 (settings) ─┬─── Phase 2 (gen)
 ## Planned Implementation Order
 
 1. **Phase 2** (dungeon generation) — done (logic)
-2. **Phase 5** (ROM write) — obtain ROM spec from baserom branch, implement alongside Phase 2
+2. **Phase 5** (ROM write) — done
 3. **Phase 6** (testing & spoiler log) — validate the feature end-to-end with Phases 2+5 complete
-4. **Phase 3** (OW pit dropdowns) — implemented; done once the next playtest seed exercises moved drops
+4. **Phase 3** (OW pit dropdowns) — done
 5. **Phase 4** — deferred until `dungeon_entrances` Phase 3 is ready to integrate
 
 Phase 4 is explicitly deferred — no work until both pitwarps and `dungeon_entrances` are independently stable.

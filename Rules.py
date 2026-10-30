@@ -2399,6 +2399,12 @@ def add_classic_key_logic_rules(key_logic, world, player):
                 set_always_allow(big_chest, allow_big_key_in_big_chest(d_logic.bk_name, player))
 
 
+def key_ruled_entrances(region):
+    """The entrances key rules go on: none into a Drop Portal, which only a hole enters and whose fall carries the
+    landing's rules."""
+    return [] if is_drop_portal(region) else region.entrances
+
+
 # todo: allow smalls, bk_restricted (because small is required), sm_restricted (because big is required?)
 # todo: universal key logic?, standard/universal
 def new_key_logic(key_logic, world, player):
@@ -2407,7 +2413,7 @@ def new_key_logic(key_logic, world, player):
         if not logic:
             continue
         for bk_region in logic.bk_regions:
-            for ent in bk_region.entrances:
+            for ent in key_ruled_entrances(bk_region):
                 add_rule(ent, create_rule(d_logic.bk_name, player))
         for bk_location in logic.bk_locations:
             add_rule(bk_location, create_rule(d_logic.bk_name, player))
@@ -2418,7 +2424,7 @@ def new_key_logic(key_logic, world, player):
                 set_always_allow(big_chest, allow_big_key_in_big_chest(d_logic.bk_name, player))
         if logic.fast_logic:
             for sk_region, value in logic.region_key_reqs.items():
-                for ent in sk_region.entrances:
+                for ent in key_ruled_entrances(sk_region):
                     add_rule(ent, create_key_rule(d_logic.small_key_name, player, value))
             for sk_loc, value in logic.location_key_reqs.items():
                 add_rule(sk_loc, create_key_rule(d_logic.small_key_name, player, value))
@@ -2442,7 +2448,7 @@ def new_key_logic(key_logic, world, player):
 
             # Small Key Logic: every region of any key-door state, including those only a prize lobby reaches
             for region in logic.layout_regions or regions:
-                for ent in region.entrances:
+                for ent in key_ruled_entrances(region):
                     add_rule(ent, create_rule_for_key_access(ent, d_logic, logic, player))
 
 

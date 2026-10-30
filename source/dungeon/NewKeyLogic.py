@@ -8,6 +8,7 @@ from DungeonGenerator import ExplorationState, blind_boss_unavail
 from KeyDoorShuffle import KeyCounter
 from KeyDoorShuffle import find_big_chest_locations, dungeon_table, open_a_door, important_location
 from KeyDoorShuffle import find_outside_connection, prize_relevance, expand_key_state, create_key_counters
+from source.dungeon.DropPortals import is_drop_portal
 from source.dungeon.KeyPlacement import create_exhaustive_placement_rules
 from Regions import dungeon_events
 from source.dungeon.DungeonStitcherV2 import special_big_key_doors
@@ -236,7 +237,7 @@ class NewKeyLogic(object):
         if accessible is not None:
             # the lobby this entrance leads into is accessible while the entrance is being evaluated
             accessible = accessible | frozenset(sr for sr, gw in self.start_regions
-                                                if entrance.connected_region in (sr, gw))
+                                                if entrance.connected_region in (sr, gw, _arrival_region(sr)))
         results, _ = self._futures(state, dungeon_logic, player, accessible)
         # in every future the connected region must be reachable, and a locked door needs a key in hand to waste unless
         # it is self-locking in that future's logic
@@ -675,6 +676,11 @@ def calc_extras(amount_needed, dungeon_name, world, player):
             and world.doorShuffle[player] not in ['vanilla', 'basic']):
         extras = amount_needed // 5
     return extras
+
+
+def _arrival_region(start_region):
+    """Where Link stands on entering by start_region: a Drop Portal's landing, else the start itself."""
+    return start_region.exits[0].connected_region if is_drop_portal(start_region) else start_region
 
 
 def _find_gateway_region(start_region):

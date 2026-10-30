@@ -6,6 +6,7 @@ import unittest
 import yaml
 
 import Main
+import Rules
 from BaseClasses import CollectionState, RegionType
 from CLI import parse_cli
 from Items import ItemFactory
@@ -205,13 +206,39 @@ def generate_doors(seed, *door_args):
         logging.disable(logging.NOTSET)
 
 
+def generate_recording_key_rules(seed, *door_args):
+    """Generate, returning the world and every spot the key logic rules were added to."""
+    ruled = []
+    original_add_rule, original_new_key_logic = Rules.add_rule, Rules.new_key_logic
+
+    def recording_add_rule(spot, rule, combine='and'):
+        ruled.append(spot)
+        original_add_rule(spot, rule, combine)
+
+    def recording_new_key_logic(*args):
+        Rules.add_rule = recording_add_rule
+        try:
+            original_new_key_logic(*args)
+        finally:
+            Rules.add_rule = original_add_rule
+
+    Rules.new_key_logic = recording_new_key_logic
+    try:
+        return generate_doors(seed, *door_args), ruled
+    finally:
+        Rules.new_key_logic = original_new_key_logic
+
+
 class TestDropPortalKeyLogic(unittest.TestCase):
     """Key logic walks a dungeon from its Drop Portals, where a hole enters it, so it never locks a hole behind a key."""
 
     @classmethod
     def setUpClass(cls):
-        cls.vanilla = generate_doors(1, '--door_shuffle', 'vanilla')
+        cls.vanilla, cls.vanilla_ruled = generate_recording_key_rules(1, '--door_shuffle', 'vanilla')
         cls.basic = generate_doors(2, '--door_shuffle', 'basic', '--intensity', '1')
+        cls.standard, cls.standard_ruled = generate_recording_key_rules(1, '--door_shuffle', 'vanilla',
+                                                                        '--mode', 'standard')
+        cls.key_drops = generate_doors(4, '--door_shuffle', 'vanilla', '--keydropshuffle', '--pottery', 'keys')
 
     def test_walks_start_at_drop_portals(self):
         for label, world in [('vanilla', self.vanilla), ('basic', self.basic)]:
@@ -237,10 +264,28 @@ class TestDropPortalKeyLogic(unittest.TestCase):
                     self.assertEqual([], sorted(r.name for r in locked if is_drop_portal(r)))
 
     def test_sanctuary_grave_needs_only_the_glove(self):
-        world = self.vanilla
+        for label, world in [('open', self.vanilla), ('standard', self.standard)]:
+            state = CollectionState(world)
+            state.collect(ItemFactory('Power Glove', 1), True)
+            with self.subTest(mode=label):
+                self.assertTrue(world.get_entrance('Sanctuary Grave', 1).access_rule(state))
+
+    def test_key_rules_never_go_on_a_hole(self):
+        for label, ruled in [('open', self.vanilla_ruled), ('standard', self.standard_ruled)]:
+            holes = sorted({spot.name for spot in ruled if is_drop_portal(getattr(spot, 'connected_region', None))})
+            with self.subTest(mode=label):
+                self.assertEqual([], holes)
+
+    def test_a_door_into_a_drop_landing_counts_as_arriving_by_the_drop(self):
+        """Without the grave open, the escape key opens the Key Rat door into the Rat Path, where the drop lands."""
+        world = self.key_drops
         state = CollectionState(world)
-        state.collect(ItemFactory('Power Glove', 1), True)
-        self.assertTrue(world.get_entrance('Sanctuary Grave', 1).access_rule(state))
+        for name in ['Lamp', 'Small Key (Escape)']:
+            state.collect(ItemFactory(name, 1), True)
+        state.sweep_for_events(locations=[loc for loc in world.get_filled_locations() if loc.forced_item])
+        self.assertTrue(state.can_reach(world.get_region('Sewers Key Rat', 1)))
+        self.assertFalse(state.can_reach(world.get_region('Sewers Drop Portal', 1)))
+        self.assertTrue(world.get_entrance('Sewers Key Rat NE', 1).can_reach(state))
 
 
 if __name__ == '__main__':
