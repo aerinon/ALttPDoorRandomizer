@@ -421,6 +421,13 @@ def main(args, seed=None, fish=None):
     return world
 
 
+def key_logic_for(dungeon_algorithm, key_logic):
+    """The new dungeon algorithms make layouts partial and dangerous key logic can't analyze; those run experimental."""
+    if dungeon_algorithm != 'classic' and key_logic in ('partial', 'dangerous'):
+        return 'experimental'
+    return key_logic
+
+
 def set_world_options(world, args, fish):
     world.boots_hint = args.boots_hint.copy()
     world.remote_items = args.remote_items.copy()
@@ -447,7 +454,8 @@ def set_world_options(world, args, fish):
     world.door_type_mode = args.door_type_mode.copy()
     world.door_type_distribution = args.door_type_distribution.copy()
     world.trap_door_mode = args.trap_door_mode.copy()
-    world.key_logic_algorithm = args.key_logic_algorithm.copy()
+    world.key_logic_algorithm = {p: key_logic_for(args.dungeon_shuffle_algorithm[p], k)
+                                 for p, k in args.key_logic_algorithm.items()}
     world.decoupledoors = args.decoupledoors.copy()
     world.door_self_loops = args.door_self_loops.copy()
     world.experimental = args.experimental.copy()
