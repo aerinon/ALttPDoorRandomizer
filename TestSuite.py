@@ -1,5 +1,9 @@
+import random
+import shlex
+import statistics
 import subprocess
 import sys
+import time
 import multiprocessing
 import concurrent.futures
 import argparse
@@ -8,6 +12,7 @@ from collections import OrderedDict
 cpu_threads = multiprocessing.cpu_count()
 key_logic = {'experimental': 'experimental', 'classic': 'partial'}  # the new generation runs with experimental key logic
 py_version = f"{sys.version_info.major}.{sys.version_info.minor}"
+timeout = 900  # seconds; a seed still running then counts as a failure
 
 
 def main(args=None):
@@ -38,14 +43,21 @@ def main(args=None):
             taskcommand = basecommand + " " + command + mode[1]
 
             def gen_seed(taskcommand):
-                return subprocess.run(taskcommand, capture_output=True, shell=True, text=True)
+                start = time.perf_counter()
+                try:
+                    # no shell: on timeout, run() kills the generator itself, not just a shell around it
+                    result = subprocess.run(shlex.split(taskcommand), capture_output=True, text=True, timeout=timeout)
+                except subprocess.TimeoutExpired:
+                    result = subprocess.CompletedProcess(taskcommand, -1, '', f'Timed out after {timeout}s')
+                return result, time.perf_counter() - start
 
             for x in range(1, max_attempts + 1):
-                task = pool.submit(gen_seed, taskcommand)  # passed now: the loop variables change before the task runs
+                seeded = f"{taskcommand} --seed {random.randint(0, 999999999)}"  # recorded so any seed can be replayed
+                task = pool.submit(gen_seed, seeded)  # passed now: the loop variables change before the task runs
                 task.success = False
                 task.name = testname
                 task.mode = mode[0]
-                task.cmd = taskcommand
+                task.cmd = seeded
                 task_mapping.append(task)
 
     test("Vanilla   ", "--shuffle vanilla")
@@ -68,7 +80,7 @@ def main(args=None):
         for task in progressbar:
             dead_or_alive += 1
             try:
-                result = task.result()
+                result, task.seconds = task.result()
                 if result.returncode:
                     errors.append([task.name + task.mode, task.cmd, result.stderr])
                 else:
@@ -87,6 +99,10 @@ def main(args=None):
             success = f"{testname}{mode} Rate: {(len(alive) / len(dead_or_alive)) * 100:.2f}%"
             successes.append(success)
             print(success)
+            seconds = [task.seconds for task in task_mapping if task.name == testname and task.mode == mode]
+            timing = (f"{testname}{mode} Time: mean {statistics.mean(seconds):.1f}s"
+                      f" median {statistics.median(seconds):.1f}s max {max(seconds):.1f}s")
+            successes.append(timing)
             result += f"{(len(alive)/len(dead_or_alive))*100:.2f}%\t"
         return result.strip()
 
