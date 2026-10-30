@@ -75,6 +75,16 @@ class TestPitWarpsOffStayVanilla(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self.assert_vanilla(generate(4, 'experimental', custom_intensity(tmp, {'pit_warps': 'none'})))
 
+    def test_intensity_4_with_pit_warps_none_generates_intensity_3(self):
+        def layout(world):
+            return (world.seed,
+                    sorted((d.name, str(getattr(d.dest, 'name', None)), d.smallKey, d.bigKey)
+                           for d in world.doors if d.player == 1),
+                    sorted((loc.name, loc.item.name if loc.item else '') for loc in world.get_locations()))
+        with tempfile.TemporaryDirectory() as tmp:
+            custom = generate(4, 'experimental', custom_intensity(tmp, {'pit_warps': 'none'}))
+        self.assertEqual(layout(generate(3, 'experimental')), layout(custom))
+
     def test_intensity_4_shuffles_and_writes(self):
         # positive control: the checks above would pass vacuously if nothing were ever shuffled
         world = generate(4, 'experimental')

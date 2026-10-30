@@ -1,7 +1,9 @@
 import unittest
+from contextlib import contextmanager
 
-from BaseClasses import CollectionState, World
+from BaseClasses import CollectionState, DoorType, World
 from CLI import parse_cli
+import DoorShuffle
 from DoorShuffle import link_doors, link_doors_prep
 from Doors import create_doors
 from Dungeons import create_dungeons
@@ -24,7 +26,35 @@ PRIZES = ['Green Pendant', 'Red Pendant', 'Blue Pendant', 'Beat Agahnim 1', 'Bea
           'Crystal 1', 'Crystal 2', 'Crystal 3', 'Crystal 4', 'Crystal 5', 'Crystal 6', 'Crystal 7']
 
 
-def build_vanilla_world(mode='open', logic='noglitches', customizer=None, key_logic='partial'):
+@contextmanager
+def moved_pits(world, pit_landings, player):
+    """While doors link, each pit or warp group named in pit_landings (by its vanilla Terminal) lands on the Terminal
+    it maps to, as a shuffled group does: every source of the group falls into that Terminal's room."""
+    moves = {}
+    for group, terminal_name in pit_landings.items():
+        old, new = world.get_door(group, player), world.get_door(terminal_name, player)
+        assert old.type == new.type == DoorType.Terminal, f'{group} -> {terminal_name}: not two Terminals'
+        moves[group] = new.entrance.parent_region.name
+    assert sorted(pit_landings) == sorted(pit_landings.values()), 'moved groups must swap Terminals among themselves'
+    kinds = {}
+    for d in world.doors:
+        if d.player == player and d.type in (DoorType.Hole, DoorType.Warp) and d.group in moves:
+            kinds[d.group] = kinds.get(d.group, set()) | {d.type}
+    for group, terminal_name in pit_landings.items():
+        assert kinds[group] == kinds[terminal_name], f'{group} -> {terminal_name}: pits and warps do not mix'
+
+    def rewire(table):
+        return [(src, moves.get(world.get_door(src, player).group, region)) for src, region in table]
+
+    vanilla = DoorShuffle.falldown_pits, DoorShuffle.dungeon_warps
+    DoorShuffle.falldown_pits, DoorShuffle.dungeon_warps = rewire(vanilla[0]), rewire(vanilla[1])
+    try:
+        yield
+    finally:
+        DoorShuffle.falldown_pits, DoorShuffle.dungeon_warps = vanilla
+
+
+def build_vanilla_world(mode='open', logic='noglitches', customizer=None, key_logic='partial', pit_landings=None):
     player = 1
     args = parse_cli(['--mode', mode, '--logic', logic, '--shuffle', 'vanilla', '--door_shuffle', 'vanilla',
                       '--intensity', '1', '--suppress_rom', '--spoiler', 'none',
@@ -51,9 +81,10 @@ def build_vanilla_world(mode='open', logic='noglitches', customizer=None, key_lo
     link_overworld(world, player)
     create_dynamic_exits(world, player)
     link_entrances_new(world, player)
-    link_doors_prep(world, player)
-    create_item_pool_config(world)
-    link_doors(world, player)
+    with moved_pits(world, pit_landings or {}, player):
+        link_doors_prep(world, player)
+        create_item_pool_config(world)
+        link_doors(world, player)
     mark_light_dark_world_regions(world, player)
 
     generate_itempool(world, player)

@@ -262,11 +262,15 @@ dungeon's slot. `TestBossIndicator` covers intensity 4, custom `pits`, and inten
 - ✓ The door spoiler lists each shuffled pit source and its landing region (one-way); shuffled drops are listed with
   the lobbies (Phase 3).
 
-### 7b. TestSuite.py
+### 7b. TestSuite.py and per-dungeon logic
 
-- Add `--pitwarps` flag to `TestSuite.py` for batch generation testing
-- Add per-dungeon pitwarp logic tests (similar to `test/dungeons/`) that verify
-  all locations remain reachable when pitwarps are shuffled
+- ✓ `TestSuite.py` generates intensity 4 in its experimental basic and crossed rows; no separate flag is needed.
+- ✓ `test/dungeons/TestPitWarpLayouts.py` pins one moved layout per dungeon with pits or warps to swap (Hera, PoD,
+  Swamp, Ice, Mire, GT pits, GT warps) without a seed: `build_vanilla_world(pit_landings=...)` lands whole pit or warp
+  groups on other Terminals while the vanilla doors link, so the key logic and rules are built on the moved layout.
+  Each layout checks that every location is reachable with everything, and has rows for the locations whose
+  requirements move with a pit (each row is reversed in vanilla). The rows use the experimental key logic, which
+  intensity 4 runs. Eastern Palace and Skull Woods have one pit group each, so they have no swap within the dungeon.
 
 ### 7c. Regression
 
@@ -278,7 +282,9 @@ dungeon's slot. `TestBossIndicator` covers intensity 4, custom `pits`, and inten
   shuffle (open, standard, inverted) and insanity. Seeds that fail generation fail identically on both branches.
 - Key logic treats a Drop Portal start like the landing it stood for: a door into the landing reaches that start, and
   no key rule goes on a hole (`TestDropPortalKeyLogic`).
-- Not yet checked: custom intensity `pit_warps: none` against NewGeneration at shuffled intensities.
+- ✓ Custom intensity `pit_warps: none` at intensity 4 generates the intensity 3 world: the same doors, door types,
+  entrances and items for each seed 1–10 that generates, on the experimental and classic algorithms
+  (`test_intensity_4_with_pit_warps_none_generates_intensity_3`).
 
 ---
 
