@@ -2389,7 +2389,7 @@ def find_valid_trap_combination(builder, suggested, start_regions, paths, world,
         proposal.extend(custom_trap_doors)
         filtered_proposal = [x for x in proposal if x.name not in trap_door_exceptions]
     builder.trap_door_proposal = proposal
-    return proposal, trap_doors_needed
+    return proposal, len(proposal)  # custom doors included, as in the count asked for
 
 
 # eliminate start region if portal marked as destination
@@ -2714,7 +2714,7 @@ def find_valid_bk_combination(builder, suggested, start_regions, world, player, 
         proposal = kth_combination(sample_list[itr], bk_door_pool, bk_doors_needed)
         proposal.extend(custom_bk_doors)
     builder.bk_door_proposal = proposal
-    return proposal, bk_doors_needed
+    return proposal, len(proposal)  # custom doors included, as in the count asked for
 
 
 def find_current_bk_doors(builder):
