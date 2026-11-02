@@ -118,7 +118,7 @@ To shuffle only some of these, use `pit_warps` in [Custom Intensity](#custom-int
 
 ### `door_type_distribution`
 
-Controls how door type counts (key doors, bomb doors, dash doors, etc.) are distributed among dungeons. It works independently of how rooms are shuffled: `crossed` and `chaos` move door types between dungeons even with `door_shuffle: basic`, where rooms stay in their own dungeon. Requires `experimental` or `biased` generation, except that `chaos` also varies the counts under `classic`.
+Controls how door type counts (key doors, bomb doors, dash doors, etc.) are distributed among dungeons. `crossed` and `chaos` move door types between dungeons, even across the pools of `door_shuffle: partitioned`. They are not compatible with `door_shuffle: basic`, which keeps each dungeon's own keys; generation stops with an error. Requires `experimental` or `biased` generation, except that `chaos` also varies the counts under `classic`.
 
 | Value | Description |
 |---|---|
@@ -133,7 +133,7 @@ settings:
     door_type_distribution: vanilla
 ```
 
-`vanilla` is useful when you want accurate per-dungeon key counts regardless of how rooms are shuffled. `crossed` provides maximum mixing: with `basic` it keeps every dungeon's rooms in place but moves key, bomb and dash doors between dungeons, so one dungeon may have no key doors while another has many more than vanilla. With `door_shuffle: crossed`, `pooled` and `crossed` are the same.
+`vanilla` is useful when you want accurate per-dungeon key counts regardless of how rooms are shuffled. `crossed` provides maximum mixing: it moves key, bomb and dash doors between all dungeons, so one dungeon may have no key doors while another has many more than vanilla. With `door_shuffle: crossed`, `pooled` and `crossed` are the same.
 
 ---
 
@@ -331,7 +331,7 @@ These features are planned for future development on this branch:
 
 ## Migration Notes
 
-Existing settings and customizer files continue to work, with one exception: `door_type_mode: chaos` has moved to `door_type_distribution: chaos`. The closest replacement is `door_type_mode: all` plus `door_type_distribution: chaos`; unlike the old mode, the new one pools door types across all dungeons, not only within each shuffle pool.
+Existing settings and customizer files continue to work, with one exception: `door_type_mode: chaos` has moved to `door_type_distribution: chaos`. The closest replacement is `door_type_mode: all` plus `door_type_distribution: chaos`; unlike the old mode, the new one pools door types across all dungeons, not only within each shuffle pool, and it is not compatible with `door_shuffle: basic`.
 
 The new `dungeon_shuffle_algorithm` defaults to `classic` (v1 behavior) when not specified.
 

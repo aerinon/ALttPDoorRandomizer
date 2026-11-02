@@ -83,6 +83,9 @@ def main(args, seed=None, fish=None):
     for i in zip(args.logic.values(), args.door_shuffle.values()):
         if i[0] == 'hybridglitches' and i[1] != 'vanilla':
             raise RuntimeError(BabelFish().translate("cli","cli","hybridglitches.door.shuffle"))
+    for door_shuffle, distribution in zip(args.door_shuffle.values(), args.door_type_distribution.values()):
+        if door_shuffle == 'basic' and distribution in ('crossed', 'chaos'):  # basic keeps each dungeon's keys
+            raise RuntimeError(BabelFish().translate("cli", "cli", "basic.door.type.distribution"))
     world = World(args.multi, args.shuffle, args.door_shuffle, args.logic, args.mode, args.swords,
                   args.difficulty, args.item_functionality, args.timer, args.progressive, args.goal, args.algorithm,
                   args.accessibility, args.shuffleganon, args.custom, args.customitemarray, args.hints, args.spoiler)

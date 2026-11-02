@@ -56,7 +56,8 @@
     "building.calculating.spheres": "Calculated sphere %i, containing %i of %i progress items.",
     "building.final.spheres": "Calculated final sphere %i, containing %i of %i progress items.",
     "old.python.version": "Door Rando may have issues with python versions earlier than 3.7.  Detected version: %s",
-    "hybridglitches.door.shuffle": "Hybrid Major Glitches is not currently compatible with Door Shuffle."
+    "hybridglitches.door.shuffle": "Hybrid Major Glitches is not currently compatible with Door Shuffle.",
+    "basic.door.type.distribution": "Basic door shuffle is not currently compatible with crossed or chaos door type distribution."
   },
   "help": {
     "lang": [ "App Language, if available, defaults to English" ],
