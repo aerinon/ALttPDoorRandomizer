@@ -290,7 +290,7 @@ def massage_item_pool(world):
         player_pool[item.player].append(item)
     for dungeon in world.dungeons:
         for item in dungeon.all_items:
-            if item.is_inside_dungeon_item(world):
+            if item.is_inside_dungeon_item(world) and item.location is None:  # customizer placements come first
                 player_pool[item.player].append(item)
     player_locations = defaultdict(list)
     for player in player_pool:

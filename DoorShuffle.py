@@ -1284,8 +1284,9 @@ def main_dungeon_generation(dungeon_builders, recombinant_builders, connections_
     logging.getLogger('').info(world.fish.translate("cli", "cli", "generating.dungeon"))
     while len(sector_queue) > 0:
         builder = sector_queue.popleft()
-        split_dungeon = (builder.name.startswith('Desert Palace') or builder.name.startswith('Skull Woods')
-                         or (builder.name.startswith('Hyrule Castle') and world.mode[player] == 'standard'))
+        # a fully pinned dungeon is never split, so only sub-builders carry a part name
+        split_dungeon = builder.split_flag and (builder.name.startswith('Desert Palace') or builder.name.startswith('Skull Woods')
+                                                or (builder.name.startswith('Hyrule Castle') and world.mode[player] == 'standard'))
         name = builder.name
         if split_dungeon:
             name = ' '.join(builder.name.split(' ')[:-1])
@@ -1874,20 +1875,27 @@ def setup_custom_door_types(world, player):
             return
         customizeable_types = ['Key Door', 'Dash Door', 'Bomb Door', 'Trap Door', 'Big Key Door']
         world.custom_door_types[player] = type_map = {x: defaultdict(list) for x in customizeable_types}
-        for door, dest in custom_doors['doors'].items():
-            if isinstance(dest, dict):
-                if 'type' in dest:
-                    door_kind = dest['type']
-                    d = world.get_door(door, player)
-                    dungeon = d.entrance.parent_region.dungeon
-                    if d.type == DoorType.SpiralStairs:
-                        type_map[door_kind][dungeon.name].append(d)
-                    else:
-                        # check if the dest is paired
-                        if d.dest and d.dest.type in [DoorType.Interior, DoorType.Normal] and door_kind != 'Trap Door':
-                            type_map[door_kind][dungeon.name].append((d, d.dest))
-                        else:
-                            type_map[door_kind][dungeon.name].append(d)
+        listed = {door: dest['type'] for door, dest in custom_doors['doors'].items() if isinstance(dest, dict) and 'type' in dest}
+        added = set()
+        for door, door_kind in listed.items():
+            d = world.get_door(door, player)
+            if d in added:
+                continue
+            dungeon = d.entrance.parent_region.dungeon
+            if d.type == DoorType.SpiralStairs:
+                type_map[door_kind][dungeon.name].append(d)
+                added.add(d)
+                continue
+            # a door pairs when its other side is listed with the same type; otherwise reassignment decides the other
+            # side, as generation does for a one-sided door
+            other = listed.get(d.dest.name) if d.dest and hasattr(d.dest, 'name') else None
+            paired = d.dest and d.dest.type in [DoorType.Interior, DoorType.Normal] and other == door_kind
+            if paired:
+                type_map[door_kind][dungeon.name].append((d, d.dest))
+                added.update((d, d.dest))
+            else:
+                type_map[door_kind][dungeon.name].append(d)
+                added.add(d)
 
 
 class DoorTypePool:

@@ -408,7 +408,7 @@ class CustomSettings(object):
             settings_dict[p]['door_shuffle'] = world.doorShuffle[p]
             settings_dict[p]['intensity'] = world.intensity[p]
             settings_dict[p]['dungeon_shuffle_algorithm'] = world.dungeon_shuffle_algorithm[p]
-            settings_dict[p]['dungeon_bias'] = world.dungeon_shuffle_algorithm[p]
+            settings_dict[p]['dungeon_bias'] = world.dungeon_bias[p]
             settings_dict[p]['door_type_mode'] = world.door_type_mode[p]
             settings_dict[p]['door_type_distribution'] = world.door_type_distribution[p]
             settings_dict[p]['trap_door_mode'] = world.trap_door_mode[p]
@@ -505,7 +505,8 @@ class CustomSettings(object):
         for p in self.player_range:
             placements[p] = {}
         for location in world.get_locations():
-            if location.type != LocationType.Logical:
+            # forced items (shop stock, unshuffled key drops) come back from the settings
+            if location.type != LocationType.Logical and location.forced_item is None:
                 if location.player != location.item.player:
                     placements[location.player][location.name] = f'{location.item.name}#{location.item.player}'
                 else:
@@ -539,25 +540,31 @@ class CustomSettings(object):
             door_kinds, skip = {}, set()
             for key, info in world.spoiler.doorTypes.items():
                 if key[1] == p:
-                    if ' <-> ' in info['doorNames']:
-                        dns = info['doorNames'].split(' <-> ')
-                        for dn in dns:
-                            door_kinds[dn] = info['type']  # Key Door, Bomb Door, Dash Door
-                    else:
-                        door_kinds[info['doorNames']] = info['type']
+                    names = info['doorNames'].rsplit(' (', 1)[0]  # the spoiler appends the dungeon
+                    for dn in names.split(' <-> '):
+                        door_kinds[dn] = info['type']  # Key Door, Bomb Door, Dash Door
+            for door in world.doors:  # small key doors door type shuffle left in place aren't in the spoiler
+                if door.player == p and door.name not in door_kinds and door.smallKey:
+                    door_kinds[door.name] = 'Key Door'
             for door in world.doors:
-                if door.player == p and not door.entranceFlag and door.type in door_types and door not in skip:
+                if (door.player == p and not door.entranceFlag and not door.traversal_only and door.type in door_types
+                        and door not in skip):  # portal doors made during generation are recorded as lobbies
                     if door.type == DoorType.Interior:
                         if door.name in door_kinds:
                             door_value = {'type':  door_kinds[door.name]}
                             door_map[door.name] = door_value  # intra-tile note
                             skip.add(door.dest)
+                            if door.dest.name in door_kinds:
+                                door_map[door.dest.name] = {'type': door_kinds[door.dest.name]}
                     elif door.dest:
                         if door.dest.dest == door:
                             door_value = door.dest.name
                             skip.add(door.dest)
                             if door.name in door_kinds:
                                 door_value = {'dest': door_value, 'type': door_kinds[door.name]}
+                                other = door_kinds.get(door.dest.name)
+                                if other:  # listing the other side's type tells a pair from a one-sided door
+                                    door_map[door.dest.name] = {'type': other}
                             if door.name not in door_kinds and door.dest.name in door_kinds:
                                 # tricky swap thing
                                 door_value = {'dest': door.name, 'type': door_kinds[door.dest.name]}
