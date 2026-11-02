@@ -662,3 +662,21 @@ def uniform_distribute(pool, capacities, total):
     random.shuffle(slots)
     chosen = slots[:total]
     return {d: chosen.count(d) for d in pool}
+
+
+def proportional_distribute(pool, weights, total, caps):
+    """Split `total` among pool dungeons in proportion to `weights`, each at most its cap. Largest remainder rounding:
+    the shares never sum past `total`."""
+    ttl = sum(weights[d] for d in pool)
+    if ttl == 0 or total <= 0:
+        return {d: 0 for d in pool}
+    exact = {d: weights[d] * total / ttl for d in pool}
+    shares = {d: min(int(exact[d]), caps[d]) for d in pool}
+    left = total - sum(shares.values())
+    for d in sorted(pool, key=lambda x: (int(exact[x]) - exact[x], x)):
+        if left <= 0:
+            break
+        if shares[d] < min(caps[d], exact[d]):
+            shares[d] += 1
+            left -= 1
+    return shares

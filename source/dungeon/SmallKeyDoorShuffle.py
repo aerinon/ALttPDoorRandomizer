@@ -19,7 +19,7 @@ from Utils import ncr, kth_combination
 
 from source.dungeon.NewKeyLogic import analyze_dungeon, calc_extras
 from source.dungeon.KeyPlacement import create_exhaustive_placement_rules, important_location
-from source.dungeon.DungeonGenerationCommon import special_bk_regions, uniform_distribute
+from source.dungeon.DungeonGenerationCommon import special_bk_regions, uniform_distribute, proportional_distribute
 from source.dungeon.DropPortals import outside_parent, entered_from_outside, is_outside
 
 
@@ -66,13 +66,21 @@ def shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_
                 builder.combo_size = combo_size
                 flex_map[dungeon] = (caps[dungeon] - key_door_num) if key_door_num < caps[dungeon] else 0
         else:
-            for dungeon in sorted(pool):
+            limits, weights = {}, {}
+            for dungeon in pool:
                 builder = world.dungeon_layouts[player][dungeon]
                 max_keys = max(0, builder.location_cnt - calc_used_dungeon_items(builder, world, player))
                 cand_len = max(0, len(builder.candidates.small) - builder.key_drop_cnt)
-                limit = 0 if escape_drops_only(builder, world, player) else min(max_keys, cand_len, max_computation)
-                calculated = 0 if ttl == 0 else int(round(builder.key_doors_num*total_keys/ttl))
-                suggested = min(calculated, limit)
+                limits[dungeon] = 0 if escape_drops_only(builder, world, player) else min(max_keys, cand_len, max_computation)
+                weights[dungeon] = builder.key_doors_num
+            if total_keys >= 0:
+                shares = proportional_distribute(pool, weights, total_keys, limits)
+            else:  # more key drops than the pool's keys: drops lower the key door count, as before
+                shares = {d: min(int(round(weights[d] * total_keys / ttl)) if ttl else 0, limits[d]) for d in pool}
+            for dungeon in sorted(pool):
+                builder = world.dungeon_layouts[player][dungeon]
+                limit = limits[dungeon]
+                suggested = shares[dungeon]
                 key_door_num = min(suggested + builder.key_drop_cnt, max_computation)
                 combo_size = ncr(len(builder.candidates.small), key_door_num)
                 suggestion_map[dungeon] = builder.key_doors_num = key_door_num

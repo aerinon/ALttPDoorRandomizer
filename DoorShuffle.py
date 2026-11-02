@@ -21,7 +21,7 @@ from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
 from source.dungeon.DungeonStitcherV2 import create_dungeon
 from source.dungeon.NewKeyLogic import analyze_dungeon as analyze_dungeon_new
 from source.dungeon.SmallKeyDoorShuffle import shuffle_small_key_doors as shuffle_small_key_doors_v2
-from source.dungeon.DungeonGenerationCommon import uniform_distribute, collapse_pit_groups
+from source.dungeon.DungeonGenerationCommon import uniform_distribute, proportional_distribute, collapse_pit_groups
 
 from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths
 from DungeonGenerator import create_dungeon_builders, split_dungeon_builder, simple_dungeon_builder, default_dungeon_entrances
@@ -1976,24 +1976,18 @@ def shuffle_trap_doors(door_type_pools, paths, start_regions_map, all_custom, wo
                 find_trappable_candidates(builder, world, player)
                 if all_custom[dungeon]:
                     builder.candidates.trap = filter_key_door_pool(builder.candidates.trap, all_custom[dungeon])
-                    remaining -= len(custom_trap_doors[dungeon])
+                remaining -= len(custom_trap_doors[dungeon])
                 ttl += len(builder.candidates.trap)
             if ttl == 0 and all(len(custom_trap_doors[dungeon]) == 0 for dungeon in pool):
                 continue
+            remaining = max(0, remaining)
+            caps = {d: len(world.dungeon_layouts[player][d].candidates.trap) for d in pool}
             if world.door_type_distribution[player] in ('crossed', 'chaos') and len(pool) > 1:
-                caps = {d: len(world.dungeon_layouts[player][d].candidates.trap) for d in pool}
-                suggestion_map = uniform_distribute(pool, caps, door_type_pool.traps)
-                flex_map = {d: caps[d] - suggestion_map[d] for d in pool}
-                remaining = 0
+                suggestion_map = uniform_distribute(pool, caps, remaining)
             else:
-                for dungeon in sorted(pool):
-                    builder = world.dungeon_layouts[player][dungeon]
-                    proportion = len(builder.candidates.trap)
-                    calc = 0 if ttl == 0 else int(round(proportion * door_type_pool.traps/ttl))
-                    suggested = min(proportion, calc)
-                    remaining -= suggested
-                    suggestion_map[dungeon] = suggested
-                    flex_map[dungeon] = proportion - suggested
+                suggestion_map = proportional_distribute(pool, caps, remaining, caps)
+            flex_map = {d: caps[d] - suggestion_map[d] for d in pool}
+            remaining -= sum(suggestion_map.values())
             for dungeon in pool:
                 builder = world.dungeon_layouts[player][dungeon]
                 valid_traps, trap_number = find_valid_trap_combination(builder, suggestion_map[dungeon],
@@ -2053,20 +2047,13 @@ def shuffle_big_key_doors(door_type_pools, used_doors, start_regions_map, all_cu
         if ttl == 0:
             continue
         remaining = max(0, remaining)
+        caps = {d: len(world.dungeon_layouts[player][d].candidates.big) for d in pool}
         if world.door_type_distribution[player] in ('crossed', 'chaos') and len(pool) > 1:
-            caps = {d: len(world.dungeon_layouts[player][d].candidates.big) for d in pool}
-            suggestion_map = uniform_distribute(pool, caps, door_type_pool.bigs)
-            flex_map = {d: caps[d] - suggestion_map[d] for d in pool}
-            remaining = 0
+            suggestion_map = uniform_distribute(pool, caps, remaining)
         else:
-            for dungeon in sorted(pool):
-                builder = world.dungeon_layouts[player][dungeon]
-                proportion = len(builder.candidates.big)
-                calc = int(round(proportion * remaining/ttl))
-                suggested = min(proportion, calc)
-                remaining -= suggested
-                suggestion_map[dungeon] = suggested
-                flex_map[dungeon] = proportion - suggested
+            suggestion_map = proportional_distribute(pool, caps, remaining, caps)
+        flex_map = {d: caps[d] - suggestion_map[d] for d in pool}
+        remaining -= sum(suggestion_map.values())
         for dungeon in pool:
             builder = world.dungeon_layouts[player][dungeon]
             valid_doors, bk_number = find_valid_bk_combination(builder, suggestion_map[dungeon],
@@ -2125,16 +2112,21 @@ def shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_
             total_keys -= builder.key_drop_cnt
             ttl += builder.key_doors_num
         remaining = max(0, remaining)
+        limits, weights = {}, {}
         for dungeon in pool:
             builder = world.dungeon_layouts[player][dungeon]
-            if ttl == 0:
-                calculated = 0
-            else:
-                calculated = int(round(builder.key_doors_num*total_keys/ttl))
             max_keys = max(0, builder.location_cnt - calc_used_dungeon_items(builder, world, player))
             cand_len = max(0, len(builder.candidates.small) - builder.key_drop_cnt)
-            limit = min(max_keys, cand_len, max_computation)
-            suggested = min(calculated, limit)
+            limits[dungeon] = min(max_keys, cand_len, max_computation)
+            weights[dungeon] = builder.key_doors_num
+        if total_keys >= 0:
+            shares = proportional_distribute(pool, weights, total_keys, limits)
+        else:  # more key drops than the pool's keys: drops lower the key door count, as before
+            shares = {d: min(int(round(weights[d] * total_keys / ttl)) if ttl else 0, limits[d]) for d in pool}
+        for dungeon in pool:
+            builder = world.dungeon_layouts[player][dungeon]
+            limit = limits[dungeon]
+            suggested = shares[dungeon]
             key_door_num = min(suggested + builder.key_drop_cnt, max_computation)
             combo_size = ncr(len(builder.candidates.small), key_door_num)
             suggestion_map[dungeon] = builder.key_doors_num = key_door_num
@@ -2231,16 +2223,12 @@ def shuffle_bomb_dash_doors(door_type_pools, used_doors, start_regions_map, all_
             remaining_bomb = 0
             remaining_dash = 0
         else:
-            for dungeon in sorted(pool):
-                builder = world.dungeon_layouts[player][dungeon]
-                proportion = len(builder.candidates.bomb_dash)
-                calc = int(round(proportion * door_type_pool.bombable/ttl))
-                suggested_bomb = min(proportion, calc)
-                calc = int(round(proportion * door_type_pool.dashable/ttl))
-                suggested_dash = min(proportion, calc)
-                remaining_bomb -= suggested_bomb
-                remaining_dash -= suggested_dash
-                suggestion_map[dungeon] = suggested_bomb, suggested_dash
+            caps = {d: len(world.dungeon_layouts[player][d].candidates.bomb_dash) for d in pool}
+            bomb_map = proportional_distribute(pool, caps, remaining_bomb, caps)
+            dash_map = proportional_distribute(pool, caps, remaining_dash, caps)
+            suggestion_map = {d: (bomb_map[d], dash_map[d]) for d in pool}
+            remaining_bomb -= sum(bomb_map.values())
+            remaining_dash -= sum(dash_map.values())
         for dungeon in pool:
             builder = world.dungeon_layouts[player][dungeon]
             bomb_doors, dash_doors, bd_number = find_valid_bd_combination(builder, suggestion_map[dungeon], world, player)
