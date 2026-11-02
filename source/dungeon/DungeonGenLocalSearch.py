@@ -32,6 +32,8 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
     dungeon_pool = list(pool)
     flags = DoorFlags.for_player(world, player)
     portal_assignments = defaultdict(list)
+    # every door connected (a customizer file that pins the layout): sectors go where their portals do, no balancing
+    pinned = all(len(s.outstanding_doors) == 0 for s in sector_pool + portal_pool)
 
     # vanilla assignment
     for key in dungeon_pool:
@@ -54,7 +56,8 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
                     door.dest = p.door
             portal_assignments[key].append(portal_sector)
 
-    if 'Hyrule Castle' in dungeon_pool and world.mode[player] == 'standard':
+    # a pinned layout already joins the throne room to the sewers, so standard's split has nothing to do
+    if 'Hyrule Castle' in dungeon_pool and world.mode[player] == 'standard' and not pinned:
         sewer_portal = create_dungeon_region(player, 'Sewer Access Portal', 'Hyrule Castle', None, ['Enter HC (Sewers)'])
         world.regions.append(sewer_portal)
         door = create_portal_door(world, player, next(e.name for e in sewer_portal.exits if e.name.startswith('Enter ')))
@@ -108,7 +111,7 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
         # the rest go in front
         for portal in assignments:
             portal_assignments['Desert Palace Front'].append(portal)
-    if 'Hyrule Castle' in dungeon_pool and world.mode[player] == 'standard':
+    if 'Hyrule Castle' in dungeon_pool and world.mode[player] == 'standard' and not pinned:
         dungeon_pool.append('Hyrule Castle Dungeon')
         dungeon_pool.append('Hyrule Castle Sewers')
         dungeon_pool.remove('Hyrule Castle')
@@ -202,7 +205,7 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
             propose_sector(dungeon_map[choice[0]], sector, info)
     if world.dungeon_shuffle_algorithm[player] == 'biased':
         seed_biased_builders(info, world, player)
-    done = False
+    done = pinned
     iterations = 0
     while not done:
         if iterations > 1000:

@@ -20,7 +20,7 @@ from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
 from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
 from source.dungeon.DungeonStitcherV2 import create_dungeon
 from source.dungeon.NewKeyLogic import analyze_dungeon as analyze_dungeon_new
-from source.dungeon.SmallKeyDoorShuffle import shuffle_small_key_doors as shuffle_small_key_doors_v2
+from source.dungeon.SmallKeyDoorShuffle import shuffle_small_key_doors as shuffle_small_key_doors_v2, pinned_key_totals
 from source.dungeon.DungeonGenerationCommon import uniform_distribute, proportional_distribute, collapse_pit_groups
 
 from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths
@@ -1862,9 +1862,24 @@ def combine_layouts(recombinant_builders, dungeon_builders, entrances_map, world
         dungeon_builders[recombine.name] = recombine
 
 
+def pins_every_connection(custom_doors, world, player):
+    """Whether a customizer doors section names every dungeon door connection door shuffle would make, as an export
+    does: then its door types are all of them."""
+    shuffled = {DoorType.Normal, DoorType.SpiralStairs}
+    if world.intensity[player] > 1:
+        shuffled.update([DoorType.Open, DoorType.StraightStairs, DoorType.Ladder])
+    named = set(custom_doors)
+    named.update(v if isinstance(v, str) else v.get('dest') for v in custom_doors.values())
+    return all(d.name in named for d in world.doors
+               if d.player == player and d.type in shuffled and not d.entranceFlag and not d.traversal_only
+               and d.entrance.parent_region.dungeon)
+
+
 def setup_custom_door_types(world, player):
     if not hasattr(world, 'custom_door_types'):
         world.custom_door_types = defaultdict(dict)
+    if not hasattr(world, 'door_types_final'):
+        world.door_types_final = {}
     if world.customizer and world.customizer.get_doors():
         # type_conv = {'Bomb Door': DoorKind.Bombable , 'Dash Door', DoorKind.Dashable, 'Key Door', DoorKind.SmallKey}
         custom_doors = world.customizer.get_doors()
@@ -1875,6 +1890,7 @@ def setup_custom_door_types(world, player):
             return
         customizeable_types = ['Key Door', 'Dash Door', 'Bomb Door', 'Trap Door', 'Big Key Door']
         world.custom_door_types[player] = type_map = {x: defaultdict(list) for x in customizeable_types}
+        world.door_types_final[player] = pins_every_connection(custom_doors['doors'], world, player)
         listed = {door: dest['type'] for door, dest in custom_doors['doors'].items() if isinstance(dest, dict) and 'type' in dest}
         added = set()
         for door, door_kind in listed.items():
@@ -1887,9 +1903,10 @@ def setup_custom_door_types(world, player):
                 added.add(d)
                 continue
             # a door pairs when its other side is listed with the same type; otherwise reassignment decides the other
-            # side, as generation does for a one-sided door
+            # side, as generation does for a one-sided door. Traps are always one-sided
             other = listed.get(d.dest.name) if d.dest and hasattr(d.dest, 'name') else None
-            paired = d.dest and d.dest.type in [DoorType.Interior, DoorType.Normal] and other == door_kind
+            paired = (d.dest and d.dest.type in [DoorType.Interior, DoorType.Normal] and other == door_kind
+                      and door_kind != 'Trap Door')
             if paired:
                 type_map[door_kind][dungeon.name].append((d, d.dest))
                 added.update((d, d.dest))
@@ -1988,7 +2005,7 @@ def shuffle_trap_doors(door_type_pools, paths, start_regions_map, all_custom, wo
                 ttl += len(builder.candidates.trap)
             if ttl == 0 and all(len(custom_trap_doors[dungeon]) == 0 for dungeon in pool):
                 continue
-            remaining = max(0, remaining)
+            remaining = 0 if world.door_types_final.get(player) else max(0, remaining)
             caps = {d: len(world.dungeon_layouts[player][d].candidates.trap) for d in pool}
             if world.door_type_distribution[player] in ('crossed', 'chaos') and len(pool) > 1:
                 suggestion_map = uniform_distribute(pool, caps, remaining)
@@ -2056,7 +2073,7 @@ def shuffle_big_key_doors(door_type_pools, used_doors, start_regions_map, all_cu
             ttl += len(builder.candidates.big)
         if ttl == 0 and all(len(custom_bk_doors[dungeon]) == 0 for dungeon in pool):
             continue
-        remaining = max(0, remaining)
+        remaining = 0 if world.door_types_final.get(player) else max(0, remaining)
         caps = {d: len(world.dungeon_layouts[player][d].candidates.big) for d in pool}
         if world.door_type_distribution[player] in ('crossed', 'chaos') and len(pool) > 1:
             suggestion_map = uniform_distribute(pool, caps, remaining)
@@ -2145,13 +2162,31 @@ def shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_
             remaining -= key_door_num + builder.key_drop_cnt
             builder.combo_size = combo_size
             flex_map[dungeon] = (limit - key_door_num) if key_door_num < limit else 0
+        for dungeon in pool:  # custom key doors count toward their dungeon's target
+            pinned = len(custom_key_doors[dungeon])
+            if pinned > suggestion_map[dungeon]:
+                remaining -= pinned - suggestion_map[dungeon]
+                suggestion_map[dungeon] = world.dungeon_layouts[player][dungeon].key_doors_num = pinned
+        # a file that places every item fixes each dungeon's keys: its listed key doors are all of them
+        placed_keys = pinned_key_totals(world, player) if total_adjustable else None
+        if placed_keys is not None:
+            for dungeon in pool:
+                suggestion_map[dungeon] = len(custom_key_doors[dungeon])
+                flex_map[dungeon] = 0
+            remaining = 0
         for dungeon in pool:
             builder = world.dungeon_layouts[player][dungeon]
-            if total_adjustable:
+            if placed_keys is not None:
+                builder.total_keys = placed_keys[dungeon]
+            elif total_adjustable:
                 builder.total_keys = max(suggestion_map[dungeon], builder.key_drop_cnt)
             valid_doors, small_number = find_valid_combination(builder, suggestion_map[dungeon],
                                                                start_regions_map[dungeon], world, player)
             small_map[dungeon] = valid_doors
+            if placed_keys is not None:
+                builder.key_doors_num = placed_keys[dungeon]  # the key count below follows it
+                suggestion_map[dungeon] = small_number
+                continue
             actual_chest_keys = small_number - builder.key_drop_cnt
             if actual_chest_keys < suggestion_map[dungeon]:
                 if total_adjustable:
@@ -2227,6 +2262,8 @@ def shuffle_bomb_dash_doors(door_type_pools, used_doors, start_regions_map, all_
             ttl += len(builder.candidates.bomb_dash)
         if ttl == 0 and all(len(custom_bomb_doors[d]) + len(custom_dash_doors[d]) == 0 for d in pool):
             continue
+        if world.door_types_final.get(player):
+            remaining_bomb = remaining_dash = 0
         if world.door_type_distribution[player] in ('crossed', 'chaos') and len(pool) > 1:
             caps = {d: len(world.dungeon_layouts[player][d].candidates.bomb_dash) for d in pool}
             bomb_map = uniform_distribute(pool, caps, remaining_bomb)

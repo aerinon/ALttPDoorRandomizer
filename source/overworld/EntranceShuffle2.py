@@ -1472,6 +1472,9 @@ def connect_custom(avail_pool, world, player):
         if 'entrances' in custom_entrances[player_key]:
             for ent_name, exit_name in custom_entrances[player_key]['entrances'].items():
                 connect_entrance(ent_name, exit_name, avail_pool)
+                if avail_pool.inverted and exit_name == 'Dark Sanctuary Hint':  # leaving goes back out that entrance
+                    ext = world.get_entrance('Dark Sanctuary Hint Exit', player)
+                    ext.connect(world.get_entrance(ent_name, player).parent_region)
         if 'exits' in custom_entrances[player_key]:
             for ent_name, exit_name in custom_entrances[player_key]['exits'].items():
                 connect_exit(exit_name, ent_name, avail_pool)

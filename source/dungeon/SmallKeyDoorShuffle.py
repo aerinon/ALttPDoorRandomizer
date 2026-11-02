@@ -4,9 +4,9 @@ from functools import reduce
 
 import RaceRandom as random
 
-from collections import defaultdict, deque
+from collections import Counter, defaultdict, deque
 
-from BaseClasses import DoorType, Door, RegionType, dungeon_keys
+from BaseClasses import DoorType, Door, RegionType, LocationType, dungeon_keys
 from DungeonGenerator import valid_region_to_explore, count_reserved_locations, ExplorationState
 from Items import ItemFactory
 from KeyDoorShuffle import build_key_layout, check_bk_special, count_key_drops, expand_key_state, flatten_pair_list, open_a_door, reduce_rules
@@ -87,13 +87,32 @@ def shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_
                 remaining -= key_door_num + builder.key_drop_cnt
                 builder.combo_size = combo_size
                 flex_map[dungeon] = (limit - key_door_num) if key_door_num < limit else 0
+        for dungeon in pool:  # custom key doors count toward their dungeon's target
+            pinned = len(custom_key_doors[dungeon])
+            if pinned > suggestion_map[dungeon]:
+                remaining -= pinned - suggestion_map[dungeon]
+                suggestion_map[dungeon] = world.dungeon_layouts[player][dungeon].key_doors_num = pinned
+        # a file that places every item fixes each dungeon's keys: its listed key doors are all of them
+        placed_keys = pinned_key_totals(world, player) if total_adjustable else None
+        if placed_keys is not None:
+            for dungeon in pool:  # the listed doors, with the key count (which max_chests reads) from placements
+                suggestion_map[dungeon] = len(custom_key_doors[dungeon])
+                world.dungeon_layouts[player][dungeon].key_doors_num = placed_keys[dungeon]
+                flex_map[dungeon] = 0
+            remaining = 0
         for dungeon in pool:
             builder = world.dungeon_layouts[player][dungeon]
-            if total_adjustable:
+            if placed_keys is not None:
+                builder.total_keys = placed_keys[dungeon]
+            elif total_adjustable:
                 builder.total_keys = max(suggestion_map[dungeon], builder.key_drop_cnt)
             valid_doors, small_number = find_valid_combination(builder, suggestion_map[dungeon],
                                                                start_regions_map[dungeon], world, player)
             small_map[dungeon] = valid_doors
+            if placed_keys is not None:
+                builder.key_doors_num = placed_keys[dungeon]  # the key count below follows it
+                suggestion_map[dungeon] = small_number
+                continue
             actual_chest_keys = small_number - builder.key_drop_cnt
             if actual_chest_keys < suggestion_map[dungeon]:
                 if total_adjustable:
@@ -312,6 +331,29 @@ def find_valid_combination(builder, target, start_regions, world, player, drop_k
     world.key_logic[player][builder.name] = key_layout.key_logic
     world.key_layout[player][builder.name] = key_layout
     return proposal, len(proposal)
+
+
+def pinned_key_totals(world, player):
+    """Small keys per dungeon when a customizer file places an item at every location: the keys it places plus the
+    forced key drops. None when some location is left to fill, since then the split decides."""
+    placements = world.customizer.get_placements() if world.customizer else None
+    if not placements or player not in placements:
+        return None
+    placed = placements[player]
+    owner = {key: dungeon for dungeon, key in dungeon_keys.items()}
+    totals = Counter()
+    for loc in world.get_locations():
+        if loc.player != player or loc.type == LocationType.Logical:
+            continue
+        if loc.forced_item is not None:
+            name = loc.forced_item.name
+        elif loc.name in placed:
+            name = placed[loc.name]
+        else:
+            return None
+        if name in owner:
+            totals[owner[name]] += 1
+    return totals
 
 
 def escape_drops_only(builder, world, player):

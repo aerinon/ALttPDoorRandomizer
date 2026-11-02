@@ -333,7 +333,14 @@ def generate_itempool(world, player):
         world.push_precollected(ItemFactory(item, player))
 
     if world.mode[player] == 'standard' and not world.state.has_blunt_weapon(player):
-        if "Link's Uncle" not in placed_items:
+        placements = world.customizer.get_placements() if world.customizer else None
+        custom_uncle = placements.get(player, {}).get("Link's Uncle") if placements else None
+        uncle_item = placed_items.get("Link's Uncle")
+        if uncle_item is None and custom_uncle:  # the customizer's choice of escape weapon
+            placed_items["Link's Uncle"] = uncle_item = custom_uncle
+            if custom_uncle in pool:
+                pool.remove(custom_uncle)
+        if uncle_item is None:
             found_sword = False
             found_bow = False
             possible_weapons = []
@@ -355,9 +362,9 @@ def generate_itempool(world, player):
                     if item not in possible_weapons and world.doorShuffle[player] != 'crossed':
                         possible_weapons.append(item)
             starting_weapon = random.choice(possible_weapons)
-            placed_items["Link's Uncle"] = starting_weapon
+            placed_items["Link's Uncle"] = uncle_item = starting_weapon
             pool.remove(starting_weapon)
-        if placed_items["Link's Uncle"] in ['Bow', 'Progressive Bow', 'Bombs (10)', 'Cane of Somaria', 'Cane of Byrna'] and world.enemy_health[player] not in ['default', 'easy']:
+        if uncle_item in ['Bow', 'Progressive Bow', 'Bombs (10)', 'Cane of Somaria', 'Cane of Byrna'] and world.enemy_health[player] not in ['default', 'easy']:
             world.escape_assist[player].append('bombs')
 
     for (location, item) in placed_items.items():
@@ -1292,7 +1299,7 @@ def make_customizer_pool(world, player):
                    or (d_item.map and not world.mapshuffle[player])):
                     d_name = d_item.dungeon
                     dungeon = world.get_dungeon(d_name, player)
-                    current_amount = 1 if dungeon.big_key and (d_item == dungeon.big_key or d_item in dungeon.dungeon_items) else 0
+                    current_amount = sum(1 for x in dungeon.dungeon_items + [dungeon.big_key] if x and x.name == item_name)
                     additional_amount = amount - current_amount
                     possible_fit = min(additional_amount, len(dungeon_locations[d_name])-dungeon_count[d_name])
                     if possible_fit > 0:
@@ -1303,7 +1310,7 @@ def make_customizer_pool(world, player):
                         pool.extend([item_name] * amount)
                 else:
                     dungeon = world.get_dungeon(d_item.dungeon, player)
-                    current_amount = 1 if dungeon.big_key and (d_item == dungeon.big_key or d_item in dungeon.dungeon_items) else 0
+                    current_amount = sum(1 for x in dungeon.dungeon_items + [dungeon.big_key] if x and x.name == item_name)
                     additional_amount = amount - current_amount
                     dungeon.dungeon_items.extend([d_item] * additional_amount)
             else:
@@ -1458,6 +1465,8 @@ def fill_specific_items(world):
             for player, placement_list in placements.items():
                 for location, item in placement_list.items():
                     loc = world.get_location(location, player)
+                    if loc.item and loc.item.name == item.split('#')[0]:  # set up already (Link's Uncle in standard)
+                        continue
                     item_to_place, event_flag = get_item_and_event_flag(item, world, player,
                                                                         dungeon_pool, prize_set, prize_pool)
                     if item_to_place:
