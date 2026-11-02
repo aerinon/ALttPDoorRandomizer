@@ -1988,6 +1988,8 @@ def shuffle_trap_doors(door_type_pools, paths, start_regions_map, all_custom, wo
                 suggestion_map = proportional_distribute(pool, caps, remaining, caps)
             flex_map = {d: caps[d] - suggestion_map[d] for d in pool}
             remaining -= sum(suggestion_map.values())
+            # the trap finder takes a count that includes the dungeon's custom doors
+            suggestion_map = {d: suggestion_map[d] + len(custom_trap_doors[d]) for d in pool}
             for dungeon in pool:
                 builder = world.dungeon_layouts[player][dungeon]
                 valid_traps, trap_number = find_valid_trap_combination(builder, suggestion_map[dungeon],
@@ -2044,7 +2046,7 @@ def shuffle_big_key_doors(door_type_pools, used_doors, start_regions_map, all_cu
                 builder.candidates.big = filter_key_door_pool(builder.candidates.big, all_custom[dungeon])
                 remaining -= len(custom_bk_doors[dungeon])
             ttl += len(builder.candidates.big)
-        if ttl == 0:
+        if ttl == 0 and all(len(custom_bk_doors[dungeon]) == 0 for dungeon in pool):
             continue
         remaining = max(0, remaining)
         caps = {d: len(world.dungeon_layouts[player][d].candidates.big) for d in pool}
@@ -2054,6 +2056,8 @@ def shuffle_big_key_doors(door_type_pools, used_doors, start_regions_map, all_cu
             suggestion_map = proportional_distribute(pool, caps, remaining, caps)
         flex_map = {d: caps[d] - suggestion_map[d] for d in pool}
         remaining -= sum(suggestion_map.values())
+        # the big key door finder takes a count that includes the dungeon's custom doors
+        suggestion_map = {d: suggestion_map[d] + len(custom_bk_doors[d]) for d in pool}
         for dungeon in pool:
             builder = world.dungeon_layouts[player][dungeon]
             valid_doors, bk_number = find_valid_bk_combination(builder, suggestion_map[dungeon],
@@ -2213,7 +2217,7 @@ def shuffle_bomb_dash_doors(door_type_pools, used_doors, start_regions_map, all_
                 remaining_bomb -= len(custom_bomb_doors[dungeon])
                 remaining_dash -= len(custom_dash_doors[dungeon])
             ttl += len(builder.candidates.bomb_dash)
-        if ttl == 0:
+        if ttl == 0 and all(len(custom_bomb_doors[d]) + len(custom_dash_doors[d]) == 0 for d in pool):
             continue
         if world.door_type_distribution[player] in ('crossed', 'chaos') and len(pool) > 1:
             caps = {d: len(world.dungeon_layouts[player][d].candidates.bomb_dash) for d in pool}
@@ -2229,6 +2233,9 @@ def shuffle_bomb_dash_doors(door_type_pools, used_doors, start_regions_map, all_
             suggestion_map = {d: (bomb_map[d], dash_map[d]) for d in pool}
             remaining_bomb -= sum(bomb_map.values())
             remaining_dash -= sum(dash_map.values())
+        # the bomb/dash finder takes counts that include the dungeon's custom doors
+        suggestion_map = {d: (b + len(custom_bomb_doors[d]), da + len(custom_dash_doors[d]))
+                          for d, (b, da) in suggestion_map.items()}
         for dungeon in pool:
             builder = world.dungeon_layouts[player][dungeon]
             bomb_doors, dash_doors, bd_number = find_valid_bd_combination(builder, suggestion_map[dungeon], world, player)
