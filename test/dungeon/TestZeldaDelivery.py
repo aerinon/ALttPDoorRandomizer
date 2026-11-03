@@ -2,6 +2,7 @@ import unittest
 
 from BaseClasses import Entrance, Region, RegionType
 from Rules import zelda_delivery_rule
+from source.logic.AccessRule import set_rule
 
 
 class StubWorld:
@@ -23,7 +24,7 @@ class StubState:
 def connect(parent, child, rule=None):
     ext = Entrance(1, f'{parent.name} -> {child.name}', parent)
     if rule:
-        ext.access_rule = rule
+        set_rule(ext, rule)
     parent.exits.append(ext)
     ext.connect(child)
     return ext
@@ -59,7 +60,7 @@ class TestZeldaDelivery(unittest.TestCase):
     def test_rules_read_when_evaluated(self):
         # rules added after setup, such as key door rules, still count
         rule = zelda_delivery_rule(self.world, 1)
-        self.short_exit.access_rule = lambda state: True
+        set_rule(self.short_exit, lambda state: True)
         self.assertTrue(rule(StubState(['Zelda Herself'])))
 
     def test_no_route_at_all(self):

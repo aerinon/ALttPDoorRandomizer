@@ -11,9 +11,10 @@ from OverworldGlitchRules import overworld_glitches_rules
 from UnderworldGlitchRules import underworld_glitches_rules
 
 from source.logic.Rule import RuleFactory
+from source.logic.AccessRule import set_rule, add_rule, and_rule, or_rule
 from source.dungeon.EnemyList import EnemySprite, Sprite
 from source.enemizer.EnemyLogic import special_rules_check, special_rules_for_region, defeat_rule_single
-from source.enemizer.EnemyLogic import defeat_rule_multiple, and_rule as and_rule_new, or_rule as or_rule_new
+from source.enemizer.EnemyLogic import defeat_rule_multiple
 from source.dungeon.DropPortals import is_drop_portal, is_lobby_portal
 
 
@@ -121,10 +122,6 @@ def mirrorless_path_to_castle_courtyard(world, player):
                     queue.append((entrance.connected_region, new_path))
 
 
-def set_rule(spot, rule):
-    spot.access_rule = rule
-
-
 def set_defeat_dungeon_boss_rule(location):
     # Lambda required to defer evaluation of dungeon.boss since it will change later if boos shuffle is used
     set_rule(location, lambda state: location.parent_region.dungeon.boss.can_defeat(state))
@@ -135,32 +132,12 @@ def set_always_allow(spot, rule):
 
 
 def add_rule_new(spot, rule, combine='and'):
-    if combine == 'and':
-        spot.verbose_rule = and_rule_new(*[spot.verbose_rule, rule])
-    else:
-        spot.verbose_rule = or_rule_new(*[spot.verbose_rule, rule])
-    add_rule(spot, rule.rule_lambda, combine)
-
-
-def add_rule(spot, rule, combine='and'):
-    old_rule = spot.access_rule
-    if combine == 'or':
-        spot.access_rule = lambda state: rule(state) or old_rule(state)
-    else:
-        spot.access_rule = lambda state: rule(state) and old_rule(state)
+    add_rule(spot, rule, combine)
 
 def add_bunny_rule(spot, player):
     region = spot.parent_region
     if not (region.is_light_world if region.world.mode[player] != 'inverted' else region.is_dark_world):
         add_rule(spot, lambda state: state.has_Pearl(player))
-
-
-def or_rule(rule1, rule2):
-    return lambda state: rule1(state) or rule2(state)
-
-
-def and_rule(rule1, rule2):
-    return lambda state: rule1(state) and rule2(state)
 
 
 def add_lamp_requirement(spot, player):

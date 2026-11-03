@@ -1,4 +1,5 @@
 from BaseClasses import RegionType, Terrain, Entrance
+from source.logic.AccessRule import set_rule
 from Utils import bidict
 import logging
 
@@ -59,9 +60,9 @@ def create_mirror_exits(world, player):
                     exit.spot_type = 'Mirror'
                     to_region = world.get_region(region_dest_name, player)
                     if region.terrain == Terrain.Water or to_region.terrain == Terrain.Water:
-                        exit.access_rule = lambda state: state.has('Flippers', player) and state.has_Pearl(player) and state.has_Mirror(player)
+                        set_rule(exit, lambda state: state.has('Flippers', player) and state.has_Pearl(player) and state.has_Mirror(player))
                     else:
-                        exit.access_rule = lambda state: state.has_Mirror(player)
+                        set_rule(exit, lambda state: state.has_Mirror(player))
                     exit.connect(to_region)
                     region.exits.append(exit)
 

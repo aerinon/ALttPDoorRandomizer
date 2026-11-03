@@ -11,6 +11,7 @@ except ImportError:
     from enum import IntFlag as FastEnum
 
 from source.classes.BabelFish import BabelFish
+from source.logic.AccessRule import TRUE, true_fn
 from Utils import int16_as_bytes
 from Tables import normal_offset_table, spiral_offset_table, multiply_lookup, divisor_lookup
 from RoomData import Room
@@ -1639,8 +1640,8 @@ class Entrance(object):
         self.spot_type = 'Entrance'
         self.recursion_count = 0
         self.vanilla = None
-        self.access_rule = lambda state: True
-        self.verbose_rule = None
+        self.access_rule = true_fn
+        self.verbose_rule = TRUE
         self.player = player
         self.door = None
         self.hide_path = False
@@ -2427,8 +2428,8 @@ class Location(object):
         self.locked = False
         self.real = not crystal
         self.always_allow = None
-        self.access_rule = lambda state: True
-        self.verbose_rule = None
+        self.access_rule = true_fn
+        self.verbose_rule = TRUE
         self.item_rule = lambda item: True
         self.player = player
         self.skip = False
