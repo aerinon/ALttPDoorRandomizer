@@ -29,6 +29,7 @@ def snapshot(world):
         'portals': {p.name: p.door.name for p in world.dungeon_portals[1]},
         'placements': {l.name: l.item.name for l in world.get_locations() if l.item and l.player == 1},
         'key doors': {name: proposal(layout) for name, layout in world.key_layout[1].items()},
+        'pits': {d.name: d.pit_terminal.name for d in world.doors if d.player == 1 and d.pit_terminal is not None},
     }
 
 
@@ -63,6 +64,10 @@ class TestCustomizerRoundTrip(unittest.TestCase):
 
     def test_crossed_experimental(self):
         self.round_trip(['--door_shuffle', 'crossed', '--intensity', '3', '--dungeon_shuffle_algorithm', 'experimental'])
+
+    def test_crossed_pits_and_warps(self):
+        self.round_trip(['--door_shuffle', 'crossed', '--intensity', '4', '--dungeon_shuffle_algorithm', 'experimental',
+                         '--key_logic_algorithm', 'experimental'])
 
 
 if __name__ == '__main__':

@@ -210,6 +210,14 @@ Sewers Rat Path WS:
 You'll note that intraroom doors do not need to be listed, but if you want them to be key doors you will have to list them.
  
  `one-way` to indicate decoupled doors
+
+Pits and warp tiles shuffled by `pit_warps` are listed the same way, one-way, with a landing terminal as `dest` (terminal names are in `data/terminals.yaml`). Pits and warps that share a vanilla landing form a group and always land together, so naming any one of them pins the whole group; an exported file names one per group.
+
+```
+Hera Beetles Holes Front:
+        dest: Hera Down Stairs Landing Terminal
+        one-way: true
+```
  
  ##### Known Issue
  

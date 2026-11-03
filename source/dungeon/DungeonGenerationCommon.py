@@ -341,6 +341,19 @@ def pit_barrier(door):
     return door.group_barrier if door.group_rep is not None else door.crystal
 
 
+def form_pit_group(doors):
+    """Makes the group's representative source (the first by name) and returns it."""
+    barriers = {d.crystal for d in doors if d.crystal}
+    if len(barriers) > 1:
+        raise GenerationException(f'Pit group {doors[0].group} mixes crystal barriers {sorted(barriers)}; unsupported')
+    rep = min(doors, key=lambda d: d.name)
+    rep.group_barrier = next(iter(barriers)) if barriers else None
+    rep.group_members = sorted(doors, key=lambda d: d.name)
+    for d in doors:
+        d.group_rep = rep
+    return rep
+
+
 def collapse_pit_groups(sectors):
     """A pit group is one edge: keep one representative source per group as the sector's outstanding door."""
     group_sector = {}
@@ -354,14 +367,7 @@ def collapse_pit_groups(sectors):
                 raise GenerationException(f'Pit group {group} spans sectors {group_sector[group].sector_key()} and '
                                           f'{sector.sector_key()}; sector formation should keep a group together')
             group_sector[group] = sector
-            barriers = {d.crystal for d in doors if d.crystal}
-            if len(barriers) > 1:
-                raise GenerationException(f'Pit group {group} mixes crystal barriers {sorted(barriers)}; unsupported')
-            rep = min(doors, key=lambda d: d.name)
-            rep.group_barrier = next(iter(barriers)) if barriers else None
-            rep.group_members = sorted(doors, key=lambda d: d.name)
-            for d in doors:
-                d.group_rep = rep
+            form_pit_group(doors)
             sector.outstanding_doors = [d for d in sector.outstanding_doors if d.group_rep is None or d.group_rep is d]
 
 

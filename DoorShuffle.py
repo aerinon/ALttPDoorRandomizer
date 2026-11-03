@@ -18,10 +18,10 @@ from source.dungeon.DropPortals import drop_portals, outside_parent, entered_fro
 from source.dungeon.DropPortals import builder_drop_portals
 from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
 from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
-from source.dungeon.DungeonStitcherV2 import create_dungeon
+from source.dungeon.DungeonStitcherV2 import create_dungeon, connect_pit
 from source.dungeon.NewKeyLogic import analyze_dungeon as analyze_dungeon_new
 from source.dungeon.SmallKeyDoorShuffle import shuffle_small_key_doors as shuffle_small_key_doors_v2, pinned_key_totals
-from source.dungeon.DungeonGenerationCommon import uniform_distribute, proportional_distribute, collapse_pit_groups
+from source.dungeon.DungeonGenerationCommon import uniform_distribute, proportional_distribute, collapse_pit_groups, form_pit_group
 
 from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths
 from DungeonGenerator import create_dungeon_builders, split_dungeon_builder, simple_dungeon_builder, default_dungeon_entrances
@@ -414,7 +414,9 @@ def connect_custom(world, player):
             return
         for door, dest in custom_doors['doors'].items():
             d = world.get_door(door, player)
-            if d.type not in [DoorType.Interior, DoorType.Logical]:
+            if d.type in [DoorType.Hole, DoorType.Warp]:
+                connect_custom_pit(d, dest if isinstance(dest, str) else dest['dest'], world, player)
+            elif d.type not in [DoorType.Interior, DoorType.Logical]:
                 if isinstance(dest, str):
                     connect_two_way(world, door, dest, player)
                 elif 'dest' in dest:
@@ -422,6 +424,24 @@ def connect_custom(world, player):
                         connect_one_way(world, door, dest['dest'], player)
                     else:
                         connect_two_way(world, door, dest['dest'], player)
+
+
+def connect_custom_pit(source, terminal_name, world, player):
+    """A customizer pit names any source of its group; the whole group lands on the terminal."""
+    terminal = world.get_door(terminal_name, player)
+    if terminal.type != DoorType.Terminal:
+        raise Exception(f'{source.name} must land on a terminal, not {terminal_name}')
+    members = [d for d in world.doors if d.player == player and d.type in [DoorType.Hole, DoorType.Warp]
+               and d.group is not None and d.group == source.group] or [source]
+    for d in world.doors:
+        if d.player == player and d.pit_terminal is not None and d not in members and d.pit_terminal == terminal:
+            raise Exception(f'{source.name} and {d.name} both land on {terminal_name}')
+        if d in members and d.pit_terminal not in (None, terminal):
+            raise Exception(f'{source.name} lands on {terminal_name} but {d.name} on {d.pit_terminal.name}')
+    for member in members:
+        if member.entrance.connected_region is not None:
+            member.entrance.connected_region.entrances.remove(member.entrance)
+    connect_pit(form_pit_group(members), terminal)
 
 
 def connect_simple_door(world, exit_name, region_name, player):
@@ -1864,15 +1884,17 @@ def combine_layouts(recombinant_builders, dungeon_builders, entrances_map, world
 
 def pins_every_connection(custom_doors, world, player):
     """Whether a customizer doors section names every dungeon door connection door shuffle would make, as an export
-    does: then its door types are all of them."""
+    does: then its door types are all of them. Pits count once generated (each shuffled group has its terminal)."""
     shuffled = {DoorType.Normal, DoorType.SpiralStairs}
     if world.intensity[player] > 1:
         shuffled.update([DoorType.Open, DoorType.StraightStairs, DoorType.Ladder])
     named = set(custom_doors)
     named.update(v if isinstance(v, str) else v.get('dest') for v in custom_doors.values())
-    return all(d.name in named for d in world.doors
-               if d.player == player and d.type in shuffled and not d.entranceFlag and not d.traversal_only
-               and d.entrance.parent_region.dungeon)
+    pits_named = all(any(m.name in named for m in d.group_members) for d in world.doors
+                     if d.player == player and d.pit_terminal is not None and d.group_rep is d)
+    return pits_named and all(d.name in named for d in world.doors
+                              if d.player == player and d.type in shuffled and not d.entranceFlag
+                              and not d.traversal_only and d.entrance.parent_region.dungeon)
 
 
 def setup_custom_door_types(world, player):
@@ -2003,7 +2025,9 @@ def shuffle_trap_doors(door_type_pools, paths, start_regions_map, all_custom, wo
                     builder.candidates.trap = filter_key_door_pool(builder.candidates.trap, all_custom[dungeon])
                 remaining -= len(custom_trap_doors[dungeon])
                 ttl += len(builder.candidates.trap)
-            if ttl == 0 and all(len(custom_trap_doors[dungeon]) == 0 for dungeon in pool):
+            # final door types still reassign: a vanilla trap the file doesn't list as one is removed
+            if (ttl == 0 and all(len(custom_trap_doors[dungeon]) == 0 for dungeon in pool)
+                    and not world.door_types_final.get(player)):
                 continue
             remaining = 0 if world.door_types_final.get(player) else max(0, remaining)
             caps = {d: len(world.dungeon_layouts[player][d].candidates.trap) for d in pool}
@@ -5070,6 +5094,7 @@ def customize_lobbies(world, player):
             portal = world.get_portal(portal_name, player)
             door = world.get_door(assigned_door, player)
             connect_door_to_portal(door, portal, world, player)
+            door.blocked = False  # a lobby is entered from the overworld, as link_portal_candidate makes it
 
 
 def connect_door_to_portal(door, portal, world, player):

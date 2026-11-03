@@ -574,6 +574,9 @@ class CustomSettings(object):
                         else:
                             door_value = {'dest': door.dest.name, 'one-way': True}
                         door_map[door.name] = door_value
+            for door in world.doors:  # one entry per shuffled pit group, by its representative
+                if door.player == p and door.pit_terminal is not None and door.group_rep is door:
+                    door_map[door.name] = {'dest': door.pit_terminal.name, 'one-way': True}
             key_rules, chest_counting = {}, False
             for key_logic in world.key_logic.get(p, {}).values():
                 chest_counting |= key_logic.chest_counting
