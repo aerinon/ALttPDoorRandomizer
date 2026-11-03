@@ -11,7 +11,7 @@ from OverworldGlitchRules import overworld_glitches_rules
 from UnderworldGlitchRules import underworld_glitches_rules
 
 from source.logic.Rule import RuleFactory
-from source.logic.AccessRule import set_rule, add_rule, and_rule, or_rule
+from source.logic.AccessRule import set_rule, add_rule, and_rule, or_rule, TRUE, FALSE, Has, Primitive
 from source.dungeon.EnemyList import EnemySprite, Sprite
 from source.enemizer.EnemyLogic import special_rules_check, special_rules_for_region, defeat_rule_single
 from source.enemizer.EnemyLogic import defeat_rule_multiple
@@ -2052,11 +2052,10 @@ def set_bunny_rules(world, player, inverted):
                                   'Take - Any  # 4 Item 1', 'Take - Any  # 4 Item 2',
                                   ]
 
-    def path_to_access_rule(path, entrance):
-        return lambda state: state.can_reach(entrance) and all(rule_func(state) for rule_func in path)
-
-    def options_to_access_rule(options):
-        return lambda state: any(rule_func(state) for rule_func in options)
+    pearl = Has('Moon Pearl', player)
+    mirror = Has('Magic Mirror', player)
+    mirror_and_sword = and_rule(mirror, Primitive('has_sword', player))
+    mirror_and_boots = and_rule(mirror, Has('Pegasus Boots', player))
 
     # Helper functions to determine if the moon pearl is required
     def is_bunny(region):
@@ -2071,6 +2070,90 @@ def set_bunny_rules(world, player, inverted):
         else:
             return region.is_light_world
 
+    bunny_rule_cache = {}
+    # Edge rules as they stand before any bunny rule, so a route search never evaluates another bunny rule
+    frozen_edge_rules = {}
+    for _region in world.get_regions():
+        if _region.player == player:
+            for _ent in _region.entrances:
+                frozen_edge_rules[id(_ent)] = _ent.verbose_rule
+
+    def owg_exit_rule(region, location, entrance, new_region):
+        """OWG: what leaving the bunny area through this entrance takes as Link (FALSE: it can't), or None when no
+        special case applies."""
+        if region.type == RegionType.Dungeon and new_region.type != RegionType.Dungeon:
+            if entrance.name in OverworldGlitchRules.invalid_mirror_bunny_entrances:
+                return FALSE
+            # todo - Is this a bunny pocketable entrance?
+            # Is there an entrance reachable to arm bunny pocket? For now, assume there is
+            lobby = revival_lobby(entrance, region, world, player)
+            if lobby.name in bunny_revivable_entrances:
+                return TRUE
+            elif lobby.name in superbunny_revivable_entrances:
+                return mirror
+            elif lobby.name in superbunny_sword_revivable_entrances:
+                return mirror_and_sword
+            return FALSE
+        elif region.type == RegionType.Cave and new_region.type != RegionType.Cave:
+            if entrance.name in OverworldGlitchRules.invalid_mirror_bunny_entrances:
+                return FALSE
+            # todo - Is this a bunny pocketable entrance?
+            # Is there an entrance reachable to arm bunny pocket? For now, assume there is
+            if region.name in OverworldGlitchRules.sword_required_superbunny_mirror_regions:
+                return mirror_and_sword
+            elif region.name in OverworldGlitchRules.boots_required_superbunny_mirror_regions:
+                return mirror_and_boots
+            elif location and location.name in OverworldGlitchRules.superbunny_accessible_locations:
+                if location.name in OverworldGlitchRules.boots_required_superbunny_mirror_locations:
+                    return mirror_and_boots
+                elif region.name == 'Kakariko Well (top)':
+                    return TRUE
+                else:
+                    return mirror
+            return FALSE
+        return None
+
+    def route_graph(region, location):
+        """The bunny area around a mixed region: per region, its (entrance, edge rule, next region) steps, where next
+        region None means the step leaves as Link (the entrance must be reachable too)."""
+        owg = world.logic[player] in ['owglitches', 'hybridglitches']
+        graph, exits = {region: []}, 0
+        queue = deque([region])
+        while queue:
+            current = queue.popleft()
+            steps = graph[current]
+            for entrance in current.entrances:
+                if entrance.door and entrance.door.blocked:
+                    continue
+                new_region = entrance.parent_region
+                edge_rule = frozen_edge_rules.get(id(entrance), entrance.verbose_rule)
+                if edge_rule is FALSE:
+                    continue
+                if not is_link(new_region):
+                    if not owg:
+                        continue
+                    extra = owg_exit_rule(region, location, entrance, new_region)
+                    if extra is not None:
+                        if extra is not FALSE:
+                            steps.append((entrance, and_rule(edge_rule, extra).compiled(), None))
+                            exits += 1
+                        continue
+                    if region.name == 'Superbunny Cave (Top)' and new_region.name == 'Superbunny Cave (Bottom)' \
+                            and location and location.name in OverworldGlitchRules.superbunny_accessible_locations:
+                        steps.append((entrance, edge_rule.compiled(), None))
+                        exits += 1
+                if is_bunny(new_region):
+                    # todo: if not owg or hmg and entrance is in bunny_impassible_doors, then skip this nonsense?
+                    steps.append((entrance, edge_rule.compiled(), new_region))
+                    if new_region not in graph:
+                        graph[new_region] = []
+                        queue.append(new_region)
+                else:
+                    # a region where Link is not a bunny
+                    steps.append((entrance, edge_rule.compiled(), None))
+                    exits += 1
+        return graph if exits else None
+
     def get_rule_to_add(region, location=None, connecting_entrance=None):
         # In OWG, a location can potentially be superbunny-mirror accessible or
         # bunny revival accessible.
@@ -2078,79 +2161,42 @@ def set_bunny_rules(world, player, inverted):
             if region.type != RegionType.Dungeon \
                     and (location is None or location.name not in OverworldGlitchRules.superbunny_accessible_locations) \
                     and not is_link(region):
-                return lambda state: state.has_Pearl(player)
+                return pearl
         else:
             if not is_link(region):
-                return lambda state: state.has_Pearl(player)
+                return pearl
 
-        # in this case we are mixed region.
-        # we collect possible options.
+        # outside OWG the location is never read, so the rule depends on the region alone. Keyed by the region
+        # object: copy_world shares doors, so the door loop below can pass the original world's regions
+        if world.logic[player] in ['owglitches', 'hybridglitches']:
+            cache_key = (region, location.name if location else None)
+        else:
+            cache_key = (region, None)
+        cached = bunny_rule_cache.get(cache_key)
+        if cached is not None:
+            return cached
 
-        # The base option is having the moon pearl
-        possible_options = [lambda state: state.has_Pearl(player)]
-
-        # We will search entrances recursively until we find
-        # one that leads to an exclusively light world region
-        # for each such entrance a new option is added that consist of:
-        #    a) being able to reach it, and
-        #    b) being able to access all entrances from there to `region`
-        queue = deque([(region, [], {region}, [region])])
-        seen_sets = set([frozenset({region})])
-        while queue:
-            (current, path, seen, region_path) = queue.popleft()
-            for entrance in current.entrances:
-                if entrance.door and entrance.door.blocked:
-                    continue
-                new_region = entrance.parent_region
-                new_seen = seen.union({new_region})
-                if new_region.type in (RegionType.Cave, RegionType.Dungeon) and new_seen in seen_sets:
-                    continue
-                new_path = path + [entrance.access_rule]
-                new_region_path = region_path + [new_region]
-                seen_sets.add(frozenset(new_seen))
-                if not is_link(new_region):
-                    if world.logic[player] in ['owglitches', 'hybridglitches']:
-                        if region.type == RegionType.Dungeon and new_region.type != RegionType.Dungeon:
-                            if entrance.name in OverworldGlitchRules.invalid_mirror_bunny_entrances:
-                                continue
-                            # todo - Is this a bunny pocketable entrance?
-                            # Is there an entrance reachable to arm bunny pocket? For now, assume there is
-                            lobby = revival_lobby(entrance, region, world, player)
-                            if lobby.name in bunny_revivable_entrances:
-                                possible_options.append(path_to_access_rule(new_path, entrance))
-                            elif lobby.name in superbunny_revivable_entrances:
-                                possible_options.append(path_to_access_rule(new_path + [lambda state: state.has_Mirror(player)], entrance))
-                            elif lobby.name in superbunny_sword_revivable_entrances:
-                                possible_options.append(path_to_access_rule(new_path + [lambda state: state.has_Mirror(player) and state.has_sword(player)], entrance))
-                            continue
-                        elif region.type == RegionType.Cave and new_region.type != RegionType.Cave:
-                            if entrance.name in OverworldGlitchRules.invalid_mirror_bunny_entrances:
-                                continue
-                            # todo - Is this a bunny pocketable entrance?
-                            # Is there an entrance reachable to arm bunny pocket? For now, assume there is
-                            if region.name in OverworldGlitchRules.sword_required_superbunny_mirror_regions:
-                                possible_options.append(path_to_access_rule(new_path + [lambda state: state.has_Mirror(player) and state.has_sword(player)], entrance))
-                            elif region.name in OverworldGlitchRules.boots_required_superbunny_mirror_regions:
-                                possible_options.append(path_to_access_rule(new_path + [lambda state: state.has_Mirror(player) and state.has_Boots(player)], entrance))
-                            elif location and location.name in OverworldGlitchRules.superbunny_accessible_locations:
-                                if location.name in OverworldGlitchRules.boots_required_superbunny_mirror_locations:
-                                    possible_options.append(path_to_access_rule(new_path + [lambda state: state.has_Mirror(player) and state.has_Boots(player)], entrance))
-                                elif region.name == 'Kakariko Well (top)':
-                                    possible_options.append(path_to_access_rule(new_path, entrance))
-                                else:
-                                    possible_options.append(path_to_access_rule(new_path + [lambda state: state.has_Mirror(player)], entrance))
-                            continue
-                        elif region.name == 'Superbunny Cave (Top)' and new_region.name == 'Superbunny Cave (Bottom)' and location and location.name in OverworldGlitchRules.superbunny_accessible_locations:
-                            possible_options.append(path_to_access_rule(new_path, entrance))
-                    else:
-                        continue
-                if is_bunny(new_region):
-                    # todo: if not owg or hmg and entrance is in bunny_impassible_doors, then skip this nonsense?
-                    queue.append((new_region, new_path, new_seen, new_region_path))
-                else:
-                    # we have reached pure light world, so we have a new possible option
-                    possible_options.append(path_to_access_rule(new_path, entrance))
-        return options_to_access_rule(possible_options)
+        # in this case we are mixed region: besides the moon pearl, any route of entrances back to a region where
+        # Link is not a bunny works. The route is searched when the rule is evaluated, so the cost follows the
+        # region graph rather than the number of distinct routes.
+        graph = route_graph(region, location)
+        if graph is None:
+            result = pearl
+        else:
+            def route_exists(state):
+                seen, queue = {region}, deque([region])
+                while queue:
+                    for entrance, edge_rule, new_region in graph[queue.popleft()]:
+                        if new_region is None:
+                            if state.can_reach(entrance) and edge_rule(state):
+                                return True
+                        elif new_region not in seen and edge_rule(state):
+                            seen.add(new_region)
+                            queue.append(new_region)
+                return False
+            result = or_rule(pearl, route_exists)
+        bunny_rule_cache[cache_key] = result
+        return result
 
     # Add requirements for bunny-impassible caves if they occur in the light world
     for region in [world.get_region(name, player) for name in bunny_impassable_caves]:
