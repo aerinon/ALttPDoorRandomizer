@@ -1,0 +1,969 @@
+bosses:
+  1:
+    Desert Palace: Lanmolas
+    Eastern Palace: Armos Knights
+    Ganons Tower (bottom): Armos Knights
+    Ganons Tower (middle): Lanmolas
+    Ganons Tower (top): Moldorm
+    Ice Palace: Kholdstare
+    Misery Mire: Vitreous
+    Palace of Darkness: Helmasaur King
+    Skull Woods: Mothula
+    Swamp Palace: Arrghus
+    Thieves Town: Blind
+    Tower of Hera: Moldorm
+    Turtle Rock: Trinexx
+doors:
+  1:
+    doors:
+      Desert Arrow Pot Corner W Edge: Mire Tall Dark and Roomy ES
+      Desert Beamos Hall NE:
+        dest: TR Lava Escape SE
+        type: Key Door
+      Desert Bonk Torch SE:
+        type: Dash Door
+      Desert Cannonball S: PoD Sexy Statue NW
+      Desert Compass Key Door WN:
+        type: Key Door
+      Desert Compass NE: Thieves Ambush S Edge
+      Desert East Lobby WS:
+        type: Key Door
+      Desert East Wing ES:
+        type: Key Door
+      Desert East Wing Key Door EN:
+        type: Key Door
+      Desert East Wing N Edge: GT Gauntlet 3 SW
+      Desert East Wing W Edge: Desert North Hall E Edge
+      Desert Main Lobby E Edge: Thieves Cricket Hall Right Edge
+      Desert Main Lobby N Edge: Desert North Hall SW Edge
+      Desert Main Lobby NE Edge: Desert North Hall SE Edge
+      Desert Main Lobby NW Edge: Thieves Ambush SE Edge
+      Desert Map SW:
+        type: Dash Door
+      Desert North Hall NW:
+        type: Dash Door
+      Desert North Hall W Edge: Thieves Ambush EN Edge
+      Desert Sandworm Corner NE:
+        type: Dash Door
+      Desert Sandworm Corner S Edge: Skull 3 Lobby NW
+      Desert Tiles 1 Up Stairs: PoD Warp Room Up Stairs
+      Desert Tiles 2 SE: TR Compass Room NW
+      Desert Wall Slide NW:
+        dest: Skull Pot Prison SE
+        type: Big Key Door
+      Desert West Lobby ES:
+        type: Bomb Door
+      Desert West Wing WS:
+        type: Bomb Door
+      Eastern Attic Start Down Stairs: Swamp Behind Waterfall Up Stairs
+      Eastern Attic Start WS: Desert Sandworm Corner E Edge
+      Eastern Big Key EN:
+        dest: Ice Refill WS
+        type: Key Door
+      Eastern Big Key NE:
+        dest: Swamp Hub S
+        type: Big Key Door
+      Eastern Cannonball Hell WS: TR Pokey 2 ES
+      Eastern Cannonball Ledge Key Door EN: Eastern Map Valley WN
+      Eastern Cannonball Ledge WN: Eastern Single Eyegore ES
+      Eastern Cannonball N:
+        type: Key Door
+      Eastern Cannonball S: Mire Minibridge NE
+      Eastern Courtyard EN: Thieves BK Corner WN Edge
+      Eastern Courtyard Ledge E: PoD Falling Bridge WN
+      Eastern Courtyard Ledge W: Thieves Big Chest Nook ES Edge
+      Eastern Courtyard N:
+        dest: Thieves BK Corner SW Edge
+        type: Big Key Door
+      Eastern Courtyard WN: Swamp Barrier EN
+      Eastern Dark Square Key Door WN: Thieves Spike Track ES
+      Eastern Dark Square NW: TR Pokey 1 SW
+      Eastern Darkness NE:
+        type: Key Door
+      Eastern Darkness S: GT Wizzrobes 2 NE
+      Eastern Darkness Up Stairs:
+        dest: Desert Bridge Down Stairs
+        type: Key Door
+      Eastern Duo Eyegores NE: Desert Arrow Pot Corner S Edge
+      Eastern East Wing ES:
+        type: Key Door
+      Eastern East Wing W: Mire Conveyor Crystal ES
+      Eastern False Switches ES: Mire Spikes WS
+      Eastern Hint Tile Blocked Path SE: Mire Crystal Dead End NW
+      Eastern Hint Tile EN: Swamp Hub WN
+      Eastern Lobby Bridge N: Thieves BK Corner S Edge
+      Eastern Lobby Left Ledge SW:
+        type: Key Door
+      Eastern Lobby NW:
+        type: Key Door
+      Eastern Map Balcony WS:
+        type: Key Door
+      Eastern Map Valley SW: Swamp Basement Shallows NW
+      Eastern Rupees SE:
+        type: Key Door
+      Eastern West Wing E: Mire Failure Bridge W
+      GT Bomb Conveyor SW:
+        type: Key Door
+      GT Brightly Lit Hall NW:
+        dest: Mire Boss SW
+        type: Big Key Door
+      GT Compass Room EN:
+        type: Key Door
+      GT Conveyor Cross EN:
+        type: Key Door
+      GT Conveyor Star Pits EN:
+        type: Bomb Door
+      GT Crystal Circles NW:
+        type: Key Door
+      GT Crystal Conveyor NE:
+        type: Key Door
+      GT Crystal Conveyor WN:
+        type: Key Door
+      GT Dash Hall NE:
+        type: Big Key Door
+      GT Fairy Abyss SW:
+        type: Key Door
+      GT Firesnake Room SW:
+        type: Key Door
+      GT Four Torches NW:
+        type: Key Door
+      GT Frozen Over ES:
+        type: Trap Door
+      GT Hidden Spikes SE:
+        type: Key Door
+      GT Hope Room WN:
+        type: Key Door
+      GT Lobby Left Down Stairs: GT Wizzrobes 1 Down Stairs
+      GT Quad Pot SW:
+        type: Trap Door
+      GT Speed Torch NE: GT Falling Torches Down Ladder
+      GT Speed Torch SE: GT Staredown Up Ladder
+      GT Speed Torch WN:
+        type: Dash Door
+      GT Tile Room EN:
+        type: Dash Door
+      GT Torch Cross WN:
+        type: Key Door
+      GT Torch EN:
+        type: Key Door
+      GT Torch SW:
+        type: Trap Door
+      GT Torch WN: GT Hidden Spikes EN
+      GT Validation WS:
+        type: Key Door
+      GT Warp Maze (Pits) ES: GT Gauntlet 5 WS
+      GT Warp Maze (Rails) NW:
+        type: Key Door
+      GT Warp Maze (Rails) WS:
+        type: Key Door
+      Hera 4F Down Stairs: Swamp Drain Left Up Stairs
+      Hera 4F Up Stairs: Hera 5F Down Stairs
+      Hera 5F Up Stairs: Hera Boss Down Stairs
+      Hera Basement Cage Up Stairs: GT Quad Pot Up Stairs
+      Hera Lobby Down Stairs: Hera Lobby Up Stairs
+      Hera Lobby Key Stairs: Hera Beetles Down Stairs
+      Hera Startile Corner NW:
+        type: Big Key Door
+      Hera Startile Wide Up Stairs: Swamp Drain Right Up Stairs
+      Hera Torches NE:
+        type: Key Door
+      Hera Tridorm SE:
+        type: Key Door
+      Hyrule Castle Back Hall Down Stairs: Mire Falling Foes Up Stairs
+      Hyrule Castle Back Hall E: GT Invisible Bridges WS
+      Hyrule Castle Back Hall W: Mire Falling Foes ES
+      Hyrule Castle East Hall S:
+        dest: Mire Spike Barrier NE
+        type: Key Door
+      Hyrule Castle East Hall W: Mire BK Door Room EN
+      Hyrule Castle East Lobby N:
+        dest: Sewers Secret Room Key Door S
+        type: Key Door
+      Hyrule Castle East Lobby NW: GT Hookshot SW
+      Hyrule Castle East Lobby W: GT Conveyor Bridge EN
+      Hyrule Castle Lobby E: GT Falling Bridge WN
+      Hyrule Castle Lobby North Stairs: TR Dark Ride SW
+      Hyrule Castle Lobby W: Mire Fishbone E
+      Hyrule Castle Lobby WN: Hyrule Castle West Lobby E
+      Hyrule Castle Throne Room N: Desert Boss SW
+      Hyrule Castle Throne Room South Stairs: Desert West Wing N Edge
+      Hyrule Castle West Hall S: TR Crystal Maze North Stairs
+      Hyrule Castle West Lobby EN: GT Falling Bridge WS
+      Hyrule Castle West Lobby N: PoD Bow Statue Down Ladder
+      Hyrule Dungeon Armory Down Stairs: Mire 2 Up Stairs
+      Hyrule Dungeon Armory Interior Key Door N:
+        type: Key Door
+      Hyrule Dungeon Armory Interior Key Door S:
+        type: Key Door
+      Hyrule Dungeon Armory S: Thieves Rail Ledge NW
+      Hyrule Dungeon Cellblock Up Stairs: GT Crystal Paths Down Stairs
+      Hyrule Dungeon Guardroom Abyss Edge: Sewers Water W
+      Hyrule Dungeon Guardroom Catwalk Edge: Thieves Pot Alcove Mid WS
+      Hyrule Dungeon Guardroom N: PoD Boss SE
+      Hyrule Dungeon Map Room Up Stairs: TR Crystaroller Down Stairs
+      Hyrule Dungeon North Abyss Catwalk Edge: TR Lobby Ledge NE
+      Hyrule Dungeon South Abyss Catwalk West Edge: GT Hidden Star ES
+      Hyrule Dungeon South Abyss North Edge: Sewers Dark Cross South Stairs
+      Hyrule Dungeon South Abyss West Edge: Swamp Trench 2 Pots ES
+      Hyrule Dungeon Staircase Up Stairs: Ice Backwards Room Down Stairs
+      Ice Anti-Fairy SE:
+        type: Key Door
+      Ice Anti-Fairy Up Stairs: GT Moldorm Pit Up Stairs
+      Ice Big Chest View ES:
+        type: Key Door
+      Ice Bomb Jump NW:
+        dest: GT Hidden Spikes SE
+        type: Key Door
+      Ice Catwalk NW:
+        dest: Mire Fishbone SE
+        type: Key Door
+      Ice Catwalk WN:
+        dest: GT Conveyor Cross EN
+        type: Key Door
+      Ice Compass Room NE:
+        type: Key Door
+      Ice Conveyor NE:
+        type: Trap Door
+      Ice Conveyor SW: Mire 2 NE
+      Ice Cross Bottom SE: Ice Pengator Trap NE
+      Ice Crystal Left WS:
+        type: Key Door
+      Ice Crystal Right ES: GT Invisible Catwalk WS
+      Ice Crystal Right NE:
+        type: Big Key Door
+      Ice Falling Square SE:
+        type: Trap Door
+      Ice Firebar Down Ladder: Ice Antechamber NE
+      Ice Firebar ES:
+        type: Key Door
+      Ice Floor Switch Up Stairs: Ice Pengator Trap Up Stairs
+      Ice Freezors Up Ladder: Ice Tall Hint SE
+      Ice Hookshot Ledge WN: Mire Wizzrobe Bypass EN
+      Ice Jelly Key Down Stairs:
+        dest: Hyrule Dungeon Staircase Down Stairs
+        type: Key Door
+      Ice Lonely Freezor NE: Mire Hidden Shooters SE
+      Ice Many Pots SW: GT Invisible Catwalk NW
+      Ice Narrow Corridor Down Stairs: GT Torch Up Stairs
+      Ice Pengator Switch WS: TR Hub EN
+      Ice Refill WS:
+        type: Key Door
+      Ice Spike Cross ES: Mire Ledgehop WN
+      Ice Spike Cross WS:
+        type: Key Door
+      Ice Spike Room Down Stairs: Ice Spike Room Up Stairs
+      Ice Spike Room WS:
+        dest: TR Hub ES
+        type: Key Door
+      Ice Switch Room ES:
+        dest: GT Validation WS
+        type: Key Door
+      Ice Switch Room NE:
+        type: Key Door
+      Ice Switch Room SE: GT Invisible Catwalk NE
+      Ice Tall Hint EN: Ice Many Pots WS
+      Ice Tongue Pull Up Ladder: Mire Conveyor Crystal SE
+      Iced T EN:
+        type: Bomb Door
+      Iced T Up Stairs: GT Lobby Up Stairs
+      Mire Antechamber NW:
+        dest: Skull Spike Corner SW
+        type: Big Key Door
+      Mire Attic Hint WS:
+        type: Key Door
+      Mire BK Door Room N:
+        dest: TR Final Abyss South Stairs
+        type: Big Key Door
+      Mire Bent Bridge SW: GT Double Switch NW
+      Mire Bent Bridge W:
+        type: Bomb Door
+      Mire Chest View NE:
+        type: Key Door
+      Mire Conveyor Barrier NW:
+        dest: GT Bob's Room SE
+        type: Key Door
+      Mire Conveyor Barrier Up Stairs: GT Four Torches Up Stairs
+      Mire Crystal Mid NW:
+        type: Key Door
+      Mire Crystal Right ES:
+        type: Bomb Door
+      Mire Crystal Top SW:
+        type: Key Door
+      Mire Dark Shooters SE:
+        type: Dash Door
+      Mire Failure Bridge E:
+        type: Trap Door
+      Mire Falling Bridge WS:
+        type: Trap Door
+      Mire Fishbone SE:
+        type: Key Door
+      Mire Hub E: TR Lava Island WS
+      Mire Hub ES: TR Hallway WS
+      Mire Hub NE: TR Roller Room SW
+      Mire Hub SE: Mire Hub Top NW
+      Mire Hub WN: Mire Hub Right EN
+      Mire Hub WS:
+        dest: TR Lazy Eyes ES
+        type: Bomb Door
+      Mire Key Rupees NE:
+        type: Dash Door
+      Mire Ledgehop NW:
+        dest: Tower Antechamber South Stairs
+        type: Key Door
+      Mire Ledgehop SW:
+        type: Bomb Door
+      Mire Left Bridge Down Stairs: GT Brightly Lit Hall Down Stairs
+      Mire Map Spike Side EN:
+        type: Trap Door
+      Mire Map Spot WN:
+        type: Key Door
+      Mire Neglected Room NE: TR Dash Room SW
+      Mire Neglected Room SE:
+        type: Key Door
+      Mire Over Bridge E:
+        dest: GT Torch Cross WN
+        type: Key Door
+      Mire Over Bridge W:
+        dest: GT Frozen Over ES
+        type: Key Door
+      Mire Post-Gap Down Stairs: GT Hope Room Up Stairs
+      Mire Right Bridge SE:
+        dest: GT Dash Hall NE
+        type: Key Door
+      Mire Shooter Rupees EN:
+        type: Key Door
+      Mire Spike Barrier ES:
+        type: Key Door
+      Mire Spike Barrier NE:
+        type: Key Door
+      Mire Spikes NW:
+        type: Bomb Door
+      Mire Spikes SW: GT Left Moldorm Ledge NW
+      Mire Square Rail NW:
+        type: Big Key Door
+      Mire Square Rail WS:
+        type: Key Door
+      Mire Tall Dark and Roomy WN:
+        type: Key Door
+      Mire Tall Dark and Roomy WS:
+        type: Bomb Door
+      Mire Tile Room SW: TR Hub NE
+      Mire Torches Bottom ES:
+        type: Key Door
+      Mire Torches Bottom NW:
+        type: Key Door
+      Mire Torches Top SW:
+        type: Key Door
+      Mire Warping Pool ES:
+        type: Trap Door
+      PoD Arena Bridge SE: Skull Vines NW
+      PoD Arena Crystals E: Mire Crystal Left WS
+      PoD Arena Ledge ES: Swamp Trench 1 Departure WS
+      PoD Arena Main NE:
+        dest: Skull Star Pits SW
+        type: Trap Door
+      PoD Arena Main SW: PoD Arena Main NW
+      PoD Basement Ledge Up Stairs:
+        dest: PoD Big Key Landing Down Stairs
+        type: Key Door
+      PoD Big Chest Balcony W:
+        dest: Iced T EN
+        type: Bomb Door
+      PoD Compass Room W Down Stairs: Mire Firesnake Skip Down Stairs
+      PoD Conveyor North Stairs: Thieves Spike Switch SW
+      PoD Conveyor SW:
+        dest: Ice Compass Room NE
+        type: Key Door
+      PoD Dark Alley NE:
+        dest: PoD Falling Bridge SW
+        type: Big Key Door
+      PoD Dark Basement W Up Stairs: Swamp Left Elbow Down Stairs
+      PoD Dark Maze E:
+        dest: Mire Map Spot WN
+        type: Key Door
+      PoD Dark Maze EN:
+        dest: GT Warp Maze (Rails) WS
+        type: Key Door
+      PoD Dark Pegs WN:
+        type: Bomb Door
+      PoD Fairy Pool WS:
+        type: Key Door
+      PoD Harmless Hellway SE: PoD Dark Pegs Up Ladder
+      PoD Left Cage Down Stairs: PoD Middle Cage Down Stairs
+      PoD Lonely Turtle EN:
+        type: Bomb Door
+      PoD Map Balcony ES:
+        type: Key Door
+      PoD Map Balcony South Stairs: TR Eye Bridge NW
+      PoD Map Balcony WS: TR Lava Island ES
+      PoD Middle Cage N: Mire Cross SW
+      PoD Mimics 2 SW:
+        dest: Hyrule Dungeon South Abyss Catwalk North Edge
+        type: Bomb Door
+      PoD Pit Room NE: TR Lava Dual Pipes SW
+      PoD Pit Room NW:
+        dest: Desert Dead End Edge
+        type: Key Door
+      PoD Pit Room S: PoD Mimics 1 NW
+      PoD Sexy Statue W: GT Beam Dash ES
+      PoD Shooter Room Up Stairs: PoD Compass Room E Down Stairs
+      Sanctuary N: GT Conveyor Bridge SE
+      Sewers Behind Tapestry Down Stairs: Hera Tile Room Up Stairs
+      Sewers Behind Tapestry S:
+        dest: Swamp Hub North Ledge N
+        type: Trap Door
+      Sewers Dark Aquabats ES: Skull Pinball WS
+      Sewers Dark Cross Key Door N: Swamp Push Statue S
+      Sewers Key Rat NE: Eastern Courtyard Ledge S
+      Sewers Pull Switch Down Stairs: TR Chain Chomps Down Stairs
+      Sewers Pull Switch S: Skull Compass Room NE
+      Sewers Rat Path WN:
+        type: Key Door
+      Sewers Rope Room North Stairs: Skull Map Room SE
+      Sewers Rope Room Up Stairs: PoD Dark Basement E Up Stairs
+      Sewers Secret Room EN:
+        type: Key Door
+      Sewers Secret Room Key Door S:
+        type: Key Door
+      Sewers Water S:
+        dest: Eastern Cannonball N
+        type: Key Door
+      Skull 2 East Lobby WS: Skull Small Hall ES
+      Skull 2 West Lobby NW:
+        type: Bomb Door
+      Skull Compass Room ES: TR Torches Ledge WS
+      Skull Compass Room WS:
+        type: Dash Door
+      Skull Left Drop ES:
+        type: Dash Door
+      Skull Pot Circle WN:
+        type: Bomb Door
+      Skull Pot Prison ES: Mire Lone Shooter WS
+      Skull Pull Switch EN:
+        type: Bomb Door
+      Skull Star Pits ES:
+        type: Dash Door
+      Skull Torch Room WS:
+        type: Dash Door
+      Skull X Room SW:
+        type: Bomb Door
+      Swamp Big Key Ledge WN:
+        dest: Thieves Ambush E
+        type: Bomb Door
+      Swamp Boss SW: Mire Wizzrobe Bypass NE
+      Swamp C Down Stairs: GT Lobby Right Down Stairs
+      Swamp Crystal Switch EN: Skull 1 Lobby WS
+      Swamp Donut Top N: Mire Spike Barrier SE
+      Swamp Entrance Down Stairs:
+        dest: Ice Spikeball Up Stairs
+        type: Key Door
+      Swamp Flooded Room Up Stairs: Thieves Spike Switch Up Stairs
+      Swamp Hammer Switch WN: TR Lava Dual Pipes EN
+      Swamp Hub Dead Ledge EN:
+        dest: TR Torches WN
+        type: Key Door
+      Swamp Hub ES: Swamp Hub WS
+      Swamp Hub North Ledge N:
+        type: Key Door
+      Swamp I S:
+        type: Dash Door
+      Swamp Map Ledge EN: Thieves Basement Block WN
+      Swamp Pot Row Up Stairs: GT Right Moldorm Ledge Down Stairs
+      Swamp Pot Row WN: GT Invisible Catwalk ES
+      Swamp Pot Row WS:
+        dest: TR Pokey 2 EN
+        type: Key Door
+      Swamp Push Statue Down Stairs: Swamp Right Elbow Down Stairs
+      Swamp T NW: GT Crystal Circles SW
+      Swamp T SW:
+        type: Key Door
+      Swamp Trench 1 Approach ES:
+        dest: TR Lava Dual Pipes WN
+        type: Key Door
+      Swamp Trench 2 Departure WS: Thieves Triple Bypass EN
+      Swamp Waterfall Room SW: Skull Pinball NE
+      Swamp Waterway N:
+        type: Dash Door
+      Swamp Waterway NW:
+        type: Key Door
+      Swamp West Shallows ES:
+        dest: Thieves Rail Ledge W
+        type: Key Door
+      TR Crystal Maze ES:
+        type: Key Door
+      TR Dash Bridge SW:
+        dest: GT Crystal Conveyor NE
+        type: Key Door
+      TR Dash Bridge WS:
+        dest: GT Conveyor Star Pits EN
+        type: Bomb Door
+      TR Dash Room ES:
+        type: Key Door
+      TR Dodgers NE:
+        dest: Hyrule Dungeon North Abyss South Edge
+        type: Big Key Door
+      TR Dodgers SE:
+        type: Trap Door
+      TR Final Abyss NW:
+        dest: Hyrule Castle East Hall SW
+        type: Big Key Door
+      TR Hub ES:
+        type: Key Door
+      TR Hub NW:
+        dest: Ice Big Key Down Ladder
+        type: Dash Door
+      TR Hub SE: TR Torches NW
+      TR Hub SW: TR Dash Bridge NW
+      TR Lava Dual Pipes WN:
+        type: Key Door
+      TR Lava Escape NW: GT Agahnim 2 SW
+      TR Lava Escape SE:
+        type: Key Door
+      TR Lazy Eyes ES:
+        type: Bomb Door
+      TR Pipe Ledge WS:
+        dest: Hyrule Castle West Hall E
+        type: Trap Door
+      TR Pipe Pit Up Stairs: GT Blocked Stairs Down Stairs
+      TR Pipe Pit WN: GT Hope Room EN
+      TR Pokey 2 EN:
+        type: Key Door
+      TR Tile Room SE: GT Hookshot NW
+      TR Tongue Pull WS:
+        type: Key Door
+      TR Torches WN:
+        type: Key Door
+      TR Twin Pokeys NW: TR Boss SW
+      Thieves Ambush E:
+        type: Bomb Door
+      Thieves Ambush ES Edge: GT Cannonball Bridge WN
+      Thieves Attic Down Stairs: GT Frozen Over Up Stairs
+      Thieves BK Corner NE:
+        dest: Eastern Boss SE
+        type: Big Key Door
+      Thieves BK Corner WS Edge: Ice Cross Right ES
+      Thieves Basement Block Up Stairs: Mire Torches Top Down Stairs
+      Thieves Blind's Cell WS:
+        type: Key Door
+      Thieves Compass Room N Edge: Mire Left Bridge S
+      Thieves Compass Room NW Edge: GT Big Chest SW
+      Thieves Compass Room W:
+        dest: TR Crystal Maze ES
+        type: Key Door
+      Thieves Compass Room WS Edge: GT Randomizer Room ES
+      Thieves Conveyor Bridge EN:
+        dest: Mire Bent Bridge W
+        type: Bomb Door
+      Thieves Conveyor Bridge ES: Mire Block X WS
+      Thieves Conveyor Maze Down Stairs: Ice Lonely Freezor Down Stairs
+      Thieves Conveyor Maze WN: Mire Hidden Shooters ES
+      Thieves Cricket Hall Left Edge: GT Tile Room WN
+      Thieves Hallway SE: Thieves Hallway NE
+      Thieves Hallway WN:
+        type: Trap Door
+      Thieves Hellway NW: GT Petting Zoo SE
+      Thieves Lobby E: Thieves Lonely Zazak WS
+      Thieves Lobby N Edge: Thieves Boss SE
+      Thieves Lobby NE Edge: GT DMs Room SW
+      Thieves Lonely Zazak ES:
+        type: Key Door
+      Thieves Rail Ledge W:
+        type: Key Door
+      Tower Agahnim 1 SW: GT Gauntlet 4 NW
+      Tower Altar NW: Ice Spike Cross SE
+      Tower Altar SW:
+        type: Trap Door
+      Tower Catwalk North Stairs: Thieves Pot Alcove Bottom SW
+      Tower Circle of Pots ES:
+        type: Key Door
+      Tower Dark Archers Up Stairs:
+        dest: Sewers Secret Room Up Stairs
+        type: Key Door
+      Tower Dark Chargers Up Stairs: GT Cannonball Bridge Up Stairs
+      Tower Dark Chargers WS:
+        type: Key Door
+      Tower Dark Maze ES:
+        type: Key Door
+      Tower Dual Statues Down Stairs: TR Dark Ride Up Stairs
+      Tower Lone Statue Down Stairs: GT Gauntlet 1 Down Stairs
+      Tower Pacifist Run Up Stairs: Swamp West Block Path Up Stairs
+      Tower Pacifist Run WS:
+        type: Key Door
+      Tower Push Statue Down Stairs: Ice Hammer Block Down Stairs
+      Tower Red Spears Down Stairs: Swamp Attic Down Stairs
+      Tower Room 03 Up Stairs: Mire Dark Shooters Up Stairs
+    lobbies:
+      Agahnims Tower: Tower Lobby S
+      Desert Back: Desert Back Lobby S
+      Desert East: Desert East Lobby S
+      Desert South: Desert Main Lobby S
+      Desert West: Desert West S
+      Eastern: Eastern Lobby S
+      Ganons Tower: GT Lobby S
+      Hera: Hera Lobby S
+      Hyrule Castle East: Hyrule Castle East Lobby S
+      Hyrule Castle South: Hyrule Castle Lobby S
+      Hyrule Castle West: Hyrule Castle West Lobby S
+      Ice: Ice Lobby SE
+      Mire: Mire Lobby S
+      Palace of Darkness: PoD Lobby S
+      Sanctuary: Sanctuary S
+      Skull 1: Skull 1 Lobby S
+      Skull 2 East: Skull 2 East Lobby SW
+      Skull 2 West: Skull 2 West Lobby S
+      Skull 3: Skull 3 Lobby SW
+      Swamp: Swamp Lobby S
+      Thieves Town: Thieves Lobby S
+      Turtle Rock Chest: TR Big Chest Entrance SE
+      Turtle Rock Eye Bridge: TR Eye Bridge SW
+      Turtle Rock Lazy Eyes: TR Lazy Eyes SE
+      Turtle Rock Main: TR Main Lobby SE
+entrances:
+  1:
+    entrances: {}
+    exits:
+      Links House: Chris Houlihan Room Exit
+    two-way: {}
+item_pool:
+  1:
+    Arrows (10): 12
+    Blue Boomerang: 1
+    Bombos: 1
+    Bombs (10): 1
+    Bombs (3): 16
+    Book of Mudora: 1
+    Boss Heart Container: 10
+    Bottle (Bee): 2
+    Bottle (Blue Potion): 1
+    Bottle (Fairy): 1
+    Bug Catching Net: 1
+    Cane of Byrna: 1
+    Cane of Somaria: 1
+    Cape: 1
+    Ether: 1
+    Fire Rod: 1
+    Flippers: 1
+    Hammer: 1
+    Hookshot: 1
+    Ice Rod: 1
+    Lamp: 1
+    Magic Mirror: 1
+    Magic Powder: 1
+    Magic Upgrade (1/2): 1
+    Moon Pearl: 1
+    Mushroom: 1
+    Ocarina: 1
+    Pegasus Boots: 1
+    Piece of Heart: 24
+    Progressive Armor: 2
+    Progressive Bow: 2
+    Progressive Glove: 2
+    Progressive Shield: 3
+    Progressive Sword: 4
+    Quake: 1
+    Red Boomerang: 1
+    Rupees (100): 1
+    Rupees (20): 25
+    Rupees (300): 5
+    Rupees (50): 7
+    Sanctuary Heart Container: 1
+    Shovel: 1
+    Single Arrow: 1
+medallions:
+  1:
+    Misery Mire: Bombos
+    Turtle Rock: Quake
+meta:
+  algorithm: balanced
+  players: 1
+  race: false
+  seed: 11
+  user_notes: ''
+placements:
+  1:
+    Aginah's Cave: Arrows (10)
+    Blacksmith: Rupees (20)
+    Blind's Hideout - Far Left: Blue Boomerang
+    Blind's Hideout - Far Right: Progressive Armor
+    Blind's Hideout - Left: Hookshot
+    Blind's Hideout - Right: Piece of Heart
+    Blind's Hideout - Top: Hammer
+    Bombos Tablet: Bombs (3)
+    Bonk Rock Cave: Piece of Heart
+    Bottle Merchant: Single Arrow
+    Brewery: Piece of Heart
+    Bumper Cave Ledge: Rupees (20)
+    C-Shaped House: Cape
+    Castle Tower - Dark Maze: Boss Heart Container
+    Castle Tower - Room 03: Big Key (Agahnims Tower)
+    Catfish: Rupees (20)
+    Cave 45: Rupees (50)
+    Checkerboard Cave: Rupees (50)
+    Chest Game: Boss Heart Container
+    Chicken House: Red Boomerang
+    Desert Ledge: Rupees (50)
+    Desert Palace - Big Chest: Piece of Heart
+    Desert Palace - Big Key Chest: Bombs (3)
+    Desert Palace - Boss: Compass (Desert Palace)
+    Desert Palace - Compass Chest: Small Key (Desert Palace)
+    Desert Palace - Map Chest: Progressive Bow
+    Desert Palace - Prize: Crystal 2
+    Desert Palace - Torch: Big Key (Skull Woods)
+    Digging Game: Piece of Heart
+    Eastern Palace - Big Chest: Map (Eastern Palace)
+    Eastern Palace - Big Key Chest: Magic Powder
+    Eastern Palace - Boss: Small Key (Eastern Palace)
+    Eastern Palace - Cannonball Chest: Map (Palace of Darkness)
+    Eastern Palace - Compass Chest: Ocarina
+    Eastern Palace - Map Chest: Piece of Heart
+    Eastern Palace - Prize: Green Pendant
+    Ether Tablet: Rupees (20)
+    Floating Island: Piece of Heart
+    Floodgate Chest: Piece of Heart
+    Flute Spot: Progressive Glove
+    Ganons Tower - Big Chest: Piece of Heart
+    Ganons Tower - Big Key Chest: Small Key (Thieves Town)
+    Ganons Tower - Big Key Room - Left: Piece of Heart
+    Ganons Tower - Big Key Room - Right: Small Key (Thieves Town)
+    Ganons Tower - Bob's Chest: Small Key (Thieves Town)
+    Ganons Tower - Bob's Torch: Small Key (Misery Mire)
+    Ganons Tower - Compass Room - Bottom Left: Bombs (3)
+    Ganons Tower - Compass Room - Bottom Right: Piece of Heart
+    Ganons Tower - Compass Room - Top Left: Boss Heart Container
+    Ganons Tower - Compass Room - Top Right: Rupees (20)
+    Ganons Tower - DMs Room - Bottom Left: Small Key (Thieves Town)
+    Ganons Tower - DMs Room - Bottom Right: Small Key (Thieves Town)
+    Ganons Tower - DMs Room - Top Left: Small Key (Thieves Town)
+    Ganons Tower - DMs Room - Top Right: Small Key (Thieves Town)
+    Ganons Tower - Firesnake Room: Rupees (20)
+    Ganons Tower - Hope Room - Left: Map (Misery Mire)
+    Ganons Tower - Hope Room - Right: Boss Heart Container
+    Ganons Tower - Map Chest: Small Key (Escape)
+    Ganons Tower - Mini Helmasaur Room - Left: Compass (Ganons Tower)
+    Ganons Tower - Mini Helmasaur Room - Right: Map (Ganons Tower)
+    Ganons Tower - Pre-Moldorm Chest: Small Key (Ganons Tower)
+    Ganons Tower - Randomizer Room - Bottom Left: Ether
+    Ganons Tower - Randomizer Room - Bottom Right: Small Key (Misery Mire)
+    Ganons Tower - Randomizer Room - Top Left: Bombs (3)
+    Ganons Tower - Randomizer Room - Top Right: Small Key (Misery Mire)
+    Ganons Tower - Tile Room: Small Key (Ganons Tower)
+    Ganons Tower - Validation Chest: Small Key (Ice Palace)
+    Graveyard Cave: Sanctuary Heart Container
+    Hobo: Cane of Byrna
+    Hookshot Cave - Bottom Left: Bombos
+    Hookshot Cave - Bottom Right: Boss Heart Container
+    Hookshot Cave - Top Left: Piece of Heart
+    Hookshot Cave - Top Right: Rupees (20)
+    Hype Cave - Bottom: Arrows (10)
+    Hype Cave - Generous Guy: Piece of Heart
+    Hype Cave - Middle Left: Shovel
+    Hype Cave - Middle Right: Bombs (3)
+    Hype Cave - Top: Rupees (20)
+    Hyrule Castle - Boomerang Chest: Compass (Eastern Palace)
+    Hyrule Castle - Map Chest: Map (Turtle Rock)
+    Hyrule Castle - Zelda's Chest: Rupees (20)
+    Ice Palace - Big Chest: Small Key (Ice Palace)
+    Ice Palace - Big Key Chest: Map (Swamp Palace)
+    Ice Palace - Boss: Map (Ice Palace)
+    Ice Palace - Compass Chest: Piece of Heart
+    Ice Palace - Freezor Chest: Big Key (Ice Palace)
+    Ice Palace - Iced T Room: Small Key (Ganons Tower)
+    Ice Palace - Map Chest: Small Key (Swamp Palace)
+    Ice Palace - Prize: Crystal 7
+    Ice Palace - Spike Room: Bombs (3)
+    Ice Rod Cave: Boss Heart Container
+    Kakariko Tavern: Bottle (Bee)
+    Kakariko Well - Bottom: Progressive Shield
+    Kakariko Well - Left: Bombs (3)
+    Kakariko Well - Middle: Progressive Glove
+    Kakariko Well - Right: Quake
+    Kakariko Well - Top: Pegasus Boots
+    King Zora: Rupees (20)
+    King's Tomb: Ice Rod
+    Lake Hylia Island: Bug Catching Net
+    Library: Arrows (10)
+    Link's House: Piece of Heart
+    Link's Uncle: Boss Heart Container
+    Lost Woods Hideout: Arrows (10)
+    Lumberjack Tree: Rupees (20)
+    Magic Bat: Rupees (50)
+    Master Sword Pedestal: Piece of Heart
+    Maze Race: Rupees (50)
+    Mimic Cave: Book of Mudora
+    Mini Moldorm Cave - Far Left: Fire Rod
+    Mini Moldorm Cave - Far Right: Bottle (Bee)
+    Mini Moldorm Cave - Generous Guy: Rupees (300)
+    Mini Moldorm Cave - Left: Arrows (10)
+    Mini Moldorm Cave - Right: Rupees (50)
+    Mire Shed - Left: Progressive Shield
+    Mire Shed - Right: Piece of Heart
+    Misery Mire - Big Chest: Progressive Shield
+    Misery Mire - Big Key Chest: Big Key (Thieves Town)
+    Misery Mire - Boss: Compass (Misery Mire)
+    Misery Mire - Bridge Chest: Small Key (Misery Mire)
+    Misery Mire - Compass Chest: Compass (Swamp Palace)
+    Misery Mire - Main Lobby: Boss Heart Container
+    Misery Mire - Map Chest: Small Key (Agahnims Tower)
+    Misery Mire - Prize: Crystal 3
+    Misery Mire - Spike Chest: Compass (Ice Palace)
+    Mushroom: Arrows (10)
+    Old Man: Rupees (300)
+    Palace of Darkness - Big Chest: Big Key (Ganons Tower)
+    Palace of Darkness - Big Key Chest: Rupees (300)
+    Palace of Darkness - Boss: Compass (Palace of Darkness)
+    Palace of Darkness - Compass Chest: Arrows (10)
+    Palace of Darkness - Dark Basement - Left: Arrows (10)
+    Palace of Darkness - Dark Basement - Right: Small Key (Skull Woods)
+    Palace of Darkness - Dark Maze - Bottom: Small Key (Agahnims Tower)
+    Palace of Darkness - Dark Maze - Top: Compass (Agahnims Tower)
+    Palace of Darkness - Harmless Hellway: Small Key (Skull Woods)
+    Palace of Darkness - Map Chest: Big Key (Turtle Rock)
+    Palace of Darkness - Prize: Crystal 5
+    Palace of Darkness - Shooter Room: Rupees (20)
+    Palace of Darkness - Stalfos Basement: Small Key (Desert Palace)
+    Palace of Darkness - The Arena - Bridge: Compass (Tower of Hera)
+    Palace of Darkness - The Arena - Ledge: Small Key (Desert Palace)
+    Paradox Cave Lower - Far Left: Progressive Sword
+    Paradox Cave Lower - Far Right: Moon Pearl
+    Paradox Cave Lower - Left: Bottle (Fairy)
+    Paradox Cave Lower - Middle: Bombs (10)
+    Paradox Cave Lower - Right: Piece of Heart
+    Paradox Cave Upper - Left: Rupees (50)
+    Paradox Cave Upper - Right: Progressive Sword
+    Peg Cave: Mushroom
+    Potion Shop: Bombs (3)
+    Purple Chest: Arrows (10)
+    Pyramid: Arrows (10)
+    Pyramid Fairy - Left: Piece of Heart
+    Pyramid Fairy - Right: Progressive Sword
+    Sahasrahla: Lamp
+    Sahasrahla's Hut - Left: Bottle (Blue Potion)
+    Sahasrahla's Hut - Middle: Bombs (3)
+    Sahasrahla's Hut - Right: Rupees (20)
+    Sanctuary: Compass (Escape)
+    Secret Passage: Rupees (20)
+    Sewers - Dark Cross: Arrows (10)
+    Sewers - Secret Room - Left: Small Key (Escape)
+    Sewers - Secret Room - Middle: Map (Escape)
+    Sewers - Secret Room - Right: Rupees (100)
+    Sick Kid: Piece of Heart
+    Skull Woods - Big Chest: Arrows (10)
+    Skull Woods - Big Key Chest: Small Key (Skull Woods)
+    Skull Woods - Boss: Rupees (300)
+    Skull Woods - Bridge Room: Bombs (3)
+    Skull Woods - Compass Chest: Boss Heart Container
+    Skull Woods - Map Chest: Small Key (Skull Woods)
+    Skull Woods - Pinball Room: Compass (Skull Woods)
+    Skull Woods - Pot Prison: Rupees (20)
+    Skull Woods - Prize: Crystal 1
+    Spectacle Rock: Bombs (3)
+    Spectacle Rock Cave: Rupees (20)
+    Spike Cave: Progressive Sword
+    Spiral Cave: Bombs (3)
+    Stumpy: Cane of Somaria
+    Sunken Treasure: Rupees (20)
+    Superbunny Cave - Bottom: Piece of Heart
+    Superbunny Cave - Top: Rupees (20)
+    Swamp Palace - Big Chest: Piece of Heart
+    Swamp Palace - Big Key Chest: Small Key (Desert Palace)
+    Swamp Palace - Boss: Small Key (Swamp Palace)
+    Swamp Palace - Compass Chest: Map (Thieves Town)
+    Swamp Palace - Entrance: Small Key (Swamp Palace)
+    Swamp Palace - Flooded Room - Left: Small Key (Tower of Hera)
+    Swamp Palace - Flooded Room - Right: Small Key (Tower of Hera)
+    Swamp Palace - Map Chest: Small Key (Thieves Town)
+    Swamp Palace - Prize: Red Pendant
+    Swamp Palace - Waterfall Room: Magic Mirror
+    Swamp Palace - West Chest: Big Key (Eastern Palace)
+    Thieves' Town - Ambush Chest: Map (Desert Palace)
+    Thieves' Town - Attic: Rupees (20)
+    Thieves' Town - Big Chest: Small Key (Agahnims Tower)
+    Thieves' Town - Big Key Chest: Bombs (3)
+    Thieves' Town - Blind's Cell: Rupees (20)
+    Thieves' Town - Boss: Compass (Thieves Town)
+    Thieves' Town - Compass Chest: Rupees (20)
+    Thieves' Town - Map Chest: Bombs (3)
+    Thieves' Town - Prize: Crystal 6
+    Tower of Hera - Basement Cage: Boss Heart Container
+    Tower of Hera - Big Chest: Map (Tower of Hera)
+    Tower of Hera - Big Key Chest: Piece of Heart
+    Tower of Hera - Boss: Rupees (20)
+    Tower of Hera - Compass Chest: Rupees (20)
+    Tower of Hera - Map Chest: Big Key (Tower of Hera)
+    Tower of Hera - Prize: Crystal 4
+    Turtle Rock - Big Chest: Flippers
+    Turtle Rock - Big Key Chest: Progressive Armor
+    Turtle Rock - Boss: Small Key (Turtle Rock)
+    Turtle Rock - Chain Chomps: Map (Skull Woods)
+    Turtle Rock - Compass Chest: Map (Agahnims Tower)
+    Turtle Rock - Crystaroller Room: Magic Upgrade (1/2)
+    Turtle Rock - Eye Bridge - Bottom Left: Rupees (20)
+    Turtle Rock - Eye Bridge - Bottom Right: Small Key (Turtle Rock)
+    Turtle Rock - Eye Bridge - Top Left: Compass (Turtle Rock)
+    Turtle Rock - Eye Bridge - Top Right: Rupees (300)
+    Turtle Rock - Prize: Blue Pendant
+    Turtle Rock - Roller Room - Left: Bombs (3)
+    Turtle Rock - Roller Room - Right: Progressive Bow
+    Waterfall Fairy - Left: Bombs (3)
+    Waterfall Fairy - Right: Piece of Heart
+    Zora's Ledge: Rupees (20)
+settings:
+  1:
+    accessibility: items
+    aga_randomness: true
+    any_enemy_logic: allow_all
+    beemizer: '0'
+    bigkeyshuffle: false
+    bombbag: false
+    boss_shuffle: none
+    bow_mode: progressive
+    collection_rate: false
+    compassshuffle: false
+    crystals_ganon: '7'
+    crystals_gt: '7'
+    decoupledoors: false
+    difficulty: normal
+    door_self_loops: false
+    door_shuffle: crossed
+    door_type_distribution: pooled
+    door_type_mode: original
+    dropshuffle: none
+    dungeon_bias: Hyrule Castle
+    dungeon_counters: default
+    dungeon_shuffle_algorithm: experimental
+    enemy_damage: default
+    enemy_health: default
+    enemy_shuffle: none
+    experimental: false
+    flute_mode: normal
+    goal: ganon
+    hints: false
+    intensity: 2
+    item_functionality: normal
+    key_logic_algorithm: experimental
+    keyshuffle: none
+    linked_drops: unset
+    logic: noglitches
+    mapshuffle: false
+    mirrorscroll: false
+    mixed_travel: prevent
+    mode: open
+    money_balance: 100
+    openpyramid: auto
+    overworld_map: default
+    pottery: none
+    pseudoboots: false
+    shopsanity: false
+    shuffle: vanilla
+    shufflelinks: false
+    shufflepots: false
+    shuffletavern: true
+    skullwoods: original
+    standardize_palettes: standardize
+    swords: random
+    take_any: none
+    trap_door_mode: optional
+    triforce_goal: 0
+    triforce_pool: 0
+start_inventory:
+  1: []

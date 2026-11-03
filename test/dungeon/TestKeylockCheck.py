@@ -55,17 +55,13 @@ class TestKeylockCheck(unittest.TestCase):
                     key_spot.item, spot.item = spot.item, key_spot.item
         self.assertGreater(moved, 0)
 
-    @unittest.expectedFailure
     def test_self_locked_key_counts_only_under_locations_accessibility(self):
-        # crossed i2: Eastern Palace's key drop at Castle Tower - Circle of Pots sits behind the door it opens; "items"
-        # accessibility may lose it, "locations" may not
-        # Seed 11 no longer reaches that case since the pooled door type split changed; pin the world once the
-        # customizer round trip works
-        argv = ['--door_shuffle', 'crossed', '--intensity', '2', '--dungeon_shuffle_algorithm', 'experimental',
-                '--key_logic_algorithm', 'experimental', '--suppress_rom', '--spoiler', 'none', '--seed', '11']
+        # crossed i2, world pinned by the customizer: Eastern Palace's key drop at Castle Tower - Circle of Pots sits
+        # behind the door it opens; "items" accessibility may lose it, "locations" may not
+        argv = ['--customizer', 'test/customizer/self_locked_key_drop.yaml', '--suppress_rom', '--spoiler', 'none']
         logging.disable(logging.WARNING)
         try:
-            world = Main.main(parse_cli(argv), seed=11, fish=BabelFish(lang='en'))
+            world = Main.main(parse_cli(argv), fish=BabelFish(lang='en'))
         finally:
             logging.disable(logging.NOTSET)
         layout = world.key_layout[1]['Eastern Palace']
