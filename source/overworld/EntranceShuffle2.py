@@ -1204,6 +1204,8 @@ def do_mandatory_connections(avail, entrances, cave_options, must_exit):
         for candidate in cave_options:
             if not isinstance(candidate, str) and len(candidate) > 1 and (candidate in used_caves
                                                                           or len(candidate) < len(entrances) - required_entrances):
+                if len(candidate) == 2 and 'Spectacle Rock Cave Exit (Peak)' in candidate:
+                    continue  # peak and top only drop into the cave, neither walks out the other
                 if not avail.swapped or (avail.combine_map[exit] not in candidate and not any(e for e in must_exit if avail.combine_map[e] in candidate)): #maybe someday allow these, but we need to disallow mutual locks in Swapped
                     candidates.append(candidate)
         cave = random.choice(candidates)
