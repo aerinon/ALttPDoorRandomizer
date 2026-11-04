@@ -354,10 +354,9 @@ jobs:
           echo "MacOS Asset:   ${{ steps.identify-macos-asset.outputs.asset_macos }}"
           echo "Windows Asset: ${{ steps.identify-windows-asset.outputs.asset_windows }}"
 
-      # create a release (DoorDevUnstable)
-      # if: contains(github.ref, 'DoorDevUnstable') # branch or tag name
-      # if: contains(github.event.head_commit.message, 'Version bump') # commit message
-      - name: 📀->🚀Create a Release (DoorDevUnstable)
+      # create a release: every DoorDevUnstable push, and NewGeneration pushes whose head commit is the version bump
+      # NewGeneration releases are pre-releases, so the DoorDevUnstable release stays Latest
+      - name: 📀->🚀Create a Release
         id: create_release
         uses: actions/create-release@v1.1.4
         env:
@@ -366,11 +365,12 @@ jobs:
           tag_name: ${{ steps.debug_info.outputs.github_tag }}
           release_name: ${{ steps.debug_info.outputs.release_name }}
           body_path: RELEASENOTES.md
+          prerelease: ${{ contains(github.ref, 'NewGeneration') }}
           # draft: true
-        if: contains(github.ref, 'DoorDevUnstable')
+        if: "contains(github.ref, 'DoorDevUnstable') || (contains(github.ref, 'NewGeneration') && startsWith(github.event.head_commit.message, 'chore: version bump'))"
 
-      # upload linux archive asset (DoorDevUnstable)
-      - name: 🔼Upload Linux Archive Asset (DoorDevUnstable)
+      # upload linux archive asset
+      - name: 🔼Upload Linux Archive Asset
         id: upload-linux-asset
         uses: actions/upload-release-asset@v1.0.2
         env:
@@ -380,10 +380,10 @@ jobs:
           asset_path: ${{ steps.parentDir.outputs.parentDir }}/deploy/linux/${{ steps.identify-linux-asset.outputs.asset_linux }}
           asset_name: ${{ steps.debug_info.outputs.asset_prefix }}-linux-focal.tar.gz
           asset_content_type: application/gzip
-        if: contains(github.ref, 'DoorDevUnstable')
+        if: steps.create_release.outcome == 'success'
 
-      # upload macos archive asset (DoorDevUnstable)
-      - name: 🔼Upload MacOS Archive Asset (DoorDevUnstable)
+      # upload macos archive asset
+      - name: 🔼Upload MacOS Archive Asset
         id: upload-macos-asset
         uses: actions/upload-release-asset@v1.0.2
         env:
@@ -393,11 +393,11 @@ jobs:
           asset_path: ${{ steps.parentDir.outputs.parentDir }}/deploy/macos/${{ steps.identify-macos-asset.outputs.asset_macos }}
           asset_name: ${{ steps.debug_info.outputs.asset_prefix }}-osx.tar.gz
           asset_content_type: application/gzip
-        if: contains(github.ref, 'DoorDevUnstable')
+        if: steps.create_release.outcome == 'success'
 
-      # upload windows archive asset (DoorDevUnstable)
+      # upload windows archive asset
       #TODO: Make sure we're firing on the proper branches
-      - name: 🔼Upload Windows Archive Asset (DoorDevUnstable)
+      - name: 🔼Upload Windows Archive Asset
         id: upload-windows-asset
         uses: actions/upload-release-asset@v1.0.2
         env:
@@ -407,4 +407,4 @@ jobs:
           asset_path: ${{ steps.parentDir.outputs.parentDir }}/deploy/windows/${{ steps.identify-windows-asset.outputs.asset_windows }}
           asset_name: ${{ steps.debug_info.outputs.asset_prefix }}-windows.zip
           asset_content_type: application/zip
-        if: contains(github.ref, 'DoorDevUnstable')
+        if: steps.create_release.outcome == 'success'
