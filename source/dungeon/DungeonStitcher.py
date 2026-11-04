@@ -335,6 +335,7 @@ def determine_paths_for_dungeon(world, player, all_regions, name):
         paths.append('Hyrule Dungeon Cellblock')
         paths.append(('Hyrule Dungeon Cellblock', 'Hyrule Castle Throne Room'))
         entrance = next(x for x in world.dungeon_portals[player] if x.name == 'Hyrule Castle South')
+        paths.append((entrance.door.entrance.parent_region.name, 'Hyrule Dungeon Cellblock'))  # escape starts at the south lobby
         # todo: in non-er, we can use the other portals too
         paths.append(('Hyrule Dungeon Cellblock', entrance.door.entrance.parent_region.name))
         paths.append(('Hyrule Castle Throne Room', [entrance.door.entrance.parent_region.name,

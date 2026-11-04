@@ -24,7 +24,7 @@ from source.dungeon.NewKeyLogic import analyze_dungeon as analyze_dungeon_new
 from source.dungeon.SmallKeyDoorShuffle import shuffle_small_key_doors as shuffle_small_key_doors_v2, pinned_key_totals
 from source.dungeon.DungeonGenerationCommon import uniform_distribute, proportional_distribute, collapse_pit_groups, form_pit_group
 
-from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths
+from DungeonGenerator import ExplorationState, convert_regions, determine_required_paths, standard_escape_paths
 from DungeonGenerator import create_dungeon_builders, split_dungeon_builder, simple_dungeon_builder, default_dungeon_entrances
 from DungeonGenerator import dungeon_portals, dungeon_drops, connect_doors, count_reserved_locations
 from DungeonGenerator import valid_region_to_explore
@@ -2435,8 +2435,9 @@ def find_valid_trap_combination(builder, suggested, start_regions, paths, world,
     proposal.extend(custom_trap_doors)
     filtered_proposal = [x for x in proposal if x.name not in trap_door_exceptions]
 
-    start_regions, event_starts = filter_start_regions(builder, start_regions, world, player)
-    while not validate_trap_layout(filtered_proposal, builder, start_regions, paths, world, player):
+    escape_starts, _ = filter_start_regions(builder, start_regions, world, player)
+    all_starts, _ = filter_start_regions(builder, start_regions, world, player, escape=False)
+    while not validate_trap_layout(filtered_proposal, builder, escape_starts, all_starts, paths, world, player):
         itr += 1
         if itr >= len(sample_list):
             if not drop:
@@ -2455,8 +2456,9 @@ def find_valid_trap_combination(builder, suggested, start_regions, paths, world,
 
 
 # eliminate start region if portal marked as destination
-def filter_start_regions(builder, start_regions, world, player):
-    std_flag = world.mode[player] == 'standard' and builder.name == 'Hyrule Castle'
+def filter_start_regions(builder, start_regions, world, player, escape=True):
+    # escape=False keeps the starts that open after the standard escape
+    std_flag = escape and world.mode[player] == 'standard' and builder.name == 'Hyrule Castle'
     excluded = {}   # todo: drop lobbies, might be better to white list instead (two entrances per region)
     event_doors = {}
     for region in start_regions:
@@ -2485,13 +2487,22 @@ def filter_start_regions(builder, start_regions, world, player):
     return [x for x in start_regions if x not in excluded.keys()], event_doors
 
 
-def validate_trap_layout(proposal, builder, start_regions, paths, world, player):
-    flag, state = check_required_paths_with_traps(paths, proposal, builder.name, start_regions, world, player)
+def validate_trap_layout(proposal, builder, escape_starts, all_starts, paths, world, player):
+    # the standard escape is checked from the courtyard; the rest of the dungeon may wait for the later entrances
+    name = builder.name
+    escape_paths = standard_escape_paths(world, player, name)
+    escape = [p for p in paths[name] if p in escape_paths]
+    rest = [p for p in paths[name] if p not in escape_paths]
+    if escape:
+        flag, escape_state = check_required_paths_with_traps({name: escape}, proposal, name, escape_starts, world, player)
+        if not flag:
+            return False
+    flag, state = check_required_paths_with_traps({name: rest}, proposal, name, all_starts, world, player)
     if not flag:
         return False
     bk_special_loc = find_bk_special_location(builder, world, player)
     if bk_special_loc:
-        if not state.found_forced_bk():
+        if not (escape_state if escape else state).found_forced_bk():
             return False
     if world.accessibility[player] != 'none':
         all_locations = [l for r in builder.master_sector.region_set() for l in world.get_region(r, player).locations]

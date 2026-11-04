@@ -57,6 +57,19 @@ boss_path_checks = ['Eastern Boss', 'Desert Boss', 'Hera Boss', 'Tower Agahnim 1
 drop_path_checks = ['Skull Pot Circle', 'Skull Left Drop', 'Skull Back Drop', 'Sewers Rat Path']
 
 
+def standard_escape_paths(world, player, name):
+    """Paths the standard escape needs, reached from the courtyard before any other entrance opens."""
+    if world.mode[player] != 'standard':
+        return []
+    if name == 'Hyrule Castle':
+        return ['Hyrule Dungeon Cellblock', ('Hyrule Dungeon Cellblock', 'Sanctuary')]
+    if name == 'Hyrule Castle Sewers':
+        return ['Sanctuary']
+    if name == 'Hyrule Castle Dungeon':
+        return ['Hyrule Dungeon Cellblock', ('Hyrule Dungeon Cellblock', 'Hyrule Castle Throne Room')]
+    return []
+
+
 def determine_paths_for_dungeon(world, player, all_regions, name):
     all_r_names = set(x.name for x in all_regions)
     paths = []
@@ -66,15 +79,7 @@ def determine_paths_for_dungeon(world, player, all_regions, name):
             non_hole_portals.append(portal.door.entrance.parent_region.name)
             if portal.destination:
                 paths.append(portal.door.entrance.parent_region.name)
-    if world.mode[player] == 'standard':
-        if name == 'Hyrule Castle':
-            paths.append('Hyrule Dungeon Cellblock')
-            paths.append(('Hyrule Dungeon Cellblock', 'Sanctuary'))
-        if name == 'Hyrule Castle Sewers':
-            paths.append('Sanctuary')
-        if name == 'Hyrule Castle Dungeon':
-            paths.append('Hyrule Dungeon Cellblock')
-            paths.append(('Hyrule Dungeon Cellblock', 'Hyrule Castle Throne Room'))
+    paths.extend(standard_escape_paths(world, player, name))
     if world.doorShuffle[player] in ['basic'] and name == 'Thieves Town':
         paths.append('Thieves Attic Window')
     elif 'Thieves Attic Window' in all_r_names:
