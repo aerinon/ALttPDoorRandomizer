@@ -15,7 +15,6 @@ from Regions import dungeon_events, flooded_keys_reverse
 from Dungeons import split_region_starts
 
 from source.dungeon.DungeonStitcher import generate_dungeon_find_proposal
-from source.dungeon.DungeonStitcher import GenerationException as OtherGenException
 from source.dungeon.DungeonGenerationCommon import GlobalPolarity, DungeonBuilder, GenerationException, NeutralizingException
 from source.dungeon.DungeonGenerationCommon import define_sector_features, default_dungeon_entrances, sum_polarity
 from source.dungeon.DungeonGenerationCommon import assign_sector, find_sector, handle_special_sectors, assign_sector_helper
@@ -2538,7 +2537,7 @@ def check_for_valid_layout(builder, sector_list, builder_info):
                 split_list['Sewers'].remove(temp_builder.throne_door.entrance.parent_region.name)
             builder.exception_list = list(sector_list)
             return True, {}, package
-        except (GenerationException, NeutralizingException, OtherGenException) as e:
+        except (GenerationException, NeutralizingException) as e:
             logging.getLogger('').debug(f'Bailing on this layout for {builder.name}', exc_info=1)
             builder.split_dungeon_map = None
             builder.valid_proposal = None

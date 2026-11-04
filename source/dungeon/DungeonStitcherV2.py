@@ -8,6 +8,7 @@ from BaseClasses import hook_from_door, flooded_keys
 from Regions import dungeon_events, flooded_keys_reverse
 from source.dungeon.DropPortals import drop_parent_region, is_drop_portal, is_escape_builder, is_lobby_portal
 from source.dungeon.DropPortals import region_overworld_side, sector_drop_portals
+from source.dungeon.DungeonGenerationCommon import GenerationException
 from source.dungeon.DungeonGenTransitivity import do_transitivity_check
 from source.dungeon.DungeonGenSectorDesc import SectorDescriptor
 
@@ -1232,7 +1233,3 @@ def get_entrance_doors(world, region, player):
         if door is not None:
             res.append(door)
     return res
-
-
-class GenerationException(Exception):
-    pass

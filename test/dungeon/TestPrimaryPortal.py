@@ -3,7 +3,8 @@ import unittest
 import RaceRandom as random
 
 from source.dungeon.DungeonGenTransitivity import find_transitivity_solution
-from source.dungeon.DungeonStitcherV2 import GenerationException, choose_primary_portal, link_portal_candidate
+from source.dungeon.DungeonGenerationCommon import GenerationException
+from source.dungeon.DungeonStitcherV2 import choose_primary_portal, link_portal_candidate
 from test.dungeon.transitivity_harness import capture_sectors, make_builder, hard_timeout
 
 # Hyrule Castle's builder in crossed intensity 4, seed 8, when the stitcher assigns its first portal

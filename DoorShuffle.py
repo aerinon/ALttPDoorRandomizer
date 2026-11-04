@@ -16,7 +16,8 @@ from RoomData import DoorKind, PairedDoor, reset_rooms
 from source.dungeon.DungeonGenLocalSearch import create_dungeon_builders_prototype, DoorFlags, drop_lobbies_locked
 from source.dungeon.DropPortals import drop_portals, outside_parent, entered_from_outside, is_outside, is_lobby_portal, is_drop_portal
 from source.dungeon.DropPortals import builder_drop_portals
-from source.dungeon.DungeonStitcher import GenerationException, generate_dungeon
+from source.dungeon.DungeonGenerationCommon import GenerationException
+from source.dungeon.DungeonStitcher import generate_dungeon
 from source.dungeon.DungeonStitcher import ExplorationState as ExplorationState2
 from source.dungeon.DungeonStitcherV2 import create_dungeon, connect_pit
 from source.dungeon.NewKeyLogic import analyze_dungeon as analyze_dungeon_new

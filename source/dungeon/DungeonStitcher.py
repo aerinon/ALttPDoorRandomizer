@@ -7,6 +7,7 @@ from BaseClasses import CrystalBarrier, DoorType, Hook, RegionType, Sector
 from BaseClasses import hook_from_door, flooded_keys
 from Regions import dungeon_events, flooded_keys_reverse
 from source.dungeon.DropPortals import outside_parent, is_outside, is_drop_portal
+from source.dungeon.DungeonGenerationCommon import GenerationException
 
 
 def pre_validate(builder, entrance_region_names, split_dungeon, world, player):
@@ -965,9 +966,3 @@ def get_entrance_doors(world, region, player):
         if door is not None:
             res.append(door)
     return res
-
-
-class GenerationException(Exception):
-    pass
-
-

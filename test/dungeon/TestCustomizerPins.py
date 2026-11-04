@@ -6,8 +6,10 @@ import unittest
 import yaml
 
 import Main
+from BaseClasses import FillError
 from CLI import parse_cli
 from source.classes.BabelFish import BabelFish
+from source.dungeon.DungeonGenerationCommon import GenerationException
 
 
 class TestCustomizerPins(unittest.TestCase):
@@ -25,9 +27,8 @@ class TestCustomizerPins(unittest.TestCase):
                     try:
                         return Main.main(parse_cli(argv + base + ['--seed', str(seed)]), seed=seed,
                                          fish=BabelFish(lang='en'))
-                    except Exception as e:  # a file that fails to load fails the test
-                        if type(e).__name__ not in ('GenerationException', 'FillError'):
-                            raise
+                    except (GenerationException, FillError):  # anything else, like a file that fails to load, fails the test
+                        continue
                 self.skipTest(f'no seed in {list(seeds)} generates')
         finally:
             logging.disable(logging.NOTSET)
