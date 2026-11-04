@@ -234,6 +234,7 @@ def do_main_shuffle(entrances, exits, avail, mode_def):
         ext.connect(avail.world.get_entrance(choice, avail.player).parent_region)
         if not avail.coupled:
             avail.decoupled_entrances.remove(choice)
+            avail.decoupled_exits.remove('Dark Sanctuary Hint')
         if avail.swapped and choice != 'Dark Sanctuary Hint':
             swap_ent, swap_ext = connect_swap(choice, 'Dark Sanctuary Hint', avail)
             entrances.remove(swap_ent)
