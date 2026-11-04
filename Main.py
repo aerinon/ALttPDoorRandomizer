@@ -664,21 +664,29 @@ def copy_world(world):
     ret.state.prog_items = world.state.prog_items.copy()
     ret.state.stale = {player: True for player in range(1, world.players + 1)}
 
-    ret.doors = world.doors
+    # doors, portals and key logic get their own copies, referring to the copy's regions, entrances and locations
+    memo = {id(world): ret}
+    for region in world.regions:
+        memo[id(region)] = ret.get_region(region.name, region.player)
+    for entrance in (e for region in world.regions for e in region.exits):
+        copied = ret.check_for_entrance(entrance.name, entrance.player)
+        if copied is not None:
+            memo[id(entrance)] = copied
+    for location in world.get_locations():
+        memo[id(location)] = ret.get_location(location.name, location.player)
+    for dungeon in world.dungeons:
+        memo[id(dungeon)] = ret.get_dungeon(dungeon.name, dungeon.player)
+    (ret.doors, ret.paired_doors, ret.rooms, ret.dungeon_layouts, ret.key_logic, ret.dungeon_portals,
+     ret.sanc_portal) = copy.deepcopy((world.doors, world.paired_doors, world.rooms, world.dungeon_layouts,
+                                       world.key_logic, world.dungeon_portals, world.sanc_portal), memo)
     for door in ret.doors:
         entrance = ret.check_for_entrance(door.name, door.player)
         if entrance is not None:
             entrance.door = door
-    ret.paired_doors = world.paired_doors
-    ret.rooms = world.rooms
     ret.inaccessible_regions = world.inaccessible_regions
-    ret.dungeon_layouts = world.dungeon_layouts
-    ret.key_logic = world.key_logic
-    ret.dungeon_portals = world.dungeon_portals
-    for player, portals in world.dungeon_portals.items():
+    for player, portals in ret.dungeon_portals.items():
         for portal in portals:
             connect_portal(portal, ret, player)
-    ret.sanc_portal = world.sanc_portal
 
     for player in range(1, world.players + 1):
         if world.logic[player] in ('nologic', 'hybridglitches'):
