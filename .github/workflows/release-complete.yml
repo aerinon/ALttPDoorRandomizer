@@ -19,7 +19,7 @@ name: 🏷️Tag Repositories
 on:
   release:
     types:
-      - released
+      - published
 
 jobs:
   # Tag Baserom
@@ -43,5 +43,6 @@ jobs:
           FINE_PAT: ${{ secrets.ALTTPER_TAGGER }}
         with:
           repository: ${{ github.repository_owner }}/z3randomizer
-          ref-name:   heads/DRUnstable
+          # pre-releases come from NewGeneration (baserom DRUnstable), releases from DoorDevUnstable (baserom DRMain)
+          ref-name:   ${{ github.event.release.prerelease && 'heads/DRUnstable' || 'heads/DRMain' }}
           github-tag: ${{ github.event.release.tag_name }}
