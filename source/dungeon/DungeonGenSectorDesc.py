@@ -519,6 +519,7 @@ class SimpleExplorationState:
     def visit_region(self, region):
         if region.crystal_switch:
             self.crystal = CrystalBarrier.Either
+        prev_visit = self.visited_map.get(region)
         if region not in self.visited_map or self.crystal == CrystalBarrier.Either:
             self.visited_map[region] = self.crystal, self.crystal_forced
         elif self.crystal == CrystalBarrier.Null or self.visited_map[region][0] == CrystalBarrier.Null:
@@ -530,6 +531,9 @@ class SimpleExplorationState:
             self.visited_map[region] = self.crystal, self.crystal_forced  # both blue and orange visited
         else:
             self.visited_map[region] = self.crystal, self.crystal_forced  # we're visiting as a specific color, not sure this is reachable
+        if prev_visit is not None and prev_visit[0] == CrystalBarrier.Either and self.crystal == CrystalBarrier.Null:
+            # a Null visit keeps Either and only clears the flag, else the two visits alternate forever
+            self.visited_map[region] = CrystalBarrier.Either, self.visited_map[region][1]
         if region.type == RegionType.Dungeon:
             for location in region.locations:
                 if location not in self.found_locations:

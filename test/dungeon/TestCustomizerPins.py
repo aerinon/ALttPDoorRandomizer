@@ -78,5 +78,20 @@ class TestCustomizerPins(unittest.TestCase):
         self.assertFalse(door.blocked)
         self.assertFalse(door.trapped)
 
+    def test_warp_into_its_own_room_loads(self):
+        """Crossed i4 seed 9: PoD Stalfos Basement Warp lands on a terminal in its own room, which sector analysis of
+        the pinned world used to explore forever."""
+        logging.disable(logging.WARNING)
+        try:
+            with tempfile.TemporaryDirectory() as out:
+                world = Main.main(parse_cli(['--customizer', 'test/customizer/self_landing_warp.yaml',
+                                             '--suppress_rom', '--spoiler', 'none', '--outputpath', out]),
+                                  fish=BabelFish(lang='en'))
+        finally:
+            logging.disable(logging.NOTSET)
+        warp = world.get_door('PoD Stalfos Basement Warp', 1)
+        self.assertEqual(warp.entrance.connected_region, warp.entrance.parent_region)
+
+
 if __name__ == '__main__':
     unittest.main()
