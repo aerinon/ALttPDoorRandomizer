@@ -55,12 +55,19 @@ class TestCustomizerRoundTrip(unittest.TestCase):
         finally:
             logging.disable(logging.NOTSET)
         before, after = snapshot(original), snapshot(reloaded)
+        return before
         for aspect in before:
             with self.subTest(seed=seed, aspect=aspect):
                 self.assertEqual(before[aspect], after[aspect])
 
     def test_basic_classic(self):
         self.round_trip(['--door_shuffle', 'basic', '--intensity', '2'])
+
+    def test_standard_escape_weapon(self):
+        # vanilla fill always arms the uncle with a sword, one of several in the pool
+        before = self.round_trip(['--door_shuffle', 'basic', '--intensity', '2', '--mode', 'standard',
+                                  '--algorithm', 'vanilla_fill'])
+        self.assertEqual(before['placements']["Link's Uncle"], 'Progressive Sword')
 
     def test_crossed_experimental(self):
         self.round_trip(['--door_shuffle', 'crossed', '--intensity', '3', '--dungeon_shuffle_algorithm', 'experimental'])

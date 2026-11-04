@@ -496,6 +496,11 @@ class CustomSettings(object):
             medallions[p] = {}
         for item in world.itempool:
             item_pool[item.player][item.name] += 1
+        for p in self.player_range:
+            # the standard escape weapon leaves the pool early; the load side takes it back out
+            uncle = world.get_location("Link's Uncle", p)
+            if world.mode[p] == 'standard' and uncle.item and uncle.item.player == p:
+                item_pool[p][uncle.item.name] += 1
         for p, req_medals in world.required_medallions.items():
             medallions[p]['Misery Mire'] = req_medals[0]
             medallions[p]['Turtle Rock'] = req_medals[1]
