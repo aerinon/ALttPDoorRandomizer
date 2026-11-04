@@ -302,16 +302,17 @@ def do_main_shuffle(entrances, exits, avail, mode_def):
         rem_exits.remove('Blacksmiths Hut')
 
     # bomb shop
-    bomb_shop = 'Links House' if avail.inverted else 'Big Bomb Shop'
+    bomb_shop = 'Big Bomb Shop'
+    bomb_shop_vanilla = 'Links House' if avail.inverted else 'Big Bomb Shop'
     if bomb_shop in rem_exits:
         bomb_shop_options = Inverted_Bomb_Shop_Options if avail.inverted else Bomb_Shop_Options
         bomb_shop_options = [x for x in bomb_shop_options if x in rem_entrances]
         if avail.swapped and len(bomb_shop_options) > 1:
-            bomb_shop_options = [x for x in bomb_shop_options if x != 'Big Bomb Shop']
+            bomb_shop_options = [x for x in bomb_shop_options if x != bomb_shop_vanilla]
         bomb_shop_choice = random.choice(bomb_shop_options)
         connect_entrance(bomb_shop_choice, bomb_shop, avail)
         rem_entrances.remove(bomb_shop_choice)
-        if avail.swapped and bomb_shop_choice != 'Big Bomb Shop':
+        if avail.swapped and bomb_shop_choice != bomb_shop_vanilla:
             swap_ent, swap_ext = connect_swap(bomb_shop_choice, bomb_shop, avail)
             rem_exits.remove(swap_ext)
             rem_entrances.remove(swap_ent)
