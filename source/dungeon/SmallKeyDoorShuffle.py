@@ -129,6 +129,7 @@ def shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_
             increased = suggestion_map[dungeon] + 1
             if increased > max_computation:
                 continue
+            kept = keep_key_door_layout(builder, world, player)
             builder.key_doors_num = increased
             valid_doors, small_number = find_valid_combination(builder, increased, start_regions_map[dungeon],
                                                                world, player)
@@ -143,8 +144,8 @@ def shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_
                     builder.combo_size = ncr(len(builder.candidates.small), builder.key_doors_num)
                     queue.append(builder)
                     queue = deque(sorted(queue, key=lambda b: b.combo_size))
-            else:
-                builder.key_doors_num -= 1
+            else:  # the search may have settled on a smaller layout; small_map and used_doors keep the last one
+                restore_key_door_layout(kept, builder, world, player)
         # time to re-assign
         reassign_key_doors(small_map, used_doors, world, player)
         for dungeon_name in pool:
@@ -162,6 +163,18 @@ def shuffle_small_key_doors(door_type_pools, used_doors, start_regions_map, all_
         for name, small_list in small_map.items():
             used_doors.update(flatten_pair_list(small_list))
     return used_doors
+
+
+def keep_key_door_layout(builder, world, player):
+    return (builder.key_doors_num, builder.key_door_proposal, world.key_logic[player][builder.name],
+            world.key_layout[player][builder.name], builder.standard_reserved,
+            set(world.item_pool_config.reserved_locations[player]))
+
+
+def restore_key_door_layout(kept, builder, world, player):
+    (builder.key_doors_num, builder.key_door_proposal, world.key_logic[player][builder.name],
+     world.key_layout[player][builder.name], builder.standard_reserved, reserved) = kept
+    world.item_pool_config.reserved_locations[player].intersection_update(reserved)
 
 
 def find_small_key_door_candidates(builder, start_regions, used, world, player):
