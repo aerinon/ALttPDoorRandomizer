@@ -742,11 +742,13 @@ def create_playthrough(world):
 
     def may_stay_unreached(location):
         # items accessibility, as key logic: a small key may stay behind a door the worst case can't open, and the
-        # events behind it with it
+        # events behind it with it; a big key may lie in a big chest that only it opens
         player = location.item.player
         return (location.name in optional_locations or world.accessibility[player] == 'none'
                 or (world.accessibility[player] == 'items' and world.keyshuffle[player] != 'universal'
-                    and location.item.type in ('SmallKey', 'Event')))
+                    and location.item.type in ('SmallKey', 'Event'))
+                or (location.item.bigkey and location.always_allow is not None
+                    and location.always_allow(state, location.item)))
 
     state_cache = [None]
     collection_spheres = []
