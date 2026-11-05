@@ -782,7 +782,8 @@ def exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, sta
                 region_set = builder.master_sector.region_set()
                 bk_required = (builder.bk_door_proposal or any(x in region_set for x in special_bk_regions)
                                or any('- Big Chest' in loc.name for loc in key_layout.item_locations))
-                if not is_key_door_layout_satisfiable(key_layout, proposed_bk_restrictions, bk_required, excluded=reserved):
+                if not is_key_door_layout_satisfiable(key_layout, proposed_bk_restrictions, bk_required, excluded=reserved,
+                                                      bk_outside=world.bigkeyshuffle[player]):
                     contradiction_exists = True
             if not contradiction_exists:
                 log_placement_rules(builder.name, key_layout.key_logic, logging.getLogger(''))
@@ -837,8 +838,10 @@ def _sanity_check_placement_rules(key_layout, proposed_bk_restrictions):
     return False
 
 
-def is_key_door_layout_satisfiable(key_layout, bk_restrictions, bk_needed=True, print_proposal=True, excluded=frozenset()):
-    """excluded: locations that may hold neither a small key nor the big key (e.g. reserved locations)."""
+def is_key_door_layout_satisfiable(key_layout, bk_restrictions, bk_needed=True, print_proposal=True, excluded=frozenset(),
+                                   bk_outside=False):
+    """excluded: locations that may hold neither a small key nor the big key (e.g. reserved locations).
+    bk_outside: the big key may lie outside the dungeon, tried after every location inside it."""
     logger = logging.getLogger('')
     # determine locations the big key could be assigned to, or is it already assigned
     bk_assignment_needed, bk_location = True, None
@@ -854,10 +857,12 @@ def is_key_door_layout_satisfiable(key_layout, bk_restrictions, bk_needed=True, 
     else:
         candidates = {loc for loc in key_layout.item_locations if not loc.item}
         possible_bk_locations.extend(candidates.difference(bk_restrictions).difference(excluded))
-        if len(possible_bk_locations) == 0:
+        if len(possible_bk_locations) == 0 and not bk_outside:
             return False
         # we could try to be more efficient by choosing a smart order here
         possible_bk_locations.sort(key = lambda loc: loc.name)
+        if bk_outside:
+            possible_bk_locations.insert(0, None)  # popped last; only the rules without the big key apply
 
     looking_for_satisfaction = True
     while looking_for_satisfaction:
@@ -868,7 +873,7 @@ def is_key_door_layout_satisfiable(key_layout, bk_restrictions, bk_needed=True, 
             if print_proposal:
                 key_layout.print_proposal(logger)
             logger.debug(f'Potential solution found: Small Keys: Anywhere.'
-                         f' Big Key at {bk_location.name if bk_location else "Special"}')
+                         f' Big Key at {bk_location.name if bk_location else "Special" if not bk_assignment_needed else "Outside"}')
             return True  # no rules to check, so satisfied
         satisfying_key_set = find_contradiction_in_rules(rules_to_check, key_layout.max_chests, bk_location, excluded)
         if satisfying_key_set is None:
@@ -879,7 +884,7 @@ def is_key_door_layout_satisfiable(key_layout, bk_restrictions, bk_needed=True, 
                 key_layout.print_proposal(logger)
             logger.debug(f'Potential solution found:'
                          f' Small Keys: {", ".join([loc.name for loc in satisfying_key_set]) if satisfying_key_set else "Empty Set"}.'
-                         f' Big Key at {bk_location.name if bk_location else "Special"}')
+                         f' Big Key at {bk_location.name if bk_location else "Special" if not bk_assignment_needed else "Outside"}')
             return True  # found a satisfying set
     return False
 
