@@ -6,6 +6,7 @@ indirect_connections = {
     #'West Dark World': 'Pyramid Fairy',
     'Big Bomb Shop Area': 'Pyramid Fairy',
     #'Light World': 'Pyramid Fairy',
+    'West Dark Death Mountain (Bottom)': 'Pyramid Fairy',
     'Old Man Cave (West)': 'Old Man S&Q'
 }
 
