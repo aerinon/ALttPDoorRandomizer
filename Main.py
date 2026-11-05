@@ -739,6 +739,15 @@ def create_playthrough(world):
     prog_locations = [location for location in world.get_filled_locations() if location.item.advancement
                       or world.goal[location.player] == 'completionist']
     optional_locations = ['Trench 1 Switch', 'Trench 2 Switch', 'Ice Block Drop', 'Skull Star Tile']
+
+    def may_stay_unreached(location):
+        # items accessibility, as key logic: a small key may stay behind a door the worst case can't open, and the
+        # events behind it with it
+        player = location.item.player
+        return (location.name in optional_locations or world.accessibility[player] == 'none'
+                or (world.accessibility[player] == 'items' and world.keyshuffle[player] != 'universal'
+                    and location.item.type in ('SmallKey', 'Event')))
+
     state_cache = [None]
     collection_spheres = []
     state = CollectionState(world)
@@ -763,72 +772,92 @@ def create_playthrough(world):
 
         logging.getLogger('').debug(world.fish.translate("cli", "cli", "building.calculating.spheres"), len(collection_spheres), len(sphere), len(prog_locations))
         if not sphere:
-            if world.accessibility[location.item.player] != 'none':
+            if not all(may_stay_unreached(location) for location in sphere_candidates):
                 logging.getLogger('').error(world.fish.translate("cli", "cli", "cannot.reach.items"),
                                             [world.fish.translate("cli","cli","cannot.reach.item") % (location.item.name, location.item.player, location.name, location.player) for location in sphere_candidates])
-            if any([location.name not in optional_locations and world.accessibility[location.item.player] != 'none' for location in sphere_candidates]):
                 raise RuntimeError(world.fish.translate("cli", "cli", "cannot.reach.progression"))
-            else:
-                old_world.spoiler.unreachables = sphere_candidates.copy()
+            old_world.spoiler.unreachables = sphere_candidates.copy()
+            break
+
+    def final_spheres(locations):
+        """Spheres of `locations` collected from the start, the state they end in and whether any stayed unreached."""
+        state, pending, spheres = CollectionState(world), set(locations), []
+        while pending:
+            state.sweep_for_events(key_only=True)
+            sphere = [loc for loc in pending if state.can_reach(loc) and state.not_flooding_a_key(world, loc)]
+            if not sphere:
                 break
+            for loc in sphere:
+                pending.remove(loc)
+                state.collect(loc.item, True, loc)
+            spheres.append(sphere)
+        return spheres, state, bool(pending)
 
-    # in the second phase, we cull each sphere such that the game is still beatable, reducing each range of influence to the bare minimum required inside it
-    for num, sphere in reversed(list(enumerate(collection_spheres))):
-        to_delete = set()
-        for location in sphere:
-            if world.goal[location.player] == 'completionist':
-                continue  # every location for that player is required
-            # we remove the item at location and check if game is still beatable
-            logging.getLogger('').debug('Checking if %s (Player %d) is required to beat the game.', location.item.name, location.item.player)
-            old_item = location.item
-            location.item = None
-            # todo: this is not very efficient, but I'm not sure how else to do it for this backwards logic
-            world.clear_exp_cache()
-            if world.can_beat_game(state_cache[max(num-1, 0)]):
-                logging.getLogger('').debug(f'{old_item.name} (Player {old_item.player}) is not required')
-                to_delete.add(location)
-            else:
-                # still required, got to keep it around
-                logging.getLogger('').debug(f'{old_item.name} (Player {old_item.player}) is required')
-                location.item = old_item
+    def remaining():
+        return [loc for sphere in collection_spheres for loc in sphere if loc.item is not None]
 
-        # cull entries in spheres for spoiler walkthrough at end
-        sphere -= to_delete
+    def from_cache(num):
+        return world.can_beat_game(state_cache[max(num-1, 0)])
+
+    def from_start(num):
+        return world.has_beaten_game(final_spheres(remaining())[1])
+
+    def cull(beatable):
+        """Second phase: cull each sphere such that the game is still beatable, reducing each range of influence to
+        the bare minimum required inside it. Returns the culled (location, item) pairs."""
+        culled = []
+        for num, sphere in reversed(list(enumerate(collection_spheres))):
+            for location in list(sphere):
+                if world.goal[location.player] == 'completionist':
+                    continue  # every location for that player is required
+                # we remove the item at location and check if game is still beatable
+                logging.getLogger('').debug('Checking if %s (Player %d) is required to beat the game.', location.item.name, location.item.player)
+                old_item = location.item
+                location.item = None
+                world.clear_exp_cache()
+                if beatable(num):
+                    logging.getLogger('').debug(f'{old_item.name} (Player {old_item.player}) is not required')
+                    culled.append((location, old_item))
+                else:
+                    # still required, got to keep it around
+                    logging.getLogger('').debug(f'{old_item.name} (Player {old_item.player}) is required')
+                    location.item = old_item
+        return culled
+
+    # Collection states depend on the order items arrive in (a key door one state had to open, a state holding more
+    # can skip) and key logic credits keys where they lie, so a sweep resumed from a state cached before a cull can
+    # judge the game beatable where the final pass from the start stalls. Then cull again, judging each cull by that
+    # pass itself: whatever it accepts, the pass finishes. Items left unreached stay placed: removing a key changes
+    # the rules
+    culled = cull(from_cache)
+    world.clear_exp_cache()
+    if not world.has_beaten_game(final_spheres(remaining())[1]):
+        for location, item in culled:
+            location.item = item
+        cull(from_start)
 
     # second phase, sphere 0
     for item in [i for i in world.precollected_items if i.advancement]:
         logging.getLogger('').debug('Checking if %s (Player %d) is required to beat the game.', item.name, item.player)
         world.precollected_items.remove(item)
         world.state.remove(item)
-        if not world.can_beat_game():
+        world.clear_exp_cache()
+        if not from_start(0):
             world.push_precollected(item)
 
-    # we are now down to just the required progress items in collection_spheres. Unfortunately
-    # the previous pruning stage could potentially have made certain items dependant on others
-    # in the same or later sphere (because the location had 2 ways to access but the item originally
-    # used to access it was deemed not required.) So we need to do one final sphere collection pass
-    # to build up the correct spheres
+    # we are now down to just the required progress items in collection_spheres. The culling could have made items
+    # depend on others in the same or later sphere (a location with two ways in, the item for the one used culled), so
+    # one final sphere collection pass builds up the correct spheres
 
-    required_locations = {item for sphere in collection_spheres for item in sphere}
-    state = CollectionState(world)
-    collection_spheres = []
-    while required_locations:
-        state.sweep_for_events(key_only=True)
-
-        sphere = list(filter(lambda loc: state.can_reach(loc) and state.not_flooding_a_key(world, loc), required_locations))
-
-        for location in sphere:
-            required_locations.remove(location)
-            state.collect(location.item, True, location)
-
-        collection_spheres.append(sphere)
-
-        logging.getLogger('').debug(world.fish.translate("cli","cli","building.final.spheres"), len(collection_spheres), len(sphere), len(required_locations))
-        if not sphere:
-            if world.has_beaten_game(state):
-                required_locations.clear()
-            else:
-                raise RuntimeError(world.fish.translate("cli","cli","cannot.reach.required"))
+    world.clear_exp_cache()
+    required = remaining()
+    collection_spheres, state, stalled = final_spheres(required)
+    left = len(required)
+    for num, sphere in enumerate(collection_spheres):
+        left -= len(sphere)
+        logging.getLogger('').debug(world.fish.translate("cli","cli","building.final.spheres"), num + 1, len(sphere), left)
+    if stalled and not world.has_beaten_game(state):
+        raise RuntimeError(world.fish.translate("cli","cli","cannot.reach.required"))
 
     # store the required locations for statistical analysis
     old_world.required_locations = [(location.name, location.player) for sphere in collection_spheres for location in sphere]
