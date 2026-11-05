@@ -1820,6 +1820,7 @@ def create_key_counters(key_layout, world, player):
     key_counters = {}
     key_layout.found_doors.clear()
     flat_proposal = key_layout.flat_prop
+    flat_set = frozenset(flat_proposal)
     state = ExplorationState(dungeon=key_layout.sector.name)
     state.init_zelda_event_doors(key_layout.event_starts, player)
     if world.doorShuffle[player] == 'vanilla':
@@ -1842,30 +1843,66 @@ def create_key_counters(key_layout, world, player):
             key_layout.prize_relevant = prize_relevant_flag
         else:
             state.visit_region(region, key_checks=True)
-            state.add_all_doors_check_keys(region, flat_proposal, world, player)
-    expand_key_state(state, flat_proposal, world, player)
+            state.add_all_doors_check_keys(region, flat_set, world, player)
+    expand_key_state(state, flat_set, world, player)
     code = state_id(state, key_layout.flat_prop)
     key_counters[code] = create_key_counter(state, key_layout, world, player)
-    queue = deque([(key_counters[code], state)])
+    queue = deque([(key_counters[code], state, code)])
+    special_bk_doors = get_special_big_key_doors(world, player)
+    bit_positions = defaultdict(list)  # 0 is the big key bit
+    for i, d in enumerate(key_layout.flat_prop, start=1):
+        bit_positions[d].append(i)
     while len(queue) > 0:
-        next_key_counter, parent_state = queue.popleft()
+        next_key_counter, parent_state, parent_code = queue.popleft()
+        can_open = {}  # can_open_door reads only the state and whether the door is a small or big key door
         for door in next_key_counter.child_doors:
             key_layout.found_doors.add(door)
-            if door.dest in flat_proposal and door.type != DoorType.SpiralStairs:
+            if door.dest in flat_set and door.type != DoorType.SpiralStairs:
                 key_layout.found_doors.add(door.dest)
-            child_state = parent_state.copy()
-            if door.bigKey or door.name in get_special_big_key_doors(world, player):
+            big_key_door = door.bigKey or door.name in special_bk_doors
+            if big_key_door:
                 key_layout.key_logic.bk_doors.add(door)
             # open the door, if possible
-            if can_open_door(door, child_state, key_layout, world, player):
-                open_a_door(door, child_state, flat_proposal, world, player)
-                expand_key_state(child_state, flat_proposal, world, player)
-                code = state_id(child_state, key_layout.flat_prop)
-                if code not in key_counters.keys():
+            kind = 'small' if door.smallKey else 'big' if door.bigKey else None
+            if kind not in can_open:
+                can_open[kind] = can_open_door(door, parent_state, key_layout, world, player)
+            if can_open[kind]:
+                code = child_state_id(door, big_key_door, parent_state, parent_code, bit_positions, flat_set)
+                if code not in key_counters:
+                    child_state = parent_state.copy()
+                    open_a_door(door, child_state, flat_set, world, player)
+                    expand_key_state(child_state, flat_set, world, player)
                     child_kr = create_key_counter(child_state, key_layout, world, player)
                     key_counters[code] = child_kr
-                    queue.append((child_kr, child_state))
+                    queue.append((child_kr, child_state, code))
     return key_counters
+
+
+def child_state_id(door, big_key_door, parent_state, parent_code, bit_positions, flat_set):
+    """state_id of the state open_a_door(door) leads to, from the parent's: expansion never opens doors."""
+    bits = list(parent_code)
+    if big_key_door:
+        bits[0] = '1'
+        newly_opened = [d.door for d in parent_state.big_doors]
+    elif door in parent_state.prize_door_set:
+        bits[-1] = '1'
+        newly_opened = []
+    else:
+        newly_opened = [door]
+        if door.dest in flat_set and door.type != DoorType.SpiralStairs:
+            newly_opened.append(door.dest)
+    for d in newly_opened:
+        for i in bit_positions.get(d, ()):
+            bits[i] = '1'
+    return ''.join(bits)
+
+
+def _state_code(big_key_opened, opened, flat_proposal, prize_door_set, prize_doors_opened):
+    s_id = '1' if big_key_opened else '0'
+    s_id += ''.join('1' if d in opened else '0' for d in flat_proposal)
+    if len(prize_door_set) > 0:
+        s_id += '1' if prize_doors_opened else '0'
+    return s_id
 
 
 def find_outside_connection(region):
@@ -1988,12 +2025,8 @@ def dict_intersection(dict_a, dict_b):
 
 
 def state_id(state, flat_proposal):
-    s_id = '1' if state.big_key_opened else '0'
-    for d in flat_proposal:
-        s_id += '1' if d in state.opened_doors else '0'
-    if len(state.prize_door_set) > 0:
-        s_id += '1' if state.prize_doors_opened else '0'
-    return s_id
+    return _state_code(state.big_key_opened, set(state.opened_doors), flat_proposal, state.prize_door_set,
+                       state.prize_doors_opened)
 
 
 def validate_id(state, flat_proposal):
