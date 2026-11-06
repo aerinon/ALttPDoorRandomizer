@@ -2,8 +2,9 @@
   "widgets": {
     "key_logic_algorithm": {
       "type": "selectbox",
-      "default": "partial",
+      "default": "experimental",
       "options": [
+        "experimental",
         "partial",
         "strict",
         "dangerous",
@@ -27,7 +28,7 @@
     },
     "dungeon_shuffle_algorithm": {
       "type": "selectbox",
-      "default": "classic",
+      "default": "experimental",
       "options": [
         "classic",
         "experimental",
@@ -36,7 +37,7 @@
     },
     "dungeonintensity": {
       "type": "selectbox",
-      "default": "2",
+      "default": "3",
       "options": [
         "1",
         "2",

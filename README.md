@@ -130,14 +130,14 @@ CLI: `--doorShuffle [vanilla|basic|partitioned|crossed]`
 ### Dungeon Shuffle Algorithm
 
 * Classic - The original algorithm that slices and dices dungeons. Has a few known generation issues.
-* Experimental - The new algorithm currently under development. Not tested with many settings still.
+* Experimental - The new algorithm. The default.
 * Biased - New algorithm, but attempt to place as much as possible in the biased dungeon. Defaults to Hyrule Castle.
 
 ### Intensity (--intensity number)
 
 * Level 1 - Normal door and spiral staircases are shuffled
 * Level 2 - Same as Level 1 plus open edges and both types of straight staircases are shuffled.
-* Level 3 -  Same as Level 2 plus Dungeon Lobbies are shuffled
+* Level 3 -  Same as Level 2 plus Dungeon Lobbies are shuffled. The default.
 
 ### Door Type Shuffle
 
@@ -185,7 +185,7 @@ Determines how small key door logic works.
 * Strict: For those would like to glitch and be protected from yourselves. Small keys door require all small keys to be available to be in logic.
 * Dangerous: Assumes you never use keys out of logic. This is the most dangerous setting and not recommend for use.
 * Static: The entrance randomizer's hand-written key rules, counting chest keys only. Requires vanilla doors and unshuffled key drops and key pots; entrance shuffle is fine. Key drops are assumed free, so with enemy shuffle on, [Enemy Logic](#enemy-logic) must be "Forbid special enemies" (`any_enemy_logic: none`).
-* Experimental: New algorithm under development. Not fully tested yet. Intended to be like partial protection but with more advanced logic for multiple paths.
+* Experimental: Like partial protection but with more advanced logic for multiple paths. The default, and what the Experimental and Biased dungeon shuffle algorithms use in place of Partial Protection and Dangerous.
 
 CLI: `--key_logic [partial|strict|dangerous|static|experimental]`
 

@@ -58,7 +58,7 @@ def build_vanilla_world(mode='open', logic='noglitches', customizer=None, key_lo
     player = 1
     args = parse_cli(['--mode', mode, '--logic', logic, '--shuffle', 'vanilla', '--door_shuffle', 'vanilla',
                       '--intensity', '1', '--suppress_rom', '--spoiler', 'none',
-                      '--key_logic_algorithm', key_logic])
+                      '--dungeon_shuffle_algorithm', 'classic', '--key_logic_algorithm', key_logic])
     world = World(args.multi, args.shuffle, args.door_shuffle, args.logic, args.mode, args.swords,
                   args.difficulty, args.item_functionality, args.timer, args.progressive, args.goal, args.algorithm,
                   args.accessibility, args.shuffleganon, args.custom, args.customitemarray, args.hints, args.spoiler)

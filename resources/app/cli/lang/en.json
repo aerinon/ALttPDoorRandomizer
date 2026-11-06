@@ -276,6 +276,7 @@
     ],
     "key_logic_algorithm": [
       "Key Logic Algorithm (default: %(default)s)",
+      "experimental: Key logic for the experimental algorithm; partial and dangerous run as this with it",
       "dangerous: Key usage must follow logic for safety",
       "partial: Partial protection when using certain minor glitches",
       "strict:  Ensure small keys are available",

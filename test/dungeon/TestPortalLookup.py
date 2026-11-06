@@ -25,7 +25,8 @@ class TestPortalLookup(unittest.TestCase):
         logging.disable(logging.WARNING)
         try:
             with self.assertRaises(Stop) as stopped:
-                Main.main(parse_cli(['--door_shuffle', 'vanilla', '--suppress_rom', '--spoiler', 'none', '--seed', '1']),
+                Main.main(parse_cli(['--door_shuffle', 'vanilla', '--dungeon_shuffle_algorithm', 'classic',
+                                     '--suppress_rom', '--spoiler', 'none', '--seed', '1']),
                           seed=1, fish=BabelFish(lang='en'))
         finally:
             Main.link_doors = original

@@ -32,8 +32,12 @@ class TestKeyLogicDefault(unittest.TestCase):
                                                       '--key_logic_algorithm', requested))
 
     def test_classic_keeps_the_requested_key_logic(self):
-        self.assertEqual('partial', key_logic())
-        self.assertEqual('dangerous', key_logic('--key_logic_algorithm', 'dangerous'))
+        classic = ['--dungeon_shuffle_algorithm', 'classic']
+        self.assertEqual('partial', key_logic(*classic, '--key_logic_algorithm', 'partial'))
+        self.assertEqual('dangerous', key_logic(*classic, '--key_logic_algorithm', 'dangerous'))
+
+    def test_default_is_experimental(self):
+        self.assertEqual('experimental', key_logic())
 
 
 if __name__ == '__main__':

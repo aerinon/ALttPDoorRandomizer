@@ -28,12 +28,12 @@ Existing settings and customizer files work without changes, with one exception:
 
 ### `dungeon_shuffle_algorithm`
 
-Controls which generation algorithm is used. Most new features require `experimental` or `biased`. Both run the [experimental key logic](#experimental-key-logic): a `key_logic_algorithm` of `partial` (the default) or `dangerous` switches to `experimental` with them, while `strict` and `static` are kept.
+Controls which generation algorithm is used. Most new features require `experimental` or `biased`. Both run the [experimental key logic](#experimental-key-logic): a `key_logic_algorithm` of `partial` or `dangerous` switches to `experimental` with them, while `strict` and `static` are kept.
 
 | Value | Description |
 |---|---|
-| `classic` | Original v1 algorithm. Fully backwards-compatible. Default when not specified. |
-| `experimental` | New constraint-based algorithm. Required for sector assignments, custom pools, and custom intensity. More reliable generation at high intensity. |
+| `classic` | Original v1 algorithm. Fully backwards-compatible. |
+| `experimental` | New constraint-based algorithm. Required for sector assignments, custom pools, and custom intensity. More reliable generation at high intensity. Default. |
 | `biased` | Experimental algorithm with one dungeon designated to absorb extra rooms, creating a mega-dungeon. |
 
 ```yaml
@@ -143,11 +143,11 @@ The new algorithms can produce dungeons with more key doors than the original al
 
 | Value | Description                                                                                                                                                                                                                                                                       |
 |---|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `partial` | Rule-based analysis (KeyDoorShuffle). Minor-glitch safe. Default.                                                                                                                                                                 |
+| `partial` | Rule-based analysis (KeyDoorShuffle). Minor-glitch safe.                                                                                                                                                                         |
 | `strict` | Minor-glitch safe. More conservative than `partial` — may require more keys than theoretically necessary in complex layouts. Requires all keys in possesion before opening a single door.                                                                                         |
 | `dangerous` | Relaxed rule-based validation. **Not minor-glitch safe.** Has a known bug in multiworld seeds that can produce unwinnable games. Only use for offline analysis or testing.                                                                                                        |
 | `static` | The entrance randomizer's hand-written key rules, counting chest keys only. Requires vanilla doors and unshuffled key drops and key pots; with enemy shuffle on, `any_enemy_logic` must be `none`. |
-| `experimental` | The rewritten key logic (below). Minor-glitch safe in the same manner as partial. Used by `experimental` and `biased` generation in place of `partial` and `dangerous`. |
+| `experimental` | The rewritten key logic (below). Minor-glitch safe in the same manner as partial. Used by `experimental` and `biased` generation in place of `partial` and `dangerous`. Default. |
 
 ### Experimental Key Logic
 
@@ -333,6 +333,6 @@ These features are planned for future development on this branch:
 
 Existing settings and customizer files continue to work, with one exception: `door_type_mode: chaos` has moved to `door_type_distribution: chaos`. The closest replacement is `door_type_mode: all` plus `door_type_distribution: chaos`; unlike the old mode, the new one pools door types across all dungeons, not only within each shuffle pool, and it is not compatible with `door_shuffle: basic`.
 
-The new `dungeon_shuffle_algorithm` defaults to `classic` (v1 behavior) when not specified.
+The defaults are now `dungeon_shuffle_algorithm: experimental`, `key_logic_algorithm: experimental` and `intensity: 3`. Settings and customizer files that leave these out get the new defaults; set `dungeon_shuffle_algorithm: classic`, `key_logic_algorithm: partial` and `intensity: 2` for v1 behavior.
 
-The new features — sector assignments, custom pools, custom intensity, and biased generation — all require explicitly setting `dungeon_shuffle_algorithm` to `experimental` or `biased`. Nothing changes unless you opt in.
+The new features — sector assignments, custom pools, custom intensity, and biased generation — require `dungeon_shuffle_algorithm` of `experimental` or `biased`.

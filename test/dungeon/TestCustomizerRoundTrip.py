@@ -61,11 +61,12 @@ class TestCustomizerRoundTrip(unittest.TestCase):
                 self.assertEqual(before[aspect], after[aspect])
 
     def test_basic_classic(self):
-        self.round_trip(['--door_shuffle', 'basic', '--intensity', '2'])
+        self.round_trip(['--door_shuffle', 'basic', '--intensity', '2', '--dungeon_shuffle_algorithm', 'classic'])
 
     def test_standard_escape_weapon(self):
         # vanilla fill always arms the uncle with a sword, one of several in the pool
         before = self.round_trip(['--door_shuffle', 'basic', '--intensity', '2', '--mode', 'standard',
+                                  '--dungeon_shuffle_algorithm', 'classic',
                                   '--algorithm', 'vanilla_fill'])
         self.assertEqual(before['placements']["Link's Uncle"], 'Progressive Sword')
 

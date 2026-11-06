@@ -29,8 +29,8 @@ class TestVanillaKeyLogicOrder(unittest.TestCase):
             raise Stop(world)
 
         Main.link_doors_prep = stop
-        argv = ['--door_shuffle', 'vanilla', '--shuffle', 'vanilla', '--mode', 'standard',
-                '--suppress_rom', '--spoiler', 'none', '--seed', '1']
+        argv = ['--door_shuffle', 'vanilla', '--dungeon_shuffle_algorithm', 'classic', '--shuffle', 'vanilla',
+                '--mode', 'standard', '--suppress_rom', '--spoiler', 'none', '--seed', '1']
         logging.disable(logging.WARNING)
         try:
             with self.assertRaises(Stop) as stopped:
