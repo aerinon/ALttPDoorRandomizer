@@ -9,7 +9,7 @@ from contextlib import suppress
 from BaseClasses import CollectionState, FillError, LocationType
 from Items import ItemFactory
 from Regions import shop_to_location_table, retro_shops
-from dungeon.SmallKeyDoorShuffle import is_key_door_layout_satisfiable
+from source.dungeon.SmallKeyDoorShuffle import is_key_door_layout_satisfiable
 from source.item.FillUtil import filter_locations, classify_major_items, replace_trash_item, vanilla_fallback
 from source.item.FillUtil import filter_special_locations, valid_pot_items
 from source.dungeon.NewKeyLogic import self_lock_ignored_events

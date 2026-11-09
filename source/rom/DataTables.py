@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from Utils import snes_to_pc, int24_as_bytes, int16_as_bytes, load_cached_yaml, pc_to_snes
-from dungeon.EnemyList import overlord_translation
+from source.dungeon.EnemyList import overlord_translation
 
 from source.dungeon.EnemyList import EnemyTable, init_vanilla_sprites, vanilla_sprites, init_enemy_stats, EnemySprite
 from source.dungeon.EnemyList import sprite_translation
