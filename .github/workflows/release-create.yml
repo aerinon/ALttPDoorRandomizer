@@ -43,7 +43,7 @@ jobs:
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
-          macos-15,
+          # macos-latest,  # macOS builds off: GitHub isn't acquiring macOS arm64 runners
           windows-latest # windows-2022
         ]
         #TODO: Python Version to run on
@@ -101,7 +101,7 @@ jobs:
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
-          macos-15,
+          # macos-latest,  # macOS builds off: GitHub isn't acquiring macOS arm64 runners
           windows-latest # windows-2022
         ]
         #TODO: Python Version to run on
@@ -176,7 +176,7 @@ jobs:
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
-          macos-15,
+          # macos-latest,  # macOS builds off: GitHub isn't acquiring macOS arm64 runners
           windows-latest # windows-2022
         ]
         #TODO: Python Version to run on
@@ -217,7 +217,7 @@ jobs:
         os-name: [
           # ubuntu-latest,  # ubuntu-22.04
           ubuntu-22.04,
-          macos-15,
+          # macos-latest,  # macOS builds off: GitHub isn't acquiring macOS arm64 runners
           windows-latest # windows-2022
         ]
         python-version: [ "3.12" ]
@@ -287,9 +287,10 @@ jobs:
 
       # download macos archive artifact
       - name: 🔽Download MacOS Archive Artifact
+        if: false  # macOS builds off: GitHub isn't acquiring macOS arm64 runners
         uses: actions/download-artifact@v4.1.7
         with:
-          name: archive-macos-15-py${{ matrix.python-version }}
+          name: archive-macos-latest-py${{ matrix.python-version }}
           path: ${{ steps.parentDir.outputs.parentDir }}/deploy/macos
 
       # download windows archive artifact
@@ -309,6 +310,7 @@ jobs:
 
       # determine macos archive asset
       - name: ❔Identify MacOS Archive Asset
+        if: false  # macOS builds off: GitHub isn't acquiring macOS arm64 runners
         id: identify-macos-asset
         shell: bash
         run: |
@@ -393,7 +395,7 @@ jobs:
           asset_path: ${{ steps.parentDir.outputs.parentDir }}/deploy/macos/${{ steps.identify-macos-asset.outputs.asset_macos }}
           asset_name: ${{ steps.debug_info.outputs.asset_prefix }}-osx.tar.gz
           asset_content_type: application/gzip
-        if: steps.create_release.outcome == 'success'
+        if: false  # macOS builds off: GitHub isn't acquiring macOS arm64 runners
 
       # upload windows archive asset
       #TODO: Make sure we're firing on the proper branches
