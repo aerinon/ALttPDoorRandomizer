@@ -270,6 +270,23 @@ This is done as `<dungeon>: <boss>`
 
 E.g. `Skull Woods: Helmasaur King` for helmacopter. Be sure to turn on at least one enemizer setting for the bosses to actually be randomized.
 
+### enemies
+
+This must be defined by player, and only applies with `enemy_shuffle` on and no `force_enemy`. Under `Underworld` (keyed by room id) and `Overworld` (keyed by area id), map a sprite slot index to an enemy name from EnemyList.py. Slots the enemizer cannot change are ignored.
+
+In the underworld, HardhatBeetle, Tektite and Stalfos take their variant from `sub_type`, so they may be written as a dictionary with `sub_type` 0 or 1. With default enemy health, a beetle has 32 HP at `sub_type` 0 and 6 HP at 1, and a Tektite has 8 HP at 0 and 12 HP at 1. A Stalfos with 1 uses its alternate palette and throws a bone after it dodges. Without `sub_type`, the enemizer picks one.
+
+```
+enemies:
+  1:
+    Underworld:
+      0x4:
+        1: Wizzrobe
+        2:
+          kind: HardhatBeetle
+          sub_type: 1
+```
+
 ### start_inventory
 
 This must be defined by player. Each player number should be listed with a list of items to start with.

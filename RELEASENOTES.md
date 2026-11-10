@@ -25,6 +25,7 @@ A new dungeon generator, now the default. See [NewGeneration](https://github.com
 * Smaller dungeons option: leave out empty filler rooms for tighter dungeons
 * More door shuffle options: door type only shuffle, paired dungeons, and door type distribution
 * Customizer: choose which dungeons mix, force rooms into dungeons, pick which connections shuffle. Custom rooms, text, and more from recent Limited Run
+* Enemizer: tektites, hardhat beetles and stalfos indoors now each have their own variant, so shuffled ones can be either. Logic counts health by variant.
 
 ## Beta Testing
 

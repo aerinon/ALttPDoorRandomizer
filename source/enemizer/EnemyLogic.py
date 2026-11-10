@@ -4,7 +4,7 @@ from collections import defaultdict
 import RaceRandom as random
 
 from source.logic.Rule import RuleFactory
-from source.dungeon.EnemyList import EnemySprite
+from source.dungeon.EnemyList import EnemySprite, variant_sprites, variant_index
 
 
 # these are for drops only
@@ -508,9 +508,8 @@ def number_of_hits(source_name, damage_src, enemy_sub_class, stats, enemy_sprite
     elif damage_amount <= 0x64:
         health = stats[enemy_sprite.kind].health
         if isinstance(health, tuple):
-            if enemy_sprite.kind in [EnemySprite.Tektite, EnemySprite.HardhatBeetle]:
-                idx = enemy_sprite.tile_x & 0x1
-                health = health[idx]
+            if enemy_sprite.kind in variant_sprites:
+                health = health[variant_index(enemy_sprite, region.is_outdoors())]
             elif region.is_light_world and region.is_dark_world:
                 health = min(health)
             elif region.is_light_world:

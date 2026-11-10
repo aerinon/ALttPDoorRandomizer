@@ -35,9 +35,7 @@ class EnemyStats:
 
         # health special cases:
         # Octorok light/dark world
-        # check the 0000 000x of the x coordinate
-        # Hardhat Beetle - (000b bit of x coordinate?) (blue if set, red otherwise)
-        # Tektite - starting position? - (000r bit of x coordinate) (red if set, blue otherwise)
+        # Hardhat Beetle, Tektite: variant_index (tile_x & 1 outdoors, sub_type != 0 indoors)
         # RatCricket light/dark world
         # Keese light/dark world
         # Rope light/dark world
@@ -318,7 +316,7 @@ def init_enemy_stats():
         EnemySprite.RedBari: EnemyStats(EnemySprite.RedBari, False, True, 6, 2, health=2, dmg=3),
         EnemySprite.BlueBari: EnemyStats(EnemySprite.BlueBari, False, True, 6, 2, health=2, dmg=1),
         EnemySprite.TalkingTree: EnemyStats(EnemySprite.TalkingTree, True, dmg=0),
-        EnemySprite.HardhatBeetle: EnemyStats(EnemySprite.HardhatBeetle, False, True, (2, 6), health=32, dmg=0),
+        EnemySprite.HardhatBeetle: EnemyStats(EnemySprite.HardhatBeetle, False, True, (2, 6), health=(32, 6), dmg=0),
         EnemySprite.Deadrock: EnemyStats(EnemySprite.Deadrock, False, True, dmg=3, health=255),
         EnemySprite.DarkWorldHintNpc: EnemyStats(EnemySprite.DarkWorldHintNpc, True, dmg=0),
         EnemySprite.AdultNpc: EnemyStats(EnemySprite.AdultNpc, True, dmg=0),
@@ -475,7 +473,7 @@ def init_enemy_stats():
         EnemySprite.FourWayShooter: EnemyStats(EnemySprite.FourWayShooter, True, ignore=True, dmg=0),
         EnemySprite.Pokey: EnemyStats(EnemySprite.Pokey, False, True, 7, health=32, dmg=6),
         EnemySprite.BigFairy: EnemyStats(EnemySprite.BigFairy, True, dmg=0),
-        EnemySprite.Tektite: EnemyStats(EnemySprite.Tektite, False, True, 2, health=12, dmg=(3, 5)),
+        EnemySprite.Tektite: EnemyStats(EnemySprite.Tektite, False, True, 2, health=(8, 12), dmg=(3, 5)),
         EnemySprite.Chainchomp: EnemyStats(EnemySprite.Chainchomp, False, False, dmg=7),
         EnemySprite.TrinexxRockHead: EnemyStats(EnemySprite.TrinexxRockHead, True, dmg=7, dmask=0x10),
         EnemySprite.TrinexxFireHead: EnemyStats(EnemySprite.TrinexxFireHead, True, dmg=7, dmask=0x10),
@@ -539,6 +537,7 @@ class Sprite(object):
         self.water = False  # water types can spawn here
         self.embedded = False  # sprite starts on impassible terrian
         self.never_drop = False
+        self.shuffled = False  # kind chosen by the enemizer
 
     def copy(self):
         sprite = Sprite(self.super_tile, self.kind, self.sub_type, self.layer, self.tile_x, self.tile_y, self.region,
@@ -548,6 +547,7 @@ class Sprite(object):
         sprite.water = self.water
         sprite.embedded = self.embedded
         sprite.never_drop = self.never_drop
+        sprite.shuffled = self.shuffled
         return sprite
 
     def sprite_data(self):
@@ -571,6 +571,11 @@ class Sprite(object):
     def __str__(self):
         return enemy_names[self.kind] if self.sub_type != 0x7 else overlord_names[self.kind]
 
+    def describe_uw(self):
+        if self.kind in variant_sprites and self.sub_type != SpriteType.Overlord:
+            return f'{self} (sub_type {self.sub_type})'
+        return str(self)
+
     @staticmethod
     def factory(room_id, kind, tile_x, tile_y, layer, sub_type=0x00):
         """Create a sprite from basic parameters.
@@ -589,6 +594,15 @@ class Sprite(object):
         return Sprite(room_id, kind, sub_type, layer, tile_x, tile_y)
 
 
+# the ROM picks these variants from sub_type indoors and from tile_x & 1 outdoors
+variant_sprites = frozenset({EnemySprite.HardhatBeetle, EnemySprite.Tektite, EnemySprite.Stalfos})
+
+
+def variant_index(sprite, outdoors):
+    return sprite.tile_x & 1 if outdoors else int(sprite.sub_type != 0)
+
+
+
 # map of super_tile to list of Sprite objects:
 vanilla_sprites = {}
 
@@ -597,6 +611,8 @@ def create_sprite(super_tile, kind, sub_type, layer, tile_x, tile_y, region=None
                   drops_item=False, drop_item_kind=None, fix=False, water=False, embed=False, never_drop=False):
     if super_tile not in vanilla_sprites:
         vanilla_sprites[super_tile] = []
+    if kind in variant_sprites and sub_type != SpriteType.Overlord:
+        sub_type = tile_x & 1  # keeps the vanilla variant
     sprite = Sprite(super_tile, kind, sub_type, layer, tile_x, tile_y, region, drops_item, drop_item_kind)
     if fix:
         sprite.static = True

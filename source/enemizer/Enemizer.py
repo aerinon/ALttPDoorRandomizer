@@ -2,7 +2,7 @@ import RaceRandom as random
 from collections import defaultdict
 from Utils import snes_to_pc
 
-from source.dungeon.EnemyList import SpriteType, EnemySprite, sprite_translation
+from source.dungeon.EnemyList import SpriteType, EnemySprite, sprite_translation, variant_sprites
 from source.dungeon.RoomList import Room010C
 from source.enemizer.SpriteSheets import sub_group_choices
 from source.enemizer.SpriteSheets import randomize_underworld_sprite_sheets, randomize_overworld_sprite_sheets
@@ -292,7 +292,35 @@ def exceeds_sprite_limit(limit, sprite):
     return sprite_limiter[sprite.sprite]-1+limit > 15 if sprite.sprite in sprite_limiter else False
 
 
-def randomize_underworld_rooms(data_tables, world, player, custom_uw):
+def shuffled_sub_type(kind, original, custom=None):
+    original_kind, original_sub_type = original
+    if kind in variant_sprites:
+        return custom if custom is not None else random.randint(0, 1)
+    return 0 if original_kind in variant_sprites else original_sub_type
+
+
+def split_custom_sub_types(custom_uw):
+    """Customizer entries are a name, or {kind: name, sub_type: 0|1} for variant enemies."""
+    kinds, sub_types = {}, {}
+    for room_id, slots in custom_uw.items():
+        kinds[room_id] = {}
+        for i, entry in slots.items():
+            if isinstance(entry, dict):
+                kinds[room_id][i] = entry['kind']
+                if 'sub_type' in entry:
+                    sub_type = entry['sub_type']
+                    if sprite_translation[entry['kind']] not in variant_sprites or sub_type not in (0, 1):
+                        raise ValueError(f'Enemy {entry["kind"]} in room {hex(room_id)} slot {i}: '
+                                         f'sub_type {sub_type} is only allowed as 0 or 1 on '
+                                         f'HardhatBeetle, Tektite and Stalfos')
+                    sub_types.setdefault(room_id, {})[i] = sub_type
+            else:
+                kinds[room_id][i] = entry
+    return kinds, sub_types
+
+
+def randomize_underworld_rooms(data_tables, world, player, custom_uw, custom_sub_types=None):
+    custom_sub_types = custom_sub_types or {}
     any_enemy_logic = world.any_enemy_logic[player]
     enemy_drops_active = world.dropshuffle[player] in ['underworld']
     specific = setup_specific_requirements(data_tables)
@@ -311,6 +339,7 @@ def randomize_underworld_rooms(data_tables, world, player, custom_uw):
             chosen_sheet = random.choice(candidate_sheets)
             data_tables.room_headers[room_id].sprite_sheet = chosen_sheet.id - 0x40
         if randomizeable_sprites:
+            originals = {i: (s.kind, s.sub_type) for i, s in randomizeable_sprites.items()}
             candidate_sheets = get_possible_sheets(room_id, data_tables, specific, all_sheets, uw_sheets)
             done = False
             while not done:
@@ -348,6 +377,9 @@ def randomize_underworld_rooms(data_tables, world, player, custom_uw):
                         weight = [data_tables.uw_weights[r.sprite] for r in choice_list]
                         chosen = random.choices(choice_list, weight, k=1)[0]
                         sprite.kind = chosen.sprite
+                    sprite.shuffled = True
+                    sprite.sub_type = shuffled_sub_type(sprite.kind, originals[i],
+                                                        custom_sub_types.get(room_id, {}).get(i))
                     if sprite.kind in sprite_limiter:
                         sprite_limit += sprite_limiter[sprite.kind]-1
                     if sprite.kind == EnemySprite.Wallmaster:
@@ -419,6 +451,7 @@ def randomize_overworld_enemies(data_tables, custom_ow):
                     weight = [data_tables.ow_weights[r.sprite] for r in candidate_sprites]
                     chosen = random.choices(candidate_sprites, weight, k=1)[0]
                     sprite.kind = chosen.sprite
+                sprite.shuffled = True
         # randomize the bush sprite per area
         bush_candidates = [x for x in candidate_sprites if x.bush_valid]
         weight = [data_tables.ow_weights[r.sprite] for r in bush_candidates]
@@ -439,7 +472,7 @@ skip_sprites = {
 def randomize_enemies(world, player):
     if world.enemy_shuffle[player] != 'none':
         data_tables = world.data_tables[player]
-        custom_uw, custom_ow = {}, {}
+        custom_uw, custom_ow, custom_sub_types = {}, {}, {}
         if world.force_enemy[player]:
             custom_ow = {area_id: {i: world.force_enemy[player] for i, s in enumerate(sprite_list)} for area_id, sprite_list in world.data_tables[player].ow_enemy_table.items()}
             forced_req = data_tables.sprite_requirements.get((sprite_translation[world.force_enemy[player]], 0))
@@ -450,11 +483,11 @@ def randomize_enemies(world, player):
             enemy_map = world.customizer.get_enemies() if world.customizer else None
             if enemy_map and player in enemy_map:
                 if 'Underworld' in enemy_map[player]:
-                    custom_uw = enemy_map[player]['Underworld']
+                    custom_uw, custom_sub_types = split_custom_sub_types(enemy_map[player]['Underworld'])
                 if 'Overworld' in enemy_map[player]:
                     custom_ow = enemy_map[player]['Overworld']
         randomize_underworld_sprite_sheets(data_tables.sprite_sheets, data_tables, custom_uw)
-        randomize_underworld_rooms(data_tables, world, player, custom_uw)
+        randomize_underworld_rooms(data_tables, world, player, custom_uw, custom_sub_types)
         randomize_overworld_sprite_sheets(data_tables.sprite_sheets, data_tables, custom_ow)
         randomize_overworld_enemies(data_tables, custom_ow)
         # fix thief stats

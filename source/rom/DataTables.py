@@ -268,7 +268,7 @@ def init_custom_sprites(world, player, custom_sprites):
 
     Sprite format (5 or 4 params):
         [kind, tile_x, tile_y, layer, sub_type]  # Full format
-        [kind, tile_x, tile_y, layer]             # sub_type defaults to 0x00
+        [kind, tile_x, tile_y, layer]             # sub_type defaults to 0x00 (tile_x & 1 for variant_sprites)
 
     kind can be either:
         - Hex string: "0x83"
@@ -281,7 +281,7 @@ def init_custom_sprites(world, player, custom_sprites):
             - ["CricketRat", "0x15", "0x06", "0x01"]          # CricketRat at x=0x15, y=0x06, layer=1, sub_type=0x00
             - ["0x6D", "0x18", "0x09", "0x01"]                # Same as CricketRat (0x6D = CricketRat ID)
     """
-    from source.dungeon.EnemyList import Sprite, sprite_translation
+    from source.dungeon.EnemyList import Sprite, sprite_translation, variant_sprites
 
     data_tables = world.data_tables[player]
     for room_id, sprite_list in custom_sprites.items():
@@ -310,8 +310,10 @@ def init_custom_sprites(world, player, custom_sprites):
             layer = int(sprite_data[3], 16)
             if kind_param == 'Overlord':
                 sub_type = 0x07  # special sub type
+            elif len(sprite_data) > 4:
+                sub_type = int(sprite_data[4], 16)
             else:
-                sub_type = int(sprite_data[4], 16) if len(sprite_data) > 4 else 0x00
+                sub_type = tile_x & 1 if kind in variant_sprites else 0x00
 
             # Create sprite using factory
             sprite = Sprite.factory(room_id, kind, tile_x, tile_y, layer, sub_type)

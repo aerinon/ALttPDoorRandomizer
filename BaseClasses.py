@@ -3109,7 +3109,7 @@ class Spoiler(object):
                 player_tag = ' ' + self.world.get_player_names(player) if self.world.players > 1 else ''
                 for area, sprite_list in self.world.data_tables[player].uw_enemy_table.room_map.items():
                     for idx, sprite in enumerate(sprite_list):
-                        outfile.write(f'{hex(area)} Enemy #{idx + 1}{player_tag}: {str(sprite)}\n')
+                        outfile.write(f'{hex(area)} Enemy #{idx + 1}{player_tag}: {sprite.describe_uw()}\n')
 
             # drops, prize packs and in-game text are recorded while patching the rom, so they are absent
             # when the rom is suppressed
