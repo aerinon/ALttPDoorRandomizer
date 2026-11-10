@@ -6,7 +6,8 @@ from test.TestBase import build_vanilla_world
 
 KEYS = {'Ganons Tower': 'Small Key (Ganons Tower)', 'Hyrule Castle': 'Small Key (Escape)',
         'Turtle Rock': 'Small Key (Turtle Rock)', 'Palace of Darkness': 'Small Key (Palace of Darkness)',
-        'Ice Palace': 'Small Key (Ice Palace)', 'Misery Mire': 'Small Key (Misery Mire)'}
+        'Ice Palace': 'Small Key (Ice Palace)', 'Misery Mire': 'Small Key (Misery Mire)',
+        'Skull Woods': 'Small Key (Skull Woods)'}
 
 
 class TestStaticKeyLogic(unittest.TestCase):
@@ -122,6 +123,15 @@ class TestStaticKeyLogic(unittest.TestCase):
             self.assertEqual(self.min_keys('Misery Mire - Compass Chest', mire), 2)
         finally:
             self.place('Misery Mire - Big Key Chest', None)
+
+    def test_skull_woods_front_doors(self):
+        sw = 'Skull Woods'
+        west = self.world.get_entrance('Skull 1 Lobby WS', 1)
+        pinball = self.world.get_entrance('Skull Map Room SE', 1)
+        self.assertFalse(west.can_reach(self.state(sw, 2)))
+        self.assertTrue(west.can_reach(self.state(sw, 3)))
+        self.assertFalse(pinball.can_reach(self.state(sw, 1)))
+        self.assertTrue(pinball.can_reach(self.state(sw, 2)))
 
     def test_requires_vanilla_doors(self):
         from source.dungeon.StaticKeyLogic import static_logic_supported
