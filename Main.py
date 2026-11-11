@@ -198,6 +198,7 @@ def main(args, seed=None, fish=None, progress=None):
                         world.push_precollected(item)
     if args.print_custom_yaml:
         world.settings.record_info(world)
+        world.settings.record_enemies(world)
 
     for player in range(1, world.players + 1):
         if world.customizer and world.customizer.get_custom_rooms(player):

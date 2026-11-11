@@ -255,7 +255,7 @@ def place_bosses(world, player):
 
     # temporary hack for swordless kholdstare:
     if world.boss_shuffle[player] in ["simple", "full", "unique"]:
-        if world.swords[player] == 'swordless':
+        if world.swords[player] == 'swordless' and ['Ice Palace', None] in boss_locations:
             world.get_dungeon('Ice Palace', player).boss = BossFactory('Kholdstare', player)
             logging.getLogger('').debug('Placing boss Kholdstare at Ice Palace')
             boss_locations.remove(['Ice Palace', None])
@@ -267,7 +267,8 @@ def place_bosses(world, player):
         else:  # all bosses present, the three duplicates chosen at random
             bosses = placeable_bosses + random.sample(placeable_bosses, 3)
         for u, level in used_bosses:
-            placeable_bosses.remove(u)
+            if u in bosses:
+                bosses.remove(u)
 
         logging.getLogger('').debug('Bosses chosen %s', bosses)
 

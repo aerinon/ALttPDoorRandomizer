@@ -26,6 +26,7 @@ A new dungeon generator, now the default. See [NewGeneration](https://github.com
 * More door shuffle options: door type only shuffle, paired dungeons, and door type distribution
 * Customizer: choose which dungeons mix, force rooms into dungeons, pick which connections shuffle. Custom rooms, text, and more from recent Limited Run
 * Enemizer: tektites, hardhat beetles and stalfos indoors now each have their own variant, so shuffled ones can be either. Logic counts health by variant.
+* Customizer: exported files (`--print_custom_yaml`) now include enemies and sprite sheets, so an enemizer seed reloads unchanged. See [Customizer](docs/Customizer.md)
 
 ## Beta Testing
 
@@ -37,6 +38,7 @@ Please report in #bug-reports, with your spoiler log:
 
 * Bunny logic generation hangs
 * Inverted bomb shop placement issues
+* Customizer: boss shuffle could place a boss a customizer file already placed, and swordless files with bosses failed to load
 * All 1.5.9 fixes
 
 ## Compatiblity Note

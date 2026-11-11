@@ -668,9 +668,36 @@ def setup_custom_enemy_sheets(custom_enemies, sheets, data_tables, sheet_range, 
         find_matching_sheet(sheet_req, sheets, sheet_range, [room_id], True)
 
 
-def randomize_underworld_sprite_sheets(sheets, data_tables, custom_enemies):
-    setup_required_dungeon_groups(sheets, data_tables)
+def pin_sheet_contents(pinned, sheets, sheet_range):
+    for num, sub_groups in (pinned or {}).get('sheets', {}).items():
+        if (num not in sheet_range or not isinstance(sub_groups, list) or len(sub_groups) != 4
+                or not all(g is None or (isinstance(g, int) and 0 <= g < 0x100) for g in sub_groups)):
+            raise ValueError(f'Sprite sheet {num}: expected a sheet in {sheet_range.start}-{sheet_range.stop - 1} '
+                             f'with four sub-groups from 0 to 255, got {sub_groups}')
+        sheet = sheets[num]  # sub-groups locked here belong to a boss and stay
+        sheet.add_sprite_to_sheet([None if sheet.locked[i] else g for i, g in enumerate(sub_groups)])
 
+
+def pin_sheet_places(pinned, places_key, sheets, sheet_range, shuffled_places):
+    """Moves each listed room or area onto its sheet; returns the pinned rooms or areas."""
+    places = (pinned or {}).get(places_key, {})
+    for place, num in places.items():
+        if place not in shuffled_places:
+            raise ValueError(f'{places_key} {place}: the enemizer does not choose a sprite sheet here')
+        if num not in sheet_range:
+            raise ValueError(f'{places_key} {hex(place)}: sprite sheet {num} is outside '
+                             f'{sheet_range.start}-{sheet_range.stop - 1}')
+        for other in sheet_range:
+            sheets[other].room_set.discard(place)
+        sheets[num].room_set.add(place)
+    return set(places)
+
+
+def randomize_underworld_sprite_sheets(sheets, data_tables, custom_enemies, pinned=None, shuffled_rooms=()):
+    pin_sheet_contents(pinned, sheets, range(65, 124))
+    setup_required_dungeon_groups(sheets, data_tables)
+    pinned_rooms = pin_sheet_places(pinned, 'rooms', sheets, range(65, 124), shuffled_rooms)
+    custom_enemies = {k: v for k, v in custom_enemies.items() if k not in pinned_rooms}
     setup_custom_enemy_sheets(custom_enemies, sheets, data_tables, range(65, 124), True)
 
     for num in range(65, 124):  # sheets 0x41 to 0x7B inclusive
@@ -774,9 +801,11 @@ def find_matching_sheet(groups, sheets, search_sheets, room_list=None, lock_matc
         chosen_sheet.add_sprite_to_sheet(chosen_groups, room_list)
 
 
-def randomize_overworld_sprite_sheets(sheets, data_tables, custom_enemies):
+def randomize_overworld_sprite_sheets(sheets, data_tables, custom_enemies, pinned=None, shuffled_areas=()):
+    pin_sheet_contents(pinned, sheets, range(1, 64))
     setup_required_overworld_groups(sheets)
-
+    pinned_areas = pin_sheet_places(pinned, 'areas', sheets, range(1, 64), shuffled_areas)
+    custom_enemies = {k: v for k, v in custom_enemies.items() if k not in pinned_areas}
     setup_custom_enemy_sheets(custom_enemies, sheets, data_tables, range(1, 64), False)
 
     for num in range(1, 64):  # sheets 0x1 to 0x3F inclusive

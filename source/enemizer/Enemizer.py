@@ -319,16 +319,18 @@ def split_custom_sub_types(custom_uw):
     return kinds, sub_types
 
 
+# boss and ganon rooms keep the sheet bosses or the base game chose
+shuffled_rooms = [r for r in range(0, 0x128) if r not in {0, 1, 3, 6, 7, 0xd, 0x14, 0x20, 0x29, 0x30, 0x33,
+                                                          0x4d, 0x5a, 0x90, 0xa4, 0xac, 0xc8, 0xde}]
+
+
 def randomize_underworld_rooms(data_tables, world, player, custom_uw, custom_sub_types=None):
     custom_sub_types = custom_sub_types or {}
     any_enemy_logic = world.any_enemy_logic[player]
     enemy_drops_active = world.dropshuffle[player] in ['underworld']
     specific = setup_specific_requirements(data_tables)
     uw_candidates, uw_sheets, all_sheets = find_candidate_sprites(data_tables, range(65, 124))
-    for room_id in range(0, 0x128):
-        if room_id in {0, 1, 3, 6, 7, 0xd, 0x14, 0x20, 0x29, 0x30, 0x33,
-                       0x4d, 0x5a, 0x90, 0xa4, 0xac, 0xc8, 0xde}:
-            continue
+    for room_id in shuffled_rooms:
         current_sprites = data_tables.uw_enemy_table.room_map[room_id]
         sprite_limit = sum(sprite_limiter[x.kind] if x.kind in sprite_limiter else 1 for x in current_sprites)
         if room_id in {0x3f, 0x44, 0x45, 0x93, 0xce, 0x117}:
@@ -423,14 +425,17 @@ def filter_water_phobic(options, sprite):
     return [x for x in options if not x.water_phobic or not sprite.water]
 
 
-def randomize_overworld_enemies(data_tables, custom_ow):
+_areas = [0, 2, 3, 5, 7, 0xA, 0xF, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
+          0x1a, 0x1b, 0x1d, 0x1e, 0x22, 0x25, 0x28, 0x29, 0x2A, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f,
+          0x30, 0x32, 0x33, 0x34, 0x35, 0x37, 0x3a, 0x3b, 0x3c, 0x3f]
+# light world, dark world, specials, post aga light world
+shuffled_areas = _areas + [x + 0x40 for x in _areas] + [0x80, 0x81] + [x + 0x90 for x in _areas]
+
+
+def randomize_overworld_enemies(data_tables, custom_ow, custom_bushes=None):
+    custom_bushes = custom_bushes or {}
     ow_candidates, ow_sheets, all_sheets = find_candidate_sprites(data_tables, range(1, 64), False)
-    areas_to_randomize = [0, 2, 3, 5, 7, 0xA, 0xF, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
-                          0x1a, 0x1b, 0x1d, 0x1e, 0x22, 0x25, 0x28, 0x29, 0x2A, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f,
-                          0x30, 0x32, 0x33, 0x34, 0x35, 0x37, 0x3a, 0x3b, 0x3c, 0x3f]
-    area_list = areas_to_randomize + [x + 0x40 for x in areas_to_randomize]  # light world + dark world
-    area_list += [0x80, 0x81] + [x + 0x90 for x in areas_to_randomize]  # specials + post aga LW
-    for area_id in area_list:
+    for area_id in shuffled_areas:
         randomizeable_sprites = get_randomize_able_sprites_ow(area_id, data_tables)
         if not randomizeable_sprites:
             candidate_sheets = get_possible_ow_sheets(area_id, all_sheets, ow_sheets, data_tables)
@@ -453,6 +458,13 @@ def randomize_overworld_enemies(data_tables, custom_ow):
                     sprite.kind = chosen.sprite
                 sprite.shuffled = True
         # randomize the bush sprite per area
+        if area_id in custom_bushes:
+            bush_req = data_tables.sprite_requirements[(sprite_translation[custom_bushes[area_id]], 0)]
+            if not chosen_sheet.valid_sprite(bush_req):
+                raise ValueError(f'Bush enemy {custom_bushes[area_id]} in area {hex(area_id)} '
+                                 f'does not fit sprite sheet {chosen_sheet.id}')
+            data_tables.bush_sprite_table[area_id] = bush_req
+            continue
         bush_candidates = [x for x in candidate_sprites if x.bush_valid]
         weight = [data_tables.ow_weights[r.sprite] for r in bush_candidates]
         bush_sprite_choice = random.choices(bush_candidates, weight, k=1)[0]
@@ -472,7 +484,9 @@ skip_sprites = {
 def randomize_enemies(world, player):
     if world.enemy_shuffle[player] != 'none':
         data_tables = world.data_tables[player]
-        custom_uw, custom_ow, custom_sub_types = {}, {}, {}
+        custom_uw, custom_ow, custom_sub_types, custom_bushes = {}, {}, {}, {}
+        sheet_layout = world.customizer.get_sprite_sheets() if world.customizer else None
+        sheet_layout = sheet_layout.get(player, {}) if sheet_layout else {}
         if world.force_enemy[player]:
             custom_ow = {area_id: {i: world.force_enemy[player] for i, s in enumerate(sprite_list)} for area_id, sprite_list in world.data_tables[player].ow_enemy_table.items()}
             forced_req = data_tables.sprite_requirements.get((sprite_translation[world.force_enemy[player]], 0))
@@ -486,10 +500,14 @@ def randomize_enemies(world, player):
                     custom_uw, custom_sub_types = split_custom_sub_types(enemy_map[player]['Underworld'])
                 if 'Overworld' in enemy_map[player]:
                     custom_ow = enemy_map[player]['Overworld']
-        randomize_underworld_sprite_sheets(data_tables.sprite_sheets, data_tables, custom_uw)
+                if 'Bushes' in enemy_map[player]:
+                    custom_bushes = enemy_map[player]['Bushes']
+        randomize_underworld_sprite_sheets(data_tables.sprite_sheets, data_tables, custom_uw,
+                                           sheet_layout.get('Underworld'), shuffled_rooms)
         randomize_underworld_rooms(data_tables, world, player, custom_uw, custom_sub_types)
-        randomize_overworld_sprite_sheets(data_tables.sprite_sheets, data_tables, custom_ow)
-        randomize_overworld_enemies(data_tables, custom_ow)
+        randomize_overworld_sprite_sheets(data_tables.sprite_sheets, data_tables, custom_ow,
+                                          sheet_layout.get('Overworld'), shuffled_areas)
+        randomize_overworld_enemies(data_tables, custom_ow, custom_bushes)
         # fix thief stats
         # subclass_table = world.damage_table[player].damage_table['SubClassTable']
         # subclass_table[EnemySprite.Thief] = subclass_table[EnemySprite.GreenEyegoreMimic]

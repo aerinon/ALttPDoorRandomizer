@@ -571,6 +571,14 @@ class Sprite(object):
     def __str__(self):
         return enemy_names[self.kind] if self.sub_type != 0x7 else overlord_names[self.kind]
 
+    def customizer_entry(self):
+        if self.sub_type == SpriteType.Overlord:
+            return overlord_names[self.kind]  # Wallmaster
+        name = customizer_names[self.kind]
+        if self.kind in variant_sprites:
+            return {'kind': name, 'sub_type': self.sub_type}
+        return name
+
     def describe_uw(self):
         if self.kind in variant_sprites and self.sub_type != SpriteType.Overlord:
             return f'{self} (sub_type {self.sub_type})'
@@ -2714,3 +2722,5 @@ sprite_translation = {
     'RupeePull': EnemySprite.RupeePull,
     'CrystalSwitch': EnemySprite.CrystalSwitch,
 }
+
+customizer_names = {kind: name for name, kind in sprite_translation.items()}

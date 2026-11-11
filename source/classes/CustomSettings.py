@@ -10,6 +10,9 @@ from pathlib import Path
 import RaceRandom as random
 from BaseClasses import LocationType, DoorType, KeyRuleType
 from source.dungeon.DropPortals import drop_portals
+from source.dungeon.EnemyList import customizer_names
+from source.enemizer.Enemizer import shuffled_rooms
+from source.enemizer.SpriteSheets import did
 from source.tools.MysteryUtils import roll_settings, get_weights
 
 
@@ -345,6 +348,11 @@ class CustomSettings(object):
             return self.file_source['enemies']
         return None
 
+    def get_sprite_sheets(self):
+        if 'sprite_sheets' in self.file_source:
+            return self.file_source['sprite_sheets']
+        return None
+
     def get_text(self):
         if 'text' in self.file_source:
             return self.file_source['text']
@@ -492,6 +500,29 @@ class CustomSettings(object):
                     bosses[dungeon.player][location] = boss.name
         for item in world.precollected_items:
             start_inv[item.player].append(item.name)
+
+    def record_enemies(self, world):
+        """Enemies and sprite sheets the enemizer chose, so a reload skips the sheet search."""
+        self.world_rep['enemies'] = enemies = {}
+        self.world_rep['sprite_sheets'] = sprite_sheets = {}
+        for p in self.player_range:
+            if world.enemy_shuffle[p] == 'none':
+                continue
+            data_tables = world.data_tables[p]
+            sheets = data_tables.sprite_sheets
+            sprite_sheets[p] = {
+                'Underworld': {'sheets': {n: list(sheets[n].sub_groups) for n in range(65, 124)},
+                               'rooms': {r: did(data_tables.room_headers[r].sprite_sheet) for r in shuffled_rooms}},
+                'Overworld': {'sheets': {n: list(sheets[n].sub_groups) for n in range(1, 64)},
+                              'areas': {a: s.id for a, s in data_tables.overworld_sprite_sheets.items()}},
+            }
+            uw = {room: {i: s.customizer_entry() for i, s in enumerate(sprites) if s.shuffled}
+                  for room, sprites in data_tables.uw_enemy_table.room_map.items()}
+            ow = {area: {i: customizer_names[s.kind] for i, s in enumerate(sprites) if s.shuffled}
+                  for area, sprites in data_tables.ow_enemy_table.items()}
+            enemies[p] = {'Underworld': {k: v for k, v in uw.items() if v},
+                          'Overworld': {k: v for k, v in ow.items() if v},
+                          'Bushes': {a: customizer_names[r.sprite] for a, r in data_tables.bush_sprite_table.items()}}
 
     def record_item_pool(self, world):
         self.world_rep['item_pool'] = item_pool = {}

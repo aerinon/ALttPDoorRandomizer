@@ -287,6 +287,29 @@ enemies:
           sub_type: 1
 ```
 
+`Bushes`, keyed by area id, names the enemy that can come out of the bushes in that area. It must fit the area's sprite sheet.
+
+The enemizer picks sprite sheets that can show the listed `Underworld` and `Overworld` enemies. A file written with `--print_custom_yaml` also has a `sprite_sheets` section, so a reload uses the same sheets instead of searching for them.
+
+### sprite_sheets
+
+This must be defined by player, and only applies with `enemy_shuffle` on. It fixes the enemizer's sprite sheets.
+
+* `Underworld`: `sheets` maps a sheet number (65 to 123) to its four sub-groups, and `rooms` maps a room id to the sheet number it uses.
+* `Overworld`: `sheets` maps a sheet number (1 to 63) to its four sub-groups, and `areas` maps an area id to the sheet number it uses.
+
+Sheets, rooms and areas that are not listed are chosen as usual. Sub-groups that bosses and NPCs need replace the listed ones. Only rooms and areas whose sheet the enemizer chooses may be listed, which leaves out boss rooms. A listed room or area uses its sheet as given, so that sheet must hold the groups for the enemies in it.
+
+```
+sprite_sheets:
+  1:
+    Underworld:
+      sheets:
+        70: [22, 32, 12, 83]
+      rooms:
+        0x4: 70
+```
+
 ### start_inventory
 
 This must be defined by player. Each player number should be listed with a list of items to start with.

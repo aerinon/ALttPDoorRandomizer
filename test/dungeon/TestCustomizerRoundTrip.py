@@ -25,7 +25,15 @@ def snapshot(world):
         return sorted(' <-> '.join(sorted(d.name for d in x)) if isinstance(x, tuple) else x.name for x in layout.proposal)
 
     lobby_doors = {p.door.name for p in world.dungeon_portals[1]}  # 'portals' covers these; placeholder names differ
+    tables = world.data_tables[1]
     return {
+        'underworld enemies': {room: [(s.kind, s.sub_type) for s in sprites]
+                               for room, sprites in tables.uw_enemy_table.room_map.items()},
+        'overworld enemies': {area: [s.kind for s in sprites] for area, sprites in tables.ow_enemy_table.items()},
+        'bushes': {area: r.sprite for area, r in tables.bush_sprite_table.items()},
+        'sprite sheets': {n: list(sheet.sub_groups) for n, sheet in tables.sprite_sheets.items()},
+        'room sheets': {room: header.sprite_sheet for room, header in tables.room_headers.items()},
+        'area sheets': {area: sheet.id for area, sheet in tables.overworld_sprite_sheets.items()},
         'doors': {d.name: getattr(d.dest, 'name', None) for d in world.doors
                   if d.player == 1 and d.type in shuffled_types and not d.traversal_only and d.name not in lobby_doors},
         'door types': door_kinds(),
@@ -39,11 +47,16 @@ def snapshot(world):
 class TestCustomizerRoundTrip(unittest.TestCase):
     """A world exported with --print_custom_yaml loads back unchanged."""
 
-    def round_trip(self, argv, seeds=range(1, 6), inspect=None):
+    def round_trip(self, argv, seeds=range(1, 6), inspect=None, settings=None):
         logging.disable(logging.WARNING)
         try:
             with tempfile.TemporaryDirectory() as out:
                 base = ['--suppress_rom', '--spoiler', 'none', '--outputpath', out]
+                if settings:  # settings only a customizer file can set
+                    source = os.path.join(out, 'source.yaml')
+                    with open(source, 'w') as f:
+                        yaml.dump({'settings': {1: settings}}, f)
+                    argv = argv + ['--customizer', source]
                 for seed in seeds:  # the first seed that generates; generation failures aren't what this tests
                     try:
                         original = Main.main(parse_cli(argv + base + ['--print_custom_yaml', '--seed', str(seed)]),
@@ -87,6 +100,24 @@ class TestCustomizerRoundTrip(unittest.TestCase):
 
         self.round_trip(['--door_shuffle', 'crossed', '--intensity', '4', '--dungeon_shuffle_algorithm', 'experimental',
                          '--key_logic_algorithm', 'experimental'], inspect=drop_lobbies)
+
+
+    def test_enemies_and_sheets(self):
+        for mode in ('open', 'standard', 'inverted'):
+            with self.subTest(mode=mode):
+                self.round_trip(['--door_shuffle', 'crossed', '--intensity', '3', '--mode', mode,
+                                 '--dungeon_shuffle_algorithm', 'experimental', '--shuffleenemies', 'shuffled'])
+
+    def test_bosses_and_enemies_vanilla_doors(self):
+        self.round_trip(['--door_shuffle', 'vanilla', '--shuffleenemies', 'shuffled', '--shufflebosses', 'full'])
+
+    def test_swordless_bosses(self):
+        self.round_trip(['--door_shuffle', 'vanilla', '--shuffleenemies', 'shuffled', '--shufflebosses', 'full',
+                         '--swords', 'swordless'])
+
+    def test_forced_enemy(self):
+        self.round_trip(['--door_shuffle', 'vanilla', '--shuffleenemies', 'shuffled'],
+                        settings={'force_enemy': 'Stalfos'})
 
 
 if __name__ == '__main__':
