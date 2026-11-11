@@ -1,5 +1,6 @@
 aenum
 aioconsole
+clingo
 colorama
 distro
 fast-enum

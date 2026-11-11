@@ -38,6 +38,7 @@ def recurse_for_py_files(names_so_far):
 hiddenimports = recurse_for_py_files(["source"])
 for hidden in (collect_submodules("pkg_resources")):
     hiddenimports.append(hidden)
+hiddenimports.append("_cffi_backend")  # clingo's compiled module imports it from C, where analysis can't see it
 
 a = Analysis(
     [f"../{BINARY_SLUG}.py"],
