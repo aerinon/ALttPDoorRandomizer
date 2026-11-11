@@ -854,6 +854,9 @@ def analyze_portals_altered(world, player):
                 for other_portal in possible_portals:
                     if other_portal != dest_portal:
                         world.get_portal(other_portal, player).dependent = access_portal
+    if world.doorShuffle[player] == 'door_type_only':  # vanilla interiors can't route a passage to these
+        world.get_portal('Desert Back', player).destination = False
+        world.get_portal('Skull 3', player).destination = False
 
 
 def connect_portal(portal, world, player):
@@ -5056,7 +5059,7 @@ def handle_intensity_settings(flags, world, player):
             if (none_flag
                or (v_flag and world.get_door(ent, player).direction in [Direction.East, Direction.West])
                or (h_flag and world.get_door(ent, player).direction in [Direction.North, Direction.South])):
-                connect_one_way(world, ent, ext, player)
+                connect_two_way(world, ent, ext, player)  # the trap keeps it one-way until trap shuffle removes it
     if not flags.spiral:
         for entrance, ext in spiral_staircases:
             connect_two_way(world, entrance, ext, player)

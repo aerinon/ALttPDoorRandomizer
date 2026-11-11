@@ -53,6 +53,11 @@ def determine_entrance_regions(builder, flags, world, player):
     rupee_bow_flag = hc_flag and world.bow_mode[player].startswith('retro')  # rupee bow
     bk_shuffle = bk_shuffle_lobbies_allowed(builder, world, player)
 
+    # a pinned layout routes nothing, so every portal is a way in
+    if all(p.assigned for p in builder_portals) and not any(s.outstanding_doors for s in builder.sectors):
+        entrance_regions = [p.door.entrance.parent_region for p in builder_portals]
+        return add_drop_entrances(entrance_regions, builder, std_flag, world, player)
+
     if len(builder_portals) == 1:  # only one access
         destination_portals, non_destination_portals = [], builder_portals
     else:
@@ -111,13 +116,16 @@ def determine_entrance_regions(builder, flags, world, player):
         else:
             record_entrance_regions(entrance_regions, portal)
 
-    # drop entrances: a hole's Drop Portal whose overworld side is reachable (gated ones open during exploration)
+    return add_drop_entrances(entrance_regions, builder, std_flag, world, player)
+
+
+def add_drop_entrances(entrance_regions, builder, std_flag, world, player):
+    """Adds each hole's Drop Portal whose overworld side is reachable (gated ones open during exploration)."""
     if not is_escape_builder(builder.name, std_flag):
         for region in (r for s in builder.sectors for r in sector_drop_portals(s)):
             parent_region = drop_parent_region(region)
             if parent_region is not None and parent_region.name not in world.inaccessible_regions[player]:
                 entrance_regions.append(region)
-
     return entrance_regions
 
 
