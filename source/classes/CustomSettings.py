@@ -346,7 +346,7 @@ class CustomSettings(object):
         return None
 
     def get_telepathic_tiles(self):
-        if 'text' in self.file_source:
+        if 'telepathic_tiles' in self.file_source:
             return self.file_source['telepathic_tiles']
         return None
 

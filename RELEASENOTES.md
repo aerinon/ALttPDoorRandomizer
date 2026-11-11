@@ -2,6 +2,10 @@
 
 A new dungeon generator, now the default. See [NewGeneration](https://github.com/aerinon/ALttPDoorRandomizer/blob/NewGeneration/docs/NewGeneration.md) for details.
 
+## 2.0.1
+
+* Customizer: custom text no longer stops the ROM from being created
+
 ## New Features
 
 * New dungeon generation algorithm: higher generation rates across the board, rewritten key logic
