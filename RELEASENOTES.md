@@ -5,3 +5,5 @@
   * Credits: Fixed spacing in the end credits. (Thanks karafruit!)
   * Bosses: Fixed a bug with Kholdstare's shell. (Thanks Kan!)
   * Music: Fixed a music bug with guards summoned by the Kakariko snitch. (Thanks Kan!)
+  * Multiworld: MultiServer and MultiClient run on current Python and websockets versions.
+  * Multiworld: MultiServer's --savefile option is used instead of ignored.

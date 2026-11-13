@@ -16,6 +16,14 @@ import source.dungeon.EnemyList as EnemyList
 import source.rom.DataTables as DataTables
 
 
+
+def socket_open(socket):
+    """True while a websocket connection is open; works across websockets versions (no .open/.closed since 14)."""
+    return socket is not None and getattr(socket.state, 'name', None) == 'OPEN'
+
+def socket_closed(socket):
+    return getattr(socket.state, 'name', None) == 'CLOSED'
+
 class ReceivedItem:
     def __init__(self, item, location, player):
         self.item = item
@@ -455,11 +463,11 @@ async def snes_connect(ctx : Context, address):
 
     except Exception as e:
         if recv_task is not None:
-            if not ctx.snes_socket.closed:
+            if not socket_closed(ctx.snes_socket):
                 await ctx.snes_socket.close()
         else:
             if ctx.snes_socket is not None:
-                if not ctx.snes_socket.closed:
+                if not socket_closed(ctx.snes_socket):
                     await ctx.snes_socket.close()
                 ctx.snes_socket = None
             ctx.snes_state = SNES_DISCONNECTED
@@ -485,7 +493,7 @@ async def snes_recv_loop(ctx : Context):
         logging.error("Lost connection to the snes, type /snes to reconnect")
     finally:
         socket, ctx.snes_socket = ctx.snes_socket, None
-        if socket is not None and not socket.closed:
+        if socket is not None and not socket_closed(socket):
             await socket.close()
 
         ctx.snes_state = SNES_DISCONNECTED
@@ -502,7 +510,7 @@ async def snes_read(ctx : Context, address, size):
     try:
         await ctx.snes_request_lock.acquire()
 
-        if ctx.snes_state != SNES_ATTACHED or ctx.snes_socket is None or not ctx.snes_socket.open or ctx.snes_socket.closed:
+        if ctx.snes_state != SNES_ATTACHED or ctx.snes_socket is None or not socket_open(ctx.snes_socket):
             return None
 
         GetAddress_Request = {
@@ -526,7 +534,7 @@ async def snes_read(ctx : Context, address, size):
             logging.error('Error reading %s, requested %d bytes, received %d' % (hex(address), size, len(data)))
             if len(data):
                 logging.error(str(data))
-            if ctx.snes_socket is not None and not ctx.snes_socket.closed:
+            if ctx.snes_socket is not None and not socket_closed(ctx.snes_socket):
                 await ctx.snes_socket.close()
             return None
 
@@ -538,7 +546,7 @@ async def snes_write(ctx : Context, write_list):
     try:
         await ctx.snes_request_lock.acquire()
 
-        if ctx.snes_state != SNES_ATTACHED or ctx.snes_socket is None or not ctx.snes_socket.open or ctx.snes_socket.closed:
+        if ctx.snes_state != SNES_ATTACHED or ctx.snes_socket is None or not socket_open(ctx.snes_socket):
             return False
 
         PutAddress_Request = {
@@ -601,7 +609,7 @@ async def snes_flush_writes(ctx : Context):
     ctx.snes_write_buffer = []
 
 async def send_msgs(websocket, msgs):
-    if not websocket or not websocket.open or websocket.closed:
+    if not socket_open(websocket):
         return
     try:
         await websocket.send(json.dumps(msgs))
@@ -648,7 +656,7 @@ async def server_loop(ctx : Context, address = None):
         ctx.items_received = []
         ctx.locations_info = {}
         socket, ctx.socket = ctx.socket, None
-        if socket is not None and not socket.closed:
+        if socket is not None and not socket_closed(socket):
             await socket.close()
         ctx.server_task = None
         if ctx.server_address:
@@ -754,7 +762,7 @@ async def console_input(ctx : Context):
     return await ctx.input_queue.get()
 
 async def disconnect(ctx: Context):
-    if ctx.socket is not None and not ctx.socket.closed:
+    if ctx.socket is not None and not socket_closed(ctx.socket):
         await ctx.socket.close()
     if ctx.server_task is not None:
         await ctx.server_task
@@ -784,7 +792,7 @@ async def console_loop(ctx : Context):
             asyncio.create_task(snes_connect(ctx, command[1] if len(command) > 1 else ctx.snes_address))
         if command[0] in ['/snes_close', '/snes_quit']:
             ctx.snes_reconnect_address = None
-            if ctx.snes_socket is not None and not ctx.snes_socket.closed:
+            if ctx.snes_socket is not None and not socket_closed(ctx.snes_socket):
                 await ctx.snes_socket.close()
 
         if command[0] in ['/connect', '/reconnect']:
@@ -1096,12 +1104,12 @@ async def main():
 
     await watcher_task
 
-    if ctx.socket is not None and not ctx.socket.closed:
+    if ctx.socket is not None and not socket_closed(ctx.socket):
         await ctx.socket.close()
     if ctx.server_task is not None:
         await ctx.server_task
 
-    if ctx.snes_socket is not None and not ctx.snes_socket.closed:
+    if ctx.snes_socket is not None and not socket_closed(ctx.snes_socket):
         await ctx.snes_socket.close()
 
     while ctx.input_requests > 0:
@@ -1112,8 +1120,5 @@ async def main():
 
 if __name__ == '__main__':
     colorama.init()
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
-    loop.run_until_complete(asyncio.gather(*asyncio.Task.all_tasks()))
-    loop.close()
+    asyncio.run(main())
     colorama.deinit()
