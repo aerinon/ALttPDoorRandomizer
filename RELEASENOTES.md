@@ -5,6 +5,7 @@ A new dungeon generator, now the default. See [NewGeneration](https://github.com
 ## 2.0.1
 
 * Biased generation: `dungeon_bias: random` picks the mega-dungeon at random
+* Biased generation: mega-dungeons with many key doors no longer run out of memory
 * Customizer: custom text no longer stops the ROM from being created
 * Door type only shuffle: fixed generation errors with entrance shuffle and with the boss or one-way trap door modes
 

@@ -1816,11 +1816,10 @@ def cnt_avail_big_locations_by_ctr(ttl_locations, counter, layout, world, player
     return 1 if not layout.big_key_special else 0
 
 
-def create_key_counters(key_layout, world, player):
-    key_counters = {}
+def initial_key_state(key_layout, world, player):
+    """The exploration state on entering the dungeon, before any key door opens."""
     key_layout.found_doors.clear()
-    flat_proposal = key_layout.flat_prop
-    flat_set = frozenset(flat_proposal)
+    flat_set = frozenset(key_layout.flat_prop)
     state = ExplorationState(dungeon=key_layout.sector.name)
     state.init_zelda_event_doors(key_layout.event_starts, player)
     if world.doorShuffle[player] == 'vanilla':
@@ -1845,6 +1844,23 @@ def create_key_counters(key_layout, world, player):
             state.visit_region(region, key_checks=True)
             state.add_all_doors_check_keys(region, flat_set, world, player)
     expand_key_state(state, flat_set, world, player)
+    return state, flat_set
+
+
+def create_full_key_counter(key_layout, world, player):
+    """The counter with every key door, big key door and prize door open. Its locations are those all of
+    create_key_counters' counters cover, found without enumerating each set of opened doors."""
+    state, flat_set = initial_key_state(key_layout, world, player)
+    while state.small_doors or state.big_doors or state.prize_doors:
+        door = unique_doors(state.small_doors + state.big_doors + state.prize_doors)[0]
+        open_a_door(door, state, flat_set, world, player)
+        expand_key_state(state, flat_set, world, player)
+    return create_key_counter(state, key_layout, world, player)
+
+
+def create_key_counters(key_layout, world, player):
+    key_counters = {}
+    state, flat_set = initial_key_state(key_layout, world, player)
     code = state_id(state, key_layout.flat_prop)
     key_counters[code] = create_key_counter(state, key_layout, world, player)
     queue = deque([(key_counters[code], state, code)])

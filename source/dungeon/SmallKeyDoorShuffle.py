@@ -12,12 +12,12 @@ from Items import ItemFactory
 from KeyDoorShuffle import build_key_layout, check_bk_special, count_key_drops, expand_key_state, flatten_pair_list, open_a_door, reduce_rules
 from KeyDoorShuffle import find_outside_connection, prize_relevance_sig2, count_free_locations, prize_or_event, reserved_location, blind_boss_unavail
 from KeyDoorShuffle import count_small_key_only_locations, cnt_avail_big_locations
-from KeyDoorShuffle import create_key_counters, prize_relevance, find_big_chest_locations
+from KeyDoorShuffle import create_key_counters, create_full_key_counter, prize_relevance, find_big_chest_locations
 from Regions import dungeon_events
 from RoomData import DoorKind, PairedDoor
 from Utils import ncr, kth_combination
 
-from source.dungeon.NewKeyLogic import analyze_dungeon, calc_extras
+from source.dungeon.NewKeyLogic import analyze_dungeon, calc_extras, uses_fast_key_logic
 from source.dungeon.KeyPlacement import create_exhaustive_placement_rules, important_location
 from source.dungeon.DungeonGenerationCommon import special_bk_regions, uniform_distribute, proportional_distribute
 from source.dungeon.DropPortals import outside_parent, entered_from_outside, is_outside
@@ -336,7 +336,8 @@ def find_valid_combination(builder, target, start_regions, world, player, drop_k
         proposal, proposed_bk_restrictions = exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, start_regions, event_starts, custom_key_doors, world, player)
     else:
         proposal = monte_carlo_algorithm(builder, key_door_pool, key_doors_needed, start_regions, event_starts, custom_key_doors, world, player)
-    key_layout = _key_layout_setup(builder, event_starts, player, proposal, start_regions, world, proposed_bk_restrictions)
+    key_layout = _key_layout_setup(builder, event_starts, player, proposal, start_regions, world, proposed_bk_restrictions,
+                                   enumerate_counters=not uses_fast_key_logic(proposal, world, player))
     if player not in world.key_logic.keys():
         world.key_logic[player] = {}
     analyze_dungeon(key_layout, world, player)
@@ -813,11 +814,17 @@ def exhaustive_key_logic_algorithm(builder, key_door_pool, key_doors_needed, sta
 
 
 
-def _key_layout_setup(builder, event_starts, player, proposal, start_regions, world, prop_bk_restrictions=None):
+def _key_layout_setup(builder, event_starts, player, proposal, start_regions, world, prop_bk_restrictions=None,
+                      enumerate_counters=True):
+    """enumerate_counters: build every key counter (exponential in key doors), not just the all-open one"""
     key_layout = build_key_layout(builder, start_regions, proposal, event_starts, world, player, prop_bk_restrictions)
     key_layout.key_logic.reset()
-    key_layout.key_counters = create_key_counters(key_layout, world, player)
-    for counter in key_layout.key_counters.values():
+    if enumerate_counters:
+        key_layout.key_counters = create_key_counters(key_layout, world, player)
+        counters = key_layout.key_counters.values()
+    else:
+        counters = [create_full_key_counter(key_layout, world, player)]
+    for counter in counters:
         key_layout.all_chest_locations.update(counter.free_locations)
         key_layout.item_locations.update(counter.free_locations)
         key_layout.item_locations.update(counter.key_only_locations)

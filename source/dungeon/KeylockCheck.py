@@ -13,6 +13,9 @@ def find_keylock(key_layout, world, player):
     description of a state where no door can be opened and item locations are still out of reach, or None."""
     if world.keyshuffle[player] == 'universal' or world.accessibility[player] == 'none':
         return None
+    new_logic = key_layout.key_logic.new_logic
+    if new_logic is not None and new_logic.fast_logic:  # the search is exponential in key doors
+        return None
     if key_layout.key_counters is None:
         key_layout.key_counters = create_key_counters(key_layout, world, player)
     counters = key_layout.key_counters

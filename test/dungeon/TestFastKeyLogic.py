@@ -5,7 +5,7 @@ import Main
 from CLI import parse_cli
 from DungeonGenerator import ExplorationState
 from Items import ItemFactory
-from KeyDoorShuffle import dungeon_bigs, dungeon_keys
+from KeyDoorShuffle import create_key_counter, dungeon_bigs, dungeon_keys, expand_key_state, initial_key_state, open_a_door
 from source.classes.BabelFish import BabelFish
 from source.dungeon.SmallKeyDoorShuffle import expand_state_for_picker
 
@@ -32,13 +32,15 @@ class TestFastKeyLogic(unittest.TestCase):
             if not logic.new_logic or not logic.new_logic.fast_logic:
                 continue
             layout = world.key_layout[1][name]
-            root = next(c for c in layout.key_counters.values() if c.used_keys == 0 and not c.big_key_opened)
+            state, flat_set = initial_key_state(layout, world, 1)
+            root = create_key_counter(state, layout, world, 1)
             front = set(root.free_locations) | set(root.key_only_locations) | set(root.other_locations)
             big_key_front = any(l.item and l.item.name == dungeon_bigs[name] for l in front)
-            if big_key_front:
-                bk_root = next((c for c in layout.key_counters.values() if c.used_keys == 0 and c.big_key_opened), None)
-                if bk_root:
-                    front |= set(bk_root.free_locations) | set(bk_root.key_only_locations)
+            if big_key_front and state.big_doors:
+                open_a_door(state.big_doors[0].door, state, flat_set, world, 1)  # opens every big key door
+                expand_key_state(state, flat_set, world, 1)
+                bk_root = create_key_counter(state, layout, world, 1)
+                front |= set(bk_root.free_locations) | set(bk_root.key_only_locations)
             keys_front = sum(1 for l in front if l.item and l.item.name == dungeon_keys[name])
             checked += 1
             with self.subTest(dungeon=name):

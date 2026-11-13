@@ -535,6 +535,11 @@ class KeySphere(object):
         return self.accessible_locations
 
 
+def uses_fast_key_logic(proposal, world, player):
+    """Large layouts skip enumerating key counters, which grow exponentially with the key doors."""
+    return world.key_logic_algorithm[player] == 'strict' or len(proposal) > 8
+
+
 def analyze_dungeon(key_layout, world, player):
     key_layout.key_logic.reset()
     key_logic = key_layout.key_logic
@@ -557,7 +562,7 @@ def analyze_dungeon(key_layout, world, player):
                                                    or key_layout.sector.name != 'Hyrule Castle'):
         return
 
-    if world.key_logic_algorithm[player] == 'strict' or len(key_layout.proposal) > 8:
+    if uses_fast_key_logic(key_layout.proposal, world, player):
         determine_small_key_logic_fast(key_layout, start_state, world, player)
 
     else:
