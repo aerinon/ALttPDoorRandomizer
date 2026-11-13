@@ -12,6 +12,8 @@ A new dungeon generator, now the default. See [NewGeneration](https://github.com
 * Customizer: exported files list shuffled holes under `lobbies`, as the spoiler does
 * Door type only shuffle: fixed generation errors with entrance shuffle and with the boss or one-way trap door modes
 * Multiworld: seeds with more than one player no longer fail to generate
+* Multiworld: MultiServer and MultiClient run on current Python and websockets versions
+* Multiworld: MultiServer's `--savefile` option is used instead of ignored
 * Generation: fewer failed attempts at intensity 3 and 4, most noticeably crossed in standard mode. Running from source: reinstall the requirements to get the new `clingo` dependency
 
 ## New Features
