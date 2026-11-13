@@ -15,7 +15,7 @@ from BaseClasses import PotItem, PotFlags
 import Items
 import Regions
 import PotShuffle
-from MultiClient import ReceivedItem, get_item_name_from_id, get_location_name_from_address
+from MultiClient import ReceivedItem, get_item_name_from_id, get_location_name_from_address, socket_closed, socket_open
 import source.dungeon.EnemyList as EnemyList
 import source.rom.DataTables as DataTables
 
@@ -52,7 +52,7 @@ class Context:
 
 
 async def send_msgs(websocket, msgs):
-    if not websocket or not websocket.open or websocket.closed:
+    if not socket_open(websocket):
         return
     try:
         await websocket.send(json.dumps(msgs))
@@ -83,7 +83,7 @@ def notify_client(client : Client, text : str):
     logging.info("Notice (Player %s in team %d): %s" % (client.name, client.team+1, text))
     asyncio.create_task(send_msgs(client.socket,  [['Print', text]]))
 
-async def server(websocket, path, ctx : Context):
+async def server(websocket, path=None, *, ctx : Context):  # websockets 10.1+ passes no path
     client = Client(websocket)
     ctx.clients.append(client)
 
@@ -310,7 +310,7 @@ async def console(ctx : Context):
             continue
 
         if command[0] == '/exit':
-            ctx.server.ws_server.close()
+            ctx.server.close()
             break
 
         if command[0] == '/players':
@@ -321,7 +321,7 @@ async def console(ctx : Context):
             team = int(command[2]) - 1 if len(command) > 2 and command[2].isdigit() else None
             for client in ctx.clients:
                 if client.auth and client.name.lower() == command[1].lower() and (team is None or team == client.team):
-                    if client.socket and not client.socket.closed:
+                    if client.socket and not socket_closed(client.socket):
                         await client.socket.close()
 
         if command[0] == '/forfeitslot' and len(command) > 1 and command[1].isdigit():
@@ -336,7 +336,7 @@ async def console(ctx : Context):
             team = int(command[2]) - 1 if len(command) > 2 and command[2].isdigit() else None
             for client in ctx.clients:
                 if client.auth and client.name.lower() == command[1].lower() and (team is None or team == client.team):
-                    if client.socket and not client.socket.closed:
+                    if client.socket and not socket_closed(client.socket):
                         forfeit_player(ctx, client.team, client.slot)
         if command[0] == '/senditem' and len(command) > 2:
             [(player, item)] = re.findall(r'\S* (\S*) (.*)', input)
@@ -424,6 +424,7 @@ async def main():
     logging.info('Hosting game at %s:%d (%s)' % (ip, ctx.port, 'No password' if not ctx.password else 'Password: %s' % ctx.password))
 
     ctx.disable_save = args.disable_save
+    ctx.save_filename = args.savefile
     if not ctx.disable_save:
         if not ctx.save_filename:
             ctx.save_filename = (ctx.data_filename[:-9] if ctx.data_filename[-9:] == 'multidata' else (ctx.data_filename + '_')) + 'multisave'
@@ -441,12 +442,8 @@ async def main():
         except Exception as e:
             logging.info(e)
 
-    ctx.server = websockets.serve(functools.partial(server,ctx=ctx), ctx.host, ctx.port, ping_timeout=None, ping_interval=None)
-    await ctx.server
+    ctx.server = await websockets.serve(functools.partial(server,ctx=ctx), ctx.host, ctx.port, ping_timeout=None, ping_interval=None)
     await console(ctx)
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
-    loop.run_until_complete(asyncio.gather(*asyncio.Task.all_tasks()))
-    loop.close()
+    asyncio.run(main())
