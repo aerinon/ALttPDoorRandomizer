@@ -593,7 +593,7 @@ def copy_world(world):
         if world.logic[player] in ('owglitches', 'hybridglitches', 'nologic'):
             create_owg_connections(ret, player)
         if world.dynamic_entrances:
-            for ent in world.dynamic_entrances:
+            for ent in (e for e in world.dynamic_entrances if e.player == player):  # later players' regions don't exist yet
                 copy_parent = ret.get_region(ent.parent_region.name, ent.parent_region.player)
                 new_ent = Entrance(ent.player, ent.name, copy_parent)
                 copy_parent.exits.append(new_ent)
