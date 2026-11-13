@@ -2713,6 +2713,7 @@ class Spoiler(object):
                          'overworld_map': self.world.overworld_map,
                          'door_shuffle': self.world.doorShuffle,
                          'dungeon_shuffle_algorithm': self.world.dungeon_shuffle_algorithm,
+                         'dungeon_bias': self.world.dungeon_bias,
                          'intensity': self.world.intensity,
                          'door_type_mode': self.world.door_type_mode,
                          'door_type_distribution': self.world.door_type_distribution,
@@ -2973,6 +2974,8 @@ class Spoiler(object):
                     outfile.write('Door Shuffle:                    %s\n' % self.metadata['door_shuffle'][player])
                     if self.metadata['door_shuffle'][player] != 'vanilla':
                         outfile.write(f"Dungeon Shuffle Algorithm:       {self.metadata['dungeon_shuffle_algorithm'][player]}\n")
+                        if self.metadata['dungeon_shuffle_algorithm'][player] == 'biased':
+                            outfile.write(f"Dungeon Bias:                    {self.metadata['dungeon_bias'][player]}\n")
                         outfile.write(f"Intensity:                       {self.metadata['intensity'][player]}\n")
                         outfile.write(f"Door Type Mode:                  {self.metadata['door_type_mode'][player]}\n")
                         outfile.write(f"Trap Door Mode:                  {self.metadata['trap_door_mode'][player]}\n")

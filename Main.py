@@ -14,6 +14,7 @@ from Bosses import place_bosses
 from Items import ItemFactory
 from KeyDoorShuffle import validate_key_placement
 from source.dungeon.KeylockCheck import find_keylock
+from source.dungeon.DungeonGenLocalSearch import resolve_dungeon_bias
 from OverworldGlitchRules import create_owg_connections
 from PotShuffle import shuffle_pots, shuffle_pot_switches
 from Regions import create_regions, create_shops, mark_light_dark_world_regions, create_dungeon_regions, adjust_locations
@@ -117,6 +118,7 @@ def main(args, seed=None, fish=None, progress=None):
         for setting in in_progress_settings:
             if world.customizer and world.customizer.has_setting(player, setting):
                 getattr(world, setting)[player] = world.customizer.get_setting(player, setting)
+        resolve_dungeon_bias(world, player)
 
     logger.info(
       world.fish.translate("cli","cli","app.title") + "\n",

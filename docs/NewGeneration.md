@@ -53,7 +53,7 @@ settings:
     dungeon_bias: Ganons Tower
 ```
 
-Any standard dungeon name is valid. The biased dungeon will receive extra sectors that do not fit elsewhere, resulting in a significantly larger dungeon than normal.
+Any standard dungeon name is valid, and `random` picks one for you (the spoiler log names it). Other names are rejected. The biased dungeon will receive extra sectors that do not fit elsewhere, resulting in a significantly larger dungeon than normal.
 
 ### `smaller_dungeon_gen`
 

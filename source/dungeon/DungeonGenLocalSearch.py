@@ -1414,3 +1414,15 @@ weight_map = {
     'Hyrule Castle Dungeon': half_dungeon_weight,
     'Hyrule Castle Sewers': half_dungeon_weight
 }
+
+bias_dungeons = [d for d, w in weight_map.items() if w == full_dungeon_weight]
+
+
+def resolve_dungeon_bias(world, player):
+    if world.dungeon_shuffle_algorithm[player] != 'biased':
+        return
+    bias = world.dungeon_bias[player]
+    if bias == 'random':
+        world.dungeon_bias[player] = random.choice(bias_dungeons)
+    elif bias not in bias_dungeons:
+        raise ValueError(f'Unknown dungeon_bias {bias!r}: use random or one of {", ".join(bias_dungeons)}')
