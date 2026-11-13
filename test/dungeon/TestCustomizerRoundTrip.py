@@ -3,6 +3,8 @@ import os
 import tempfile
 import unittest
 
+import yaml
+
 import Main
 from BaseClasses import DoorType
 from CLI import parse_cli
@@ -22,9 +24,10 @@ def snapshot(world):
     def proposal(layout):
         return sorted(' <-> '.join(sorted(d.name for d in x)) if isinstance(x, tuple) else x.name for x in layout.proposal)
 
+    lobby_doors = {p.door.name for p in world.dungeon_portals[1]}  # 'portals' covers these; placeholder names differ
     return {
         'doors': {d.name: getattr(d.dest, 'name', None) for d in world.doors
-                  if d.player == 1 and d.type in shuffled_types and not d.traversal_only},
+                  if d.player == 1 and d.type in shuffled_types and not d.traversal_only and d.name not in lobby_doors},
         'door types': door_kinds(),
         'portals': {p.name: p.door.name for p in world.dungeon_portals[1]},
         'placements': {l.name: l.item.name for l in world.get_locations() if l.item and l.player == 1},
@@ -36,7 +39,7 @@ def snapshot(world):
 class TestCustomizerRoundTrip(unittest.TestCase):
     """A world exported with --print_custom_yaml loads back unchanged."""
 
-    def round_trip(self, argv, seeds=range(1, 6)):
+    def round_trip(self, argv, seeds=range(1, 6), inspect=None):
         logging.disable(logging.WARNING)
         try:
             with tempfile.TemporaryDirectory() as out:
@@ -51,14 +54,17 @@ class TestCustomizerRoundTrip(unittest.TestCase):
                 else:
                     self.skipTest(f'no seed in {list(seeds)} generates')
                 custom = os.path.join(out, f'DR_{seed}_custom.yaml')
+                if inspect:
+                    with open(custom) as f:
+                        inspect(yaml.safe_load(f))
                 reloaded = Main.main(parse_cli(['--customizer', custom] + base), fish=BabelFish(lang='en'))
         finally:
             logging.disable(logging.NOTSET)
         before, after = snapshot(original), snapshot(reloaded)
-        return before
         for aspect in before:
             with self.subTest(seed=seed, aspect=aspect):
                 self.assertEqual(before[aspect], after[aspect])
+        return before
 
     def test_basic_classic(self):
         self.round_trip(['--door_shuffle', 'basic', '--intensity', '2', '--dungeon_shuffle_algorithm', 'classic'])
@@ -74,8 +80,13 @@ class TestCustomizerRoundTrip(unittest.TestCase):
         self.round_trip(['--door_shuffle', 'crossed', '--intensity', '3', '--dungeon_shuffle_algorithm', 'experimental'])
 
     def test_crossed_pits_and_warps(self):
+        def drop_lobbies(custom):  # shuffled holes are lobbies, as in the spoiler
+            doors = custom['doors'][1]
+            self.assertIn('Skull Pot Circle Drop Portal', doors['lobbies'])
+            self.assertNotIn('Skull Pot Circle Drop Portal Fall', doors['doors'])
+
         self.round_trip(['--door_shuffle', 'crossed', '--intensity', '4', '--dungeon_shuffle_algorithm', 'experimental',
-                         '--key_logic_algorithm', 'experimental'])
+                         '--key_logic_algorithm', 'experimental'], inspect=drop_lobbies)
 
 
 if __name__ == '__main__':

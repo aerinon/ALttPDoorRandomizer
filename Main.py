@@ -113,7 +113,7 @@ def main(args, seed=None, fish=None, progress=None):
     set_world_options(world, args, fish)
 
     # custom settings - these haven't been promoted to full settings yet
-    in_progress_settings = ['force_enemy', 'free_lamp_cone', 'dungeon_bias', 'smaller_dungeon_gen']
+    in_progress_settings = ['force_enemy', 'free_lamp_cone', 'dungeon_bias']
     for player in range(1, world.players + 1):
         for setting in in_progress_settings:
             if world.customizer and world.customizer.has_setting(player, setting):
@@ -462,6 +462,7 @@ def set_world_options(world, args, fish):
     world.any_enemy_logic = args.any_enemy_logic.copy()
     world.beemizer = {player: str(args.beemizer[player]) for player in range(1, world.players + 1)}
     world.dungeon_shuffle_algorithm = args.dungeon_shuffle_algorithm.copy()
+    world.smaller_dungeon_gen = args.smaller_dungeon_gen.copy()
     world.intensity = {player: random.randint(1, 4) if args.intensity[player] == 'random' else int(args.intensity[player]) for player in range(1, world.players + 1)}
     world.door_type_mode = args.door_type_mode.copy()
     world.door_type_distribution = args.door_type_distribution.copy()

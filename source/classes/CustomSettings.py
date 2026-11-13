@@ -9,6 +9,7 @@ from pathlib import Path
 
 import RaceRandom as random
 from BaseClasses import LocationType, DoorType, KeyRuleType
+from source.dungeon.DropPortals import drop_portals
 from source.tools.MysteryUtils import roll_settings, get_weights
 
 
@@ -232,7 +233,11 @@ class CustomSettings(object):
 
     def get_doors(self):
         if 'doors' in self.file_source:
-            return self.file_source['doors']
+            doors = self.file_source['doors']
+            for player_doors in doors.values():
+                if player_doors:
+                    pin_drop_lobbies(player_doors)
+            return doors
         return None
 
     def get_key_logic(self, player):
@@ -539,6 +544,12 @@ class CustomSettings(object):
             door_map = meta_doors['doors'] = {}
             for portal in world.dungeon_portals[p]:
                 lobbies[portal.name] = portal.door.name
+            drop_falls = set()
+            for drop in drop_portals:  # a shuffled hole is a lobby: its Drop Portal and the Terminal it lands on
+                fall = world.get_door(drop.fall, p)
+                drop_falls.add(fall.name)
+                if fall.pit_terminal is not None:
+                    lobbies[drop.region] = fall.pit_terminal.name
             door_types = {DoorType.Normal, DoorType.SpiralStairs, DoorType.Interior}
             if world.intensity[p] > 1:
                 door_types.update([DoorType.Open, DoorType.StraightStairs, DoorType.Ladder])
@@ -580,7 +591,8 @@ class CustomSettings(object):
                             door_value = {'dest': door.dest.name, 'one-way': True}
                         door_map[door.name] = door_value
             for door in world.doors:  # one entry per shuffled pit group, by its representative
-                if door.player == p and door.pit_terminal is not None and door.group_rep is door:
+                if (door.player == p and door.pit_terminal is not None and door.group_rep is door
+                        and door.name not in drop_falls):
                     door_map[door.name] = {'dest': door.pit_terminal.name, 'one-way': True}
             key_rules, chest_counting = {}, False
             for key_logic in world.key_logic.get(p, {}).values():
@@ -598,6 +610,16 @@ class CustomSettings(object):
         yaml.add_representer(defaultdict, Representer.represent_dict)
         with open(destination, 'w') as file:
             yaml.dump(self.world_rep, file)
+
+
+def pin_drop_lobbies(player_doors):
+    """A drop lobby (<hole> Drop Portal: <Terminal>) pins the hole's fall like any pit; the generator reads it there."""
+    lobbies = player_doors.get('lobbies') or {}
+    falls = {drop.region: drop.fall for drop in drop_portals}
+    for name in [n for n in lobbies if n in falls]:
+        if player_doors.get('doors') is None:
+            player_doors['doors'] = {}
+        player_doors['doors'][falls[name]] = {'dest': lobbies.pop(name), 'one-way': True}
 
 
 def load_yaml(path):

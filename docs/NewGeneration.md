@@ -112,6 +112,43 @@ in it. When lobbies or pits stay vanilla, the holes land where they always have.
 
 The spoiler lists each shuffled pit and warp with where it lands, and lists shuffled holes with the dungeon lobbies.
 
+**Pit groups.** Each row of the table below is one group. A group always lands together, so falling into any pit of a
+group takes you to the same place. Generally, pits in the same area form one group and an interior door between pits
+separates them. Pits also split where their vanilla landings are distinctly interesting, as on Hera 5F, where the fairy
+pit, the big chest pit and the rest each land somewhere different. Where vanilla chains one fall into another (the Moldorm arena,
+Hera 4F), only the first fall is modelled. The spoiler lists every pit in a group separately, with the same
+destination. Every warp tile is its own group.
+
+| Dungeon | Pits that fall together | Vanilla landing |
+|---|---|---|
+| Eastern Palace | Eastern Courtyard Potholes | Eastern Fairies |
+| Tower of Hera | Hera Beetles Holes Front, Hera Beetles Holes Landing | Hera Up Stairs Landing |
+| Tower of Hera | Hera Startile Corner Holes Front, Hera Startile Corner Holes Landing | Hera Down Stairs Landing |
+| Tower of Hera | Hera Startile Wide Holes | Hera Back |
+| Tower of Hera | Hera 4F Holes, Hera Big Chest Landing Holes | Hera Startile Wide |
+| Tower of Hera | Hera 5F Star Hole | Hera Big Chest Landing |
+| Tower of Hera | Hera 5F Pothole Chain | Hera Fairies |
+| Tower of Hera | Hera 5F Normal Holes | Hera 4F |
+| Tower of Hera | Hera Boss Outer Hole, Hera Boss Inner Hole | Hera 5F |
+| Palace of Darkness | PoD Pit Room Freefall | PoD Stalfos Basement |
+| Palace of Darkness | PoD Pit Room Bomb Hole | PoD Basement Ledge |
+| Palace of Darkness | PoD Big Key Landing Hole | PoD Stalfos Basement |
+| Swamp Palace | Swamp Attic Right Pit | Swamp Barrier Ledge |
+| Swamp Palace | Swamp Attic Left Pit | Swamp West Ledge |
+| Skull Woods | Skull Final Drop Hole | Skull Boss |
+| Ice Palace | Ice Bomb Drop Hole | Ice Stalfos Hint |
+| Ice Palace | Ice Falling Square Hole | Ice Tall Hint |
+| Ice Palace | Ice Freezors Hole, Ice Freezors Bomb Hole | Ice Big Chest Landing |
+| Ice Palace | Ice Crystal Block Hole, Ice Crystal Right Blue Hole | Ice Switch Room |
+| Ice Palace | Ice Backwards Room Hole | Ice Fairy |
+| Ice Palace | Ice Antechamber Hole | Ice Boss |
+| Misery Mire | Mire Attic Hint Hole | Mire BK Chest Ledge |
+| Misery Mire | Mire Torches Top Holes | Mire Conveyor Barrier |
+| Misery Mire | Mire Torches Bottom Holes | Mire Warping Pool |
+| Ganon's Tower | GT Bob's Room Hole | GT Ice Armos |
+| Ganon's Tower | GT Falling Torches Hole | GT Staredown |
+| Ganon's Tower | GT Moldorm Hole | GT Moldorm Pit |
+
 To shuffle only some of these, use `pit_warps` in [Custom Intensity](#custom-intensity-doorsintensity).
 
 ---

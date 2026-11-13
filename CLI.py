@@ -219,6 +219,7 @@ def parse_settings():
         'keysanity': False,
         'door_shuffle': 'vanilla',
         'dungeon_shuffle_algorithm': 'experimental',
+        'smaller_dungeon_gen': False,
         'intensity': 3,
         'door_type_mode': 'original',
         'door_type_distribution': 'pooled',

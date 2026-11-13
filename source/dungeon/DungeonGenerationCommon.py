@@ -262,9 +262,14 @@ def calc_allowance_and_dead_ends(builder, connections_tuple, world, player):
             used_sectors.add(sector)
 
 
-def handle_non_crossworld_sanctuary(candidate_sectors, dungeon_map, dungeon_pool, global_pole, world, player):
+def sanctuary_needs_light_world(world, player):
+    """Respawning in a dark world dungeon is a bunny trap unless entrances cross worlds."""
     # todo: figure out non-crossworld better, using mode_def from ES2, probably
-    if world.mode[player] == 'open' and world.shuffle[player] not in ['crossed', 'insanity', 'lean', 'swapped']:
+    return world.mode[player] == 'open' and world.shuffle[player] not in ['crossed', 'insanity', 'lean', 'swapped']
+
+
+def handle_non_crossworld_sanctuary(candidate_sectors, dungeon_map, dungeon_pool, global_pole, world, player):
+    if sanctuary_needs_light_world(world, player):
         sanc = find_sector('Sanctuary', candidate_sectors)
         if sanc:  # only run if sanc if a candidate
             lw_builders = []

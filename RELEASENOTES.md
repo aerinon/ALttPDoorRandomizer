@@ -6,7 +6,10 @@ A new dungeon generator, now the default. See [NewGeneration](https://github.com
 
 * Biased generation: `dungeon_bias: random` picks the mega-dungeon at random
 * Biased generation: mega-dungeons with many key doors no longer run out of memory
+* Smaller dungeons: `--smaller_dungeon_gen` now works from the command line and GUI, not only the customizer
+* Sanctuary: without cross-world entrance shuffle, the Sanctuary is again kept in a Light World dungeon in open mode
 * Customizer: custom text no longer stops the ROM from being created
+* Customizer: exported files list shuffled holes under `lobbies`, as the spoiler does
 * Door type only shuffle: fixed generation errors with entrance shuffle and with the boss or one-way trap door modes
 * Multiworld: seeds with more than one player no longer fail to generate
 

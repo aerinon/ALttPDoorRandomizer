@@ -9,7 +9,7 @@ from BaseClasses import Direction, CrystalBarrier, DoorType, Door, Hook, Entranc
 from Regions import create_dungeon_region
 from Utils import clear_file
 from source.dungeon.DungeonGenerationCommon import DungeonBuilder, GenerationException, define_sector_features, dungeon_portals
-from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector, assign_sector_helper, hanger_from_door, hook_from_door, sum_polarity
+from source.dungeon.DungeonGenerationCommon import GlobalPolarity, find_sector, assign_sector_helper, hanger_from_door, hook_from_door, sum_polarity, sanctuary_needs_light_world
 from source.dungeon.DungeonGenSectorDesc import create_sector_descriptors
 from source.dungeon.DropPortals import drop_portals
 from source.dungeon.DungeonGenTransitivity import do_transitivity_check as do_transitivity_check_new
@@ -178,6 +178,7 @@ def main_dungeon_builders(pool, sector_pool, portal_pool, gen_log, world, player
                 exclude_sector(find_sector(r, info.sector_pool), info, dungeon_aliases['Hyrule Castle'])
     do_custom_sectors(dungeon_map, info, world, player)
     do_custom_exclusions(info, world, player)
+    restrict_sanctuary_to_light_world(dungeon_map, portal_assignments, info, world, player)
 
     if info.flags.lobbies:
         # randomly choose which portal will not be portalAble for this seed
@@ -272,6 +273,14 @@ def cut_empty_sectors(sector_pool, world, player):
         # Remove found sectors from sector_pool
         for s in removed_sectors:
             sector_pool.remove(s)
+
+
+def restrict_sanctuary_to_light_world(dungeon_map, portal_assignments, info, world, player):
+    sanc = find_sector('Sanctuary', info.sector_pool)  # None when the customizer already placed it
+    if sanc and sanctuary_needs_light_world(world, player):
+        lw_builders = [name for name in dungeon_map
+                       if any(p.light_world for sector in portal_assignments[name] for p in sector.portals)]
+        propose_sector(dungeon_map[random.choice(lw_builders)], sanc, info, False, restrict_list=lw_builders)
 
 
 def do_custom_sectors(dungeon_map, info, world, player):

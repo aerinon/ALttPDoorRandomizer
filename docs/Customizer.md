@@ -190,6 +190,9 @@ Options are:
 
 `<lobby name>: <door name>` Ex. `Turtle Rock Chest: TR Lava Escape SE`
 
+Shuffled overworld holes (drop lobbies) are listed here too, as the hole's Drop Portal with the landing terminal it
+falls to (terminal names are in `data/terminals.yaml`). Ex. `Skull Pot Circle Drop Portal: Skull Pinball Terminal`
+
 #### doors
 
 `doors` lists pairs of doors. The first door name is listed is the key. The value of this object may be the paired door name or optionally it can have two properties: `dest` and `type`. If you want a type, you must use the second option. 
