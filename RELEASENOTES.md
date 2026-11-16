@@ -1,6 +1,7 @@
 # Patch Notes
 
 * 1.5.10
+  * Enemizer: A Terrorpin no longer spawns under the liftable block in Ice Antechamber and clips out of the room.
   * Multiworld: MultiServer and MultiClient run on current Python and websockets versions.
   * Multiworld: MultiServer's `--savefile` option is used instead of ignored.
 * 1.5.9
