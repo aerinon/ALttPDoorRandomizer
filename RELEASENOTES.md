@@ -10,7 +10,10 @@ A new dungeon generator, now the default. See [NewGeneration](https://github.com
 * Sanctuary: without cross-world entrance shuffle, the Sanctuary is again kept in a Light World dungeon in open mode
 * Customizer: custom text no longer stops the ROM from being created
 * Customizer: exported files list shuffled holes under `lobbies`, as the spoiler does
+* Customizer: exported files (`--print_custom_yaml`) now include enemies and sprite sheets, so an enemizer seed reloads unchanged. See [Customizer](docs/Customizer.md)
+* Customizer: boss shuffle could place a boss a customizer file already placed, and swordless files with bosses failed to load
 * Door type only shuffle: fixed generation errors with entrance shuffle and with the boss or one-way trap door modes
+* Enemizer: tektites, hardhat beetles and stalfos indoors now each have their own variant, so shuffled ones can be either. Logic counts health by variant
 * Enemizer: a Terrorpin no longer spawns under the liftable block in Ice Antechamber and clips out of the room
 * Multiworld: seeds with more than one player no longer fail to generate
 * Multiworld: MultiServer and MultiClient run on current Python and websockets versions
@@ -25,8 +28,6 @@ A new dungeon generator, now the default. See [NewGeneration](https://github.com
 * Smaller dungeons option: leave out empty filler rooms for tighter dungeons
 * More door shuffle options: door type only shuffle, paired dungeons, and door type distribution
 * Customizer: choose which dungeons mix, force rooms into dungeons, pick which connections shuffle. Custom rooms, text, and more from recent Limited Run
-* Enemizer: tektites, hardhat beetles and stalfos indoors now each have their own variant, so shuffled ones can be either. Logic counts health by variant.
-* Customizer: exported files (`--print_custom_yaml`) now include enemies and sprite sheets, so an enemizer seed reloads unchanged. See [Customizer](docs/Customizer.md)
 
 ## Beta Testing
 
@@ -38,7 +39,6 @@ Please report in #bug-reports, with your spoiler log:
 
 * Bunny logic generation hangs
 * Inverted bomb shop placement issues
-* Customizer: boss shuffle could place a boss a customizer file already placed, and swordless files with bosses failed to load
 * All 1.5.9 fixes
 
 ## Compatiblity Note
