@@ -41,7 +41,7 @@ from source.enemizer.DamageTables import DamageTable
 from source.enemizer.Enemizer import randomize_enemies
 from source.rom.DataTables import init_data_tables, init_custom_rooms, init_custom_sprites
 
-version_number = '2.0.0'
+version_number = '2.0.1'
 version_branch = '-u'
 __version__ = f'{version_number}{version_branch}'
 

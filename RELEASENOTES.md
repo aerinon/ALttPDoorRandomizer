@@ -1,47 +1,20 @@
 # Door Randomizer 2.0 (Beta)
 
-A new dungeon generator, now the default. See [NewGeneration](https://github.com/aerinon/ALttPDoorRandomizer/blob/NewGeneration/docs/NewGeneration.md) for details.
-
 ## 2.0.1
 
-* Biased generation: `dungeon_bias: random` picks the mega-dungeon at random
-* Biased generation: mega-dungeons with many key doors no longer run out of memory
-* Smaller dungeons: `--smaller_dungeon_gen` now works from the command line and GUI, not only the customizer
-* Sanctuary: without cross-world entrance shuffle, the Sanctuary is again kept in a Light World dungeon in open mode
-* Customizer: custom text no longer stops the ROM from being created
-* Customizer: exported files list shuffled holes under `lobbies`, as the spoiler does
-* Customizer: exported files (`--print_custom_yaml`) now include enemies and sprite sheets, so an enemizer seed reloads unchanged. See [Customizer](docs/Customizer.md)
-* Customizer: boss shuffle could place a boss a customizer file already placed, and swordless files with bosses failed to load
-* Door type only shuffle: fixed generation errors with entrance shuffle and with the boss or one-way trap door modes
-* Enemizer: tektites, hardhat beetles and stalfos indoors now each have their own variant, so shuffled ones can be either. Logic counts health by variant
-* Enemizer: a Terrorpin no longer spawns under the liftable block in Ice Antechamber and clips out of the room
-* Multiworld: seeds with more than one player no longer fail to generate
-* Multiworld: MultiServer and MultiClient run on current Python and websockets versions
-* Multiworld: MultiServer's `--savefile` option is used instead of ignored
-* Generation: fewer failed attempts at intensity 3 and 4, most noticeably crossed in standard mode. Running from source: reinstall the requirements to get the new `clingo` dependency
-
-## New Features
-
-* New dungeon generation algorithm: higher generation rates across the board, rewritten key logic
-* Intensity 4 (experimental): pits and warps are now able to be shuffled
-* Mega-dungeon option: choose a dungeon to get tons of rooms
-* Smaller dungeons option: leave out empty filler rooms for tighter dungeons
-* More door shuffle options: door type only shuffle, paired dungeons, and door type distribution
-* Customizer: choose which dungeons mix, force rooms into dungeons, pick which connections shuffle. Custom rooms, text, and more from recent Limited Run
+* Mega-dungeon: `dungeon_bias: random` option; no longer runs out of memory with many key doors
+* `smaller_dungeon_gen` option: now settable from the command line and GUI
+* Generation: fewer failures at intensity 3 and 4 (running from source: new dependency `clingo`)
+* Enemizer: adopted the v32 enemy subtype system
+* Customizer: exports include enemies, sprite sheets and drop lobbies
+* Customizer fixes: a `text` section stopped the ROM from being created; boss shuffle could place a boss the file already placed; swordless files that place bosses failed to load
+* Multiworld: fixed generation with more than one player
+* Fixed: the Sanctuary could end up in a Dark World dungeon in open mode without cross-world entrance shuffle
+* Fixed: door type only shuffle failed to generate with entrance shuffle, or with `trap_door_mode` `boss` or `oneway`
+* All 1.5.10 fixes
 
 ## Beta Testing
 
 Please report in #bug-reports, with your spoiler log:
 * Any seed you can't beat without glitches
 * Key logic that looks wrong, such as a key door you were expected to open without enough keys
-
-## Fixes
-
-* Bunny logic generation hangs
-* Inverted bomb shop placement issues
-* All 1.5.9 fixes
-
-## Compatiblity Note
-
-* New defaults: `dungeon_shuffle_algorithm: experimental`, `key_logic_algorithm: experimental`, `intensity: 3`. Use `classic`, `partial` and `2` for 1.5 behavior
-* `door_type_mode: chaos` is now `door_type_distribution: chaos`
