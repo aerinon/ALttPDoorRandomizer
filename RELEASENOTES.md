@@ -11,6 +11,7 @@ A new dungeon generator, now the default. See [NewGeneration](https://github.com
 * Customizer: custom text no longer stops the ROM from being created
 * Customizer: exported files list shuffled holes under `lobbies`, as the spoiler does
 * Door type only shuffle: fixed generation errors with entrance shuffle and with the boss or one-way trap door modes
+* Enemizer: a Terrorpin no longer spawns under the liftable block in Ice Antechamber and clips out of the room
 * Multiworld: seeds with more than one player no longer fail to generate
 * Multiworld: MultiServer and MultiClient run on current Python and websockets versions
 * Multiworld: MultiServer's `--savefile` option is used instead of ignored
