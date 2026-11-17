@@ -42,7 +42,7 @@ DOOR_RULES = {
         'Swamp Hub WN': 0, 'Swamp Hub North Ledge N': 0, 'Swamp Waterway NW': 0,
     },
     'Skull Woods': {
-        'Skull Map Room SE': 1, 'Skull Pinball NE': 1, 'Skull 1 Lobby WS': 2, 'Skull 2 West Lobby NW': 0,
+        'Skull Map Room SE': 2, 'Skull Pinball NE': 3, 'Skull 1 Lobby WS': 3, 'Skull 2 West Lobby NW': 0,
         'Skull 3 Lobby NW': 3, 'Skull Spike Corner ES': 3,
     },
     'Thieves Town': {
