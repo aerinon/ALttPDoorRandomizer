@@ -132,6 +132,9 @@ class TestStaticKeyLogic(unittest.TestCase):
         self.assertTrue(west.can_reach(self.state(sw, 3)))
         self.assertFalse(pinball.can_reach(self.state(sw, 1)))
         self.assertTrue(pinball.can_reach(self.state(sw, 2)))
+        pinball_exit = self.world.get_entrance('Skull Pinball NE', 1)
+        self.assertFalse(pinball_exit.can_reach(self.state(sw, 2)))
+        self.assertTrue(pinball_exit.can_reach(self.state(sw, 3)))
 
     def test_requires_vanilla_doors(self):
         from source.dungeon.StaticKeyLogic import static_logic_supported

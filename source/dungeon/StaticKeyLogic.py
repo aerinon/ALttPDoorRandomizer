@@ -43,7 +43,8 @@ DOOR_RULES = {
     },
     'Skull Woods': {
         # 2 and 3, not ER's 1 and 2: the holes can be bunny drops
-        'Skull Map Room SE': 2, 'Skull Pinball NE': 2, 'Skull 1 Lobby WS': 3, 'Skull 2 West Lobby NW': 0,
+        # leaving Pinball needs 3: a bunny can spend a key on the west door, which Link can't use from there
+        'Skull Map Room SE': 2, 'Skull Pinball NE': 3, 'Skull 1 Lobby WS': 3, 'Skull 2 West Lobby NW': 0,
         'Skull 3 Lobby NW': 3, 'Skull Spike Corner ES': 3,
     },
     'Thieves Town': {
